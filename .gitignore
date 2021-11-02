@@ -1,0 +1,6 @@
+.idea
+*.pyc
+*.swp
+*/__pycache__
+api/*.db
+vmware/sql/vmware.data-development.sql

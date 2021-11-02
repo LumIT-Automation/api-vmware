@@ -1,0 +1,5 @@
+- Using the web or the API interface, add all the VMware devices in the asset table.
+- Using the web or the API interface, grant permissions to the authentication groups (the model is role to group on VMware asset/vmFolder, where a role is a collection of privileges).
+
+- If an VMware device is accessible only via https using a CA-signed certificate:
+  in order to add the ca-chain just save the files with the .crt extension in /var/lib/containers/storage/volumes/api-vmware-cacerts/_data/.
