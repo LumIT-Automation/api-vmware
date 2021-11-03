@@ -9,3 +9,4 @@ PyJWT~=2.0.1
 urllib3~=1.26.4
 redis~=3.5.3
 requests~=2.25.1
+git+https://github.com/vmware/vsphere-automation-sdk-python.git
