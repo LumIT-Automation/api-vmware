@@ -1,5 +1,4 @@
 from pyVmomi import vim, vmodl
-from pprint import pprint
 
 from vmware.models.VMware.Asset.Asset import Asset
 
@@ -7,11 +6,15 @@ from vmware.helpers.VmwareSupplicant import VmwareSupplicant
 from vmware.helpers.Log import Log
 
 
+
 class VMFolder:
-    def __init__(self, assetId: int, *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
+        self.moId = moId
+
+        # The moId is the VMware Managed Object Id. Can be obtained from the "_moId" property of a managed object.
 
 
 
@@ -19,12 +22,54 @@ class VMFolder:
     # Public methods
     ####################################################################################################################
 
-    def folderTree(self, silent: bool = None) -> list:
-        treeList = list()
+    def parentList(self, silent: bool = None) -> list:
+        parentList = list()
         vClient = None
 
         try:
             vmware = Asset(self.assetId)
+            dataConnection = vmware.vmwareDataConnection()
+
+            vClient = VmwareSupplicant(dataConnection, silent)
+            vClient.getContent()
+
+            allFolders = vClient.getAllObjs([vim.Folder])
+
+            moId = self.moId
+            folder = None
+            while True:
+                for f in allFolders:
+                    if f._moId == moId:
+                        folder = f.parent
+                        moId = f.parent._moId
+                        parentList.insert(0, moId)
+                        break
+
+                if not isinstance(folder, vim.Folder):
+                    break
+
+            return parentList
+
+        except Exception as e:
+            raise e
+
+        finally:
+            if vClient and hasattr(vClient, 'content'):
+                vClient.disconnect()
+
+
+
+    ####################################################################################################################
+    # Public static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def folderTree(assetId, silent: bool = None) -> list:
+        treeList = list()
+        vClient = None
+
+        try:
+            vmware = Asset(assetId)
             dataConnection = vmware.vmwareDataConnection()
 
             vClient = VmwareSupplicant(dataConnection, silent)
@@ -39,7 +84,7 @@ class VMFolder:
                         "subFolders": {}
                     }
                 }
-                treeList.append(self.__folderTree(parentFolder, tree))
+                treeList.append(VMFolder.__folderTree(parentFolder, tree))
 
             return treeList
 
@@ -50,10 +95,9 @@ class VMFolder:
             if vClient and hasattr(vClient, 'content'):
                 vClient.disconnect()
 
-    ####################################################################################################################
-    # Public static methods
-    ####################################################################################################################
 
+
+    # Plain folders list using rest api, not pvmomi.
     @staticmethod
     def list(assetId: int) -> dict:
         o = dict()
@@ -74,6 +118,8 @@ class VMFolder:
 
         return o
 
+
+
     ####################################################################################################################
     # Private static methods
     ####################################################################################################################
@@ -81,10 +127,10 @@ class VMFolder:
     @staticmethod
     def __folderTree(folder, tree: {}):
         if isinstance(folder, vim.Folder):
-            Log.log(folder._moId, 'TTTTT')
             children = folder.childEntity
             for child in children:
                 if isinstance(child, vim.Folder):
+                    # _moId == Managed object Id.
                     subTree = {
                         child._moId: {
                             "name": child.name,
@@ -95,4 +141,3 @@ class VMFolder:
                     VMFolder.__folderTree(child, subTree)
 
         return tree
-

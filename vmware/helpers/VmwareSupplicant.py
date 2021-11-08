@@ -50,6 +50,24 @@ class VmwareSupplicant:
 
 
 
+    # Get all objects of type vimType.
+    # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
+    def getAllObjs(self, vimType: []):
+        obj = {}
+
+        if self.content:
+            try:
+                container = self.content.viewManager.CreateContainerView(self.content.rootFolder, vimType, True)
+                for managedObject_ref in container.view:
+                    obj.update({managedObject_ref: managedObject_ref.name})
+
+            except Exception as e:
+                raise e
+
+        return obj
+
+
+
     def disconnect(self):
         try:
             Disconnect(self.content)

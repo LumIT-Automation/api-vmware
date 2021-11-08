@@ -13,50 +13,42 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareVMFoldersController(CustomController):
+class VMwareVMFolderController(CustomController):
     @staticmethod
-    def get(request: Request, assetId: int) -> Response:
-        # allowedData = {
+    def get(request: Request, assetId: int, moId: str) -> Response:
         data = {
             "data": {
-                "items": []
+                "parentList": []
             }
         }
         user = CustomController.loggedUser(request)
 
         try:
-            #if Permission.hasUserPermission(groups=user["groups"], action="vmFolders_get", assetId=assetId) or user["authDisabled"]:
             if True:
-                Log.actionLog("VMFolders tree", user)
+            #if Permission.hasUserPermission(groups=user["groups"], action="node_delete", assetId=assetId, vmFolderName=vmFolderName) or user["authDisabled"]:
+                Log.actionLog("VMFolder properties", user)
 
-                lock = Lock("vmFolders", locals())
+                lock = Lock("vmFolder", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    #vmFolder = VMFolder(assetId)
-                    itemData = VMFolder.folderTree(assetId)
-                    Log.log(itemData, '_')
+                    vmFolder = VMFolder(assetId, moId)
 
-                    # Filter vmFolders' list basing on permissions.
-                    # For any result, check if the user has got at least a pools_get permission on the vmFolder.
-                    #for p in itemData["data"]["items"]:
-                    #    if Permission.hasUserPermission(groups=user["groups"], action="pools_get", assetId=assetId, vmFolderName=str(p["fullPath"])) or user["authDisabled"]:
-                    #        allowedData["data"]["items"].append(p)
-
-                    #data["data"] = Serializer(allowedData).data["data"]
-                    data["data"]["items"] = itemData
+                    data["data"]["parentList"] = vmFolder.parentList()
                     data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK
                     lock.release()
+
                 else:
                     data = None
                     httpStatus = status.HTTP_423_LOCKED
+
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("vmFolders", locals()).release()
+            Lock("vmFolder", locals(), locals()["moId"]).release()
 
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)

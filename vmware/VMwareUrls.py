@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .controllers import Root
-from .controllers.VMware import VMFolders
+from .controllers.VMware import VMFolders, VMFolder
 from .controllers.VMware.Asset import Asset, Assets
 from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions
 from .controllers import History
@@ -24,6 +24,7 @@ urlpatterns = [
 
     # VMFolder.
     path('<int:assetId>/vmFolders/', VMFolders.VMwareVMFoldersController.as_view(), name='vmware-vmFolders'),
+    path('<int:assetId>/vmFolder/<str:moId>/', VMFolder.VMwareVMFolderController.as_view(), name='vmware-vmFolder'),
 
     # Node.
     #path('<int:assetId>/<str:vmFolderName>/node/<str:nodeName>/', Node.VMwareNodeController.as_view(), name='vmware-node'),
