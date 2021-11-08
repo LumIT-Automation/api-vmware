@@ -22,6 +22,13 @@ SET time_zone = "+00:00";
 --
 
 --
+-- Dump dei dati per la tabella `asset`
+--
+
+INSERT INTO `asset` (`id`, `address`, `port`, `fqdn`, `baseurl`, `tlsverify`, `datacenter`, `environment`, `position`, `api_type`, `api_additional_data`, `username`, `password`) VALUES
+(1, '192.168.12.8', NULL, 'vcsa.lumitlab.local', 'https://vcsa.lumitlab.local/', 0, 'Milano', 'Development', 'RACK 1', 'Vmware', '', 'administrator@vsphere.local', 'Password01!!');
+
+--
 -- Dump dei dati per la tabella `privilege`
 --
 

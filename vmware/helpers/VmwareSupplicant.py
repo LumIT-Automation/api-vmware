@@ -2,7 +2,6 @@
 from pyVim.connect import SmartConnect, Disconnect
 import ssl
 import atexit
-from pyVmomi import vim, vmodl
 
 from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
@@ -25,7 +24,10 @@ class VmwareSupplicant:
         self.username = dataConnection["username"]
         self.password = dataConnection["password"]
 
+        self.connection = None
+        self.content = None
         self.silent = silent
+
 
 
 
@@ -39,11 +41,19 @@ class VmwareSupplicant:
 
         try:
             Log.actionLog("Try vmware python connection to " + str(self.ipAddr))
-            connection = SmartConnect(host=self.ipAddr, user=self.username, pwd=self.password, port=self.port, sslContext=context)
-            atexit.register(Disconnect, connection)
-            content = connection.RetrieveContent()
+            self.connection = SmartConnect(host=self.ipAddr, user=self.username, pwd=self.password, port=self.port, sslContext=context)
+            atexit.register(Disconnect, self.connection)
+            self.content = self.connection.RetrieveContent()
 
         except Exception as e:
             raise e
 
-        return content
+
+
+    def disconnect(self):
+        try:
+            Disconnect(self.content)
+
+        except Exception as e:
+            raise e
+

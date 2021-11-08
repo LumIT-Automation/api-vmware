@@ -20,6 +20,39 @@ class Asset:
     # Public methods
     ####################################################################################################################
 
+    def vmwareDataConnection(self) -> dict:
+        dataConnection = dict()
+        c = connection.cursor()
+
+        try:
+            c.execute("SELECT `id`, `address`, `port`, `api_type`, `api_additional_data`, `username`, `password` "
+                    "FROM asset WHERE id = %s", [
+                self.assetId
+            ])
+
+            a = DBHelper.asDict(c)[0]
+
+            if a["api_type"] == "Vmware":
+                    dataConnection = {
+                        "ip": a["address"],
+                        "port": a["port"],
+                        "additional_data": a["api_additional_data"],
+                        "username": a["username"],
+                        "password": a["password"]
+                    }
+
+            else:
+                raise CustomException(status=404, payload={"asset": "Wrong api_type (not vmware)"})
+
+            return dataConnection
+
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
     def info(self) -> dict:
         a = dict()
         c = connection.cursor()

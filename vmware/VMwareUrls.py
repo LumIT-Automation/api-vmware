@@ -1,9 +1,8 @@
 from django.urls import path
 
 from .controllers import Root
-from .controllers.VMware import VMFolders, Node, Nodes, Monitor, Monitors, Certificate, Certificates, Pools, Pool, SnatPool, SnatPools, PoolMembers, PoolMember, PoolMemberStats, Profile, Profiles, Policy, Policies, VirtualServer, VirtualServers
+from .controllers.VMware import VMFolders
 from .controllers.VMware.Asset import Asset, Assets
-from .controllers.VMware.Workflow import VirtualServersController as WorkflowVirtualServers, VirtualServerController as WorkflowVirtualServer
 from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions
 from .controllers import History
 
@@ -27,8 +26,8 @@ urlpatterns = [
     path('<int:assetId>/vmFolders/', VMFolders.VMwareVMFoldersController.as_view(), name='vmware-vmFolders'),
 
     # Node.
-    path('<int:assetId>/<str:vmFolderName>/node/<str:nodeName>/', Node.VMwareNodeController.as_view(), name='vmware-node'),
-    path('<int:assetId>/<str:vmFolderName>/nodes/', Nodes.VMwareNodesController.as_view(), name='vmware-nodes'),
+    #path('<int:assetId>/<str:vmFolderName>/node/<str:nodeName>/', Node.VMwareNodeController.as_view(), name='vmware-node'),
+    #path('<int:assetId>/<str:vmFolderName>/nodes/', Nodes.VMwareNodesController.as_view(), name='vmware-nodes'),
 
     # Log history.
     path('history/', History.HistoryLogsController.as_view(), name='vmware-log-history'),
