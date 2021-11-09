@@ -8,12 +8,12 @@ from vmware.helpers.Database import Database as DBHelper
 
 
 class VMFolder:
-    def __init__(self, assetId: int, vmFolderId: int = 0, vmFolderName: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str = "", vmFolderName: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId = assetId
-        self.vmFolderId = id
-        self.vmFolderName = vmFolderName
+        self.moId = moId
+        self.name = vmFolderName
 
 
 
@@ -24,8 +24,8 @@ class VMFolder:
     def exists(self) -> bool:
         c = connection.cursor()
         try:
-            c.execute("SELECT COUNT(*) AS c FROM `vmFolder` WHERE `vmFolder` = %s AND id_asset = %s", [
-                self.vmFolderName,
+            c.execute("SELECT COUNT(*) AS c FROM `vmFolder` WHERE `moId` = %s AND id_asset = %s", [
+                self.moId,
                 self.assetId
             ])
             o = DBHelper.asDict(c)
@@ -42,15 +42,15 @@ class VMFolder:
     def info(self) -> dict:
         c = connection.cursor()
         try:
-            c.execute("SELECT * FROM `vmFolder` WHERE `vmFolder` = %s AND id_asset = %s", [
-                self.vmFolderName,
+            c.execute("SELECT * FROM `vmFolder` WHERE `moId` = %s AND id_asset = %s", [
+                self.moId,
                 self.assetId
             ])
 
             return DBHelper.asDict(c)[0]
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -59,13 +59,13 @@ class VMFolder:
     def delete(self) -> None:
         c = connection.cursor()
         try:
-            c.execute("DELETE FROM `vmFolder` WHERE `vmFolder` = %s AND id_asset = %s", [
-                self.vmFolderName,
+            c.execute("DELETE FROM `vmFolder` WHERE `moId` = %s AND id_asset = %s", [
+                self.moId,
                 self.assetId
             ])
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -76,38 +76,24 @@ class VMFolder:
     ####################################################################################################################
 
     @staticmethod
-    def add(assetId, vmFolderName) -> int:
+    def add(moId, assetId, vmFolderName) -> int:
         c = connection.cursor()
 
-        if vmFolderName == "any":
-            try:
-                c.execute("INSERT INTO `vmFolder` (id_asset, `vmFolder`) VALUES (%s, %s)", [
-                    assetId,
-                    vmFolderName
-                ])
+        # Check if assetId/vmFolderName is a valid VMware vmFolder (at the time of the insert).
+        vmwareVMFolders = VMFolder.list(assetId)["data"]["items"]
 
-                return c.lastrowid
+        for v in vmwareVMFolders:
+            if v["folder"] == moId and v["name"] == vmFolderName:
+                try:
+                    c.execute("INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`) VALUES (%s, %s, %s)", [
+                        moId,
+                        assetId,
+                        vmFolderName
+                    ])
 
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-            finally:
-                c.close()
+                    return c.lastrowid
 
-        else:
-            # Check if assetId/vmFolderName is a valid VMware vmFolder (at the time of the insert).
-            vmwareVMFolders = VMwareVMFolder.list(assetId)["data"]["items"]
-
-            for v in vmwareVMFolders:
-                if v["name"] == vmFolderName:
-                    try:
-                        c.execute("INSERT INTO `vmFolder` (id_asset, `vmFolder`) VALUES (%s, %s)", [
-                            assetId,
-                            vmFolderName
-                        ])
-
-                        return c.lastrowid
-
-                    except Exception as e:
-                        raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-                    finally:
-                        c.close()
+                except Exception as e:
+                    raise CustomException(status=400, payload={"database": e.__str__()})
+                finally:
+                    c.close()

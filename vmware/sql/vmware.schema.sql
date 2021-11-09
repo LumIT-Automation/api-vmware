@@ -53,7 +53,7 @@ CREATE TABLE `group_role_vmFolder` (
   `id` int(255) NOT NULL,
   `id_group` int(11) NOT NULL,
   `id_role` int(11) NOT NULL,
-  `id_vmFolder` int(11) NOT NULL
+  `id_vmFolder` varchar(64) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -104,9 +104,9 @@ CREATE TABLE `migrations` (
 --
 
 CREATE TABLE `vmFolder` (
-  `id` int(11) NOT NULL,
+  `moId` varchar(64) NOT NULL,
   `id_asset` int(11) NOT NULL,
-  `vmFolder` varchar(64) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -119,8 +119,6 @@ CREATE TABLE `vmFolder` (
 CREATE TABLE `privilege` (
   `id` int(11) NOT NULL,
   `privilege` varchar(64) NOT NULL,
-  `propagate_to_all_asset_vmFolders` tinyint(1) NOT NULL DEFAULT 0,
-  `propagate_to_all_assets` tinyint(1) NOT NULL DEFAULT 0,
   `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -164,7 +162,7 @@ ALTER TABLE `asset`
 ALTER TABLE `group_role_vmFolder`
   ADD PRIMARY KEY (`id_group`,`id_role`,`id_vmFolder`),
   ADD KEY `id_role` (`id_role`),
-  ADD KEY `grp_vmFolder` (`id_vmFolder`),
+  ADD KEY `id_vmFolder` (`id_vmFolder`),
   ADD KEY `id` (`id`);
 
 --
@@ -192,8 +190,9 @@ ALTER TABLE `migrations`
 -- Indici per le tabelle `vmFolder`
 --
 ALTER TABLE `vmFolder`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `id_asset` (`id_asset`,`vmFolder`),
+  ADD PRIMARY KEY (`moId`),
+  ADD UNIQUE KEY `id_asset` (`id_asset`,`moId`),
+  ADD KEY `name` (`name`),
   ADD KEY `p_asset` (`id_asset`);
 
 --
@@ -252,12 +251,6 @@ ALTER TABLE `migrations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `vmFolder`
---
-ALTER TABLE `vmFolder`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT per la tabella `privilege`
 --
 ALTER TABLE `privilege`
@@ -278,7 +271,7 @@ ALTER TABLE `role`
 --
 ALTER TABLE `group_role_vmFolder`
   ADD CONSTRAINT `grp_group` FOREIGN KEY (`id_group`) REFERENCES `identity_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `grp_vmFolder` FOREIGN KEY (`id_vmFolder`) REFERENCES `vmFolder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `grp_vmFolder` FOREIGN KEY (`id_vmFolder`) REFERENCES `vmFolder` (`moId`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `grp_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --

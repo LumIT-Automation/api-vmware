@@ -28,7 +28,8 @@ class VMFolder:
 
         try:
             vmware = Asset(self.assetId)
-            dataConnection = vmware.vmwareDataConnection()
+            vmwareInfo = vmware.info()
+            dataConnection = vmwareInfo["dataConnection"]
 
             vClient = VmwareSupplicant(dataConnection, silent)
             vClient.getContent()
@@ -67,24 +68,39 @@ class VMFolder:
     def folderTree(assetId, silent: bool = None) -> list:
         treeList = list()
         vClient = None
+        datacenters = []
+
+        def datacenterList(folder: vim.Folder, dcList: []) -> list:
+            children = folder.childEntity
+            for c in children:
+                if isinstance(c, vim.Datacenter):
+                    dcList.append(c)
+                elif isinstance(c, vim.Folder):
+                    datacenterList(c, dcList)
+
+            return dcList
 
         try:
             vmware = Asset(assetId)
-            dataConnection = vmware.vmwareDataConnection()
+            vmwareInfo = vmware.info()
+            dataConnection = vmwareInfo["dataConnection"]
 
             vClient = VmwareSupplicant(dataConnection, silent)
             vClient.getContent()
 
-            datacenters = vClient.content.rootFolder.childEntity  # TODO: this should be performed by the datacenter class.
+            rootFolder = vClient.content.rootFolder
+            datacenters = datacenterList(rootFolder, datacenters)
+
             for dc in datacenters:
-                parentFolder = dc.vmFolder
-                tree = {
-                    parentFolder._moId: {
-                        "name": dc.name,
-                        "subFolders": {}
+                if isinstance(dc, vim.Datacenter):
+                    parentFolder = dc.vmFolder
+                    tree = {
+                        parentFolder._moId: {
+                            "name": dc.name,
+                            "subFolders": {}
+                        }
                     }
-                }
-                treeList.append(VMFolder.__folderTree(parentFolder, tree))
+                    treeList.append(VMFolder.__folderTree(parentFolder, tree))
 
             return treeList
 
@@ -94,6 +110,7 @@ class VMFolder:
         finally:
             if vClient and hasattr(vClient, 'content'):
                 vClient.disconnect()
+
 
 
 

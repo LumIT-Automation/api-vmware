@@ -73,6 +73,6 @@ class Role:
             })
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()

@@ -29,25 +29,34 @@ INSERT INTO `asset` (`id`, `address`, `port`, `fqdn`, `baseurl`, `tlsverify`, `d
 (1, '192.168.12.8', NULL, 'vcsa.lumitlab.local', 'https://vcsa.lumitlab.local/', 0, 'Milano', 'Development', 'RACK 1', 'Vmware', '', 'administrator@vsphere.local', 'Password01!!');
 
 --
+-- Dump dei dati per la tabella `identity_group`
+--
+
+INSERT INTO `identity_group` (`id`, `name`, `identity_group_identifier`) VALUES
+(1, 'groupAdmin', 'cn=groupadmin,cn=users,dc=lab,dc=local'),
+(2, 'groupStaff', 'cn=groupstaff,cn=users,dc=lab,dc=local'),
+(3, 'groupReadOnly', 'cn=groupreadonly,cn=users,dc=lab,dc=local');
+
+--
 -- Dump dei dati per la tabella `privilege`
 --
 
-INSERT INTO `privilege` (`id`, `privilege`, `propagate_to_all_asset_vmFolders`, `propagate_to_all_assets`, `description`) VALUES
-(1, 'asset_patch', 1, 1, NULL),
-(2, 'asset_delete', 1, 1, NULL),
-(3, 'assets_get', 1, 1, NULL),
-(4, 'assets_post', 1, 1, NULL),
-(5, 'permission_identityGroups_get', 1, 1, NULL),
-(6, 'permission_identityGroups_post', 1, 1, NULL),
-(7, 'permission_roles_get', 1, 1, NULL),
-(8, 'permission_identityGroup_patch', 1, 1, NULL),
-(9, 'permission_identityGroup_delete', 1, 1, NULL),
-(10, 'vmFolders_get', 1, 0, NULL),
-(11, 'nodes_get', 0, 0, NULL),
-(12, 'nodes_post', 0, 0, NULL),
-(13, 'node_patch', 0, 0, NULL),
-(14, 'node_delete', 0, 0, NULL),
-(15, 'historyComplete_get', 1, 1, NULL);
+INSERT INTO `privilege` (`id`, `privilege`, `description`) VALUES
+(1, 'asset_patch', NULL),
+(2, 'asset_delete', NULL),
+(3, 'assets_get', NULL),
+(4, 'assets_post', NULL),
+(5, 'permission_identityGroups_get', NULL),
+(6, 'permission_identityGroups_post', NULL),
+(7, 'permission_roles_get', NULL),
+(8, 'permission_identityGroup_patch', NULL),
+(9, 'permission_identityGroup_delete', NULL),
+(10, 'vmFolders_get', NULL),
+(11, 'nodes_get', NULL),
+(12, 'nodes_post', NULL),
+(13, 'node_patch', NULL),
+(14, 'node_delete', NULL),
+(15, 'historyComplete_get', NULL);
 
 
 --
