@@ -4,6 +4,7 @@ from vmware.models.VMware.VMFolder import VMFolder as vCemterVMFolder
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
+from vmware.helpers.Log import Log
 
 
 
@@ -80,13 +81,12 @@ class VMFolder:
     def add(moId: str, assetId: int, vmFolder: str, description: str="") -> int:
         c = connection.cursor()
 
-        # TODO Check if assetId/vmFolderName is a valid VMware vmFolder (at the time of the insert).
-        #vCenterVMFolders =vCemterVMFolder.list(assetId)["data"]["items"]
 
-        #for v in vCenterVMFolders:
-        #    if v["folder"] == moId and v["name"] == vmFolderName:
-        if True:
-            if True:
+        # Check if the vmFolder is exusts in the vCenter server.
+        vCenterVMFolders = vCemterVMFolder.list(assetId)["data"]
+
+        for v in vCenterVMFolders:
+            if v["moId"] == moId and v["name"] == vmFolder:
                 try:
                     c.execute("INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES (%s, %s, %s, %s)", [
                         moId,

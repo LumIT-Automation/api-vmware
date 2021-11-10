@@ -272,15 +272,14 @@ class IdentityGroup:
                     values
                 )
                 igId = c.lastrowid
-                Log.log(roles, '_')
 
                 # Add associated roles (no error on non-existent role).
                 for roleName, vmFolderAssetList in roles.items():
                     for vmFolderAssetDict in vmFolderAssetList:
-                        #try:
-                        Permission.add(igId, roleName, vmFolderAssetDict["assetId"], vmFolderAssetDict["moId"], vmFolderAssetDict["vmFolder"])
-                        #except Exception:
-                        #    pass
+                        try:
+                            Permission.add(igId, roleName, vmFolderAssetDict["assetId"], vmFolderAssetDict["moId"], vmFolderAssetDict["vmFolder"])
+                        except Exception:
+                            pass
 
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})

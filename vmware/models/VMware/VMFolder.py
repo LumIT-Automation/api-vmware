@@ -71,6 +71,7 @@ class VMFolder:
         vClient = None
         datacenters = []
 
+        # TODO: move in Datacenter.py
         def datacenterList(folder: vim.Folder, dcList: []) -> list:
             children = folder.childEntity
             for c in children:
@@ -114,26 +115,39 @@ class VMFolder:
 
 
 
-    # Plain vCenter folders list using rest api, not pvmomi.
     @staticmethod
-    def list(assetId: int) -> dict:
-        o = dict()
+    # Plain vCenter folders list using pvmomi (a rest api call can be used alse for this onw).
+    def list(assetId, silent: bool = None) -> dict:
+        data = {
+            "data": []
+        }
+        vClient = None
 
         try:
             vmware = Asset(assetId)
-            asset = vmware.info()
+            vmwareInfo = vmware.info()
+            dataConnection = vmwareInfo["dataConnection"]
 
-            api = ApiSupplicant(
-                endpoint=asset["baseurl"]+"tm/auth/vmFolder/",
-                auth=asset["auth"],
-                tlsVerify=asset["tlsverify"]
-            )
+            vClient = VmwareSupplicant(dataConnection, silent)
+            vClient.getContent()
 
-            o["data"] = api.get()
+            allFolders = vClient.getAllObjs([vim.Folder])
+
+            for f in allFolders:
+                of = {
+                    "moId": f._moId,
+                    "name": f.name
+                }
+                data["data"].append(of)
+
+            return data
+
         except Exception as e:
             raise e
 
-        return o
+        finally:
+            if vClient and hasattr(vClient, 'content'):
+                vClient.disconnect()
 
 
 
