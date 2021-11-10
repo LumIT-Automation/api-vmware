@@ -4,8 +4,9 @@ from vmware.models.Permission.Role import Role
 
 
 class IdentityGroupsAssestRolesSubItems(serializers.Serializer):
-    assetId = serializers.IntegerField(required=True)
+    moId = serializers.CharField(max_length=64, required=True)
     vmFolder = serializers.CharField(max_length=64, required=True)
+    assetId = serializers.IntegerField(required=True)
 
 class IdentityGroupsSerializer(serializers.Serializer):
     class IdentityGroupsInnerSerializer(serializers.Serializer):

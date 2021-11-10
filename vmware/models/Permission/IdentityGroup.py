@@ -6,6 +6,8 @@ from vmware.models.Permission.Permission import Permission
 from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
+from vmware.helpers.Utils import GroupConcatToDict
+
 from django.db import connection
 
 
@@ -33,7 +35,7 @@ class IdentityGroup:
             return DBHelper.asDict(c)[0]
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -91,12 +93,12 @@ class IdentityGroup:
                                 pass
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
 
         else:
-            raise CustomException(status=404, payload={"database": {"message": "Non existent identity group"}})
+            raise CustomException(status=404, payload={"database": "Non existent identity group"})
 
 
 
@@ -112,12 +114,12 @@ class IdentityGroup:
                 # Foreign keys' on cascade rules will clean the linked items on db.
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
 
         else:
-            raise CustomException(status=404, payload={"database": {"message": "Non existent identity group"}})
+            raise CustomException(status=404, payload={"database": "Non existent identity group"})
 
 
 
@@ -138,13 +140,13 @@ class IdentityGroup:
                 "identity_group.*, " 
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmFolder.id_asset,'::',vmFolder.name)) " 
+                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmFolder.moId,'::',vmFolder.name,'::',vmFolder.id_asset)) " 
                     "ORDER BY role.id "
                     "SEPARATOR ',' "
                 "), '') AS roles_vmFolder, "
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(privilege.privilege,'::',vmFolder.id_asset,'::',vmFolder.name) " 
+                    "DISTINCT CONCAT(privilege.privilege,'::',vmFolder.moId,'::',vmFolder.name,'::',vmFolder.id_asset) " 
                     "ORDER BY privilege.id "
                     "SEPARATOR ',' "
                 "), '') AS privileges_vmFolder "
@@ -158,16 +160,6 @@ class IdentityGroup:
                 "GROUP BY identity_group.id"
             )
 
-            # Simple start query:
-            # SELECT identity_group.*, role.role, privilege.privilege, `vmFolder`.vmFolder
-            # FROM identity_group
-            # LEFT JOIN group_role_vmFolder ON group_role_vmFolder.id_group = identity_group.id
-            # LEFT JOIN role ON role.id = group_role_vmFolder.id_role
-            # LEFT JOIN `vmFolder` ON `vmFolder`.id = group_role_vmFolder.id_vmFolder
-            # LEFT JOIN role_privilege ON role_privilege.id_role = role.id
-            # LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege
-            # GROUP BY identity_group.id
-
             items = DBHelper.asDict(c)
 
             # "items": [
@@ -176,94 +168,51 @@ class IdentityGroup:
             #    "id": 2,
             #    "name": "groupStaff",
             #    "identity_group_identifier": "cn=groupStaff,cn=users,dc=lab,dc=local",
-            #    "roles_vmFolder": "staff::1::Common",
-            #    "privileges_vmFolder": "certificates_post::1::Common::1::0,poolMember_get::1::Common::0::0,poolMember_patch::1::Common::0::0,poolMembers_get::1::Common::0::0,poolMemberStats_get::1::Common::0::0,pools_get::1::Common::0::0,vmFolders_get::1::Common::1::1"
+            #    "roles_vmFolder": "staff::group-v1082::Varie::1",
+            #    "privileges_vmFolder": "asset_get::group-v1082::Varie::1,vmfolder_get::group-v1082::Varie::1, ..."
             # },
             # ...
             # ]
 
-            for ln in items:
-                if "roles_vmFolder" in items[j]:
-                    if "," in ln["roles_vmFolder"]:
-                        items[j]["roles_vmFolder"] = ln["roles_vmFolder"].split(",") # "staff::1::vmFolder,...,readonly::2::vmFolder" string to list value: replace into original data structure.
-                    else:
-                        items[j]["roles_vmFolder"] = [ ln["roles_vmFolder"] ] # simple string to list.
+            gcR = GroupConcatToDict(["role", "moId", "vmFolder", "assetId"])
+            gcP = GroupConcatToDict(["privilege", "moId", "vmFolder","assetId"])
+            """
+                rStructure data example:
+                 [
+                    {
+                        "role": "staff", 
+                        "moId": "group-v1082",
+                        "vmFolder": "Varie"
+                        "assetId": "1", 
+                    }, 
+                    {
+                        ...
+                    }
+                ]
+            """
+            for el in items:
+                rStructure = gcR.makeDict(el["roles_vmFolder"])
+                roleStructure = dict()
+                for rs in rStructure:
+                    role = rs["role"]
+                    if not role in roleStructure:
+                        roleStructure[role] = list()
 
-                    # "roles_vmFolder": [
-                    #    "admin::1::any",
-                    #    "staff::1::PARTITION1",
-                    #    "staff::2::PARTITION2"
-                    # ]
+                    roleStructure[role].append(rs)
+                el["roles_vmFolder"] = roleStructure
 
-                    rolesStructure = dict()
-                    for rls in items[j]["roles_vmFolder"]:
-                        if "::" in rls:
-                            rlsList = rls.split("::")
-                            if not str(rlsList[0]) in rolesStructure:
-                                # Initialize list if not already done.
-                                rolesStructure[rlsList[0]] = list()
-
-                            rolesStructure[rlsList[0]].append({
-                                "assetId": rlsList[1],
-                                "vmFolder": rlsList[2]
-                            })
-
-                    items[j]["roles_vmFolder"] = rolesStructure
-
-                    #"roles_vmFolder": {
-                    #    "staff": [
-                    #        {
-                    #            "assetId": 1
-                    #            "vmFolder": "PARTITION1"
-                    #        },
-                    #        {
-                    #            "assetId": 2
-                    #            "vmFolder": "PARTITION2"
-                    #        },
-                    #    ],
-                    #    "admin": [
-                    #        {
-                    #            "assetId": 1
-                    #            "vmFolder": "any"
-                    #        },
-                    #    ]
-                    #}
 
                 if showPrivileges:
-                    # Add detailed privileges' descriptions to the output.
-                    if "privileges_vmFolder" in items[j]:
-                        if "," in ln["privileges_vmFolder"]:
-                            items[j]["privileges_vmFolder"] = ln["privileges_vmFolder"].split(",")
-                        else:
-                            items[j]["privileges_vmFolder"] = [ ln["privileges_vmFolder"] ]
+                    pStructure = gcP.makeDict(el["privileges_vmFolder"])
+                    privStructure = dict()
+                    for ps in pStructure:
+                        priv = ps["privilege"]
+                        if not priv in privStructure:
+                            privStructure[priv] = list()
 
-                        ppStructure = dict()
-                        for pls in items[j]["privileges_vmFolder"]:
-                            if "::" in pls:
-                                pList = pls.split("::")
-                                if not str(pList[0]) in ppStructure:
-                                    ppStructure[pList[0]] = list()
+                        privStructure[priv].append(ps)
+                    el["privileges_vmFolder"] = privStructure
 
-                                # If propagate_to_all_asset_vmFolders is set, set "any" for vmFolders value.
-                                # It means that a privilege does not require the vmFolders to be specified <--> it's valid for all vmFolders within the asset.
-                                if pList[3]:
-                                    if int(pList[3]):
-                                        pList[2] = "any"
-
-                                # If propagate_to_all_assets is set, set "any" for assets value.
-                                # It means that a privilege does not require the asset to be specified <--> it's valid for all assets.
-                                if pList[4]:
-                                    if int(pList[4]):
-                                        pList[1] = 0
-                                        pList[2] = "any"
-
-                                if not any(v['assetId'] == 0 for v in ppStructure[pList[0]]): # insert value only if not already present (applied to assetId "0").
-                                    ppStructure[pList[0]].append({
-                                        "assetId": pList[1],
-                                        "vmFolder": pList[2],
-                                    })
-
-                        items[j]["privileges_vmFolder"] = ppStructure
                 else:
                     del items[j]["privileges_vmFolder"]
 
@@ -274,7 +223,7 @@ class IdentityGroup:
             })
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -297,10 +246,11 @@ class IdentityGroup:
             )):
                 # "roles_vmFolder": {
                 #     "staff": [
-                #         {
-                #             "assetId": 1,
-                #             "vmFolder": "any"
-                #         }
+                #       {
+                #           "moId": "group-v2476",
+                #           "vmFolder": "riurca",
+                #           "assetId": 1
+                #       }
                 #     ],
                 #  "nonExistent": []
                 # }
@@ -322,17 +272,19 @@ class IdentityGroup:
                     values
                 )
                 igId = c.lastrowid
+                Log.log(roles, '_')
 
                 # Add associated roles (no error on non-existent role).
-                for roleName, vmFoldersAssetsList in roles.items():
-                    for vmFoldersAssetDict in vmFoldersAssetsList:
+                for roleName, vmFolderAssetList in roles.items():
+                    for vmFolderAssetDict in vmFolderAssetList:
                         try:
-                            Permission.add(igId, roleName, vmFoldersAssetDict["assetId"], vmFoldersAssetDict["vmFolder"])
+                            Log.log(str(igId) + " " + str(roleName) + " " + str(vmFolderAssetDict["moId"]) + " " + str(vmFolderAssetDict["assetId"]), '_')
+                            # Permission.add(igId, roleName, vmFolderAssetDict["moId"], vmFolderAssetDict["assetId"])
                         except Exception:
                             pass
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
