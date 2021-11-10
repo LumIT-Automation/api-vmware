@@ -1,6 +1,6 @@
 from django.db import connection
 
-from vmware.models.VMware.VMFolder import VMFolder as VMwareVMFolder
+from vmware.models.VMware.VMFolder import VMFolder as vCemterVMFolder
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
@@ -8,12 +8,13 @@ from vmware.helpers.Database import Database as DBHelper
 
 
 class VMFolder:
-    def __init__(self, assetId: int, moId: str = "", vmFolderName: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, vmFolder: str = "", description: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId = assetId
         self.moId = moId
-        self.name = vmFolderName
+        self.name = vmFolder
+        self.description = description
 
 
 
@@ -76,19 +77,22 @@ class VMFolder:
     ####################################################################################################################
 
     @staticmethod
-    def add(moId, assetId, vmFolderName) -> int:
+    def add(moId: str, assetId: int, vmFolder: str, description: str="") -> int:
         c = connection.cursor()
 
-        # Check if assetId/vmFolderName is a valid VMware vmFolder (at the time of the insert).
-        vmwareVMFolders = VMFolder.list(assetId)["data"]["items"]
+        # TODO Check if assetId/vmFolderName is a valid VMware vmFolder (at the time of the insert).
+        #vCenterVMFolders =vCemterVMFolder.list(assetId)["data"]["items"]
 
-        for v in vmwareVMFolders:
-            if v["folder"] == moId and v["name"] == vmFolderName:
+        #for v in vCenterVMFolders:
+        #    if v["folder"] == moId and v["name"] == vmFolderName:
+        if True:
+            if True:
                 try:
-                    c.execute("INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`) VALUES (%s, %s, %s)", [
+                    c.execute("INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES (%s, %s, %s, %s)", [
                         moId,
                         assetId,
-                        vmFolderName
+                        vmFolder,
+                        description
                     ])
 
                     return c.lastrowid

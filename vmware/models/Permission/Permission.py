@@ -172,32 +172,30 @@ class Permission:
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, assetId: int, vmFolderName: str) -> None:
+    def add(identityGroupId: int, role: str, assetId: int, moId: str, vmFolder: str) -> None:
         c = connection.cursor()
 
         try:
             if role == "admin":
-                vmFolderName = "any" # if admin: "any" is the only valid choice (on selected assetId).
+                moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
 
             # RoleId.
             r = Role(roleName=role)
             roleId = r.info()["id"]
 
             # VMFolder id. If vmFolder does not exist, create it.
-            p = VMFolder(assetId=assetId, vmFolderName=vmFolderName)
-            if p.exists():
-                vmFolderId = p.info()["id"]
-            else:
-                vmFolderId = p.add(assetId, vmFolderName)
+            f = VMFolder(assetId=assetId, moId=moId, vmFolder=vmFolder)
+            if not f.exists():
+                VMFolder.add(moId, assetId, vmFolder)
 
             c.execute("INSERT INTO group_role_vmFolder (id_group, id_role, id_vmFolder) VALUES (%s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.
                 roleId,
-                vmFolderId
+                moId
             ])
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -213,6 +211,6 @@ class Permission:
             ])
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()

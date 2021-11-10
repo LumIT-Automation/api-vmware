@@ -11,10 +11,9 @@ class VMFolder:
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # The moId is the VMware Managed Object Id. Can be obtained from the "_moId" property of a managed object.
         self.assetId = int(assetId)
         self.moId = moId
-
-        # The moId is the VMware Managed Object Id. Can be obtained from the "_moId" property of a managed object.
 
 
 
@@ -22,6 +21,7 @@ class VMFolder:
     # Public methods
     ####################################################################################################################
 
+    # For a vCenter folder get the list of the parent folders.
     def parentList(self, silent: bool = None) -> list:
         parentList = list()
         vClient = None
@@ -64,6 +64,7 @@ class VMFolder:
     # Public static methods
     ####################################################################################################################
 
+    # vCenter folders tree built using pvmomi.
     @staticmethod
     def folderTree(assetId, silent: bool = None) -> list:
         treeList = list()
@@ -113,8 +114,7 @@ class VMFolder:
 
 
 
-
-    # Plain folders list using rest api, not pvmomi.
+    # Plain vCenter folders list using rest api, not pvmomi.
     @staticmethod
     def list(assetId: int) -> dict:
         o = dict()
