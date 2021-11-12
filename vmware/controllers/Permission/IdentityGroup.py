@@ -50,7 +50,6 @@ class PermissionIdentityGroupController(CustomController):
                 serializer = GroupSerializer(data=request.data, partial=True)
                 if serializer.is_valid():
                     data = serializer.validated_data["data"]
-
                     ig = IdentityGroup(identityGroupIdentifier)
                     ig.modify(data)
 

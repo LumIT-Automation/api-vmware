@@ -85,10 +85,11 @@ class IdentityGroup:
                     except Exception:
                         pass
 
-                    for roleName, vmFoldersAssetsList in roles.items():
-                        for vmFoldersAssetDict in vmFoldersAssetsList:
+                    # Add associated roles (no error on non-existent role).
+                    for roleName, vmFolderAssetList in roles.items():
+                        for vmFolderAssetDict in vmFolderAssetList:
                             try:
-                                Permission.add(identityGroupId, roleName, vmFoldersAssetDict["assetId"], vmFoldersAssetDict["vmFolder"])
+                                Permission.add(identityGroupId, roleName, vmFolderAssetDict["assetId"], vmFolderAssetDict["moId"], vmFolderAssetDict["vmFolder"])
                             except Exception:
                                 pass
 
