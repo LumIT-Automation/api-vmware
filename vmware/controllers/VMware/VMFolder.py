@@ -24,8 +24,7 @@ class VMwareVMFolderController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if True:
-            #if Permission.hasUserPermission(groups=user["groups"], action="node_delete", assetId=assetId, vmFolderName=vmFolderName) or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="folder_get", assetId=assetId, folderMoId=moId) or user["authDisabled"]:
                 Log.actionLog("VMFolder properties", user)
 
                 lock = Lock("vmFolder", locals(), moId)

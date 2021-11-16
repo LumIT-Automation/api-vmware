@@ -52,8 +52,8 @@ INSERT INTO `privilege` (`id`, `privilege`, `description`) VALUES
 (8, 'permission_identityGroup_patch', NULL),
 (9, 'permission_identityGroup_delete', NULL),
 (10, 'vmFolders_get', NULL),
-(11, 'nodes_get', NULL),
-(12, 'nodes_post', NULL),
+(11, 'folder_get', NULL),
+(12, 'folders_get', NULL),
 (13, 'node_patch', NULL),
 (14, 'node_delete', NULL),
 (15, 'historyComplete_get', NULL);

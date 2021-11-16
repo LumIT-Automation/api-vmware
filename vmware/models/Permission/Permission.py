@@ -1,5 +1,7 @@
 from vmware.models.Permission.Role import Role
-from vmware.models.Permission.VMFolder import VMFolder
+from vmware.models.Permission.VMFolder import VMFolder as VMFolderPermission
+
+from vmware.models.VMware.VMFolder import VMFolder
 
 from django.db import connection
 from django.conf import settings
@@ -76,7 +78,7 @@ class Permission:
     ####################################################################################################################
 
     @staticmethod
-    def hasUserPermission(groups: list, action: str, assetId: int = 0, vmFolderName: str = "") -> bool:
+    def hasUserPermission(groups: list, action: str, assetId: int = 0, folderMoId: str="") -> bool:
         if action and groups:
             args = groups.copy()
             assetWhere = ""
@@ -98,11 +100,16 @@ class Permission:
                 # Put all the args of the query in a list.
                 if assetId:
                     args.append(assetId)
-                    assetWhere = "AND `vmFolder`.id_asset = %s "
+                    assetWhere = "AND vmFolder.id_asset = %s "
 
-                if vmFolderName:
-                    args.append(vmFolderName)
-                    vmFolderWhere = "AND (`vmFolder`.`vmFolder` = %s OR `vmFolder`.`vmFolder` = 'any') " # if "any" appears in the query results so far -> pass.
+                if folderMoId:
+                    f = VMFolder(assetId, folderMoId)
+                    foldersMoIdsList = f.parentList()
+                    vmFolderWhere = "AND (vmFolder.moId = 'any' " # if "any" appears in the query results so far -> pass.
+                    for moId in foldersMoIdsList:
+                        args.append(moId)
+                        vmFolderWhere += "OR vmFolder.moId = %s "
+                    vmFolderWhere += ") "
 
                 args.append(action)
 
@@ -111,8 +118,9 @@ class Permission:
                     "LEFT JOIN group_role_vmFolder ON group_role_vmFolder.id_group = identity_group.id "
                     "LEFT JOIN role ON role.id = group_role_vmFolder.id_role "
                     "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
-                    "LEFT JOIN `vmFolder` ON `vmFolder`.id = group_role_vmFolder.id_vmFolder "                      
                     "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
+                    "LEFT JOIN vmFolder ON vmFolder.moId = group_role_vmFolder.id_vmFolder "
+
                     "WHERE ("+groupWhere[:-4]+") " +
                     assetWhere +
                     vmFolderWhere +
@@ -183,10 +191,10 @@ class Permission:
             r = Role(roleName=role)
             roleId = r.info()["id"]
 
-            # VMFolder id. If vmFolder does not exist, create it.
-            f = VMFolder(assetId=assetId, moId=moId, vmFolder=vmFolder)
+            # VMFolderPermission id. If vmFolder does not exist, create it.
+            f = VMFolderPermission(assetId=assetId, moId=moId, vmFolder=vmFolder)
             if not f.exists():
-                VMFolder.add(moId, assetId, vmFolder)
+                VMFolderPermission.add(moId, assetId, vmFolder)
 
             c.execute("INSERT INTO group_role_vmFolder (id_group, id_role, id_vmFolder) VALUES (%s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.
