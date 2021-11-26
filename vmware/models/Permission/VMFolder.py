@@ -9,12 +9,12 @@ from vmware.helpers.Log import Log
 
 
 class VMFolder:
-    def __init__(self, assetId: int, moId: str, vmFolder: str = "", description: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, name: str = "", description: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId = assetId
         self.moId = moId
-        self.name = vmFolder
+        self.name = name
         self.description = description
 
 

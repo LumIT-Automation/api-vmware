@@ -41,22 +41,21 @@ INSERT INTO `identity_group` (`id`, `name`, `identity_group_identifier`) VALUES
 -- Dump dei dati per la tabella `privilege`
 --
 
-INSERT INTO `privilege` (`id`, `privilege`, `description`) VALUES
-(1, 'asset_patch', NULL),
-(2, 'asset_delete', NULL),
-(3, 'assets_get', NULL),
-(4, 'assets_post', NULL),
-(5, 'permission_identityGroups_get', NULL),
-(6, 'permission_identityGroups_post', NULL),
-(7, 'permission_roles_get', NULL),
-(8, 'permission_identityGroup_patch', NULL),
-(9, 'permission_identityGroup_delete', NULL),
-(10, 'vmFolders_get', NULL),
-(11, 'folder_get', NULL),
-(12, 'folders_get', NULL),
-(13, 'node_patch', NULL),
-(14, 'node_delete', NULL),
-(15, 'historyComplete_get', NULL);
+
+INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VALUES
+(1, 'asset_patch', 'asset', NULL),
+(2, 'asset_delete', 'asset', NULL),
+(3, 'assets_get', 'asset', NULL),
+(4, 'assets_post', 'asset', NULL),
+(5, 'permission_identityGroups_get', 'global', NULL),
+(6, 'permission_identityGroups_post', 'global', NULL),
+(7, 'permission_roles_get', 'global', NULL),
+(8, 'permission_identityGroup_patch', 'global', NULL),
+(9, 'permission_identityGroup_delete', 'global', NULL),
+(10, 'vmFolders_get', 'object', NULL),
+(11, 'folder_get', 'object', NULL),
+(12, 'folders_get', 'object', NULL),
+(13, 'historyComplete_get', 'global', NULL);
 
 
 --
@@ -67,6 +66,7 @@ INSERT INTO `role` (`id`, `role`, `description`) VALUES
 (1, 'admin', 'admin'),
 (2, 'staff', 'read / write, excluding assets'),
 (3, 'readonly', 'readonly');
+
 
 --
 -- Dump dei dati per la tabella `role_privilege`
@@ -86,18 +86,30 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (1, 11),
 (1, 12),
 (1, 13),
-(1, 14),
-(1, 15),
 (2, 3),
 (2, 10),
 (2, 11),
 (2, 12),
-(2, 13),
-(2, 14),
-(2, 15),
 (3, 3),
 (3, 10),
 (3, 11);
+
+
+--
+-- Dump dei dati per la tabella `vmFolder`
+--
+
+INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES
+('any', 1, 'any', 'All folders of this vCenter'),
+('group-v2478', 1, 'rrivarie', '');
+
+
+--
+-- Dump dei dati per la tabella `group_role_object`
+--
+
+INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_asset`, `id_object`) VALUES
+(1, 2, 2, 1, 'group-v2478');
 
 
 COMMIT;

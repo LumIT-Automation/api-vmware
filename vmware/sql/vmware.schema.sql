@@ -49,12 +49,14 @@ CREATE TABLE `asset` (
 -- Struttura della tabella `group_role_vmFolder`
 --
 
-CREATE TABLE `group_role_vmFolder` (
+CREATE TABLE `group_role_object` (
   `id` int(255) NOT NULL,
   `id_group` int(11) NOT NULL,
   `id_role` int(11) NOT NULL,
-  `id_vmFolder` varchar(64) NOT NULL
+  `id_asset` int(11) NOT NULL,
+  `id_object` varchar(64) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- --------------------------------------------------------
 
@@ -119,6 +121,7 @@ CREATE TABLE `vmFolder` (
 CREATE TABLE `privilege` (
   `id` int(11) NOT NULL,
   `privilege` varchar(64) NOT NULL,
+  `privilege_type` enum('object','asset','global') NOT NULL DEFAULT 'object',
   `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -159,11 +162,8 @@ ALTER TABLE `asset`
 --
 -- Indici per le tabelle `group_role_vmFolder`
 --
-ALTER TABLE `group_role_vmFolder`
-  ADD PRIMARY KEY (`id_group`,`id_role`,`id_vmFolder`),
-  ADD KEY `id_role` (`id_role`),
-  ADD KEY `id_vmFolder` (`id_vmFolder`),
-  ADD KEY `id` (`id`);
+ALTER TABLE `group_role_object`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indici per le tabelle `identity_group`
@@ -229,7 +229,7 @@ ALTER TABLE `asset`
 --
 -- AUTO_INCREMENT per la tabella `group_role_vmFolder`
 --
-ALTER TABLE `group_role_vmFolder`
+ALTER TABLE `group_role_object`
   MODIFY `id` int(255) NOT NULL AUTO_INCREMENT;
 
 --
@@ -269,10 +269,11 @@ ALTER TABLE `role`
 --
 -- Limiti per la tabella `group_role_vmFolder`
 --
-ALTER TABLE `group_role_vmFolder`
-  ADD CONSTRAINT `grp_group` FOREIGN KEY (`id_group`) REFERENCES `identity_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `grp_vmFolder` FOREIGN KEY (`id_vmFolder`) REFERENCES `vmFolder` (`moId`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `grp_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `group_role_object`
+  ADD CONSTRAINT `gro_group` FOREIGN KEY (`id_group`) REFERENCES `identity_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `gro_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `gro_asset` FOREIGN KEY (`id_asset`) REFERENCES `asset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `gro_object` FOREIGN KEY (`id_object`) REFERENCES `vmFolder` (`moId`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `vmFolder`

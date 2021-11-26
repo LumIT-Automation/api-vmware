@@ -24,34 +24,37 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroupId: int, role: str, assetId: int, vmFolderName: str) -> None:
+    def modify(self, identityGroupId: int, role: str, assetId: int, name: str) -> None:
         c = connection.cursor()
 
         if self.permissionId:
             try:
                 if role == "admin":
-                    vmFolderName = "any" # if admin: "any" is the only valid choice (on selected assetId).
+                    moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
+                    name = "any"
 
-                # RoleId.
-                r = Role(roleName=role)
-                roleId = r.info()["id"]
-
-                # VMFolder id. If vmFolder does not exist, create it.
-                p = VMFolder(assetId=assetId, vmFolderName=vmFolderName)
-                if p.exists():
-                    vmFolderId = p.info()["id"]
                 else:
-                    vmFolderId = p.add(assetId, vmFolderName)
+                    # RoleId.
+                    r = Role(roleName=role)
+                    roleId = r.info()["id"]
 
-                c.execute("UPDATE group_role_vmFolder SET id_group=%s, id_role=%s, id_vmFolder=%s WHERE id=%s", [
+                    # VMFolder id. If vmFolder does not exist, create it.
+                    p = VMFolder(assetId=assetId, moId=moId)
+                    if p.exists():
+                        objectId = p.info()["id"]
+                    else:
+                        objectId = p.add(assetId, name)
+
+                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_asset, id_object=%s WHERE id=%s", [
                     identityGroupId, # AD or RADIUS group.
                     roleId,
-                    vmFolderId,
+                    assetId,
+                    objectId,
                     self.permissionId
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
 
@@ -62,12 +65,12 @@ class Permission:
 
         if self.permissionId:
             try:
-                c.execute("DELETE FROM group_role_vmFolder WHERE id = %s", [
+                c.execute("DELETE FROM group_role_object WHERE id = %s", [
                     self.permissionId
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
 
@@ -132,7 +135,7 @@ class Permission:
                     return bool(q)
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
 
@@ -173,32 +176,38 @@ class Permission:
             }
 
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, assetId: int, moId: str, vmFolder: str) -> None:
+    def add(identityGroupId: int, role: str, assetId: int, moId: str, name: str) -> None:
         c = connection.cursor()
 
         try:
-            if role == "admin":
-                moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
-
             # RoleId.
             r = Role(roleName=role)
             roleId = r.info()["id"]
 
-            # VMFolderPermission id. If vmFolder does not exist, create it.
-            f = VMFolderPermission(assetId=assetId, moId=moId, vmFolder=vmFolder)
-            if not f.exists():
-                VMFolderPermission.add(moId, assetId, vmFolder)
+            if role == "admin":
+                moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
+            else:
+                # VMFolderPermission id. If vmFolder does not exist, create it.
+                f = VMFolderPermission(assetId=assetId, moId=moId, name=name)
+                if not f.exists():
+                    VMFolderPermission.add(moId, assetId, name)
 
-            c.execute("INSERT INTO group_role_vmFolder (id_group, id_role, id_vmFolder) VALUES (%s, %s, %s)", [
+            Log.log(identityGroupId, '_')
+            Log.log(roleId, '_')
+            Log.log(assetId, '_')
+            Log.log(moId, '_')
+
+            c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_asset, id_object) VALUES (NULL, %s, %s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.
                 roleId,
+                assetId,
                 moId
             ])
 
@@ -214,7 +223,7 @@ class Permission:
         c = connection.cursor()
 
         try:
-            c.execute("DELETE FROM group_role_vmFolder WHERE id_group = %s", [
+            c.execute("DELETE FROM group_role_object WHERE id_group = %s", [
                 identityGroupId,
             ])
 

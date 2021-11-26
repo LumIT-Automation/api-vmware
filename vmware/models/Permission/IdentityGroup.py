@@ -50,14 +50,15 @@ class IdentityGroup:
         if self.__exists():
             for k, v in data.items():
                 if any(exc in k for exc in (
-                        "roles_vmFolder",
+                        "roles_object",
                 )):
-                    # "roles_vmFolder": {
+                    # "roles_object": {
                     #     "staff": [
-                    #         {
-                    #             "assetId": 1,
-                    #             "vmFolder": "any"
-                    #         }
+                    #       {
+                    #           "moId": "group-v2476",
+                    #           "name": "riurca",
+                    #           "assetId": 1
+                    #       }
                     #     ],
                     #  "nonExistent": []
                     # }
@@ -86,10 +87,10 @@ class IdentityGroup:
                         pass
 
                     # Add associated roles (no error on non-existent role).
-                    for roleName, vmFolderAssetList in roles.items():
-                        for vmFolderAssetDict in vmFolderAssetList:
+                    for roleName, objectsList in roles.items():
+                        for objectDict in objectsList:
                             try:
-                                Permission.add(identityGroupId, roleName, vmFolderAssetDict["assetId"], vmFolderAssetDict["moId"], vmFolderAssetDict["vmFolder"])
+                                Permission.add(identityGroupId, roleName, objectDict["assetId"], objectDict["moId"], objectDict["name"])
                             except Exception:
                                 pass
 
@@ -130,7 +131,7 @@ class IdentityGroup:
 
     @staticmethod
     def list(showPrivileges: bool = False) -> dict:
-        # List identity groups with related information regarding the associated roles on vmFolders
+        # List identity groups with related information regarding the associated roles on objects
         # and optionally detailed privileges' descriptions.
 
         j = 0
@@ -144,18 +145,18 @@ class IdentityGroup:
                     "DISTINCT CONCAT(role.role,'::',CONCAT(vmFolder.moId,'::',vmFolder.name,'::',vmFolder.id_asset)) " 
                     "ORDER BY role.id "
                     "SEPARATOR ',' "
-                "), '') AS roles_vmFolder, "
+                "), '') AS roles_object, "
 
                 "IFNULL(GROUP_CONCAT( "
                     "DISTINCT CONCAT(privilege.privilege,'::',vmFolder.moId,'::',vmFolder.name,'::',vmFolder.id_asset) " 
                     "ORDER BY privilege.id "
                     "SEPARATOR ',' "
-                "), '') AS privileges_vmFolder "
+                "), '') AS privilege_object "
 
                 "FROM identity_group "
-                "LEFT JOIN group_role_vmFolder ON group_role_vmFolder.id_group = identity_group.id "
-                "LEFT JOIN role ON role.id = group_role_vmFolder.id_role "
-                "LEFT JOIN `vmFolder` ON `vmFolder`.moId = group_role_vmFolder.id_vmFolder "
+                "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                "LEFT JOIN role ON role.id = group_role_object.id_role "
+                "LEFT JOIN `vmFolder` ON `vmFolder`.moId = group_role_object.id_object "
                 "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
                 "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
                 "GROUP BY identity_group.id"
@@ -169,21 +170,21 @@ class IdentityGroup:
             #    "id": 2,
             #    "name": "groupStaff",
             #    "identity_group_identifier": "cn=groupStaff,cn=users,dc=lab,dc=local",
-            #    "roles_vmFolder": "staff::group-v1082::Varie::1",
-            #    "privileges_vmFolder": "asset_get::group-v1082::Varie::1,vmfolder_get::group-v1082::Varie::1, ..."
+            #    "roles_object": "staff::group-v1082::Varie::1",
+            #    "privilege_object": "asset_get::group-v1082::Varie::1,vmfolder_get::group-v1082::Varie::1, ..."
             # },
             # ...
             # ]
 
-            gcR = GroupConcatToDict(["role", "moId", "vmFolder", "assetId"])
-            gcP = GroupConcatToDict(["privilege", "moId", "vmFolder","assetId"])
+            gcR = GroupConcatToDict(["role", "moId", "name", "assetId"])
+            gcP = GroupConcatToDict(["privilege", "moId", "name","assetId"])
             """
                 rStructure data example:
                  [
                     {
                         "role": "staff", 
                         "moId": "group-v1082",
-                        "vmFolder": "Varie"
+                        "name": "Varie"
                         "assetId": "1", 
                     }, 
                     {
@@ -192,7 +193,7 @@ class IdentityGroup:
                 ]
             """
             for el in items:
-                rStructure = gcR.makeDict(el["roles_vmFolder"])
+                rStructure = gcR.makeDict(el["roles_object"])
                 roleStructure = dict()
                 for rs in rStructure:
                     role = rs["role"]
@@ -200,11 +201,11 @@ class IdentityGroup:
                         roleStructure[role] = list()
 
                     roleStructure[role].append(rs)
-                el["roles_vmFolder"] = roleStructure
+                el["roles_object"] = roleStructure
 
 
                 if showPrivileges:
-                    pStructure = gcP.makeDict(el["privileges_vmFolder"])
+                    pStructure = gcP.makeDict(el["privilege_object"])
                     privStructure = dict()
                     for ps in pStructure:
                         priv = ps["privilege"]
@@ -212,10 +213,10 @@ class IdentityGroup:
                             privStructure[priv] = list()
 
                         privStructure[priv].append(ps)
-                    el["privileges_vmFolder"] = privStructure
+                    el["privilege_object"] = privStructure
 
                 else:
-                    del items[j]["privileges_vmFolder"]
+                    del items[j]["privilege_object"]
 
                 j = j+1
 
@@ -241,15 +242,15 @@ class IdentityGroup:
 
         # Build SQL query according to dict fields (only whitelisted fields pass).
         for k, v in data.items():
-            # roles is a dictionary of related roles/vmFolders, which is POSTed together with the main identity group item.
+            # roles_object is a dictionary of related roles/objects, which is POSTed together with the main identity group item.
             if any(exc in k for exc in (
-                    "roles_vmFolder",
+                    "roles_object",
             )):
-                # "roles_vmFolder": {
+                # "roles_object": {
                 #     "staff": [
                 #       {
                 #           "moId": "group-v2476",
-                #           "vmFolder": "riurca",
+                #           "name": "riurca",
                 #           "assetId": 1
                 #       }
                 #     ],
@@ -275,10 +276,10 @@ class IdentityGroup:
                 igId = c.lastrowid
 
                 # Add associated roles (no error on non-existent role).
-                for roleName, vmFolderAssetList in roles.items():
-                    for vmFolderAssetDict in vmFolderAssetList:
+                for roleName, objectsList in roles.items():
+                    for objectDict in objectsList:
                         try:
-                            Permission.add(igId, roleName, vmFolderAssetDict["assetId"], vmFolderAssetDict["moId"], vmFolderAssetDict["vmFolder"])
+                            Permission.add(igId, roleName, objectDict["assetId"], objectDict["moId"], objectDict["name"])
                         except Exception:
                             pass
 
