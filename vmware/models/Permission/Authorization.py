@@ -1,4 +1,8 @@
-from vmware.models.Permission.IdentityGroup import IdentityGroup
+from django.db import connection
+from vmware.helpers.Log import Log
+from vmware.helpers.Exception import CustomException
+from vmware.helpers.Database import Database as DBHelper
+from vmware.helpers.Utils import GroupConcatToDict
 
 
 
@@ -14,100 +18,51 @@ class Authorization:
 
     @staticmethod
     def list(groups: list) -> dict:
-        permissions = list()
-        combinedPermissions = dict()
+        permissions = dict()
+        c = connection.cursor()
 
-        o = IdentityGroup.list(True)
 
-        # Collect every permission related to the group in groups.
-        for identityGroup in groups:
-            for el in o["items"]:
-                if "identity_group_identifier" in el:
-                    if el["identity_group_identifier"].lower() == identityGroup.lower():
-                        permissions.append(el["privileges_vmFolder"])
+        try:
+            if groups:
+                # Build the where condition of the query.
+                # Obtain: WHERE (identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || ....)
+                groupWhere = ''
+                for g in groups:
+                    groupWhere += 'identity_group.identity_group_identifier = %s || '
 
-        #[
-        #    {
-        #        "assets_get": [
-        #            {
-        #                "assetId": "1",
-        #                "vmFolder": "any"
-        #            }
-        #        ],
-        #        ...
-        #    },
-        #    {
-        #        "assets_get": [
-        #            {
-        #                "assetId": "1",
-        #                "vmFolder": "Common"
-        #            }
-        #        ],
-        #        ...
-        #    }
-        #]
+                query = ("SELECT "
+                        "privilege.privilege, "
+                        "IFNULL( "
+                            "GROUP_CONCAT( "
+                                "DISTINCT CONCAT(vmFolder.id_asset,'::',vmFolder.moId,'::',vmFolder.name) "
+                                "ORDER BY vmFolder.moId SEPARATOR ',' "
+                            "), ''"
+                        ") AS privilege_objects "                  
+                        "FROM identity_group "
+                        "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                        "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
+                        "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
+                        "LEFT JOIN vmFolder ON vmFolder.moId = group_role_object.id_object AND vmFolder.id_asset = group_role_object.id_asset "
+                        "WHERE ("+groupWhere[:-4]+") " +
+                        "GROUP BY privilege.privilege "
 
-        # Clean up structure.
-        for el in permissions:
-            for k, v in el.items():
+                )
 
-                # Initialize list if not already done.
-                if not str(k) in combinedPermissions:
-                    combinedPermissions[k] = list()
+                c.execute(query, groups)
+                items = DBHelper.asDict(c)
 
-                for innerEl in v:
-                    if innerEl not in combinedPermissions[k]:
-                        combinedPermissions[k].append(innerEl)
+                aIn = GroupConcatToDict(["assetId", "moId", "objectName"])
 
-        #{
-        #    ...
-        #    "assets_get": [
-        #        {
-        #            "assetId": "1",
-        #            "vmFolder": "any"
-        #        },
-        #        {
-        #            "assetId": "1",
-        #            "vmFolder": "Common"
-        #        },
-        #        {
-        #            "assetId": "2",
-        #            "vmFolder": "Common"
-        #        }
-        #    ],
-        #    ...
-        #}
+                for el in items:
+                    pStructure = aIn.makeDict(el["privilege_objects"])
+                    permissions.update({ el["privilege"]: pStructure })
 
-        # Clean up structure.
-        for k, v in combinedPermissions.items():
-            asset = 0
-            for el in v:
-                if el["vmFolder"] == "any":
-                    asset = el["assetId"] # assetId for vmFolder "any".
+            return {
+                "items": permissions
+            }
 
-            if asset:
-                for j in range(len(v)):
-                    try:
-                        if v[j]["assetId"] == asset and v[j]["vmFolder"] != "any":
-                            del v[j]
-                    except Exception:
-                        pass
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
 
-        #{
-        #    ...
-        #    "assets_get": [
-        #        {
-        #            "assetId": "1",
-        #            "vmFolder": "any"
-        #        },
-        #        {
-        #            "assetId": "2",
-        #            "vmFolder": "Common"
-        #        }
-        #    ],
-        #    ...
-        #}
-
-        return dict({
-            "items": combinedPermissions
-        })

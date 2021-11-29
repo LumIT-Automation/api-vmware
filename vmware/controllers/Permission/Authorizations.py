@@ -34,7 +34,7 @@ class AuthorizationsController(CustomController):
                                 "any": [
                                     {
                                         "assetId": 0,
-                                        "vmFolder": "any"
+                                        "moId": "any"
                                     }
                                 ]
                             }
