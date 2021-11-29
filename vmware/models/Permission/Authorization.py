@@ -54,8 +54,9 @@ class Authorization:
                 aIn = GroupConcatToDict(["assetId", "moId", "objectName"])
 
                 for el in items:
-                    pStructure = aIn.makeDict(el["privilege_objects"])
-                    permissions.update({ el["privilege"]: pStructure })
+                    if el["privilege_objects"]:
+                        pStructure = aIn.makeDict(el["privilege_objects"])
+                        permissions.update({ el["privilege"]: pStructure })
 
             return {
                 "items": permissions

@@ -12,7 +12,7 @@ from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Log import Log
 
 
-class PermissionVMFolderController(CustomController):
+class PermissionVMFoldersController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
