@@ -109,7 +109,8 @@ INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES
 --
 
 INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_asset`, `id_object`) VALUES
-(1, 2, 2, 1, 'group-v2478');
+(1, 1, 1, 1, 'any'),
+(2, 2, 2, 1, 'group-v2478');
 
 
 COMMIT;

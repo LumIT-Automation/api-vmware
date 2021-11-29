@@ -24,32 +24,28 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroupId: int, role: str, assetId: int, name: str) -> None:
+    def modify(self, identityGroupId: int, role: str, assetId: int, moId: str, name: str="") -> None:
         c = connection.cursor()
 
         if self.permissionId:
             try:
+                # RoleId.
+                r = Role(roleName=role)
+                roleId = r.info()["id"]
+
                 if role == "admin":
-                    moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
-                    name = "any"
-
+                    moId = "any"  # if admin: "any" is the only valid choice (on selected assetId).
                 else:
-                    # RoleId.
-                    r = Role(roleName=role)
-                    roleId = r.info()["id"]
+                    # VMFolderPermission id. If vmFolder does not exist, create it.
+                    f = VMFolderPermission(assetId=assetId, moId=moId)
+                    if not f.exists():
+                        VMFolderPermission.add(moId, assetId, name)
 
-                    # VMFolder id. If vmFolder does not exist, create it.
-                    p = VMFolder(assetId=assetId, moId=moId)
-                    if p.exists():
-                        objectId = p.info()["id"]
-                    else:
-                        objectId = p.add(assetId, name)
-
-                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_asset, id_object=%s WHERE id=%s", [
+                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_asset=%s, id_object=%s WHERE id=%s", [
                     identityGroupId, # AD or RADIUS group.
                     roleId,
                     assetId,
-                    objectId,
+                    moId,
                     self.permissionId
                 ])
 
@@ -155,8 +151,9 @@ class Permission:
                     "identity_group.name AS identity_group_name, "
                     "identity_group.identity_group_identifier AS identity_group_identifier, "
                     "role.role AS role, "
-                    "vmFolder.id_asset AS vmFolder_asset, "
-                    "vmFolder.name AS vmFolder_name "
+                    "vmFolder.moId AS object_id, "
+                    "vmFolder.id_asset AS object_asset, "
+                    "vmFolder.name AS object_name "
                                     
                     "FROM identity_group "
                     "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
@@ -166,13 +163,15 @@ class Permission:
             l = DBHelper.asDict(c)
 
             for el in l:
-                el["vmFolder"] = {
-                    "asset_id": el["vmFolder_asset"],
-                    "name": el["vmFolder_name"]
+                el["object"] = {
+                    "asset_id": el["object_asset"],
+                    "moId": el["object_id"],
+                    "name": el["object_name"]
                 }
 
-                del(el["vmFolder_asset"])
-                del(el["vmFolder_name"])
+                del(el["object_asset"])
+                del (el["object_id"])
+                del(el["object_name"])
 
             return {
                 "items": l
@@ -186,7 +185,7 @@ class Permission:
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, assetId: int, moId: str, name: str) -> None:
+    def add(identityGroupId: int, role: str, assetId: int, moId: str, name: str="") -> None:
         c = connection.cursor()
 
         try:
@@ -201,11 +200,6 @@ class Permission:
                 f = VMFolderPermission(assetId=assetId, moId=moId, name=name)
                 if not f.exists():
                     VMFolderPermission.add(moId, assetId, name)
-
-            Log.log(identityGroupId, '_')
-            Log.log(roleId, '_')
-            Log.log(assetId, '_')
-            Log.log(moId, '_')
 
             c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_asset, id_object) VALUES (NULL, %s, %s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.

@@ -76,8 +76,9 @@ class PermissionsController(CustomController):
                     Permission.add(
                         identityGroupId,
                         data["role"],
-                        data["vmFolder"]["id_asset"],
-                        data["vmFolder"]["name"]
+                        data["object"]["id_asset"],
+                        data["object"]["moId"],
+                        data["object"]["name"]
                     )
 
                     httpStatus = status.HTTP_201_CREATED

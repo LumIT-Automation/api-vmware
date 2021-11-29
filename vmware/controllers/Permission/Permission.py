@@ -58,8 +58,9 @@ class PermissionController(CustomController):
                     p.modify(
                         identityGroupId,
                         data["role"],
-                        data["vmFolder"]["id_asset"],
-                        data["vmFolder"]["name"]
+                        data["object"]["id_asset"],
+                        data["object"]["moId"],
+                        data["object"]["name"]
                     )
 
                     httpStatus = status.HTTP_200_OK
