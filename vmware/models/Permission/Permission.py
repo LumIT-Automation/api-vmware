@@ -81,11 +81,11 @@ class Permission:
     ####################################################################################################################
 
     @staticmethod
-    def hasUserPermission(groups: list, action: str, assetId: int = 0, folderMoId: str="") -> bool:
+    def hasUserPermission(groups: list, action: str, assetId: int = 0, objectId: str="") -> bool:
         if action and groups:
             args = groups.copy()
             assetWhere = ""
-            vmFolderWhere = ""
+            objectWhere = ""
             c = connection.cursor()
 
             # Superadmin's group.
@@ -103,33 +103,35 @@ class Permission:
                 # Put all the args of the query in a list.
                 if assetId:
                     args.append(assetId)
-                    assetWhere = "AND vmFolder.id_asset = %s "
+                    assetWhere = "AND group_role_object.id_asset = %s "
 
-                if folderMoId:
-                    f = VMFolder(assetId, folderMoId)
+                if objectId:
+                    f = VMFolder(assetId, objectId)
                     foldersMoIdsList = f.parentList()
-                    vmFolderWhere = "AND (vmFolder.moId = 'any' " # if "any" appears in the query results so far -> pass.
+                    objectWhere = "AND (vmFolder.moId = 'any' " # if "any" appears in the query results so far -> pass.
                     for moId in foldersMoIdsList:
                         args.append(moId)
-                        vmFolderWhere += "OR vmFolder.moId = %s "
-                    vmFolderWhere += ") "
+                        objectWhere += "OR vmFolder.moId = %s "
+                    objectWhere += ") "
 
                 args.append(action)
 
-                c.execute("SELECT COUNT(*) AS count "
-                    "FROM identity_group "
-                    "LEFT JOIN group_role_vmFolder ON group_role_vmFolder.id_group = identity_group.id "
-                    "LEFT JOIN role ON role.id = group_role_vmFolder.id_role "
-                    "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
-                    "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                    "LEFT JOIN vmFolder ON vmFolder.moId = group_role_vmFolder.id_vmFolder "
-
+                query = ("SELECT COUNT(*) AS count "
+                        "FROM identity_group "
+                        "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                        "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
+                        "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
+                        "LEFT JOIN asset ON asset.id = group_role_object.id_asset "
+                        "LEFT JOIN vmFolder ON vmFolder.moId = group_role_object.id_object "
+                       
                     "WHERE ("+groupWhere[:-4]+") " +
                     assetWhere +
-                    vmFolderWhere +
-                    "AND privilege.privilege = %s ",
-                        args
+                    objectWhere +
+                    "AND privilege.privilege = %s "
                 )
+
+                Log.log(query, '_')
+                c.execute(query, args)
                 q = DBHelper.asDict(c)[0]["count"]
                 if q:
                     return bool(q)

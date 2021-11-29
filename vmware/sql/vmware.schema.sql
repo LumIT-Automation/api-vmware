@@ -190,8 +190,7 @@ ALTER TABLE `migrations`
 -- Indici per le tabelle `vmFolder`
 --
 ALTER TABLE `vmFolder`
-  ADD PRIMARY KEY (`moId`),
-  ADD UNIQUE KEY `id_asset` (`id_asset`,`moId`),
+  ADD PRIMARY KEY (`moId`,`id_asset`),
   ADD KEY `name` (`name`),
   ADD KEY `p_asset` (`id_asset`);
 
