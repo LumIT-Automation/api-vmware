@@ -151,17 +151,18 @@ class Permission:
 
         try:
             c.execute("SELECT "
-                      "group_role_vmFolder.id, "
-                      "identity_group.name AS identity_group_name, "
-                      "identity_group.identity_group_identifier AS identity_group_identifier, "
-                      "role.role AS role, "
-                      "`vmFolder`.id_asset AS vmFolder_asset, "
-                      "`vmFolder`.`vmFolder` AS vmFolder_name "
-                "FROM identity_group "
-                "LEFT JOIN group_role_vmFolder ON group_role_vmFolder.id_group = identity_group.id "
-                "LEFT JOIN role ON role.id = group_role_vmFolder.id_role "
-                "LEFT JOIN `vmFolder` ON `vmFolder`.id = group_role_vmFolder.id_vmFolder "
-                "WHERE role.role IS NOT NULL")
+                    "group_role_object.id, "
+                    "identity_group.name AS identity_group_name, "
+                    "identity_group.identity_group_identifier AS identity_group_identifier, "
+                    "role.role AS role, "
+                    "vmFolder.id_asset AS vmFolder_asset, "
+                    "vmFolder.name AS vmFolder_name "
+                                    
+                    "FROM identity_group "
+                    "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                    "LEFT JOIN role ON role.id = group_role_object.id_role "
+                    "LEFT JOIN `vmFolder` ON vmFolder.moId = group_role_object.id_object AND vmFolder.id_asset = group_role_object.id_asset "
+                    "WHERE role.role IS NOT NULL ")
             l = DBHelper.asDict(c)
 
             for el in l:
