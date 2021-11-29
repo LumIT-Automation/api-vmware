@@ -3,7 +3,7 @@ from django.urls import path
 from .controllers import Root
 from .controllers.VMware import VMFolders, VMFolder
 from .controllers.VMware.Asset import Asset, Assets
-from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions
+from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions, VMFolder as PermissionVMFolder
 from .controllers import History
 
 
@@ -15,6 +15,7 @@ urlpatterns = [
     path('roles/', Roles.PermissionRolesController.as_view(), name='permission-roles'),
     path('permissions/', Permissions.PermissionsController.as_view(), name='permissions'),
     path('permission/<int:permissionId>/', Permission.PermissionController.as_view(), name='permission'),
+    path('permissions/vmFolders/', PermissionVMFolder.PermissionVMFolderController.as_view(), name='permissions'),
 
     path('authorizations/', Authorizations.AuthorizationsController.as_view(), name='authorizations'),
 

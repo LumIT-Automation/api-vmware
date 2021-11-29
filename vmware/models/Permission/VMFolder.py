@@ -78,6 +78,23 @@ class VMFolder:
     ####################################################################################################################
 
     @staticmethod
+    def list() -> dict:
+        c = connection.cursor()
+        try:
+            c.execute("SELECT * FROM vmFolder")
+
+            return {
+                "items": DBHelper.asDict(c)
+            }
+
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    @staticmethod
     def add(moId: str, assetId: int, vmFolder: str, description: str="") -> int:
         c = connection.cursor()
 
