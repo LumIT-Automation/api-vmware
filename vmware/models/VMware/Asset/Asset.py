@@ -152,7 +152,7 @@ class Asset:
 
                 # When inserting an asset, add the "any" vmFolder (Permission).
                 from vmware.models.Permission.VMFolder import VMFolder as PermissionVMFolder
-                PermissionVMFolder.add(aId, "any")
+                PermissionVMFolder.add("any", aId, "any", "All the folders of this vCenter")
 
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})

@@ -100,7 +100,7 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 --
 
 INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES
-('any', 1, 'any', 'All folders of this vCenter'),
+('any', 1, 'any', 'All the folders of this vCenter'),
 ('group-v2478', 1, 'rrivarie', '');
 
 

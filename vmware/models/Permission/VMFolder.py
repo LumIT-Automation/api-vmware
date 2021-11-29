@@ -81,23 +81,28 @@ class VMFolder:
     def add(moId: str, assetId: int, vmFolder: str, description: str="") -> int:
         c = connection.cursor()
 
+        # Check if the vmFolder is exists in the vCenter server (skip for "any").
+        if moId == "any":
+            object_id = "any"
+            object_name = "any"
+        else:
+            vCenterVMFolders = vCemterVMFolder.list(assetId)["data"]
+            for v in vCenterVMFolders:
+                if v["moId"] == moId and v["name"] == vmFolder:
+                    object_id = v["moId"]
+                    object_name = v["name"]
 
-        # Check if the vmFolder is exusts in the vCenter server.
-        vCenterVMFolders = vCemterVMFolder.list(assetId)["data"]
+        try:
+            c.execute("INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES (%s, %s, %s, %s)", [
+                object_id,
+                assetId,
+                object_name,
+                description
+            ])
 
-        for v in vCenterVMFolders:
-            if v["moId"] == moId and v["name"] == vmFolder:
-                try:
-                    c.execute("INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES (%s, %s, %s, %s)", [
-                        moId,
-                        assetId,
-                        vmFolder,
-                        description
-                    ])
+            return c.lastrowid
 
-                    return c.lastrowid
-
-                except Exception as e:
-                    raise CustomException(status=400, payload={"database": e.__str__()})
-                finally:
-                    c.close()
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
