@@ -28,20 +28,29 @@ class PermissionsController(CustomController):
                 Log.actionLog("Permissions list", user)
 
                 itemData["data"] = Permission.list()
-                data["data"] = PermissionsSerializer(itemData).data["data"]
-                data["href"] = request.get_full_path()
+                serializer = PermissionsSerializer(data=itemData)
+                if serializer.is_valid():
+                    data["data"] = serializer.validated_data["data"]
+                    data["href"] = request.get_full_path()
 
-                # Check the response's ETag validity (against client request).
-                conditional = Conditional(request)
-                etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
-                if etagCondition["state"] == "fresh":
-                    data = None
-                    httpStatus = status.HTTP_304_NOT_MODIFIED
+                    # Check the response's ETag validity (against client request).
+                    conditional = Conditional(request)
+                    etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                    if etagCondition["state"] == "fresh":
+                        data = None
+                        httpStatus = status.HTTP_304_NOT_MODIFIED
+                    else:
+                        httpStatus = status.HTTP_200_OK
                 else:
-                    httpStatus = status.HTTP_200_OK
-            else:
-                httpStatus = status.HTTP_403_FORBIDDEN
+                    httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                    data = {
+                        "VMware": "Upstream data mismatch."
+                    }
 
+                    Log.log("Upstream data incorrect: "+str(serializer.errors))
+            else:
+                data = None
+                httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)

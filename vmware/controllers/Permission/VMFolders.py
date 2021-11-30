@@ -43,7 +43,7 @@ class PermissionVMFoldersController(CustomController):
                 else:
                     httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
                     data = {
-                        "Fortinet": "Upstream data mismatch."
+                        "VMware": "Upstream data mismatch."
                     }
 
                     Log.log("Upstream data incorrect: "+str(serializer.errors))
