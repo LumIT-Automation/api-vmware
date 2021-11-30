@@ -34,7 +34,6 @@ class VMwareVMFoldersController(CustomController):
 
                     #vmFolder = VMFolder(assetId)
                     itemData = VMFolder.folderTree(assetId)
-                    Log.log(itemData, '_')
 
                     # Filter vmFolders' list basing on permissions.
                     # For any result, check if the user has got at least a pools_get permission on the vmFolder.

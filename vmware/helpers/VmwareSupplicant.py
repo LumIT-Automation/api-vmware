@@ -1,7 +1,6 @@
 from pyVim.connect import SmartConnect, Disconnect
 import ssl
 import atexit
-import socket
 
 from vmware.helpers.Singleton import Singleton
 
@@ -32,20 +31,16 @@ class VmwareSupplicant(metaclass=Singleton):
 
 
 
-
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
 
     def getContent(self):
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-        context.verify_mode = ssl.CERT_NONE
-
         try:
-            Log.actionLog("Try vmware python connection to " + str(self.ipAddr))
-            socket.setdefaulttimeout(60)
-            self.connection = SmartConnect(host=self.ipAddr, user=self.username, pwd=self.password, port=self.port, sslContext=context)
-            atexit.register(Disconnect, self.connection)
+            Log.actionLog("Get vmware contemt.")
+            if not self.connection:
+                self.__connect()
+
             self.content = self.connection.RetrieveContent()
 
         except Exception as e:
@@ -57,6 +52,7 @@ class VmwareSupplicant(metaclass=Singleton):
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
     def getAllObjs(self, vimType: []):
         obj = {}
+        Log.actionLog("Get all vmware objects.")
 
         if self.content:
             try:
@@ -78,3 +74,18 @@ class VmwareSupplicant(metaclass=Singleton):
         except Exception as e:
             raise e
 
+    ####################################################################################################################
+    # Private  methods
+    ####################################################################################################################
+
+    def __connect(self):
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        context.verify_mode = ssl.CERT_NONE
+        Log.actionLog("Try vmware python connection to " + str(self.ipAddr))
+
+        try:
+            self.connection = SmartConnect(host=self.ipAddr, user=self.username, pwd=self.password, port=self.port, connectionPoolTimeout=60, sslContext=context)
+            atexit.register(Disconnect, self.connection)
+
+        except Exception as e:
+            raise e
