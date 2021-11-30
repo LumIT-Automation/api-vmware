@@ -16,7 +16,6 @@ from vmware.helpers.Log import Log
 class VMwareVMFoldersController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
-        # allowedData = {
         data = {
             "data": {
                 "items": []
@@ -32,7 +31,6 @@ class VMwareVMFoldersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    #vmFolder = VMFolder(assetId)
                     itemData = VMFolder.folderTree(assetId)
 
                     # Filter vmFolders' list basing on permissions.
