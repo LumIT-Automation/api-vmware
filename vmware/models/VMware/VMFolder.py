@@ -54,9 +54,9 @@ class VMFolder:
         except Exception as e:
             raise e
 
-        finally:
-            if vClient and hasattr(vClient, 'content'):
-                vClient.disconnect()
+        #finally:
+        #    if vClient and hasattr(vClient, 'content'):
+        #        vClient.disconnect()
 
 
 
@@ -109,9 +109,9 @@ class VMFolder:
         except Exception as e:
             raise e
 
-        finally:
-            if vClient and hasattr(vClient, 'content'):
-                vClient.disconnect()
+        #finally:
+        #    if vClient and hasattr(vClient, 'content'):
+        #        vClient.disconnect()
 
 
 
@@ -145,9 +145,9 @@ class VMFolder:
         except Exception as e:
             raise e
 
-        finally:
-            if vClient and hasattr(vClient, 'content'):
-                vClient.disconnect()
+        #finally:
+        #    if vClient and hasattr(vClient, 'content'):
+        #        vClient.disconnect()
 
 
 

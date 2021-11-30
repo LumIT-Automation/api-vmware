@@ -1,13 +1,15 @@
-
 from pyVim.connect import SmartConnect, Disconnect
 import ssl
 import atexit
+import socket
+
+from vmware.helpers.Singleton import Singleton
 
 from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
 
 
-class VmwareSupplicant:
+class VmwareSupplicant(metaclass=Singleton):
 
     def __init__(self, dataConnection: dict, silent: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,6 +43,7 @@ class VmwareSupplicant:
 
         try:
             Log.actionLog("Try vmware python connection to " + str(self.ipAddr))
+            socket.setdefaulttimeout(60)
             self.connection = SmartConnect(host=self.ipAddr, user=self.username, pwd=self.password, port=self.port, sslContext=context)
             atexit.register(Disconnect, self.connection)
             self.content = self.connection.RetrieveContent()
