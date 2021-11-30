@@ -53,10 +53,11 @@ INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VAL
 (8, 'permission_identityGroup_patch', 'global', NULL),
 (9, 'permission_identityGroup_delete', 'global', NULL),
 (10, 'permission_vmfolders_get', 'global', NULL),
-(11, 'vmFolders_get', 'object', NULL),
-(12, 'folder_get', 'object', NULL),
-(13, 'folders_get', 'object', NULL),
-(14, 'historyComplete_get', 'global', NULL);
+(11, 'permission_vmfolder_delete', 'global', NULL),
+(12, 'vmFolders_get', 'object', NULL),
+(13, 'folder_get', 'object', NULL),
+(14, 'folders_get', 'object', NULL),
+(15, 'historyComplete_get', 'global', NULL);
 
 
 --
@@ -88,13 +89,14 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (1, 12),
 (1, 13),
 (1, 14),
+(1, 15),
 (2, 3),
-(2, 11),
 (2, 12),
 (2, 13),
+(2, 14),
 (3, 3),
-(3, 11),
-(3, 12);
+(3, 12),
+(3, 13);
 
 
 --
