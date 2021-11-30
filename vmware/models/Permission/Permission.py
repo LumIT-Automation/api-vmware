@@ -41,11 +41,11 @@ class Permission:
                     if not f.exists():
                         VMFolderPermission.add(moId, assetId, name)
 
-                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_asset=%s, id_object=%s WHERE id=%s", [
+                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s, id_asset=%s, WHERE id=%s", [
                     identityGroupId, # AD or RADIUS group.
                     roleId,
-                    assetId,
                     moId,
+                    assetId,
                     self.permissionId
                 ])
 
@@ -201,11 +201,11 @@ class Permission:
                 if not f.exists():
                     VMFolderPermission.add(moId, assetId, name)
 
-            c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_asset, id_object) VALUES (NULL, %s, %s, %s, %s)", [
+            c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object, id_asset) VALUES (NULL, %s, %s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.
                 roleId,
+                moId,
                 assetId,
-                moId
             ])
 
         except Exception as e:

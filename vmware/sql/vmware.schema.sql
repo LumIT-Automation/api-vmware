@@ -53,8 +53,8 @@ CREATE TABLE `group_role_object` (
   `id` int(255) NOT NULL,
   `id_group` int(11) NOT NULL,
   `id_role` int(11) NOT NULL,
-  `id_asset` int(11) NOT NULL,
-  `id_object` varchar(64) NOT NULL
+  `id_object` varchar(64) NOT NULL,
+    `id_asset` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

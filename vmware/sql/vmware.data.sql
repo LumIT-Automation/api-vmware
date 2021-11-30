@@ -110,9 +110,9 @@ INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES
 -- Dump dei dati per la tabella `group_role_object`
 --
 
-INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_asset`, `id_object`) VALUES
-(1, 1, 1, 1, 'any'),
-(2, 2, 2, 1, 'group-v2478');
+INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`, `id_asset`) VALUES
+(1, 1, 1, 'any', 1),
+(2, 2, 2, 'group-v2478', 1);
 
 
 COMMIT;
