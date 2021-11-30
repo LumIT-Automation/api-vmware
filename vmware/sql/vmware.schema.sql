@@ -271,8 +271,7 @@ ALTER TABLE `role`
 ALTER TABLE `group_role_object`
   ADD CONSTRAINT `gro_group` FOREIGN KEY (`id_group`) REFERENCES `identity_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `gro_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `gro_asset` FOREIGN KEY (`id_asset`) REFERENCES `asset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `gro_object` FOREIGN KEY (`id_object`) REFERENCES `vmFolder` (`moId`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `gro_assetObject` FOREIGN KEY (`id_object`,`id_asset`) REFERENCES `vmFolder` (`moId`,`id_asset`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `vmFolder`

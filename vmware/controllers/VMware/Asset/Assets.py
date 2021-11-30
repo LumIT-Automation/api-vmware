@@ -23,13 +23,22 @@ class VMwareAssetsController(CustomController):
                 Log.actionLog("Asset list", user)
 
                 itemData = Asset.list()
-                data["data"] = AssetsSerializer(itemData).data["data"]
-                data["href"] = request.get_full_path()
+                serializer = AssetsSerializer(data=itemData)
+                if serializer.is_valid():
+                    data["data"] = serializer.validated_data["data"]
+                    data["href"] = request.get_full_path()
 
-                httpStatus = status.HTTP_200_OK
+                    httpStatus = status.HTTP_200_OK
+                else:
+                    httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                    data = {
+                        "VMware": "Upstream data mismatch."
+                    }
+
+                    Log.log("Upstream data incorrect: "+str(serializer.errors))
             else:
+                data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
@@ -37,7 +46,6 @@ class VMwareAssetsController(CustomController):
         return Response(data, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-
 
 
     @staticmethod
