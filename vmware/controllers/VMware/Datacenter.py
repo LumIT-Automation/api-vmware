@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.VMware.Datacenter import Datacenter
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.Datacenters import VMwareDatacentersSerializer as Serializer
+from vmware.serializers.VMware.Datacenter import VMwareDatacenterSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -19,6 +19,7 @@ class VMwareDatacenterController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
+        itemData = dict()
         user = CustomController.loggedUser(request)
 
         try:
@@ -31,8 +32,11 @@ class VMwareDatacenterController(CustomController):
 
                     dc = Datacenter(assetId, moId)
 
-                    data["data"] = dc.info()
-                    data["href"] = request.get_full_path()
+                    itemData["data"] = dc.info()
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data["data"]
+                        data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK
                     lock.release()
