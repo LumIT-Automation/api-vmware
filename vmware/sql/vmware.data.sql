@@ -58,7 +58,8 @@ INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VAL
 (13, 'folder_get', 'object', NULL),
 (14, 'folders_get', 'object', NULL),
 (15, 'datacenters_get', 'asset', NULL),
-(16, 'historyComplete_get', 'global', NULL);
+(16, 'datacenter_get', 'asset', NULL),
+(17, 'historyComplete_get', 'global', NULL);
 
 
 --
@@ -92,15 +93,17 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (1, 14),
 (1, 15),
 (1, 16),
+(1, 17),
 (2, 3),
 (2, 12),
 (2, 13),
 (2, 14),
 (2, 15),
+(2, 16),
 (3, 3),
 (3, 12),
 (3, 13);
-
+(2, 16),
 
 --
 -- Dump dei dati per la tabella `vmFolder`

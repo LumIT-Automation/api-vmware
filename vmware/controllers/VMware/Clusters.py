@@ -2,10 +2,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.Datacenter import Datacenter
+from vmware.models.VMware.Cluster import Cluster
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.Datacenters import VMwareDatacentersSerializer as Serializer
+#from vmware.serializers.VMware.Datacenters import VMwareDatacentersSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -14,7 +14,7 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareDatacentersController(CustomController):
+class VMwareClustersController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
@@ -23,17 +23,19 @@ class VMwareDatacentersController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="datacenters_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("Datacenters list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="clusters_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("Clusters list", user)
 
-                lock = Lock("datacenters", locals())
+                lock = Lock("clusters", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = Datacenter.listData(assetId)
-                    serializer = Serializer(data=itemData)
-                    if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
+                    data["data"] = Cluster.listData(assetId)
+
+                    #  serializer = Serializer(data=itemData)
+                    if True:
+                    #if serializer.is_valid():
+                    #    data["data"] = serializer.validated_data["data"]
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).

@@ -9,7 +9,7 @@ from vmware.helpers.Log import Log
 
 
 
-class Datacenter(VMwareDjangoObj):
+class Cluster(VMwareDjangoObj):
 
 
 
@@ -17,33 +17,65 @@ class Datacenter(VMwareDjangoObj):
     # Public methods
     ####################################################################################################################
 
-    def listComputeResources(self) -> object:
-        computeResources = []
+    def info(self) -> dict:
+        hosts = datastores = networks = []
+        o = {
+            "hosts": [],
+            "datastores": [],
+            "networks": []
+        }
+
         try:
-            self.__getObject()
-            dcObj = self.vmwareObj
-            for child in dcObj.hostFolder.childEntity:
-                if isinstance(child, vim.ComputeResource):
-                    computeResources.append({child})
-            return computeResources
+            hosts = self.listHosts()
+            datastores = self.listDatastores()
+            networks = self.listNetworks()
+
+            for h in hosts:
+                o["hosts"].append(VMwareObj.vmwareObjToDict(h))
+
+            for d in datastores:
+                o["datastores"].append(VMwareObj.vmwareObjToDict(d))
+
+            for n in networks:
+                o["networks"].append(VMwareObj.vmwareObjToDict(n))
+
+            return o
 
         except Exception as e:
             raise e
 
 
 
-    def info(self) -> dict:
-        clusters = []
+    def listHosts(self) -> list:
+        hosts = list()
         try:
-            computeResources = self.listComputeResources()
-            # each element of computeResources is a set containing a vmware ClusterComputeResource object.
-            for cr in computeResources:
-                for c in cr:
-                    clusters.append(VMwareObj.vmwareObjToDict(c))
+            self.__getObject()
+            hosts = self.vmwareObj.host
+            return hosts
 
-            return dict({
-                "items": clusters
-            })
+        except Exception as e:
+            raise e
+
+
+
+    def listDatastores(self) -> list:
+        ds = list()
+        try:
+            self.__getObject()
+            ds = self.vmwareObj.datastore
+            return ds
+
+        except Exception as e:
+            raise e
+
+
+
+    def listNetworks(self) -> list:
+        n = list()
+        try:
+            self.__getObject()
+            n = self.vmwareObj.network
+            return n
 
         except Exception as e:
             raise e
@@ -57,13 +89,16 @@ class Datacenter(VMwareDjangoObj):
     @staticmethod
     # Plain vCenter datacenters list.
     def list(assetId, silent: bool = None) -> list:
-        dcObjList = list()
+        clustersObjList = list()
 
         try:
             vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
-            dcObjList = vClient.getAllObjs([vim.Datacenter])
+            clList = vClient.getAllObjs([vim.ComputeResource])
 
-            return dcObjList
+            for cl in clList:
+                clustersObjList.append(cl)
+
+            return clustersObjList
 
         except Exception as e:
             raise e
@@ -73,15 +108,14 @@ class Datacenter(VMwareDjangoObj):
     @staticmethod
     # Plain vCenter datacenters list.
     def listData(assetId, silent: bool = None) -> dict:
-        datacenters = []
+        clusters = list()
         try:
-            dcObjList = Datacenter.list(assetId, silent)
-
-            for dc in dcObjList:
-                datacenters.append(VMwareObj.vmwareObjToDict(dc))
+            clustersObjList = Cluster.list(assetId, silent)
+            for cl in clustersObjList:
+                clusters.append(VMwareObj.vmwareObjToDict(cl))
 
             return dict({
-                "items": datacenters
+                "items": clusters
             })
 
         except Exception as e:
@@ -89,13 +123,16 @@ class Datacenter(VMwareDjangoObj):
 
 
 
+
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
 
-    def __getObject(self, silent: bool = None) -> None:
+    def __getObject(self, silent: bool = None) -> object:
+        obj = None
         try:
-            self._getObject(vim.Datacenter, silent)
+            obj = self._getObject(vim.ComputeResource, silent)
+            return obj
 
         except Exception as e:
             raise e

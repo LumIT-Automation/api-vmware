@@ -51,9 +51,9 @@ class VMwareVMFoldersController(CustomController):
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
+
         except Exception as e:
             Lock("vmFolders", locals()).release()
-
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

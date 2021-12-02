@@ -5,13 +5,14 @@ from vmware.helpers.Log import Log
 
 
 
-class VMwareObj:
+class VMwareDjangoObj:
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # The moId is the VMware Managed Object Id. Can be obtained from the "_moId" property of a managed object.
         self.assetId = int(assetId)
         self.moId = moId
+        self.vmwareObj = None
 
 
 
@@ -55,6 +56,18 @@ class VMwareObj:
             raise e
 
 
+#################################### AMBIGUO
+    @staticmethod
+    def vmwareObjToDict(vmwareObj) -> dict:
+        try:
+            return dict({
+                "moId": vmwareObj._moId,
+                "name": vmwareObj.name
+        })
+
+        except Exception as e:
+            raise e
+
 
     ####################################################################################################################
     # Protected methods
@@ -66,9 +79,9 @@ class VMwareObj:
             objList = vClient.getAllObjs([vimType])
             for obj in objList:
                 if obj._moId == self.moId:
-                    return obj
-
-            return None
+                    self.vmwareObj = obj
 
         except Exception as e:
             raise e
+
+

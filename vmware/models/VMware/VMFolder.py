@@ -1,5 +1,5 @@
 from pyVmomi import vim, vmodl
-from vmware.models.VMwareObj import VMwareObj
+from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
 from vmware.models.VMware.Asset.Asset import Asset
 
@@ -8,7 +8,7 @@ from vmware.helpers.Log import Log
 
 
 
-class VMFolder(VMwareObj):
+class VMFolder(VMwareDjangoObj):
 
 
 
@@ -72,7 +72,7 @@ class VMFolder(VMwareObj):
             return dcList
 
         try:
-            vClient = VMwareObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
             rootFolder = vClient.content.rootFolder
             datacenters = datacenterList(rootFolder, datacenters)
 
@@ -107,7 +107,7 @@ class VMFolder(VMwareObj):
         vClient = None
 
         try:
-            vClient = VMwareObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
             allFolders = vClient.getAllObjs([vim.Folder])
 
             for f in allFolders:
