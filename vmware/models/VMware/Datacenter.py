@@ -1,19 +1,34 @@
 from pyVmomi import vim, vmodl
 
 from vmware.models.VMware.Asset.Asset import Asset
+from vmware.models.VMwareObj import VMwareObj
 
 from vmware.helpers.VmwareSupplicant import VmwareSupplicant
 from vmware.helpers.Log import Log
 
 
 
-class Datacenter:
-    def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class Datacenter(VMwareObj):
 
-        # The moId is the VMware Managed Object Id. Can be obtained from the "_moId" property of a managed object.
-        self.assetId = int(assetId)
-        self.moId = moId
+
+
+    ####################################################################################################################
+    # Public methods
+    ####################################################################################################################
+
+    def listComputeResources(self):
+        dc = self.__getObject()
+        clusters = []
+        try:
+            for cl in dc.hostFolder.childEntity:
+                if isinstance(cl, vim.ComputeResource):
+                    clusters.append({cl})
+
+            return clusters
+
+
+        except Exception as e:
+            raise e
 
 
 
@@ -22,21 +37,19 @@ class Datacenter:
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter folders list using pvmomi (a rest api call can be used alse for this onw).
+    # Plain vCenter datacenters list.
     def list(assetId, silent: bool = None) -> dict:
         datacenters = list()
-        vClient = None
 
         try:
-            vmware = Asset(assetId)
-            vmwareInfo = vmware.info()
-            dataConnection = vmwareInfo["dataConnection"]
+            vClient = VMwareObj.connectToAssetStatic(assetId, silent)
 
-            vClient = VmwareSupplicant(dataConnection, silent)
-            vClient.getContent()
-
-            rootFolder = vClient.content.rootFolder
-            datacenters = Datacenter.folderDatacenterList(rootFolder, datacenters)
+            dcList = vClient.getAllObjs([vim.Datacenter])
+            for dc in dcList:
+                datacenters.append({
+                    "moId": dc._moId,
+                    "name": dc.name
+                })
 
             return dict({
                 "items": datacenters
@@ -46,27 +59,17 @@ class Datacenter:
             raise e
 
 
-    @staticmethod
-    # Plain vCenter folders list using pvmomi (a rest api call can be used alse for this onw).
-    def objectlist(assetId, silent: bool = None) -> dict:
-        pass
 
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
 
-
-    @staticmethod
-    def folderDatacenterList(folder: vim.Folder, dcList: []) -> list:
+    def __getObject(self, silent: bool = None) -> object:
+        obj = None
         try:
-            children = folder.childEntity
-            for c in children:
-                if isinstance(c, vim.Datacenter):
-                    dcList.append({
-                        "moId": c._moId,
-                        "name": c.name
-                    })
-                elif isinstance(c, vim.Folder):
-                    Datacenter.folderDatacenterList(c, dcList)
-
-            return dcList
+            obj = self._getObject(vim.Datacenter, silent)
+            return obj
 
         except Exception as e:
             raise e
+

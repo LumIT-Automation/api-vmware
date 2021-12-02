@@ -1,4 +1,5 @@
 from pyVmomi import vim, vmodl
+from vmware.models.VMwareObj import VMwareObj
 
 from vmware.models.VMware.Asset.Asset import Asset
 
@@ -7,13 +8,7 @@ from vmware.helpers.Log import Log
 
 
 
-class VMFolder:
-    def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # The moId is the VMware Managed Object Id. Can be obtained from the "_moId" property of a managed object.
-        self.assetId = int(assetId)
-        self.moId = moId
+class VMFolder(VMwareObj):
 
 
 
@@ -27,13 +22,7 @@ class VMFolder:
         vClient = None
 
         try:
-            vmware = Asset(self.assetId)
-            vmwareInfo = vmware.info()
-            dataConnection = vmwareInfo["dataConnection"]
-
-            vClient = VmwareSupplicant(dataConnection, silent)
-            vClient.getContent()
-
+            vClient = self.connectToAsset(silent)
             allFolders = vClient.getAllObjs([vim.Folder])
 
             moId = self.moId
@@ -83,13 +72,7 @@ class VMFolder:
             return dcList
 
         try:
-            vmware = Asset(assetId)
-            vmwareInfo = vmware.info()
-            dataConnection = vmwareInfo["dataConnection"]
-
-            vClient = VmwareSupplicant(dataConnection, silent)
-            vClient.getContent()
-
+            vClient = VMwareObj.connectToAssetStatic(assetId, silent)
             rootFolder = vClient.content.rootFolder
             datacenters = datacenterList(rootFolder, datacenters)
 
@@ -124,13 +107,7 @@ class VMFolder:
         vClient = None
 
         try:
-            vmware = Asset(assetId)
-            vmwareInfo = vmware.info()
-            dataConnection = vmwareInfo["dataConnection"]
-
-            vClient = VmwareSupplicant(dataConnection, silent)
-            vClient.getContent()
-
+            vClient = VMwareObj.connectToAssetStatic(assetId, silent)
             allFolders = vClient.getAllObjs([vim.Folder])
 
             for f in allFolders:
