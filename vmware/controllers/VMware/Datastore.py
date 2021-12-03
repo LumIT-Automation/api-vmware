@@ -2,10 +2,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.Datacenter import Datacenter
+from vmware.models.VMware.Datastore import Datastore
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.Datacenters import VMwareDatacentersSerializer as Serializer
+from vmware.serializers.VMware.Datastore import VMwareDatastoreSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -14,23 +14,25 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareDatacentersController(CustomController):
+
+class VMwareDatastoreController(CustomController):
     @staticmethod
-    def get(request: Request, assetId: int) -> Response:
+    def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
         itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="datacenters_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("Datacenters list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="datastore_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("Datastore info", user)
 
-                lock = Lock("datacenters", locals())
+                lock = Lock("Datastore", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = Datacenter.list(assetId)
+                    ds = Datastore(assetId, moId)
+                    itemData["data"] = ds.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
@@ -58,7 +60,7 @@ class VMwareDatacentersController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("datacenters", locals()).release()
+            Lock("datastore", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

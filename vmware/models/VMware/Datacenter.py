@@ -22,25 +22,23 @@ class Datacenter(VMwareDjangoObj):
         datastores = []
         networks = []
         try:
-            computeResourcesList = self.listComputeResources()
+            computeResourcesList = self.listComputeResourcesObjects()
             # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
             for cr in computeResourcesList:
                 for c in cr:
                     clusters.append(VMwareObj.vmwareObjToDict(c))
 
-            dsList = self.listDatastores()
+            dsList = self.listDatastoresObjects()
             # each element of dsList is a set containing a vmware Datastore object.
             for ds in dsList:
                 for d in ds:
                     datastores.append(VMwareObj.vmwareObjToDict(d))
 
-            nList = self.listNetworks()
+            nList = self.listNetworksObjects()
             # each element of computeResources is a set containing a vmware Network object.
             for net in nList:
                 for n in net:
                     networks.append(VMwareObj.vmwareObjToDict(n))
-
-            Log.log(datastores, '_')
 
             return dict({
                 "clusters": clusters,
@@ -53,7 +51,7 @@ class Datacenter(VMwareDjangoObj):
 
 
 
-    def listComputeResources(self) -> list:
+    def listComputeResourcesObjects(self) -> list:
         computeResources = []
         try:
             self.__getObject()
@@ -68,7 +66,7 @@ class Datacenter(VMwareDjangoObj):
 
 
 
-    def listDatastores(self) -> list:
+    def listDatastoresObjects(self) -> list:
         datastores = []
         try:
             self.__getObject()
@@ -83,7 +81,7 @@ class Datacenter(VMwareDjangoObj):
 
 
 
-    def listNetworks(self) -> list:
+    def listNetworksObjects(self) -> list:
         networks = []
         try:
             self.__getObject()
@@ -104,14 +102,17 @@ class Datacenter(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def list(assetId, silent: bool = None) -> list:
-        dcObjList = list()
-
+    def list(assetId, silent: bool = None) -> dict:
+        datacenters = []
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
-            dcObjList = vClient.getAllObjs([vim.Datacenter])
+            dcObjList = Datacenter.listDatacentersObjects(assetId, silent)
 
-            return dcObjList
+            for dc in dcObjList:
+                datacenters.append(VMwareObj.vmwareObjToDict(dc))
+
+            return dict({
+                "items": datacenters
+            })
 
         except Exception as e:
             raise e
@@ -120,17 +121,14 @@ class Datacenter(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def listData(assetId, silent: bool = None) -> dict:
-        datacenters = []
+    def listDatacentersObjects(assetId, silent: bool = None) -> list:
+        dcObjList = list()
+
         try:
-            dcObjList = Datacenter.list(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            dcObjList = vClient.getAllObjs([vim.Datacenter])
 
-            for dc in dcObjList:
-                datacenters.append(VMwareObj.vmwareObjToDict(dc))
-
-            return dict({
-                "items": datacenters
-            })
+            return dcObjList
 
         except Exception as e:
             raise e
