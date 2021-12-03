@@ -1,9 +1,7 @@
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMware.Asset.Asset import Asset
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VmwareSupplicant import VmwareSupplicant
 from vmware.helpers.VMwareObj import VMwareObj
 from vmware.helpers.Log import Log
 
@@ -87,7 +85,7 @@ class Cluster(VMwareDjangoObj):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter datacenters list.
+    # Plain vCenter clusters list.
     def list(assetId, silent: bool = None) -> list:
         clustersObjList = list()
 
@@ -106,7 +104,7 @@ class Cluster(VMwareDjangoObj):
 
 
     @staticmethod
-    # Plain vCenter datacenters list.
+    # vCenter cluster pyVmomi objects list.
     def listData(assetId, silent: bool = None) -> dict:
         clusters = list()
         try:

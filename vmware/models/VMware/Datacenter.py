@@ -1,9 +1,7 @@
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMware.Asset.Asset import Asset
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VmwareSupplicant import VmwareSupplicant
 from vmware.helpers.VMwareObj import VMwareObj
 from vmware.helpers.Log import Log
 
@@ -120,7 +118,7 @@ class Datacenter(VMwareDjangoObj):
 
 
     @staticmethod
-    # Plain vCenter datacenters list.
+    # vCenter datacenter pyVmomi objects list.
     def listDatacentersObjects(assetId, silent: bool = None) -> list:
         dcObjList = list()
 

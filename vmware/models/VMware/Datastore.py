@@ -1,9 +1,7 @@
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMware.Asset.Asset import Asset
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VmwareSupplicant import VmwareSupplicant
 from vmware.helpers.VMwareObj import VMwareObj
 from vmware.helpers.Log import Log
 
@@ -97,15 +95,18 @@ class Datastore(VMwareDjangoObj):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter datacenters list.
-    def list(assetId, silent: bool = None) -> list:
-        dcObjList = list()
-
+    # Plain vCenter datastores list.
+    def list(assetId, silent: bool = None) -> dict:
+        datastores = []
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
-            dcObjList = vClient.getAllObjs([vim.Datacenter])
+            dsObjList = Datastore.listDatastoresObjects(assetId, silent)
 
-            return dcObjList
+            for ds in dsObjList:
+                datastores.append(VMwareObj.vmwareObjToDict(ds))
+
+            return dict({
+                "items": datastores
+            })
 
         except Exception as e:
             raise e
@@ -113,18 +114,15 @@ class Datastore(VMwareDjangoObj):
 
 
     @staticmethod
-    # Plain vCenter datacenters list.
-    def listData(assetId, silent: bool = None) -> dict:
-        datacenters = []
+    # vCenter datastores pyVmomi objects list.
+    def listDatastoresObjects(assetId, silent: bool = None) -> list:
+        dsObjList = list()
+
         try:
-            dcObjList = Datacenter.list(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            dsObjList = vClient.getAllObjs([vim.Datastore])
 
-            for dc in dcObjList:
-                datacenters.append(VMwareObj.vmwareObjToDict(dc))
-
-            return dict({
-                "items": datacenters
-            })
+            return dsObjList
 
         except Exception as e:
             raise e
