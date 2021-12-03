@@ -27,7 +27,7 @@ class VMwareDatastoreController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="datastore_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Datastore info", user)
 
-                lock = Lock("Datastore", locals(), moId)
+                lock = Lock("datastore", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 

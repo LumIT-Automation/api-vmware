@@ -16,18 +16,26 @@ class Network(VMwareDjangoObj):
     ####################################################################################################################
 
     def info(self) -> dict:
-        attachedHosts = []
-        datastoreInfo = []
+        configuredHosts = []
+        networkInfo = None
         try:
-            attachedHostsObjs = self.listAttachedHostsObjects()
-            for h in attachedHostsObjs:
-                attachedHosts.append(VMwareObj.vmwareObjToDict(h))
+            networkInfo = self.getNetworkInfo()
 
-            datastoreInfo = self.getDatastoreInfo()
+            configuredHostsObjs = self.listConfiguredHostsObjects()
+            for h in configuredHostsObjs:
+                hostData = VMwareObj.vmwareObjToDict(h)
+                pgInfo = self.getHostPortGroupsObjects(h)
+                for pg in pgInfo:
+                    if pg.spec.name == networkInfo["name"]:
+                        hostData["vlanId"] = pg.spec.vlanId
+
+                configuredHosts.append(hostData)
+
+            networkInfo = self.getNetworkInfo()
 
             return dict({
-                "attachedHosts": attachedHosts,
-                "datastoreInfo": datastoreInfo
+                "configuredHosts": configuredHosts,
+                "networkInfo": networkInfo
             })
 
         except Exception as e:
@@ -35,25 +43,12 @@ class Network(VMwareDjangoObj):
 
 
 
-    def getDatastoreInfo(self) -> dict:
+    def getNetworkInfo(self) -> dict:
         info = dict()
         try:
-            dsInfo = self.getDatastoreInfoObject()
-            info["name"] = dsInfo.name
-            info["url"] = dsInfo.url
-            info["freeSpace"] = dsInfo.freeSpace
-            info["maxFileSize"] = dsInfo.maxFileSize
-            info["maxVirtualDiskCapacity"] = dsInfo.maxVirtualDiskCapacity
-
-            if hasattr(dsInfo, 'nas'):
-                info["type"] = dsInfo.nas.type
-                info["capacity"] = dsInfo.nas.capacity
-            elif hasattr(dsInfo, 'vmfs'):
-                info["type"] = dsInfo.vmfs.type
-                info["capacity"] = dsInfo.vmfs.capacity
-                info["ssd"] = dsInfo.vmfs.ssd
-                info["majorVersion"] = dsInfo.vmfs.majorVersion
-                info["local"] = dsInfo.vmfs.local
+            netInfo = self.getNetworkInfoObject()
+            info["name"] = netInfo.name
+            info["accessible"] = netInfo.accessible
 
             return info
 
@@ -62,30 +57,36 @@ class Network(VMwareDjangoObj):
 
 
 
-    def getDatastoreInfoObject(self) -> object:
-        dsInfo = None
+    def getNetworkInfoObject(self) -> object:
+        netInfo = None
         try:
             self.__getObject()
-            dsObj = self.vmwareObj
-            dsInfo = dsObj.info
-            return dsInfo
+            netObj = self.vmwareObj
+            netInfo = netObj.summary
+            return netInfo
 
         except Exception as e:
             raise e
 
 
 
-    def listAttachedHostsObjects(self) -> list:
+    def listConfiguredHostsObjects(self) -> list:
         hosts = []
         try:
             self.__getObject()
-            dsObj = self.vmwareObj
-            hostMounts = dsObj.host
-            for h in hostMounts:
-                if h.mountInfo.mounted is True and h.mountInfo.accessible is True and h.mountInfo.accessMode == "readWrite":
-                    hosts.append(h.key)
-
+            netObj = self.vmwareObj
+            hosts = netObj.host
             return hosts
+
+        except Exception as e:
+            raise e
+
+
+    # TODO: move to a new Hostsystem class.
+    def getHostPortGroupsObjects(self, hostRef) -> list:
+        try:
+            pgInfo = hostRef.config.network.portgroup
+            return pgInfo
 
         except Exception as e:
             raise e

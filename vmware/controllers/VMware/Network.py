@@ -2,10 +2,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.Datacenter import Datacenter
+from vmware.models.VMware.Network import Network
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.Datacenter import VMwareDatacenterSerializer as Serializer
+from vmware.serializers.VMware.Network import VMwareDatastoreSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -15,7 +15,7 @@ from vmware.helpers.Log import Log
 
 
 
-class VMwareDatacenterController(CustomController):
+class VMwareNetworkController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
@@ -24,15 +24,15 @@ class VMwareDatacenterController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="datacenter_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("Datacenter clusters", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="network_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("Network info", user)
 
-                lock = Lock("datacenter", locals(), moId)
+                lock = Lock("network", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    dc = Datacenter(assetId, moId)
-                    itemData["data"] = dc.info()
+                    ds = Network(assetId, moId)
+                    itemData["data"] = ds.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
@@ -60,7 +60,7 @@ class VMwareDatacenterController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("datacenter", locals(), locals()["moId"]).release()
+            Lock("network", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

@@ -4,7 +4,7 @@ from .controllers import Root
 from .controllers.VMware import Datacenters, Datacenter
 from .controllers.VMware import Clusters, Cluster
 from .controllers.VMware import Datastores, Datastore
-from .controllers.VMware import Networks
+from .controllers.VMware import Networks,Network
 from .controllers.VMware import VMFolders, VMFolder
 from .controllers.VMware.Asset import Asset, Assets
 from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions, VMFolders as PermissionVMFolders, VMFolder as PermissionVMFolder
@@ -42,7 +42,7 @@ urlpatterns = [
 
     # Datastore.
     path('<int:assetId>/networks/', Networks.VMwareNetworksController.as_view(), name='vmware-networks'),
-    # path('<int:assetId>/network/<str:moId>/', Datastore.VMwareNetworkController.as_view(), name='vmware-network'),
+    path('<int:assetId>/network/<str:moId>/', Network.VMwareNetworkController.as_view(), name='vmware-network'),
 
     # VMFolder.
     path('<int:assetId>/vmFolders/', VMFolders.VMwareVMFoldersController.as_view(), name='vmware-vmFolders'),
