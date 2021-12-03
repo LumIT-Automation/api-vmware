@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.VMware.Cluster import Cluster
 from vmware.models.Permission.Permission import Permission
 
-#from vmware.serializers.VMware.Datacenters import VMwareDatacentersSerializer as Serializer
+from vmware.serializers.VMware.Clusters import VMwareClustersSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -30,12 +30,10 @@ class VMwareClustersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    data["data"] = Cluster.listData(assetId)
-
-                    #  serializer = Serializer(data=itemData)
-                    if True:
-                    #if serializer.is_valid():
-                    #    data["data"] = serializer.validated_data["data"]
+                    itemData["data"] = Cluster.listData(assetId)
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data["data"]
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -52,12 +50,15 @@ class VMwareClustersController(CustomController):
                             "VMware": "Upstream data mismatch."
                         }
                         Log.log("Upstream data incorrect: "+str(serializer.errors))
+                    lock.release()
+                else:
+                    data = None
+                    httpStatus = status.HTTP_423_LOCKED
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
-            Lock("datacenters", locals()).release()
+            Lock("clusters", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

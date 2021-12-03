@@ -17,7 +17,43 @@ class Datacenter(VMwareDjangoObj):
     # Public methods
     ####################################################################################################################
 
-    def listComputeResources(self) -> object:
+    def info(self) -> dict:
+        clusters = []
+        datastores = []
+        networks = []
+        try:
+            computeResourcesList = self.listComputeResources()
+            # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
+            for cr in computeResourcesList:
+                for c in cr:
+                    clusters.append(VMwareObj.vmwareObjToDict(c))
+
+            dsList = self.listDatastores()
+            # each element of dsList is a set containing a vmware Datastore object.
+            for ds in dsList:
+                for d in ds:
+                    datastores.append(VMwareObj.vmwareObjToDict(d))
+
+            nList = self.listNetworks()
+            # each element of computeResources is a set containing a vmware Network object.
+            for net in nList:
+                for n in net:
+                    networks.append(VMwareObj.vmwareObjToDict(n))
+
+            Log.log(datastores, '_')
+
+            return dict({
+                "clusters": clusters,
+                "datastores": datastores,
+                "networks": networks
+            })
+
+        except Exception as e:
+            raise e
+
+
+
+    def listComputeResources(self) -> list:
         computeResources = []
         try:
             self.__getObject()
@@ -32,18 +68,30 @@ class Datacenter(VMwareDjangoObj):
 
 
 
-    def info(self) -> dict:
-        clusters = []
+    def listDatastores(self) -> list:
+        datastores = []
         try:
-            computeResources = self.listComputeResources()
-            # each element of computeResources is a set containing a vmware ClusterComputeResource object.
-            for cr in computeResources:
-                for c in cr:
-                    clusters.append(VMwareObj.vmwareObjToDict(c))
+            self.__getObject()
+            dcObj = self.vmwareObj
+            for child in dcObj.datastoreFolder.childEntity:
+                if isinstance(child, vim.Datastore):
+                    datastores.append({child})
+            return datastores
 
-            return dict({
-                "items": clusters
-            })
+        except Exception as e:
+            raise e
+
+
+
+    def listNetworks(self) -> list:
+        networks = []
+        try:
+            self.__getObject()
+            dcObj = self.vmwareObj
+            for child in dcObj.networkFolder.childEntity:
+                if isinstance(child, vim.Network):
+                    networks.append({child})
+            return networks
 
         except Exception as e:
             raise e

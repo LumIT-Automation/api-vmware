@@ -21,6 +21,7 @@ class VMwareDatacenterController(CustomController):
         data = dict()
         itemData = dict()
         user = CustomController.loggedUser(request)
+        etagCondition = {"responseEtag": ""}
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="datacenter_get", assetId=assetId) or user["authDisabled"]:
@@ -31,29 +32,39 @@ class VMwareDatacenterController(CustomController):
                     lock.lock()
 
                     dc = Datacenter(assetId, moId)
-
                     itemData["data"] = dc.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
                         data["href"] = request.get_full_path()
 
-                    httpStatus = status.HTTP_200_OK
+                        # Check the response's ETag validity (against client request).
+                        conditional = Conditional(request)
+                        etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                        if etagCondition["state"] == "fresh":
+                            data = None
+                            httpStatus = status.HTTP_304_NOT_MODIFIED
+                        else:
+                            httpStatus = status.HTTP_200_OK
+                    else:
+                        httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                        data = {
+                            "VMware": "Upstream data mismatch."
+                        }
+                        Log.log("Upstream data incorrect: "+str(serializer.errors))
                     lock.release()
-
                 else:
                     data = None
                     httpStatus = status.HTTP_423_LOCKED
-
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
             Lock("datacenter", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
         return Response(data, status=httpStatus, headers={
-            "Cache-Control": "no-cache"
+            "ETag": etagCondition["responseEtag"],
+            "Cache-Control": "must-revalidate"
         })

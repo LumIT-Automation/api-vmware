@@ -50,10 +50,13 @@ class VMwareDatacentersController(CustomController):
                             "VMware": "Upstream data mismatch."
                         }
                         Log.log("Upstream data incorrect: "+str(serializer.errors))
+                    lock.release()
+                else:
+                    data = None
+                    httpStatus = status.HTTP_423_LOCKED
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
             Lock("datacenters", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
