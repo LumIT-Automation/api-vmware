@@ -5,23 +5,23 @@ from rest_framework import status
 from vmware.models.VMware.VMFolder import VMFolder
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.VMFolders import VMwareVMFoldersSerializer as Serializer
+from vmware.serializers.VMware.VMFolder import VMwareVMFolderSerializer as InfoSerializer, VMwareVMFolderParentListSerializer as ParentSerializer
 
 from vmware.controllers.CustomController import CustomController
+from vmware.helpers.Conditional import Conditional
 
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
+
 class VMwareVMFolderController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
-        data = {
-            "data": {
-                "parentList": []
-            }
-        }
+        data = dict()
+        itemData = dict()
         user = CustomController.loggedUser(request)
+        etagCondition = {"responseEtag": ""}
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="folder_get", assetId=assetId, objectId=moId) or user["authDisabled"]:
@@ -33,16 +33,30 @@ class VMwareVMFolderController(CustomController):
 
                     vmFolder = VMFolder(assetId, moId)
 
-                    data["data"]["parentList"] = vmFolder.parentList()
-                    data["href"] = request.get_full_path()
+                    itemData["data"] = vmFolder.info()
+                    serializer = InfoSerializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data["data"]
+                        data["href"] = request.get_full_path()
 
-                    httpStatus = status.HTTP_200_OK
+                        # Check the response's ETag validity (against client request).
+                        conditional = Conditional(request)
+                        etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                        if etagCondition["state"] == "fresh":
+                            data = None
+                            httpStatus = status.HTTP_304_NOT_MODIFIED
+                        else:
+                            httpStatus = status.HTTP_200_OK
+                    else:
+                        httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                        data = {
+                            "VMware": "Upstream data mismatch."
+                        }
+                        Log.log("Upstream data incorrect: "+str(serializer.errors))
                     lock.release()
-
                 else:
                     data = None
                     httpStatus = status.HTTP_423_LOCKED
-
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
@@ -53,5 +67,68 @@ class VMwareVMFolderController(CustomController):
             return Response(data, status=httpStatus, headers=headers)
 
         return Response(data, status=httpStatus, headers={
-            "Cache-Control": "no-cache"
+            "ETag": etagCondition["responseEtag"],
+            "Cache-Control": "must-revalidate"
         })
+
+
+
+class VMwareVMFolderParentListController(CustomController):
+    @staticmethod
+    def get(request: Request, assetId: int, moId: str) -> Response:
+        data = {
+            "data": ""
+        }
+        itemData = dict()
+        user = CustomController.loggedUser(request)
+        etagCondition = {"responseEtag": ""}
+
+        try:
+            if Permission.hasUserPermission(groups=user["groups"], action="folder_get", assetId=assetId, objectId=moId) or user["authDisabled"]:
+                Log.actionLog("VMFolder properties", user)
+
+                lock = Lock("vmFolder", locals(), moId)
+                if lock.isUnlocked():
+                    lock.lock()
+
+                    vmFolder = VMFolder(assetId, moId)
+
+                    itemData["data"] = vmFolder.parentList()
+                    Log.log(itemData, '_')
+                    serializer = ParentSerializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data["data"]
+                        data["href"] = request.get_full_path()
+
+                        # Check the response's ETag validity (against client request).
+                        conditional = Conditional(request)
+                        etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                        if etagCondition["state"] == "fresh":
+                            data = None
+                            httpStatus = status.HTTP_304_NOT_MODIFIED
+                        else:
+                            httpStatus = status.HTTP_200_OK
+                    else:
+                        httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                        data = {
+                            "VMware": "Upstream data mismatch."
+                        }
+                        Log.log("Upstream data incorrect: " + str(serializer.errors))
+                    lock.release()
+                else:
+                    data = None
+                    httpStatus = status.HTTP_423_LOCKED
+            else:
+                data = None
+                httpStatus = status.HTTP_403_FORBIDDEN
+
+        except Exception as e:
+            Lock("vmFolder", locals(), locals()["moId"]).release()
+            data, httpStatus, headers = CustomController.exceptionHandler(e)
+            return Response(data, status=httpStatus, headers=headers)
+
+        return Response(data, status=httpStatus, headers={
+            "ETag": etagCondition["responseEtag"],
+            "Cache-Control": "must-revalidate"
+        })
+

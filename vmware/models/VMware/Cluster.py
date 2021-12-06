@@ -24,9 +24,9 @@ class Cluster(VMwareDjangoObj):
         }
 
         try:
-            hosts = self.listHosts()
-            datastores = self.listDatastores()
-            networks = self.listNetworks()
+            hosts = self.listHostsObjects()
+            datastores = self.listDatastoresObjects()
+            networks = self.listNetworksObjects()
 
             for h in hosts:
                 o["hosts"].append(VMwareObj.vmwareObjToDict(h))
@@ -44,7 +44,7 @@ class Cluster(VMwareDjangoObj):
 
 
 
-    def listHosts(self) -> list:
+    def listHostsObjects(self) -> list:
         try:
             self.__getVMwareObject()
             return self.vmwareObj.host
@@ -54,7 +54,7 @@ class Cluster(VMwareDjangoObj):
 
 
 
-    def listDatastores(self) -> list:
+    def listDatastoresObjects(self) -> list:
         try:
             self.__getVMwareObject()
             return self.vmwareObj.datastore
@@ -64,7 +64,7 @@ class Cluster(VMwareDjangoObj):
 
 
 
-    def listNetworks(self) -> list:
+    def listNetworksObjects(self) -> list:
         try:
             self.__getVMwareObject()
             return self.vmwareObj.network

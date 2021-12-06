@@ -76,6 +76,7 @@ class Network(VMwareDjangoObj):
             raise e
 
 
+
     # TODO: move to Hostsystem class.
     def getHostPortGroupsObjects(self, hostRef) -> list:
         try:

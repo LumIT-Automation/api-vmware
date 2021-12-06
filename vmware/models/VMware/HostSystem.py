@@ -23,8 +23,8 @@ class HostSystem(VMwareDjangoObj):
         }
 
         try:
-            datastores = self.listDatastores()
-            networks = self.listNetworks()
+            datastores = self.listDatastoresObjects()
+            networks = self.listNetworksObjects()
 
             for d in datastores:
                 o["datastores"].append(VMwareObj.vmwareObjToDict(d))
@@ -44,7 +44,7 @@ class HostSystem(VMwareDjangoObj):
 
 
 
-    def listDatastores(self) -> list:
+    def listDatastoresObjects(self) -> list:
         try:
             self.__getVMwareObject()
             return self.vmwareObj.datastore
@@ -54,7 +54,7 @@ class HostSystem(VMwareDjangoObj):
 
 
 
-    def listNetworks(self) -> list:
+    def listNetworksObjects(self) -> list:
         try:
             self.__getVMwareObject()
             return self.vmwareObj.network

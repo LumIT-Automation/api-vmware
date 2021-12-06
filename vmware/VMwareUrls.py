@@ -52,6 +52,8 @@ urlpatterns = [
     # VMFolder.
     path('<int:assetId>/vmFolders/', VMFolders.VMwareVMFoldersController.as_view(), name='vmware-vmFolders'),
     path('<int:assetId>/vmFolder/<str:moId>/', VMFolder.VMwareVMFolderController.as_view(), name='vmware-vmFolder'),
+    path('<int:assetId>/vmFolder/<str:moId>/parentList/', VMFolder.VMwareVMFolderParentListController.as_view(), name='vmware-vmFolder'),
+
 
     # Log history.
     path('history/', History.HistoryLogsController.as_view(), name='vmware-log-history'),

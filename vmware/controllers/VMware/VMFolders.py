@@ -13,14 +13,14 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
+
 class VMwareVMFoldersController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
-        data = {
-            "data": {
-                "items": []
-            }
-        }
+        data = dict()
+        itemData = dict()
+        formatTree = False
+        etagCondition = {"responseEtag": ""}
         user = CustomController.loggedUser(request)
 
         try:
@@ -31,7 +31,13 @@ class VMwareVMFoldersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData = VMFolder.folderTree(assetId)
+                    # If asked for, get related privileges.
+                    if "related" in request.GET:
+                        rList = request.GET.getlist('related')
+                        if "tree" in rList:
+                            formatTree = True
+
+                    itemData = VMFolder.list(assetId, formatTree)
 
                     # Filter vmFolders' list basing on permissions.
                     # For any result, check if the user has got at least a pools_get permission on the vmFolder.
@@ -40,7 +46,7 @@ class VMwareVMFoldersController(CustomController):
                     #        allowedData["data"]["items"].append(p)
 
                     #data["data"] = Serializer(allowedData).data["data"]
-                    data["data"]["items"] = itemData
+                    data["data"] = itemData
                     data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK
