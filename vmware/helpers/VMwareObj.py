@@ -28,3 +28,15 @@ class VMwareObj:
         except Exception as e:
             raise e
 
+
+
+    @staticmethod
+    def getDjangoObjFromVMware(vmwareObj, assetId, DjangoCLass) -> dict:
+        try:
+            newObj = DjangoCLass(assetId, vmwareObj._moId)
+            newObj.vmwareObj = vmwareObj
+            return newObj
+
+        except Exception as e:
+            raise e
+

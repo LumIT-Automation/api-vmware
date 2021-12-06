@@ -2,10 +2,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.Cluster import Cluster
+from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.Clusters import VMwareClustersSerializer as Serializer
+from vmware.serializers.VMware.HostSystem import VMwareHostSystemSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -14,26 +14,30 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareClustersController(CustomController):
+
+class VMwareHostSystemController(CustomController):
     @staticmethod
-    def get(request: Request, assetId: int) -> Response:
+    def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
         itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="clusters_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("Clusters list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="hostsystem_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("Get hostsystem info", user)
 
-                lock = Lock("clusters", locals())
+                lock = Lock("hostsystem", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = Cluster.list(assetId)
+                    h = HostSystem(assetId, moId)
+                    itemData["data"] = h.info()
+                    Log.log(itemData, '_')
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
+                        data = itemData
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -58,7 +62,7 @@ class VMwareClustersController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("clusters", locals()).release()
+            Lock("cluster", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

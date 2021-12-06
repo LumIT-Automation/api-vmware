@@ -73,15 +73,18 @@ class VMwareDjangoObj:
     # Protected methods
     ####################################################################################################################
 
-    def _getObject(self, vimType: str, silent: bool = True) -> object:
-        try:
-            vClient = self.connectToAsset(silent)
-            objList = vClient.getAllObjs([vimType])
-            for obj in objList:
-                if obj._moId == self.moId:
-                    self.vmwareObj = obj
+    def _getVMwareObject(self, vimType: str, refresh: bool = False, silent: bool = True) -> object:
+        if not self.vmwareObj or refresh:
+            try:
+                vClient = self.connectToAsset(silent)
+                objList = vClient.getAllObjs([vimType])
+                for obj in objList:
+                    if obj._moId == self.moId:
+                        self.vmwareObj = obj
 
-        except Exception as e:
-            raise e
+            except Exception as e:
+                raise e
+        else:
+            pass
 
 

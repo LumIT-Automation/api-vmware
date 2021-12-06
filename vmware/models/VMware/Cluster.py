@@ -45,11 +45,9 @@ class Cluster(VMwareDjangoObj):
 
 
     def listHosts(self) -> list:
-        hosts = list()
         try:
-            self.__getObject()
-            hosts = self.vmwareObj.host
-            return hosts
+            self.__getVMwareObject()
+            return self.vmwareObj.host
 
         except Exception as e:
             raise e
@@ -57,11 +55,9 @@ class Cluster(VMwareDjangoObj):
 
 
     def listDatastores(self) -> list:
-        ds = list()
         try:
-            self.__getObject()
-            ds = self.vmwareObj.datastore
-            return ds
+            self.__getVMwareObject()
+            return self.vmwareObj.datastore
 
         except Exception as e:
             raise e
@@ -69,11 +65,9 @@ class Cluster(VMwareDjangoObj):
 
 
     def listNetworks(self) -> list:
-        n = list()
         try:
-            self.__getObject()
-            n = self.vmwareObj.network
-            return n
+            self.__getVMwareObject()
+            return self.vmwareObj.network
 
         except Exception as e:
             raise e
@@ -86,7 +80,25 @@ class Cluster(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter clusters list.
-    def list(assetId, silent: bool = None) -> list:
+    def list(assetId, silent: bool = None) -> dict:
+        clusters = list()
+        try:
+            clustersObjList = Cluster.listClustersObjects(assetId, silent)
+            for cl in clustersObjList:
+                clusters.append(VMwareObj.vmwareObjToDict(cl))
+
+            return dict({
+                "items": clusters
+            })
+
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    # vCenter cluster pyVmomi objects list.
+    def listClustersObjects(assetId, silent: bool = None) -> list:
         clustersObjList = list()
 
         try:
@@ -103,34 +115,14 @@ class Cluster(VMwareDjangoObj):
 
 
 
-    @staticmethod
-    # vCenter cluster pyVmomi objects list.
-    def listData(assetId, silent: bool = None) -> dict:
-        clusters = list()
-        try:
-            clustersObjList = Cluster.list(assetId, silent)
-            for cl in clustersObjList:
-                clusters.append(VMwareObj.vmwareObjToDict(cl))
-
-            return dict({
-                "items": clusters
-            })
-
-        except Exception as e:
-            raise e
-
-
-
-
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
 
-    def __getObject(self, silent: bool = None) -> object:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> object:
         obj = None
         try:
-            obj = self._getObject(vim.ComputeResource, silent)
-            return obj
+            self._getVMwareObject(vim.ComputeResource, refresh, silent)
 
         except Exception as e:
             raise e

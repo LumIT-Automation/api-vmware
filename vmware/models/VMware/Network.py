@@ -58,12 +58,9 @@ class Network(VMwareDjangoObj):
 
 
     def getNetworkInfoObject(self) -> object:
-        netInfo = None
         try:
-            self.__getObject()
-            netObj = self.vmwareObj
-            netInfo = netObj.summary
-            return netInfo
+            self.__getVMwareObject()
+            return self.vmwareObj.summary
 
         except Exception as e:
             raise e
@@ -71,18 +68,15 @@ class Network(VMwareDjangoObj):
 
 
     def listConfiguredHostsObjects(self) -> list:
-        hosts = []
         try:
-            self.__getObject()
-            netObj = self.vmwareObj
-            hosts = netObj.host
-            return hosts
+            self.__getVMwareObject()
+            return self.vmwareObj.host
 
         except Exception as e:
             raise e
 
 
-    # TODO: move to a new Hostsystem class.
+    # TODO: move to Hostsystem class.
     def getHostPortGroupsObjects(self, hostRef) -> list:
         try:
             pgInfo = hostRef.config.network.portgroup
@@ -133,9 +127,9 @@ class Network(VMwareDjangoObj):
     # Private methods
     ####################################################################################################################
 
-    def __getObject(self, silent: bool = None) -> None:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
         try:
-            self._getObject(vim.Network, silent)
+            self._getVMwareObject(vim.Network, refresh, silent)
 
         except Exception as e:
             raise e

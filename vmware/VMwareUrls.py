@@ -3,6 +3,7 @@ from django.urls import path
 from .controllers import Root
 from .controllers.VMware import Datacenters, Datacenter
 from .controllers.VMware import Clusters, Cluster
+from .controllers.VMware import HostSystems, HostSystem
 from .controllers.VMware import Datastores, Datastore
 from .controllers.VMware import Networks,Network
 from .controllers.VMware import VMFolders, VMFolder
@@ -35,6 +36,10 @@ urlpatterns = [
     # Cluster.
     path('<int:assetId>/clusters/', Clusters.VMwareClustersController.as_view(), name='vmware-clusters'),
     path('<int:assetId>/cluster/<str:moId>/', Cluster.VMwareClusterController.as_view(), name='vmware-cluster'),
+
+    # HostSystems.
+    path('<int:assetId>/hostsystems/', HostSystems.VMwareHostSystemsController.as_view(), name='vmware-clusters'),
+    path('<int:assetId>/hostsystem/<str:moId>/', HostSystem.VMwareHostSystemController.as_view(), name='vmware-clusters'),
 
     # Datastore.
     path('<int:assetId>/datastores/', Datastores.VMwareDatastoresController.as_view(), name='vmware-datastores'),

@@ -52,9 +52,8 @@ class Datacenter(VMwareDjangoObj):
     def listComputeResourcesObjects(self) -> list:
         computeResources = []
         try:
-            self.__getObject()
-            dcObj = self.vmwareObj
-            for child in dcObj.hostFolder.childEntity:
+            self.__getVMwareObject()
+            for child in self.vmwareObj.hostFolder.childEntity:
                 if isinstance(child, vim.ComputeResource):
                     computeResources.append({child})
             return computeResources
@@ -67,9 +66,8 @@ class Datacenter(VMwareDjangoObj):
     def listDatastoresObjects(self) -> list:
         datastores = []
         try:
-            self.__getObject()
-            dcObj = self.vmwareObj
-            for child in dcObj.datastoreFolder.childEntity:
+            self.__getVMwareObject()
+            for child in  self.vmwareObj.datastoreFolder.childEntity:
                 if isinstance(child, vim.Datastore):
                     datastores.append({child})
             return datastores
@@ -82,9 +80,8 @@ class Datacenter(VMwareDjangoObj):
     def listNetworksObjects(self) -> list:
         networks = []
         try:
-            self.__getObject()
-            dcObj = self.vmwareObj
-            for child in dcObj.networkFolder.childEntity:
+            self.__getVMwareObject()
+            for child in self.vmwareObj.networkFolder.childEntity:
                 if isinstance(child, vim.Network):
                     networks.append({child})
             return networks
@@ -137,9 +134,9 @@ class Datacenter(VMwareDjangoObj):
     # Private methods
     ####################################################################################################################
 
-    def __getObject(self, silent: bool = None) -> None:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
         try:
-            self._getObject(vim.Datacenter, silent)
+            self._getVMwareObject(vim.Datacenter, refresh, silent)
 
         except Exception as e:
             raise e

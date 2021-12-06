@@ -2,10 +2,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.Cluster import Cluster
+from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.Clusters import VMwareClustersSerializer as Serializer
+from vmware.serializers.VMware.HostSystems import VMwareHostSystemsSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -14,7 +14,7 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareClustersController(CustomController):
+class VMwareHostSystemsController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
@@ -23,14 +23,14 @@ class VMwareClustersController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="clusters_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("Clusters list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="hostsystems_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("HostSystems list", user)
 
-                lock = Lock("clusters", locals())
+                lock = Lock("hostsystems", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = Cluster.list(assetId)
+                    itemData["data"] = HostSystem.list(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

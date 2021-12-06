@@ -63,12 +63,9 @@ class Datastore(VMwareDjangoObj):
 
 
     def getDatastoreInfoObject(self) -> object:
-        dsInfo = None
         try:
-            self.__getObject()
-            dsObj = self.vmwareObj
-            dsInfo = dsObj.info
-            return dsInfo
+            self.__getVMwareObject()
+            return self.vmwareObj.info
 
         except Exception as e:
             raise e
@@ -78,9 +75,8 @@ class Datastore(VMwareDjangoObj):
     def listAttachedHostsObjects(self) -> list:
         hosts = []
         try:
-            self.__getObject()
-            dsObj = self.vmwareObj
-            hostMounts = dsObj.host
+            self.__getVMwareObject()
+            hostMounts = self.vmwareObj.host
             for h in hostMounts:
                 if h.mountInfo.mounted is True and h.mountInfo.accessible is True and h.mountInfo.accessMode == "readWrite":
                     hosts.append(h.key)
@@ -133,9 +129,9 @@ class Datastore(VMwareDjangoObj):
     # Private methods
     ####################################################################################################################
 
-    def __getObject(self, silent: bool = None) -> None:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
         try:
-            self._getObject(vim.Datastore, silent)
+            self._getVMwareObject(vim.Datastore, refresh, silent)
 
         except Exception as e:
             raise e
