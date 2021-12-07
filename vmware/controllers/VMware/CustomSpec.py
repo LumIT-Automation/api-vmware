@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.VMware.CustomSpecManager import CustomSpecManager
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecEditSerializer as EditSerializer
+from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -31,12 +31,11 @@ class VMwareCustomSpecController(CustomController):
                     lock.lock()
 
                     itemData["data"] = CustomSpecManager.getCustomSpecInfo(assetId, specName)
-                    data = itemData
-                    if True:
-                    #serializer = Serializer(data=itemData)
-                    #if serializer.is_valid():
-                        #data["data"] = serializer.validated_data["data"]
-                        #data["href"] = request.get_full_path()
+                    Log.log(itemData, 'TTTTTTTTTTTTTTTTT')
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data["data"]
+                        data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
                         conditional = Conditional(request)
@@ -111,7 +110,7 @@ class VMwareCustomSpecController(CustomController):
                 Log.actionLog("User data: "+str(request.data), user)
 
 
-                serializer = EditSerializer(data=request.data, partial=True)
+                serializer = Serializer(data=request.data, partial=True)
                 if serializer.is_valid():
                     data = serializer.validated_data["data"]
                     lock = Lock("custom_spec", locals(), specName)

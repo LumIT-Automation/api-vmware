@@ -21,9 +21,49 @@ class CustomSpecManager(VMwareDjangoObj):
     ####################################################################################################################
 
     @staticmethod
-    def getCustomSpecInfo(assetId, specName, silent: bool = True) -> str:
+    def getCustomSpecInfo(assetId, specName, silent: bool = True) -> dict:
+        o = {
+            "ip": "",
+            "netMask": "",
+            "gw": [],
+            "dns1": "",
+            "dns2": "",
+            "hostName": "",
+            "domainName": "",
+            "timeZone": "",
+        }
+        dns = list()
+
         try:
-            return str(CustomSpecManager.getCustomSpecObject(assetId, specName, silent))
+            spec = CustomSpecManager.getCustomSpecObject(assetId, specName, silent)
+            if hasattr(spec, "spec"):
+                if hasattr(spec.spec, "identity"):
+                    if hasattr(spec.spec.identity, "hostName") and hasattr(spec.spec.identity.hostName, "name"):
+                        o["hostName"] = spec.spec.identity.hostName.name
+                    if hasattr(spec.spec.identity, "domain"):
+                        o["domainName"] = spec.spec.identity.domain
+                    if hasattr(spec.spec.identity, "timeZone"):
+                        o["timeZone"] = spec.spec.identity.timeZone
+
+                if hasattr(spec.spec, "globalIPSettings"):
+                    if hasattr(spec.spec.globalIPSettings, "dnsServerList"):
+                        dns = spec.spec.globalIPSettings.dnsServerList
+
+                if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap and hasattr(spec.spec.nicSettingMap[0], "adapter"):
+                    if hasattr(spec.spec.nicSettingMap[0].adapter, "ip") and hasattr(spec.spec.nicSettingMap[0].adapter.ip, "ipAddress"):
+                        o["ip"] = spec.spec.nicSettingMap[0].adapter.ip.ipAddress
+                    if hasattr(spec.spec.nicSettingMap[0].adapter, "subnetMask"):
+                        o["netMask"] = spec.spec.nicSettingMap[0].adapter.subnetMask
+                    if hasattr(spec.spec.nicSettingMap[0].adapter, "gateway"):
+                        o["gw"] = spec.spec.nicSettingMap[0].adapter.gateway
+                    if hasattr(spec.spec.nicSettingMap[0].adapter, "dnsServerList"):
+                        dns = spec.spec.nicSettingMap[0].adapter.dnsServerList  # Overwrite global settings.
+            if dns:
+                o["dns1"] = dns[0]
+                if 1 < len(dns):
+                    o["dns2"] = dns[1]
+
+            return o
 
         except Exception as e:
             raise e
@@ -109,7 +149,7 @@ class CustomSpecManager(VMwareDjangoObj):
                 spec.spec.nicSettingMap[0].adapter.subnetMask = data["netMask"]
 
             if data["gw"]:
-                spec.spec.nicSettingMap[0].adapter.gateway = [ data["gw"] ]
+                spec.spec.nicSettingMap[0].adapter.gateway = data["gw"]
 
             dns = []
             if data["dns1"]:
@@ -125,7 +165,6 @@ class CustomSpecManager(VMwareDjangoObj):
             if data["hostName"]:
                 newComputerName = vim.vm.customization.FixedName()
                 newComputerName.name = data["hostName"]
-                Log.log(spec.spec, 'SSSSSSSSSSSSSSSSSSSSSSS')
                 spec.spec.identity.hostName = newComputerName
 
             if data["domainName"]:
