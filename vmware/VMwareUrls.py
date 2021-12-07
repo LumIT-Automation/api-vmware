@@ -7,6 +7,7 @@ from .controllers.VMware import HostSystems, HostSystem
 from .controllers.VMware import Datastores, Datastore
 from .controllers.VMware import Networks,Network
 from .controllers.VMware import VMFolders, VMFolder
+from .controllers.VMware import CustomSpecs, CustomSpec
 from .controllers.VMware.Asset import Asset, Assets
 from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions, VMFolders as PermissionVMFolders, VMFolder as PermissionVMFolder
 from .controllers import History
@@ -54,6 +55,9 @@ urlpatterns = [
     path('<int:assetId>/vmFolder/<str:moId>/', VMFolder.VMwareVMFolderController.as_view(), name='vmware-vmFolder'),
     path('<int:assetId>/vmFolder/<str:moId>/parentList/', VMFolder.VMwareVMFolderParentListController.as_view(), name='vmware-vmFolder'),
 
+    # Virtual machines customization specifications.
+    path('<int:assetId>/customSpecs/', CustomSpecs.VMwareCustomSpecsController.as_view(), name='vmware-customSpecs'),
+    path('<int:assetId>/customSpec/<str:specName>/', CustomSpec.VMwareCustomSpecController.as_view(), name='vmware-customSpec'),
 
     # Log history.
     path('history/', History.HistoryLogsController.as_view(), name='vmware-log-history'),

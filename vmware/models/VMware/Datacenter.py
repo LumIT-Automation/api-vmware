@@ -97,7 +97,7 @@ class Datacenter(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def list(assetId, silent: bool = None) -> dict:
+    def list(assetId, silent: bool = True) -> dict:
         datacenters = []
         try:
             dcObjList = Datacenter.listDatacentersObjects(assetId, silent)
@@ -116,11 +116,11 @@ class Datacenter(VMwareDjangoObj):
 
     @staticmethod
     # vCenter datacenter pyVmomi objects list.
-    def listDatacentersObjects(assetId, silent: bool = None) -> list:
+    def listDatacentersObjects(assetId, silent: bool = True) -> list:
         dcObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
             dcObjList = vClient.getAllObjs([vim.Datacenter])
 
             return dcObjList
@@ -134,7 +134,7 @@ class Datacenter(VMwareDjangoObj):
     # Private methods
     ####################################################################################################################
 
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
             self._getVMwareObject(vim.Datacenter, refresh, silent)
 

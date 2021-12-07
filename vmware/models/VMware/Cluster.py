@@ -80,7 +80,7 @@ class Cluster(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter clusters list.
-    def list(assetId, silent: bool = None) -> dict:
+    def list(assetId, silent: bool = True) -> dict:
         clusters = list()
         try:
             clustersObjList = Cluster.listClustersObjects(assetId, silent)
@@ -98,11 +98,11 @@ class Cluster(VMwareDjangoObj):
 
     @staticmethod
     # vCenter cluster pyVmomi objects list.
-    def listClustersObjects(assetId, silent: bool = None) -> list:
+    def listClustersObjects(assetId, silent: bool = True) -> list:
         clustersObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
             clList = vClient.getAllObjs([vim.ComputeResource])
 
             for cl in clList:
@@ -119,7 +119,7 @@ class Cluster(VMwareDjangoObj):
     # Private methods
     ####################################################################################################################
 
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> object:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> object:
         obj = None
         try:
             self._getVMwareObject(vim.ComputeResource, refresh, silent)

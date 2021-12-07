@@ -82,7 +82,7 @@ class HostSystem(VMwareDjangoObj):
 
     @staticmethod
     # vCenter cluster pyVmomi objects list.
-    def list(assetId, silent: bool = None) -> dict:
+    def list(assetId, silent: bool = True) -> dict:
         hosts = list()
         try:
             hostsObjList = HostSystem.listHostsObjects(assetId, silent)
@@ -100,11 +100,11 @@ class HostSystem(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter hosts list.
-    def listHostsObjects(assetId, silent: bool = None) -> list:
+    def listHostsObjects(assetId, silent: bool = True) -> list:
         hostsObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
             hList = vClient.getAllObjs([vim.ComputeResource])
 
             for h in hList:
@@ -124,7 +124,7 @@ class HostSystem(VMwareDjangoObj):
     def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         if not self.vmwareObj or refresh:
             try:
-                vClient = self.connectToAsset(silent)
+                vClient = self.connectToAssetAndGetContent(silent)
                 objList = vClient.getAllObjs([vim.ComputeResource])
                 for obj in objList:
                     if obj._moId == self.moId:  # Standalone host.

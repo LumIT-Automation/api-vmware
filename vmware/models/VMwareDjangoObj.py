@@ -20,7 +20,7 @@ class VMwareDjangoObj:
     # Public methods
     ####################################################################################################################
 
-    def connectToAsset(self, silent: bool = True):
+    def connectToAssetAndGetContent(self, silent: bool = True):
         try:
             vmware = Asset(self.assetId)
             vmwareInfo = vmware.info()
@@ -41,7 +41,7 @@ class VMwareDjangoObj:
     ####################################################################################################################
 
     @staticmethod
-    def connectToAssetStatic(assetId, silent: bool = True):
+    def connectToAssetAndGetContentStatic(assetId, silent: bool = True):
         try:
             vmware = Asset(assetId)
             vmwareInfo = vmware.info()
@@ -76,7 +76,7 @@ class VMwareDjangoObj:
     def _getVMwareObject(self, vimType: str, refresh: bool = False, silent: bool = True) -> object:
         if not self.vmwareObj or refresh:
             try:
-                vClient = self.connectToAsset(silent)
+                vClient = self.connectToAssetAndGetContent(silent)
                 objList = vClient.getAllObjs([vimType])
                 for obj in objList:
                     if obj._moId == self.moId:

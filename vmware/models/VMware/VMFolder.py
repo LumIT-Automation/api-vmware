@@ -15,7 +15,7 @@ class VMFolder(VMwareDjangoObj):
     ####################################################################################################################
 
     # For a vCenter virtual machine folder get the list of the virtual machines and vApps.
-    def info(self, silent: bool = None) -> dict:
+    def info(self, silent: bool = True) -> dict:
         o = {
             "vmList": [],
             "vAppList": []
@@ -36,12 +36,12 @@ class VMFolder(VMwareDjangoObj):
 
 
     # For a vCenter virtual machine folder get the plain list of the parent folders moIds.
-    def parentList(self, silent: bool = None) -> list:
+    def parentList(self, silent: bool = True) -> list:
         parentList = list()
         vClient = None
 
         try:
-            vClient = self.connectToAsset(silent)
+            vClient = self.connectToAssetAndGetContent(silent)
             allFolders = vClient.getAllObjs([vim.Folder])
 
             moId = self.moId
@@ -89,7 +89,7 @@ class VMFolder(VMwareDjangoObj):
 
     # vCenter folders tree built using pvmomi.
     @staticmethod
-    def folderTree(assetId, silent: bool = None) -> list:
+    def folderTree(assetId, silent: bool = True) -> list:
         treeList = list()
 
         try:
@@ -116,7 +116,7 @@ class VMFolder(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter networks list by default, otherwise show the folderTree output.
-    def list(assetId, formatTree: bool = False, silent: bool = None) -> dict:
+    def list(assetId, formatTree: bool = False, silent: bool = True) -> dict:
         folders = []
         if formatTree:
             folders = VMFolder.folderTree(assetId, silent)
@@ -138,11 +138,11 @@ class VMFolder(VMwareDjangoObj):
 
     @staticmethod
     # vCenter networks pyVmomi objects list.
-    def listVMFoldersObjects(assetId, silent: bool = None) -> list:
+    def listVMFoldersObjects(assetId, silent: bool = True) -> list:
         vmFoldersObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
             vmFoldersObjList = vClient.getAllObjs([vim.Folder])
 
             return vmFoldersObjList
@@ -180,7 +180,7 @@ class VMFolder(VMwareDjangoObj):
     # Private methods
     ####################################################################################################################
 
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
             self._getVMwareObject(vim.Folder, refresh, silent)
 

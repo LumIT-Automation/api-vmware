@@ -114,7 +114,7 @@ class Network(VMwareDjangoObj):
         netObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
             netObjList = vClient.getAllObjs([vim.Network])
 
             return netObjList

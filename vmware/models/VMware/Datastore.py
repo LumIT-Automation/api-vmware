@@ -92,7 +92,7 @@ class Datastore(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter datastores list.
-    def list(assetId, silent: bool = None) -> dict:
+    def list(assetId, silent: bool = True) -> dict:
         datastores = []
         try:
             dsObjList = Datastore.listDatastoresObjects(assetId, silent)
@@ -111,11 +111,11 @@ class Datastore(VMwareDjangoObj):
 
     @staticmethod
     # vCenter datastores pyVmomi objects list.
-    def listDatastoresObjects(assetId, silent: bool = None) -> list:
+    def listDatastoresObjects(assetId, silent: bool = True) -> list:
         dsObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetStatic(assetId, silent)
+            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
             dsObjList = vClient.getAllObjs([vim.Datastore])
 
             return dsObjList
@@ -129,7 +129,7 @@ class Datastore(VMwareDjangoObj):
     # Private methods
     ####################################################################################################################
 
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
+    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
             self._getVMwareObject(vim.Datastore, refresh, silent)
 
