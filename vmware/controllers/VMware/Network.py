@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.VMware.Network import Network
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.Network import VMwareDatastoreSerializer as Serializer
+from vmware.serializers.VMware.Network import VMwareNetworkSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional

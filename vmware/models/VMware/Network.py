@@ -24,10 +24,13 @@ class Network(VMwareDjangoObj):
             configuredHostsObjs = self.listConfiguredHostsObjects()
             for h in configuredHostsObjs:
                 hostData = VMwareObj.vmwareObjToDict(h)
-                pgInfo = self.getHostPortGroupsObjects(h)
-                for pg in pgInfo:
-                    if pg.spec.name == networkInfo["name"]:
-                        hostData["vlanId"] = pg.spec.vlanId
+                try:
+                    pgObjList = self.getHostPortGroupsObjects(h)
+                    for pgObj in pgObjList:
+                        if pgObj.spec.name == networkInfo["name"]:
+                            hostData["vlanId"] = pgObj.spec.vlanId
+                except:
+                    pass
 
                 configuredHosts.append(hostData)
 
@@ -80,8 +83,8 @@ class Network(VMwareDjangoObj):
     # TODO: move to Hostsystem class.
     def getHostPortGroupsObjects(self, hostRef) -> list:
         try:
-            pgInfo = hostRef.config.network.portgroup
-            return pgInfo
+            pgObjList = hostRef.config.network.portgroup
+            return pgObjList
 
         except Exception as e:
             raise e
