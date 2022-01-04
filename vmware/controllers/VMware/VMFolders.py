@@ -24,7 +24,7 @@ class VMwareVMFoldersController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="vmFolders_get", assetId=assetId) or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="folders_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("VMFolders tree", user)
 
                 lock = Lock("vmFolders", locals())
