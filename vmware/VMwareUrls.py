@@ -7,7 +7,7 @@ from .controllers.VMware import HostSystems, HostSystem
 from .controllers.VMware import Datastores, Datastore
 from .controllers.VMware import Networks,Network
 from .controllers.VMware import VMFolders, VMFolder
-from .controllers.VMware import VirtualMachines
+from .controllers.VMware import VirtualMachines, VirtualMachine
 from .controllers.VMware import Templates
 from .controllers.VMware import CustomSpecs, CustomSpec
 from .controllers.VMware.Asset import Asset, Assets
@@ -59,6 +59,7 @@ urlpatterns = [
 
     # VirtualMachiner.
     path('<int:assetId>/virtualmachines/', VirtualMachines.VMwareVirtualMachinesController.as_view(), name='vmware-virtualmachines'),
+    path('<int:assetId>/virtualmachine/<str:moId>/', VirtualMachine.VMwareVirtualMachineController.as_view(), name='vmware-virtualmachine'),
 
     path('<int:assetId>/templates/', Templates.VMwareTemplatesController.as_view(), name='vmware-templates'),
 

@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.VirtualMachines import VMwareVirtualMachinesSerializer as Serializer
+from vmware.serializers.VMware.VirtualMachine import VMwareVirtualMachineSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -14,23 +14,25 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareVirtualMachinesController(CustomController):
+
+class VMwareVirtualMachineController(CustomController):
     @staticmethod
-    def get(request: Request, assetId: int) -> Response:
+    def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
         itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="virtualmachines_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("VirtualMachines list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="virtualmachine_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("VirtualMachine clusters", user)
 
-                lock = Lock("virtualmachines", locals())
+                lock = Lock("virtualmachine", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = VirtualMachine.list(assetId)
+                    vm = VirtualMachine(assetId, moId)
+                    itemData["data"] = vm.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
@@ -58,7 +60,7 @@ class VMwareVirtualMachinesController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("virtualmachines", locals()).release()
+            Lock("virtualmachine", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

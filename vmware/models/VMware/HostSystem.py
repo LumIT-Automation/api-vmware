@@ -16,7 +16,7 @@ class HostSystem(VMwareDjangoObj):
     ####################################################################################################################
 
     def info(self) -> dict:
-        hosts = datastores = networks = []
+        datastores = networks = []
         o = {
             "datastores": [],
             "networks": []

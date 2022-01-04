@@ -16,41 +16,58 @@ class VirtualMachine(VMwareDjangoObj):
     ####################################################################################################################
 
     def info(self) -> dict:
-        clusters = []
-        datastores = []
-        networks = []
+        info = {
+            "diskDevices": [],
+            "networkDevices": []
+        }
+
         try:
-            # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
-            for cr in computeResourcesList:
-                for c in cr:
-                    clusters.append(VMwareObj.vmwareObjToDict(c))
-
-            # each element of dsList is a set containing a vmware Datastore object.
-            for ds in dsList:
-                for d in ds:
-                    datastores.append(VMwareObj.vmwareObjToDict(d))
-
-            # each element of computeResources is a set containing a vmware Network object.
-            for net in nList:
-                for n in net:
-                    networks.append(VMwareObj.vmwareObjToDict(n))
-
-            return dict({
-                "clusters": clusters,
-                "datastores": datastores,
-                "networks": networks
+            config = self.getVirtualMachineConfigObject()
+            info.update({
+                "name": config.name,
+                "guestName": config.guestFullName,
+                "version": config.version,
+                "uuid": config.uuid,
+                "numCpu": config.hardware.numCPU,
+                "numCoresPerSocket": config.hardware.numCoresPerSocket,
+                "memoryMB": config.hardware.memoryMB,
+                "template": config.template
             })
+
+            for dev in config.hardware.device:
+                if isinstance(dev, vim.vm.device.VirtualDisk):
+                    info["diskDevices"].append({
+                        "label": dev.deviceInfo.label,
+                        "size": str(dev.deviceInfo.summary)
+                    })
+
+                if isinstance(dev, vim.vm.device.VirtualEthernetCard):
+                    if hasattr(dev, 'backing'):
+                        if hasattr(dev.backing, 'network'): # Standard port group.
+                            info["networkDevices"].append({
+                                "label": dev.deviceInfo.label,
+                                "network": str(dev.backing.network)
+                            })
+                        elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'): # Distributed port group.
+                            info["networkDevices"].append({
+                                "label": dev.deviceInfo.label,
+                                "network": str(dev.backing.port.portgroupKey)
+                            })
+
+            return info
 
         except Exception as e:
             raise e
 
 
 
+    def getVirtualMachineConfigObject(self) -> object:
+        try:
+            self.__getVMwareObject()
+            return self.vmwareObj.config
 
-
-
-
-
+        except Exception as e:
+            raise e
 
 
 
@@ -60,7 +77,7 @@ class VirtualMachine(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def listVMs(assetId, silent: bool = True) -> dict:
+    def list(assetId, silent: bool = True) -> dict:
         vmList = []
         try:
             vmObjList = VirtualMachine.listVirtualMachinesOnlyObjects(assetId, silent)
@@ -71,42 +88,6 @@ class VirtualMachine(VMwareDjangoObj):
             return dict({
                 "items": vmList
             })
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # Plain vCenter datacenters list.
-    def listTemplates(assetId, silent: bool = True) -> dict:
-        tList = []
-        try:
-            tObjList = VirtualMachine.listTemplatesOnlyObjects(assetId, silent)
-
-            for t in tObjList:
-                tList.append(VMwareObj.vmwareObjToDict(t))
-
-            return dict({
-                "items": tList
-            })
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # vCenter templates (not regular virtual machines) pyVmomi objects list.
-    def listTemplatesOnlyObjects(assetId, silent: bool = True) -> list:
-        tObjList = list()
-        try:
-            objList = VirtualMachine.listVirtualMachinesObjects(assetId, silent)
-            for obj in objList:
-                if obj.config.template:
-                    tObjList.append(obj)
-
-            return tObjList
 
         except Exception as e:
             raise e
@@ -145,7 +126,7 @@ class VirtualMachine(VMwareDjangoObj):
 
 
     ####################################################################################################################
-    # Private methods
+    # Protected methods
     ####################################################################################################################
 
     def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
