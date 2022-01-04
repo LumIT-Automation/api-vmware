@@ -14,7 +14,7 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareVirtualMachinesController(CustomController):
+class VMwareTemplatesController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
@@ -23,14 +23,14 @@ class VMwareVirtualMachinesController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="virtualmachines_get", assetId=assetId) or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="templates_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("VirtualMachines list", user)
 
                 lock = Lock("virtualmachines", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = VirtualMachine.listVMs(assetId)
+                    itemData["data"] = VirtualMachine.listTemplates(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

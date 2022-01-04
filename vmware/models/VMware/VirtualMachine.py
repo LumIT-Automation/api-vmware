@@ -60,16 +60,16 @@ class VirtualMachine(VMwareDjangoObj):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def list(assetId, silent: bool = True) -> dict:
-        vms = []
+    def listVMs(assetId, silent: bool = True) -> dict:
+        vmList = []
         try:
-            vmObjList = VirtualMachine.listVirtualMachinesObjects(assetId, silent)
+            vmObjList = VirtualMachine.listVirtualMachinesOnlyObjects(assetId, silent)
 
             for vm in vmObjList:
-                vms.append(VMwareObj.vmwareObjToDict(vm))
+                vmList.append(VMwareObj.vmwareObjToDict(vm))
 
             return dict({
-                "items": vms
+                "items": vmList
             })
 
         except Exception as e:
@@ -78,15 +78,66 @@ class VirtualMachine(VMwareDjangoObj):
 
 
     @staticmethod
-    # vCenter datacenter pyVmomi objects list.
-    def listVirtualMachinesObjects(assetId, silent: bool = True) -> list:
-        vmObjList = list()
-
+    # Plain vCenter datacenters list.
+    def listTemplates(assetId, silent: bool = True) -> dict:
+        tList = []
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
-            vmObjList = vClient.getAllObjs([vim.VirtualMachine])
+            tObjList = VirtualMachine.listTemplatesOnlyObjects(assetId, silent)
+
+            for t in tObjList:
+                tList.append(VMwareObj.vmwareObjToDict(t))
+
+            return dict({
+                "items": tList
+            })
+
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    # vCenter templates (not regular virtual machines) pyVmomi objects list.
+    def listTemplatesOnlyObjects(assetId, silent: bool = True) -> list:
+        tObjList = list()
+        try:
+            objList = VirtualMachine.listVirtualMachinesObjects(assetId, silent)
+            for obj in objList:
+                if obj.config.template:
+                    tObjList.append(obj)
+
+            return tObjList
+
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    # vCenter virtual machines (not templates) pyVmomi objects list.
+    def listVirtualMachinesOnlyObjects(assetId, silent: bool = True) -> list:
+        vmObjList = list()
+        try:
+            objList = VirtualMachine.listVirtualMachinesObjects(assetId, silent)
+            for obj in objList:
+                if not obj.config.template:
+                    vmObjList.append(obj)
 
             return vmObjList
+
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    # vCenter virtual machines and templates pyVmomi objects list.
+    def listVirtualMachinesObjects(assetId, silent: bool = True) -> list:
+        objList = list()
+        try:
+            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
+            objList = vClient.getAllObjs([vim.VirtualMachine])
+            return objList
 
         except Exception as e:
             raise e
