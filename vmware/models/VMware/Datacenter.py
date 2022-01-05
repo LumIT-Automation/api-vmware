@@ -52,7 +52,7 @@ class Datacenter(VMwareDjangoObj):
     def listComputeResourcesObjects(self) -> list:
         computeResources = []
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             for child in self.vmwareObj.hostFolder.childEntity:
                 if isinstance(child, vim.ComputeResource):
                     computeResources.append({child})
@@ -66,7 +66,7 @@ class Datacenter(VMwareDjangoObj):
     def listDatastoresObjects(self) -> list:
         datastores = []
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             for child in  self.vmwareObj.datastoreFolder.childEntity:
                 if isinstance(child, vim.Datastore):
                     datastores.append({child})
@@ -80,11 +80,20 @@ class Datacenter(VMwareDjangoObj):
     def listNetworksObjects(self) -> list:
         networks = []
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             for child in self.vmwareObj.networkFolder.childEntity:
                 if isinstance(child, vim.Network):
                     networks.append({child})
             return networks
+
+        except Exception as e:
+            raise e
+
+
+
+    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
+        try:
+            self._getVMwareObject(vim.Datacenter, refresh, silent)
 
         except Exception as e:
             raise e
@@ -130,14 +139,6 @@ class Datacenter(VMwareDjangoObj):
 
 
 
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
 
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getVMwareObject(vim.Datacenter, refresh, silent)
 
-        except Exception as e:
-            raise e
 

@@ -46,7 +46,7 @@ class Cluster(VMwareDjangoObj):
 
     def listHostsObjects(self) -> list:
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             return self.vmwareObj.host
 
         except Exception as e:
@@ -56,7 +56,7 @@ class Cluster(VMwareDjangoObj):
 
     def listDatastoresObjects(self) -> list:
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             return self.vmwareObj.datastore
 
         except Exception as e:
@@ -66,8 +66,18 @@ class Cluster(VMwareDjangoObj):
 
     def listNetworksObjects(self) -> list:
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             return self.vmwareObj.network
+
+        except Exception as e:
+            raise e
+
+
+
+    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> object:
+        obj = None
+        try:
+            self._getVMwareObject(vim.ComputeResource, refresh, silent)
 
         except Exception as e:
             raise e
@@ -115,15 +125,5 @@ class Cluster(VMwareDjangoObj):
 
 
 
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
 
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> object:
-        obj = None
-        try:
-            self._getVMwareObject(vim.ComputeResource, refresh, silent)
-
-        except Exception as e:
-            raise e
 

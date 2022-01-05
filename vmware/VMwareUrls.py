@@ -8,7 +8,7 @@ from .controllers.VMware import Datastores, Datastore
 from .controllers.VMware import Networks,Network
 from .controllers.VMware import VMFolders, VMFolder
 from .controllers.VMware import VirtualMachines, VirtualMachine
-from .controllers.VMware import Templates
+from .controllers.VMware import Templates, Template
 from .controllers.VMware import CustomSpecs, CustomSpec
 from .controllers.VMware.Asset import Asset, Assets
 from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions, VMFolders as PermissionVMFolders, VMFolder as PermissionVMFolder
@@ -62,6 +62,7 @@ urlpatterns = [
     path('<int:assetId>/virtualmachine/<str:moId>/', VirtualMachine.VMwareVirtualMachineController.as_view(), name='vmware-virtualmachine'),
 
     path('<int:assetId>/templates/', Templates.VMwareTemplatesController.as_view(), name='vmware-templates'),
+    path('<int:assetId>/template/<str:moId>/', Template.VMwareVirtualMachineTemplateController.as_view(), name='vmware-template'),
 
     # Virtual machines customization specifications.
     path('<int:assetId>/customSpecs/', CustomSpecs.VMwareCustomSpecsController.as_view(), name='vmware-customSpecs'),

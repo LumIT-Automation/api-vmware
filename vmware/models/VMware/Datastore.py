@@ -64,7 +64,7 @@ class Datastore(VMwareDjangoObj):
 
     def getDatastoreInfoObject(self) -> object:
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             return self.vmwareObj.info
 
         except Exception as e:
@@ -75,7 +75,7 @@ class Datastore(VMwareDjangoObj):
     def listAttachedHostsObjects(self) -> list:
         hosts = []
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             hostMounts = self.vmwareObj.host
             for h in hostMounts:
                 if h.mountInfo.mounted is True and h.mountInfo.accessible is True and h.mountInfo.accessMode == "readWrite":
@@ -85,6 +85,17 @@ class Datastore(VMwareDjangoObj):
 
         except Exception as e:
             raise e
+
+
+
+    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
+        try:
+            self._getVMwareObject(vim.Datastore, refresh, silent)
+
+        except Exception as e:
+            raise e
+
+
 
     ####################################################################################################################
     # Public static methods
@@ -123,16 +134,4 @@ class Datastore(VMwareDjangoObj):
         except Exception as e:
             raise e
 
-
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getVMwareObject(vim.Datastore, refresh, silent)
-
-        except Exception as e:
-            raise e
 

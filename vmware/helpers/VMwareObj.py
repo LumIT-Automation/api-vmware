@@ -21,7 +21,7 @@ class VMwareObj:
     def vmwareObjToDict(vmwareObj) -> dict:
         try:
             return dict({
-                "moId": vmwareObj._moId,
+                "moId": vmwareObj._GetMoId(),
                 "name": vmwareObj.name
         })
 
@@ -33,7 +33,7 @@ class VMwareObj:
     @staticmethod
     def getDjangoObjFromVMware(vmwareObj, assetId, DjangoCLass) -> dict:
         try:
-            newObj = DjangoCLass(assetId, vmwareObj._moId)
+            newObj = DjangoCLass(assetId, vmwareObj._GetMoId())
             newObj.vmwareObj = vmwareObj
             return newObj
 

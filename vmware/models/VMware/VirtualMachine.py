@@ -1,7 +1,7 @@
 from pyVmomi import vim, vmodl
 
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
-
+from vmware.helpers.Exception import CustomException
 from vmware.helpers.VMwareObj import VMwareObj
 from vmware.helpers.Log import Log
 
@@ -63,8 +63,20 @@ class VirtualMachine(VMwareDjangoObj):
 
     def getVirtualMachineConfigObject(self) -> object:
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
+            if not hasattr(self.vmwareObj, 'config'):
+                raise CustomException(status=400, payload={"VMware: this object is not a virtual machine."})
+
             return self.vmwareObj.config
+
+        except Exception as e:
+            raise e
+
+
+
+    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
+        try:
+            self._getVMwareObject(vim.VirtualMachine, refresh, silent)
 
         except Exception as e:
             raise e
@@ -123,16 +135,4 @@ class VirtualMachine(VMwareDjangoObj):
         except Exception as e:
             raise e
 
-
-
-    ####################################################################################################################
-    # Protected methods
-    ####################################################################################################################
-
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getVMwareObject(vim.VirtualMachine, refresh, silent)
-
-        except Exception as e:
-            raise e
 

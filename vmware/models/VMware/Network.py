@@ -62,7 +62,7 @@ class Network(VMwareDjangoObj):
 
     def getNetworkInfoObject(self) -> object:
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             return self.vmwareObj.summary
 
         except Exception as e:
@@ -72,7 +72,7 @@ class Network(VMwareDjangoObj):
 
     def listConfiguredHostsObjects(self) -> list:
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             return self.vmwareObj.host
 
         except Exception as e:
@@ -88,6 +88,17 @@ class Network(VMwareDjangoObj):
 
         except Exception as e:
             raise e
+
+
+
+    def getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
+        try:
+            self._getVMwareObject(vim.Network, refresh, silent)
+
+        except Exception as e:
+            raise e
+
+
 
     ####################################################################################################################
     # Public static methods
@@ -125,16 +136,4 @@ class Network(VMwareDjangoObj):
         except Exception as e:
             raise e
 
-
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
-        try:
-            self._getVMwareObject(vim.Network, refresh, silent)
-
-        except Exception as e:
-            raise e
 

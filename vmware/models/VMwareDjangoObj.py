@@ -9,7 +9,8 @@ class VMwareDjangoObj:
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # The moId is the VMware Managed Object Id. Can be obtained from the "_moId" property of a managed object.
+        # The moId is the VMware Managed Object Id.
+        # Can be obtained from the _GetMoId() method or from the "_moId" property of a managed object.
         self.assetId = int(assetId)
         self.moId = moId
         self.vmwareObj = None
@@ -61,7 +62,7 @@ class VMwareDjangoObj:
     def vmwareObjToDict(vmwareObj) -> dict:
         try:
             return dict({
-                "moId": vmwareObj._moId,
+                "moId": vmwareObj._GetMoId(),
                 "name": vmwareObj.name
         })
 
@@ -79,7 +80,7 @@ class VMwareDjangoObj:
                 vClient = self.connectToAssetAndGetContent(silent)
                 objList = vClient.getAllObjs([vimType])
                 for obj in objList:
-                    if obj._moId == self.moId:
+                    if obj._GetMoId() == self.moId:
                         self.vmwareObj = obj
 
             except Exception as e:

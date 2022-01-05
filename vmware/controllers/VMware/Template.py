@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.VirtualMachine import VirtualMachine
+from vmware.models.VMware.Template import VirtualMachineTemplate
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.VMware.VirtualMachine import VMwareVirtualMachineSerializer as Serializer
@@ -15,7 +15,7 @@ from vmware.helpers.Log import Log
 
 
 
-class VMwareVirtualMachineController(CustomController):
+class VMwareVirtualMachineTemplateController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
@@ -24,14 +24,14 @@ class VMwareVirtualMachineController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="virtualmachine_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("VirtualMachine info", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="template_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("VirtualMachineTemplate info", user)
 
-                lock = Lock("virtualmachine", locals(), moId)
+                lock = Lock("template", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    vm = VirtualMachine(assetId, moId)
+                    vm = VirtualMachineTemplate(assetId, moId)
                     itemData["data"] = vm.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
@@ -60,7 +60,7 @@ class VMwareVirtualMachineController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("virtualmachine", locals(), locals()["moId"]).release()
+            Lock("template", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

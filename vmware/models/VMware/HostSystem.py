@@ -127,12 +127,12 @@ class HostSystem(VMwareDjangoObj):
                 vClient = self.connectToAssetAndGetContent(silent)
                 objList = vClient.getAllObjs([vim.ComputeResource])
                 for obj in objList:
-                    if obj._moId == self.moId:  # Standalone host.
+                    if obj._GetMoId() == self.moId:  # Standalone host.
                         self.vmwareObj = obj
                         break
                     if hasattr(obj, 'host'):  # If this is a cluster, loop into it.
                         for h in obj.host:
-                            if h._moId == self.moId:  # In cluster host.
+                            if h._GetMoId() == self.moId:  # In cluster host.
                                 self.vmwareObj = h
                                 break
 

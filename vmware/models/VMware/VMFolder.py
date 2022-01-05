@@ -48,9 +48,9 @@ class VMFolder(VMwareDjangoObj):
             folder = None
             while True:
                 for f in allFolders:
-                    if f._moId == moId:
+                    if f._GetMoId() == moId:
                         folder = f.parent
-                        moId = f.parent._moId
+                        moId = f.parent._GetMoId()
                         parentList.insert(0, moId)
                         break
 
@@ -68,7 +68,7 @@ class VMFolder(VMwareDjangoObj):
         vmList = list()
         vAppList = list()
         try:
-            self.__getVMwareObject()
+            self.getVMwareObject()
             children = self.vmwareObj.childEntity
             for child in children:
                 if isinstance(child, vim.VirtualMachine):
@@ -77,6 +77,15 @@ class VMFolder(VMwareDjangoObj):
                     vAppList.append(child)
 
             return [ vmList, vAppList]
+
+        except Exception as e:
+            raise e
+
+
+
+    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
+        try:
+            self._getVMwareObject(vim.Folder, refresh, silent)
 
         except Exception as e:
             raise e
@@ -100,7 +109,7 @@ class VMFolder(VMwareDjangoObj):
                 if isinstance(dc, vim.Datacenter):
                     parentFolder = dc.vmFolder
                     tree = {
-                        parentFolder._moId: {
+                        parentFolder._GetMoId(): {
                             "name": dc.name,
                             "subFolders": {}
                         }
@@ -162,27 +171,16 @@ class VMFolder(VMwareDjangoObj):
             children = folderObj.childEntity
             for child in children:
                 if isinstance(child, vim.Folder):
-                    # _moId == Managed object Id.
+                    # _GetMoId() == obj._moId == Managed object Id.
                     subTree = {
-                        child._moId: {
+                        child._GetMoId(): {
                             "name": child.name,
                             "subFolders": {}
                         }
                     }
-                    tree[folderObj._moId]["subFolders"].update(subTree)
+                    tree[folderObj._GetMoId()]["subFolders"].update(subTree)
                     VMFolder.__folderTree(child, subTree)
 
         return tree
 
 
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getVMwareObject(vim.Folder, refresh, silent)
-
-        except Exception as e:
-            raise e
