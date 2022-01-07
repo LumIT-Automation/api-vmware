@@ -31,8 +31,8 @@ class VMwareVirtualMachineTemplateController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    vm = VirtualMachineTemplate(assetId, moId)
-                    itemData["data"] = vm.info()
+                    template = VirtualMachineTemplate(assetId, moId)
+                    itemData["data"] = template.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
@@ -67,4 +67,52 @@ class VMwareVirtualMachineTemplateController(CustomController):
         return Response(data, status=httpStatus, headers={
             "ETag": etagCondition["responseEtag"],
             "Cache-Control": "must-revalidate"
+        })
+
+
+
+    @staticmethod
+    def post(request: Request, assetId: int, moId: str) -> Response:
+        response = None
+        user = CustomController.loggedUser(request)
+
+        try:
+            if Permission.hasUserPermission(groups=user["groups"], action="template_post") or user["authDisabled"]:
+                Log.actionLog("Deploy new virtual machines from template", user)
+                Log.actionLog("User data: " + str(request.data), user)
+
+                #serializer = DeploySerializer(data=request.data)
+                #if serializer.is_valid():
+                    #data = serializer.validated_data
+                if True:
+                    lock = Lock("template", locals(), moId)
+                    if lock.isUnlocked():
+                        lock.lock()
+
+                        template = VirtualMachineTemplate(assetId, moId)
+                        #template.deployVM(serializer.validated_data["data"])
+                        template.deployVM(request.data["data"])
+
+                        httpStatus = status.HTTP_201_CREATED
+                        lock.release()
+                    else:
+                        httpStatus = status.HTTP_423_LOCKED
+                else:
+                    httpStatus = status.HTTP_400_BAD_REQUEST
+                    response = {
+                        "VMware": {
+                            "error": str(serializer.errors)
+                        }
+                    }
+                    Log.actionLog("User data incorrect: " + str(response), user)
+            else:
+                httpStatus = status.HTTP_403_FORBIDDEN
+
+        except Exception as e:
+            Lock("template", locals(), locals()["moId"]).release()
+            data, httpStatus, headers = CustomController.exceptionHandler(e)
+            return Response(data, status=httpStatus, headers=headers)
+
+        return Response(response, status=httpStatus, headers={
+            "Cache-Control": "no-cache"
         })
