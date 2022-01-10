@@ -46,64 +46,62 @@ class VirtualMachineTemplate(VirtualMachine):
 
 
 
-    def deployVM(self, data: dict) -> bool:
-        datacenter = Datacenter(self.assetId, data["datacenterId"])
+    def deployVM(self, data: dict) -> dict:
+        clusterObj = None
+        datastoreObj = None
+        networkObj = None
 
-        dcClusterObjList = datacenter.listComputeResourcesObjects()
-        # each element of dcClusterObjList is a set containing a vmware ClusterComputeResource object.
-        dcClusterIdList = []
-        for cSet in dcClusterObjList:
-            for c in cSet:
-                dcClusterIdList.append(VMwareObj.vmwareObjToDict(c)["moId"]) # Build a list of the moIds of the clusters found in this datacenter.
+        try:
+            datacenter = Datacenter(self.assetId, data["datacenterId"])
 
-        if data["clusterId"] in dcClusterIdList:
-            cluster = Cluster(self.assetId, data["clusterId"])
-            cluster.getVMwareObject()
-            clusterObj = cluster.vmwareObj # Got the right VMware cluster object.
-        else:
-            raise CustomException(status=400, payload={"VMware": "clusterId not found in this datacenter."})
+            dcClusterObjList = datacenter.listComputeResourcesObjects()
+            for c in dcClusterObjList:
+                if data["clusterId"] == c._GetMoId():
+                    clusterObj = c
+            if not clusterObj:
+                raise CustomException(status=400, payload={"VMware": "clusterId not found in this datacenter."})
 
-        cluDatastoreObjList = cluster.listDatastoresObjects()
-        cluDatastoreIdList = []
-        for d in cluDatastoreObjList:
-            cluDatastoreIdList.append(VMwareObj.vmwareObjToDict(d)["moId"]) # Build a list of the moIds of the datastores found attached to this cluster.
-        if data["datastoreId"] in cluDatastoreIdList:
-            datastore = Datastore(self.assetId, data["datastoreId"])
-            datastore.getVMwareObject()
-            datastoreObj = datastore.vmwareObj # Got the right VMware datastore object.
-        else:
-            raise CustomException(status=400, payload={"VMware": "datastoreId not found attached to this cluster."})
+            cluster = Cluster(self.assetId, clusterObj._GetMoId())
+            cluDatastoreObjList = cluster.listDatastoresObjects()
+            for d in cluDatastoreObjList:
+                if data["datastoreId"] == d._GetMoId(): # VMware pvmomi method.
+                    datastoreObj = d
+            if not datastoreObj:
+                raise CustomException(status=400, payload={"VMware": "datastoreId not found attached to this cluster."})
 
-        cluNetworkObjList = cluster.listNetworksObjects()
-        cluNetworkIdList = []
-        for n in cluNetworkObjList:
-            cluNetworkIdList.append(VMwareObj.vmwareObjToDict(n)["moId"])
-        if data["networkId"] in cluNetworkIdList:
-            network = Network(self.assetId, data["networkId"])
-            network.getVMwareObject()
-            networkObj = network.vmwareObj
-        else:
-            raise CustomException(status=400, payload={"VMware": "networkId not found attached to this cluster."})
+            cluNetworkObjList = cluster.listNetworksObjects()
+            for n in cluNetworkObjList:
+                if data["networkId"] == n._GetMoId():
+                    networkObj = n
+            if not networkObj:
+                raise CustomException(status=400, payload={"VMware": "networkId not found attached to this cluster."})
 
-        vmFolder = VMFolder(self.assetId, data["vmFolderId"])
-        vmFolder.getVMwareObject()
-        vmFolderObj = vmFolder.vmwareObj
+            vmFolder = VMFolder(self.assetId, data["vmFolderId"])
+            vmFolder.getVMwareObject()
+            vmFolderObj = vmFolder.vmwareObj
 
-        # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
-        relocateSpec = vim.vm.RelocateSpec()
-        relocateSpec.datastore = datastoreObj
-        relocateSpec.pool = clusterObj.resourcePool # The resource pool associated to this cluster.
+            # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
+            relocateSpec = vim.vm.RelocateSpec()
+            relocateSpec.datastore = datastoreObj
+            relocateSpec.pool = clusterObj.resourcePool # The resource pool associated to this cluster.
 
-        # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
-        cloneSpec = vim.vm.CloneSpec()
-        cloneSpec.location = relocateSpec
-        cloneSpec.powerOn = data["powerOn"]
+            # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
+            cloneSpec = vim.vm.CloneSpec()
+            cloneSpec.location = relocateSpec
+            cloneSpec.powerOn = data["powerOn"]
 
-        self.getVMwareObject()
-        templateObj = self.vmwareObj
-        # Deploy
-        task = templateObj.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
-        self.waitForTask(task)
+            self.getVMwareObject()
+            templateObj = self.vmwareObj
+            # Deploy
+            task = templateObj.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
+            # self.waitForTask(task)
+
+            return dict({
+                "task": task._GetMoId()
+            })
+
+        except Exception as e:
+            raise e
 
 
 

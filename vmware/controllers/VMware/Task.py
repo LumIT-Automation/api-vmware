@@ -2,11 +2,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.Template import VirtualMachineTemplate
+from vmware.models.VMware.Task import Task
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.VirtualMachine import VMwareVirtualMachineSerializer as Serializer
-from vmware.serializers.VMware.Template import VMwareDeployTemplateSerializer as DeploySerializer
+from vmware.serializers.VMware.Task import VMwareTaskSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -16,7 +15,7 @@ from vmware.helpers.Log import Log
 
 
 
-class VMwareVirtualMachineTemplateController(CustomController):
+class VMwareTaskController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
@@ -25,18 +24,19 @@ class VMwareVirtualMachineTemplateController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="template_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("VirtualMachineTemplate info", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="task_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("Task", user)
 
-                lock = Lock("template", locals(), moId)
+                lock = Lock("task", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    template = VirtualMachineTemplate(assetId, moId)
-                    itemData["data"] = template.info()
+                    t = Task(assetId, moId)
+                    itemData["data"] = t.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
+                        data["data"] =  itemData["data"]
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -61,7 +61,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("template", locals(), locals()["moId"]).release()
+            Lock("task", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
@@ -73,45 +73,30 @@ class VMwareVirtualMachineTemplateController(CustomController):
 
 
     @staticmethod
-    def post(request: Request, assetId: int, moId: str) -> Response:
-        response = None
+    def delete(request: Request, assetId: int, moId: str) -> Response:
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="template_post") or user["authDisabled"]:
-                Log.actionLog("Deploy new virtual machines from template", user)
-                Log.actionLog("User data: " + str(request.data), user)
+            if Permission.hasUserPermission(groups=user["groups"], action="task_delete", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("Cancel task", user)
 
-                serializer = DeploySerializer(data=request.data)
-                if serializer.is_valid():
-                    data = serializer.validated_data
-                    lock = Lock("template", locals(), moId)
-                    if lock.isUnlocked():
-                        lock.lock()
+                lock = Lock("task_delete", locals(), moId)
+                if lock.isUnlocked():
+                    lock.lock()
 
-                        template = VirtualMachineTemplate(assetId, moId)
-                        template.deployVM(serializer.validated_data["data"])
-                        response = template.deployVM(request.data["data"])
-                        httpStatus = status.HTTP_201_CREATED
-                        lock.release()
-                    else:
-                        httpStatus = status.HTTP_423_LOCKED
+                    t = Task(assetId, moId)
+                    t.cancel()
+                    httpStatus = status.HTTP_200_OK
+                    lock.release()
                 else:
-                    httpStatus = status.HTTP_400_BAD_REQUEST
-                    response = {
-                        "VMware": {
-                            "error": str(serializer.errors)
-                        }
-                    }
-                    Log.actionLog("User data incorrect: " + str(response), user)
+                    httpStatus = status.HTTP_423_LOCKED
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
-            Lock("template", locals(), locals()["moId"]).release()
+            Lock("task_delete", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
-        return Response(response, status=httpStatus, headers={
+        return Response(None, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })

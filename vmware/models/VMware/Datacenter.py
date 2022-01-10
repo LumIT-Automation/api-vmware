@@ -22,9 +22,8 @@ class Datacenter(VMwareDjangoObj):
         try:
             computeResourcesList = self.listComputeResourcesObjects()
             # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
-            for cr in computeResourcesList:
-                for c in cr:
-                    clusters.append(VMwareObj.vmwareObjToDict(c))
+            for c in computeResourcesList:
+                clusters.append(VMwareObj.vmwareObjToDict(c))
 
             dsList = self.listDatastoresObjects()
             # each element of dsList is a set containing a vmware Datastore object.
@@ -55,7 +54,7 @@ class Datacenter(VMwareDjangoObj):
             self.getVMwareObject()
             for child in self.vmwareObj.hostFolder.childEntity:
                 if isinstance(child, vim.ComputeResource):
-                    computeResources.append({child})
+                    computeResources.append(child)
             return computeResources
 
         except Exception as e:
@@ -67,7 +66,7 @@ class Datacenter(VMwareDjangoObj):
         datastores = []
         try:
             self.getVMwareObject()
-            for child in  self.vmwareObj.datastoreFolder.childEntity:
+            for child in self.vmwareObj.datastoreFolder.childEntity:
                 if isinstance(child, vim.Datastore):
                     datastores.append({child})
             return datastores

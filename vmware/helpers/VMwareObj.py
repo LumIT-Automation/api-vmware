@@ -40,3 +40,16 @@ class VMwareObj:
         except Exception as e:
             raise e
 
+
+
+    ####################################################################################################################
+    # Protected methods
+    ####################################################################################################################
+
+    @staticmethod
+    def _getMoId(self) -> dict:
+        try:
+            return vmwareObj._GetMoId()
+
+        except Exception as e:
+            raise e
