@@ -81,6 +81,16 @@ class HostSystem(VMwareDjangoObj):
     ####################################################################################################################
 
     @staticmethod
+    def listHostsInClusterObjects(cluster: object) -> list: # (List of vim.Hostsystem)
+        try:
+            return cluster.host
+
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
     # vCenter cluster pyVmomi objects list.
     def list(assetId, silent: bool = True) -> dict:
         hosts = list()

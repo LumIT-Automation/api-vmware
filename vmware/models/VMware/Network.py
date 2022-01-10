@@ -123,6 +123,16 @@ class Network(VMwareDjangoObj):
 
 
     @staticmethod
+    def listNetworksInClusterObjects(cluster: object) -> list: # (List of vim.Hostsystem)
+        try:
+            return cluster.network
+
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
     # vCenter networks pyVmomi objects list.
     def listNetworksObjects(assetId, silent: bool = None) -> list:
         netObjList = list()

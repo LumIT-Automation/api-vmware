@@ -58,6 +58,7 @@ class Task(VMwareDjangoObj):
             vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(self.assetId, silent)
             taskManager = vClient.content.taskManager
             for task in taskManager.recentTask:
+                Log.log(task, 'TTTTTTTTTTTTTT')
                 if task.info.key == self.moId:
                     self.vmwareObj = task
 

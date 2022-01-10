@@ -91,7 +91,6 @@ class VMwareVirtualMachineTemplateController(CustomController):
 
                         template = VirtualMachineTemplate(assetId, moId)
                         template.deployVM(serializer.validated_data["data"])
-                        response = template.deployVM(request.data["data"])
                         httpStatus = status.HTTP_201_CREATED
                         lock.release()
                     else:

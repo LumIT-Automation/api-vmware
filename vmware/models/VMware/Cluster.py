@@ -1,6 +1,9 @@
 from pyVmomi import vim, vmodl
 
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VMware.HostSystem import HostSystem
+from vmware.models.VMware.Datastore import Datastore
+from vmware.models.VMware.Network import Network
 
 from vmware.helpers.VMwareObj import VMwareObj
 from vmware.helpers.Log import Log
@@ -44,10 +47,10 @@ class Cluster(VMwareDjangoObj):
 
 
 
-    def listHostsObjects(self) -> list:
+    def listHostsObjects(self) -> list: # (List of vim.Hostsystem)
         try:
             self.getVMwareObject()
-            return self.vmwareObj.host
+            return HostSystem.listHostsInClusterObjects(self.vmwareObj)
 
         except Exception as e:
             raise e
@@ -57,7 +60,7 @@ class Cluster(VMwareDjangoObj):
     def listDatastoresObjects(self) -> list:
         try:
             self.getVMwareObject()
-            return self.vmwareObj.datastore
+            return Datastore.listDatastoresInClusterObjects(self.vmwareObj)
 
         except Exception as e:
             raise e
@@ -67,7 +70,7 @@ class Cluster(VMwareDjangoObj):
     def listNetworksObjects(self) -> list:
         try:
             self.getVMwareObject()
-            return self.vmwareObj.network
+            return Network.listNetworksInClusterObjects(self.vmwareObj)
 
         except Exception as e:
             raise e

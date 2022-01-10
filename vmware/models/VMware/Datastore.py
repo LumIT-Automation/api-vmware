@@ -121,6 +121,16 @@ class Datastore(VMwareDjangoObj):
 
 
     @staticmethod
+    def listDatastoresInClusterObjects(cluster: object) -> list: # (List of vim.Hostsystem)
+        try:
+            return cluster.datastore
+
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
     # vCenter datastores pyVmomi objects list.
     def listDatastoresObjects(assetId, silent: bool = True) -> list:
         dsObjList = list()

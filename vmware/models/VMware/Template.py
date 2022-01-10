@@ -31,21 +31,6 @@ class VirtualMachineTemplate(VirtualMachine):
 
 
 
-    # https://github.com/vmware/pyvmomi-community-samples/blob/master/samples/clone_vm.py
-    def waitForTask(self, task):
-        """ wait for a vCenter task to finish """
-        task_done = False
-        while not task_done:
-            if task.info.state == 'success':
-                return task.info.result
-
-            if task.info.state == 'error':
-                print("there was an error")
-                print(task.info.error)
-                task_done = True
-
-
-
     def deployVM(self, data: dict) -> dict:
         clusterObj = None
         datastoreObj = None
@@ -91,10 +76,8 @@ class VirtualMachineTemplate(VirtualMachine):
             cloneSpec.powerOn = data["powerOn"]
 
             self.getVMwareObject()
-            templateObj = self.vmwareObj
             # Deploy
-            task = templateObj.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
-            # self.waitForTask(task)
+            task = self.vmwareObj.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
 
             return dict({
                 "task": task._GetMoId()
