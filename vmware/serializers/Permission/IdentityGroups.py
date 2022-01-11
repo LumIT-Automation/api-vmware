@@ -3,7 +3,13 @@ from vmware.models.Permission.Privilege import Privilege
 from vmware.models.Permission.Role import Role
 
 
+
 class IdentityGroupsAssestRolesSubItems(serializers.Serializer):
+    moId = serializers.CharField(max_length=64, required=True)
+    name = serializers.CharField(max_length=64, required=True)
+    assetId = serializers.IntegerField(required=True)
+
+class IdentityGroupsAssetsPrivilegesSubItems(serializers.Serializer):
     moId = serializers.CharField(max_length=64, required=True)
     name = serializers.CharField(max_length=64, required=True)
     assetId = serializers.IntegerField(required=True)
@@ -26,7 +32,7 @@ class IdentityGroupsSerializer(serializers.Serializer):
                     for af in additionalFields:
                         self.fields[af] = IdentityGroupsAssestRolesSubItems(many=True, required=False)
 
-            class IdentityGroupsAssestPrivilegeItems(serializers.Serializer):
+            class IdentityGroupsAssetsPrivilegeItems(serializers.Serializer):
                 def __init__(self, *args, **kwargs):
                     super().__init__(*args, **kwargs)
 
@@ -38,13 +44,13 @@ class IdentityGroupsSerializer(serializers.Serializer):
                             additionalFields.append(additionalField["privilege"])
 
                     for af in additionalFields:
-                        self.fields[af] = IdentityGroupsAssestRolesSubItems(many=True, required=False)
+                        self.fields[af] = IdentityGroupsAssetsPrivilegesSubItems(many=True, required=False)
 
             name = serializers.CharField(max_length=64, required=True)
             identity_group_identifier = serializers.CharField(max_length=255, required=True)
 
             roles_object = IdentityGroupsAssestRolesItems(required=False)
-            privileges_object = IdentityGroupsAssestPrivilegeItems(required=False)
+            privileges_object = IdentityGroupsAssetsPrivilegeItems(required=False)
 
         items = IdentityGroupsAssestItems(many=True)
 

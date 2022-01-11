@@ -34,15 +34,15 @@ class Authorization:
                         "privilege.privilege, "
                         "IFNULL( "
                             "GROUP_CONCAT( "
-                                "DISTINCT CONCAT(vmFolder.id_asset,'::',vmFolder.moId,'::',vmFolder.name) "
-                                "ORDER BY vmFolder.moId SEPARATOR ',' "
+                                "DISTINCT CONCAT(vmObject.id_asset,'::',vmObject.moId,'::',vmObject.name) "
+                                "ORDER BY vmObject.moId SEPARATOR ',' "
                             "), ''"
                         ") AS privilege_objects "                  
                         "FROM identity_group "
                         "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                         "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
                         "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                        "LEFT JOIN vmFolder ON vmFolder.moId = group_role_object.id_object AND vmFolder.id_asset = group_role_object.id_asset "
+                        "LEFT JOIN vmObject ON vmObject.moId = group_role_object.id_object AND vmObject.id_asset = group_role_object.id_asset "
                         "WHERE ("+groupWhere[:-4]+") " +
                         "GROUP BY privilege.privilege "
 

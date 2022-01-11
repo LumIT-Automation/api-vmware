@@ -150,9 +150,9 @@ class Asset:
                 )
                 aId = c.lastrowid
 
-                # When inserting an asset, add the "any" vmFolder (Permission).
-                from vmware.models.Permission.VMFolder import VMFolder as PermissionVMFolder
-                PermissionVMFolder.add("any", aId, "any", "All the folders of this vCenter")
+                # When inserting an asset, add the "any" vmObject (Permission).
+                from vmware.models.Permission.VMObject import VMObject as PermissionVMObject
+                PermissionVMObject.add("any", aId, "any", "All the folders of this vCenter")
 
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})

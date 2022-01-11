@@ -142,21 +142,21 @@ class IdentityGroup:
                 "identity_group.*, " 
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmFolder.moId,'::',vmFolder.name,'::',vmFolder.id_asset)) " 
+                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset)) " 
                     "ORDER BY role.id "
                     "SEPARATOR ',' "
                 "), '') AS roles_object, "
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(privilege.privilege,'::',vmFolder.moId,'::',vmFolder.name,'::',vmFolder.id_asset) " 
+                    "DISTINCT CONCAT(privilege.privilege,'::',vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset) " 
                     "ORDER BY privilege.id "
                     "SEPARATOR ',' "
-                "), '') AS privilege_object "
+                "), '') AS privileges_object "
 
                 "FROM identity_group "
                 "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                 "LEFT JOIN role ON role.id = group_role_object.id_role "
-                "LEFT JOIN `vmFolder` ON `vmFolder`.moId = group_role_object.id_object "
+                "LEFT JOIN `vmObject` ON `vmObject`.moId = group_role_object.id_object "
                 "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
                 "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
                 "GROUP BY identity_group.id"
@@ -171,7 +171,7 @@ class IdentityGroup:
             #    "name": "groupStaff",
             #    "identity_group_identifier": "cn=groupStaff,cn=users,dc=lab,dc=local",
             #    "roles_object": "staff::group-v1082::Varie::1",
-            #    "privilege_object": "asset_get::group-v1082::Varie::1,vmfolder_get::group-v1082::Varie::1, ..."
+            #    "privileges_object": "asset_get::group-v1082::Varie::1,vmObject_get::group-v1082::Varie::1, ..."
             # },
             # ...
             # ]
@@ -205,18 +205,18 @@ class IdentityGroup:
 
 
                 if showPrivileges:
-                    pStructure = gcP.makeDict(el["privilege_object"])
+                    pStructure = gcP.makeDict(el["privileges_object"])
                     privStructure = dict()
                     for ps in pStructure:
-                        priv = ps["privilege"]
-                        if not priv in privStructure:
-                            privStructure[priv] = list()
+                        privilege = ps["privilege"]
+                        if not privilege in privStructure:
+                            privStructure[privilege] = list()
 
-                        privStructure[priv].append(ps)
-                    el["privilege_object"] = privStructure
+                        privStructure[privilege].append(ps)
+                    el["privileges_object"] = privStructure
 
                 else:
-                    del items[j]["privilege_object"]
+                    del items[j]["privileges_object"]
 
                 j = j+1
 

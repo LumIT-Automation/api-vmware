@@ -46,7 +46,7 @@ CREATE TABLE `asset` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `group_role_vmFolder`
+-- Struttura della tabella `group_role_object`
 --
 
 CREATE TABLE `group_role_object` (
@@ -102,10 +102,10 @@ CREATE TABLE `migrations` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `vmFolder`
+-- Struttura della tabella `vmObject`
 --
 
-CREATE TABLE `vmFolder` (
+CREATE TABLE `vmObject` (
   `moId` varchar(64) NOT NULL,
   `id_asset` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -160,7 +160,7 @@ ALTER TABLE `asset`
   ADD UNIQUE KEY `address` (`address`);
 
 --
--- Indici per le tabelle `group_role_vmFolder`
+-- Indici per le tabelle `group_role_object`
 --
 ALTER TABLE `group_role_object`
   ADD PRIMARY KEY (`id`);
@@ -187,9 +187,9 @@ ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `vmFolder`
+-- Indici per le tabelle `vmObject`
 --
-ALTER TABLE `vmFolder`
+ALTER TABLE `vmObject`
   ADD PRIMARY KEY (`moId`,`id_asset`),
   ADD KEY `name` (`name`),
   ADD KEY `p_asset` (`id_asset`);
@@ -226,7 +226,7 @@ ALTER TABLE `asset`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `group_role_vmFolder`
+-- AUTO_INCREMENT per la tabella `group_role_object`
 --
 ALTER TABLE `group_role_object`
   MODIFY `id` int(255) NOT NULL AUTO_INCREMENT;
@@ -266,17 +266,17 @@ ALTER TABLE `role`
 --
 
 --
--- Limiti per la tabella `group_role_vmFolder`
+-- Limiti per la tabella `group_role_object`
 --
 ALTER TABLE `group_role_object`
   ADD CONSTRAINT `gro_group` FOREIGN KEY (`id_group`) REFERENCES `identity_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `gro_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `gro_assetObject` FOREIGN KEY (`id_object`,`id_asset`) REFERENCES `vmFolder` (`moId`,`id_asset`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `gro_assetObject` FOREIGN KEY (`id_object`,`id_asset`) REFERENCES `vmObject` (`moId`,`id_asset`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Limiti per la tabella `vmFolder`
+-- Limiti per la tabella `vmObject`
 --
-ALTER TABLE `vmFolder`
+ALTER TABLE `vmObject`
   ADD CONSTRAINT `p_asset` FOREIGN KEY (`id_asset`) REFERENCES `asset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --

@@ -167,10 +167,10 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 
 --
 --
--- Dump dei dati per la tabella `vmFolder`
+-- Dump dei dati per la tabella `vmObject`
 --
 
-INSERT INTO `vmFolder` (`moId`, `id_asset`, `name`, `description`) VALUES
+INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `description`) VALUES
 ('any', 1, 'any', 'All the folders of this vCenter'),
 ('group-v2478', 1, 'rrivarie', '');
 

@@ -1,5 +1,5 @@
 from vmware.models.Permission.Role import Role
-from vmware.models.Permission.VMFolder import VMFolder as VMFolderPermission
+from vmware.models.Permission.VMObject import VMObject as vmObjectPermission
 
 from vmware.models.VMware.VMFolder import VMFolder
 
@@ -36,12 +36,12 @@ class Permission:
                 if role == "admin":
                     moId = "any"  # if admin: "any" is the only valid choice (on selected assetId).
                 else:
-                    # VMFolderPermission id. If vmFolder does not exist, create it.
-                    f = VMFolderPermission(assetId=assetId, moId=moId)
+                    # vmObjectPermission id. If vmObject does not exist, create it.
+                    f = vmObjectPermission(assetId=assetId, moId=moId)
                     if not f.exists():
-                        VMFolderPermission.add(moId, assetId, name)
+                        vmObjectPermission.add(moId, assetId, name)
 
-                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s, id_asset=%s, WHERE id=%s", [
+                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s, id_asset=%s WHERE id=%s", [
                     identityGroupId, # AD or RADIUS group.
                     roleId,
                     moId,
@@ -102,12 +102,12 @@ class Permission:
                     assetWhere = "AND group_role_object.id_asset = %s "
 
                 if objectId:
-                    f = VMFolder(assetId, objectId)
+                    f = vmObject(assetId, objectId)
                     foldersMoIdsList = f.parentList()
-                    objectWhere = "AND (vmFolder.moId = 'any' " # if "any" appears in the query results so far -> pass.
+                    objectWhere = "AND (vmObject.moId = 'any' " # if "any" appears in the query results so far -> pass.
                     for moId in foldersMoIdsList:
                         args.append(moId)
-                        objectWhere += "OR vmFolder.moId = %s "
+                        objectWhere += "OR vmObject.moId = %s "
                     objectWhere += ") "
 
                 args.append(action)
@@ -118,7 +118,7 @@ class Permission:
                         "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
                         "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
                         "LEFT JOIN asset ON asset.id = group_role_object.id_asset "
-                        "LEFT JOIN vmFolder ON vmFolder.moId = group_role_object.id_object "
+                        "LEFT JOIN vmObject ON vmObject.moId = group_role_object.id_object "
                        
                     "WHERE ("+groupWhere[:-4]+") " +
                     assetWhere +
@@ -151,14 +151,14 @@ class Permission:
                     "identity_group.name AS identity_group_name, "
                     "identity_group.identity_group_identifier AS identity_group_identifier, "
                     "role.role AS role, "
-                    "vmFolder.moId AS object_id, "
-                    "vmFolder.id_asset AS object_asset, "
-                    "vmFolder.name AS object_name "
+                    "vmObject.moId AS object_id, "
+                    "vmObject.id_asset AS object_asset, "
+                    "vmObject.name AS object_name "
                                     
                     "FROM identity_group "
                     "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                     "LEFT JOIN role ON role.id = group_role_object.id_role "
-                    "LEFT JOIN `vmFolder` ON vmFolder.moId = group_role_object.id_object AND vmFolder.id_asset = group_role_object.id_asset "
+                    "LEFT JOIN `vmObject` ON vmObject.moId = group_role_object.id_object AND vmObject.id_asset = group_role_object.id_asset "
                     "WHERE role.role IS NOT NULL ")
             l = DBHelper.asDict(c)
 
@@ -196,10 +196,10 @@ class Permission:
             if role == "admin":
                 moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
             else:
-                # VMFolderPermission id. If vmFolder does not exist, create it.
-                f = VMFolderPermission(assetId=assetId, moId=moId, name=name)
+                # vmObjectPermission id. If vmObject does not exist, create it.
+                f = vmObjectPermission(assetId=assetId, moId=moId, name=name)
                 if not f.exists():
-                    VMFolderPermission.add(moId, assetId, name)
+                    vmObjectPermission.add(moId, assetId, name)
 
             c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object, id_asset) VALUES (NULL, %s, %s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.

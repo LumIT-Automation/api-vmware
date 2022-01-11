@@ -3,16 +3,16 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from vmware.models.Permission.Permission import Permission
-from vmware.models.Permission.VMFolder import VMFolder
+from vmware.models.Permission.VMObject import VMObject
 
-from vmware.serializers.Permission.VMFolder import PermissionVMFoldersSerializer as Serializer
+from vmware.serializers.Permission.VMObject import PermissionVMObjectsSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Log import Log
 
 
-class PermissionVMFoldersController(CustomController):
+class PermissionVMObjectsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
@@ -22,10 +22,10 @@ class PermissionVMFoldersController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="permission_vmfolders_get") or user["authDisabled"]:
-                Log.actionLog("Permissions vmFolders list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="permission_vmobject_get") or user["authDisabled"]:
+                Log.actionLog("Permissions vmware objects list", user)
 
-                itemData["data"] = VMFolder.list()
+                itemData["data"] = VMObject.list()
 
                 serializer = Serializer(data=itemData)
                 if serializer.is_valid():
