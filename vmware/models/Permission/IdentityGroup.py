@@ -142,13 +142,13 @@ class IdentityGroup:
                 "identity_group.*, " 
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset)) " 
+                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset,'::',vmObject.object_type)) " 
                     "ORDER BY role.id "
                     "SEPARATOR ',' "
                 "), '') AS roles_object, "
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(privilege.privilege,'::',vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset) " 
+                    "DISTINCT CONCAT(privilege.privilege,'::',vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset,'::',vmObject.object_type) " 
                     "ORDER BY privilege.id "
                     "SEPARATOR ',' "
                 "), '') AS privileges_object "
@@ -170,22 +170,23 @@ class IdentityGroup:
             #    "id": 2,
             #    "name": "groupStaff",
             #    "identity_group_identifier": "cn=groupStaff,cn=users,dc=lab,dc=local",
-            #    "roles_object": "staff::group-v1082::Varie::1",
-            #    "privileges_object": "asset_get::group-v1082::Varie::1,vmObject_get::group-v1082::Varie::1, ..."
+            #    "roles_object": "staff::group-v1082::Varie::1::folder",
+            #    "privileges_object": "asset_get::group-v1082::Varie::1::folder,vmObject_get::group-v1082::Varie::1::folder, ..."
             # },
             # ...
             # ]
 
-            gcR = GroupConcatToDict(["role", "moId", "name", "assetId"])
-            gcP = GroupConcatToDict(["privilege", "moId", "name","assetId"])
+            gcR = GroupConcatToDict(["role", "moId", "name", "assetId","object_type"])
+            gcP = GroupConcatToDict(["privilege", "moId", "name","assetId","object_type"])
             """
-                rStructure data example:
+                rStructure data sample:
                  [
                     {
                         "role": "staff", 
                         "moId": "group-v1082",
                         "name": "Varie"
-                        "assetId": "1", 
+                        "assetId": "1",
+                        "object_type": "folder" 
                     }, 
                     {
                         ...

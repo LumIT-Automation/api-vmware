@@ -60,6 +60,7 @@ class PermissionController(CustomController):
                         data["role"],
                         data["object"]["id_asset"],
                         data["object"]["moId"],
+                        data["object"]["object_type"],
                         data["object"]["name"]
                     )
 

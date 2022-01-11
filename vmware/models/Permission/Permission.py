@@ -24,7 +24,7 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroupId: int, role: str, assetId: int, moId: str, name: str="") -> None:
+    def modify(self, identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str="") -> None:
         c = connection.cursor()
 
         if self.permissionId:
@@ -37,9 +37,9 @@ class Permission:
                     moId = "any"  # if admin: "any" is the only valid choice (on selected assetId).
                 else:
                     # vmObjectPermission id. If vmObject does not exist, create it.
-                    f = vmObjectPermission(assetId=assetId, moId=moId)
+                    f = vmObjectPermission(assetId=assetId, moId=moId, objectType=objectType)
                     if not f.exists():
-                        vmObjectPermission.add(moId, assetId, name)
+                        vmObjectPermission.add(moId, assetId, name, objectType)
 
                 c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s, id_asset=%s WHERE id=%s", [
                     identityGroupId, # AD or RADIUS group.
@@ -153,7 +153,8 @@ class Permission:
                     "role.role AS role, "
                     "vmObject.moId AS object_id, "
                     "vmObject.id_asset AS object_asset, "
-                    "vmObject.name AS object_name "
+                    "vmObject.name AS object_name, "
+                    "vmObject.object_type "
                                     
                     "FROM identity_group "
                     "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
@@ -166,12 +167,14 @@ class Permission:
                 el["object"] = {
                     "asset_id": el["object_asset"],
                     "moId": el["object_id"],
-                    "name": el["object_name"]
+                    "name": el["object_name"],
+                    "object_type": el["object_type"]
                 }
 
                 del(el["object_asset"])
-                del (el["object_id"])
+                del(el["object_id"])
                 del(el["object_name"])
+                del(el["object_type"])
 
             return {
                 "items": l
@@ -185,7 +188,7 @@ class Permission:
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, assetId: int, moId: str, name: str="") -> None:
+    def add(identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str="") -> None:
         c = connection.cursor()
 
         try:
@@ -197,9 +200,9 @@ class Permission:
                 moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
             else:
                 # vmObjectPermission id. If vmObject does not exist, create it.
-                f = vmObjectPermission(assetId=assetId, moId=moId, name=name)
+                f = vmObjectPermission(assetId=assetId, moId=moId, objectType=objectType, name=name)
                 if not f.exists():
-                    vmObjectPermission.add(moId, assetId, name)
+                    vmObjectPermission.add(moId, assetId, name, objectType)
 
             c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object, id_asset) VALUES (NULL, %s, %s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.

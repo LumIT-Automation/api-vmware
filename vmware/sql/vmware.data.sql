@@ -170,9 +170,12 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 -- Dump dei dati per la tabella `vmObject`
 --
 
-INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `description`) VALUES
-('any', 1, 'any', 'All the folders of this vCenter'),
-('group-v2478', 1, 'rrivarie', '');
+INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `object_type`, `description`) VALUES
+('any', 1, 'any', 'any_type', 'All the objects of this vCenter'),
+('any_f', 1, 'any_folder', 'folder', 'All the folders of this vCenter'),
+('any_n', 1, 'any_network', 'network', 'All the networks of this vCenter'),
+('any_d', 1, 'any_datastore', 'datastore', 'All the datastores of this vCenter'),
+('group-v2478', 1, 'rrivarie', 'folder', '');
 
 
 --
