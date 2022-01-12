@@ -90,7 +90,7 @@ class IdentityGroup:
                     for roleName, objectsList in roles.items():
                         for objectDict in objectsList:
                             try:
-                                Permission.add(identityGroupId, roleName, objectDict["assetId"], objectDict["moId"], objectDict["name"])
+                                Permission.add(identityGroupId, roleName, objectDict["assetId"], objectDict["moId"], objectDict["object_type"], objectDict["name"])
                             except Exception:
                                 pass
 
@@ -280,7 +280,7 @@ class IdentityGroup:
                 for roleName, objectsList in roles.items():
                     for objectDict in objectsList:
                         try:
-                            Permission.add(igId, roleName, objectDict["assetId"], objectDict["moId"], objectDict["name"])
+                            Permission.add(igId, roleName, objectDict["assetId"], objectDict["moId"], objectDict["object_type"], objectDict["name"])
                         except Exception:
                             pass
 

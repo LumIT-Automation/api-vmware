@@ -34,7 +34,7 @@ class Authorization:
                         "privilege.privilege, "
                         "IFNULL( "
                             "GROUP_CONCAT( "
-                                "DISTINCT CONCAT(vmObject.id_asset,'::',vmObject.moId,'::',vmObject.name) "
+                                "DISTINCT CONCAT(vmObject.id_asset,'::',vmObject.moId,'::',vmObject.name,'::',vmObject.object_type) "
                                 "ORDER BY vmObject.moId SEPARATOR ',' "
                             "), ''"
                         ") AS privilege_objects "                  
@@ -51,7 +51,7 @@ class Authorization:
                 c.execute(query, groups)
                 items = DBHelper.asDict(c)
 
-                aIn = GroupConcatToDict(["assetId", "moId", "objectName"])
+                aIn = GroupConcatToDict(["assetId", "moId", "objectName", "object_type"])
 
                 for el in items:
                     if el["privilege_objects"]:
