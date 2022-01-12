@@ -98,50 +98,61 @@ class VMObject:
 
 
     @staticmethod
-    def add(moId: str, assetId: int, objectName: str, objectType: str, description: str="") -> int:
+    def add(moId: str, assetId: int, objectName: str, objectType: str, description: str = "") -> int:
+        object_id = ""
+        object_type = ""
+        object_name = ""
         c = connection.cursor()
 
-        # Check if the objectName is exists in the vCenter server (skip for "any").
+        # Check if the objectName is exists in the vCenter server. Skip for "any".
         if moId == "any":
             object_id = "any"
             object_name = "any"
+            object_type = "any_type"
         elif moId == "any_f":
             object_id = "any_f"
             object_name = "any_folder"
+            object_type = "folder"
         elif moId == "any_n":
             object_id = "any_n"
             object_name = "any_network"
+            object_type = "network"
         elif moId == "any_d":
             object_id = "any_d"
             object_name = "any_datastore"
+            object_type = "datastore"
         else:
             if objectType == 'folder':
-
                 vCentervmObjects = vCemterVMFolder.list(assetId)["items"]
                 for v in vCentervmObjects:
-                    Log.log(v["moId"], '_')
                     if v["moId"] == moId and v["name"] == objectName:
                         object_id = v["moId"]
                         object_name = v["name"]
+                        object_type = 'folder'
             elif objectType == 'network':
                 vCentervmObjects = vCenterNetwork.list(assetId)["items"]
                 for n in vCentervmObjects:
                     if n["moId"] == moId and n["name"] == objectName:
                         object_id = n["moId"]
                         object_name = n["name"]
+                        object_type = 'network'
             elif objectType == 'datastore':
                 vCentervmObjects = vCenterDatastore.list(assetId)["items"]
                 for d in vCentervmObjects:
                     if d["moId"] == moId and d["name"] == objectName:
                         object_id = d["moId"]
                         object_name = d["name"]
+                        object_type = 'datastore'
+
+        if not object_id or not object_type:
+            raise CustomException(status=400, payload={"VMware": "Object id not found in vCenter"})
 
         try:
             c.execute("INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `object_type`, `description`) VALUES (%s, %s, %s, %s, %s)", [
                 object_id,
                 assetId,
                 object_name,
-                objectType,
+                object_type,
                 description
             ])
 

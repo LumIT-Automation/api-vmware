@@ -24,7 +24,7 @@ class VMwareDatastoreController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="datastore_get", assetId=assetId) or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="datastore_get", assetId=assetId, objectId=moId, object_type="datastore") or user["authDisabled"]:
                 Log.actionLog("Datastore info", user)
 
                 lock = Lock("datastore", locals(), moId)

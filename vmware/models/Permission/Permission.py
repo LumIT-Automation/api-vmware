@@ -114,8 +114,10 @@ class Permission:
                             objectWhere += ") "
                     elif object_type == "datastore":
                         objectWhere = "AND (vmObject.moId = 'any_d' OR vmObject.moId = %s) " # "any_d" == any datastore -> pass.
+                        args.append(objectId)
                     elif object_type == "network":
                         objectWhere = "AND (vmObject.moId = 'any_n' OR vmObject.moId = %s) " # "any_n" == any network -> pass.
+                        args.append(objectId)
                     else:
                         raise CustomException(status=400, payload={"database": "\"object_type\" can have only one of these values: folder,datastore,network"})
 
@@ -197,7 +199,7 @@ class Permission:
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str="") -> None:
+    def add(identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str = "") -> None:
         c = connection.cursor()
 
         try:
@@ -209,9 +211,9 @@ class Permission:
                 moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
             else:
                 # vmObjectPermission id. If vmObject does not exist, create it.
-                o = vmObjectPermission(assetId=assetId, moId=moId)
+                o = vmObjectPermission(assetId=assetId, moId=moId, objectType=objectType)
                 if not o.exists():
-                    vmObjectPermission.add(moId, assetId, name, objectType)
+                    vmObjectPermission.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
 
             c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object, id_asset) VALUES (NULL, %s, %s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.
