@@ -175,7 +175,7 @@ INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `object_type`, `description`
 ('any_f', 1, 'any_folder', 'folder', 'All the folders of this vCenter'),
 ('any_n', 1, 'any_network', 'network', 'All the networks of this vCenter'),
 ('any_d', 1, 'any_datastore', 'datastore', 'All the datastores of this vCenter'),
-('group-v2478', 1, 'rrivarie', 'folder', '');
+('group-v2477', 1, 'rrivarie', 'folder', '');
 
 
 --
@@ -184,7 +184,7 @@ INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `object_type`, `description`
 
 INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`, `id_asset`) VALUES
 (1, 1, 1, 'any', 1),
-(2, 2, 2, 'group-v2478', 1);
+(2, 2, 2, 'group-v2477', 1);
 
 
 COMMIT;

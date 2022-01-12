@@ -37,8 +37,8 @@ class Permission:
                     moId = "any"  # if admin: "any" is the only valid choice (on selected assetId).
                 else:
                     # vmObjectPermission id. If vmObject does not exist, create it.
-                    f = vmObjectPermission(assetId=assetId, moId=moId, objectType=objectType)
-                    if not f.exists():
+                    o = vmObjectPermission(assetId=assetId, moId=moId)
+                    if not o.exists():
                         vmObjectPermission.add(moId, assetId, name, objectType)
 
                 c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s, id_asset=%s WHERE id=%s", [
@@ -77,7 +77,7 @@ class Permission:
     ####################################################################################################################
 
     @staticmethod
-    def hasUserPermission(groups: list, action: str, assetId: int = 0, objectId: str="") -> bool:
+    def hasUserPermission(groups: list, action: str, assetId: int = 0, objectId: str = "", object_type: str = "") -> bool:
         if action and groups:
             args = groups.copy()
             assetWhere = ""
@@ -102,13 +102,22 @@ class Permission:
                     assetWhere = "AND group_role_object.id_asset = %s "
 
                 if objectId:
-                    f = vmObject(assetId, objectId)
-                    foldersMoIdsList = f.parentList()
-                    objectWhere = "AND (vmObject.moId = 'any' " # if "any" appears in the query results so far -> pass.
-                    for moId in foldersMoIdsList:
-                        args.append(moId)
-                        objectWhere += "OR vmObject.moId = %s "
-                    objectWhere += ") "
+                    objectWhere = "AND vmObject.moId = 'any' "  # if "any" appears in the query results so far -> pass.
+                    if object_type == "folder":
+                            f = VMFolder(assetId, objectId)
+                            foldersMoIdsList = f.parentList()
+                            foldersMoIdsList.append(objectId)
+                            objectWhere = "AND (vmObject.moId = 'any_f' " # "any_f" == any folder -> pass.
+                            for moId in foldersMoIdsList:
+                                args.append(moId)
+                                objectWhere += "OR vmObject.moId = %s "
+                            objectWhere += ") "
+                    elif object_type == "datastore":
+                        objectWhere = "AND (vmObject.moId = 'any_d' OR vmObject.moId = %s) " # "any_d" == any datastore -> pass.
+                    elif object_type == "network":
+                        objectWhere = "AND (vmObject.moId = 'any_n' OR vmObject.moId = %s) " # "any_n" == any network -> pass.
+                    else:
+                        raise CustomException(status=400, payload={"database": "\"object_type\" can have only one of these values: folder,datastore,network"})
 
                 args.append(action)
 
@@ -200,8 +209,8 @@ class Permission:
                 moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
             else:
                 # vmObjectPermission id. If vmObject does not exist, create it.
-                f = vmObjectPermission(assetId=assetId, moId=moId, objectType=objectType, name=name)
-                if not f.exists():
+                o = vmObjectPermission(assetId=assetId, moId=moId)
+                if not o.exists():
                     vmObjectPermission.add(moId, assetId, name, objectType)
 
             c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object, id_asset) VALUES (NULL, %s, %s, %s, %s)", [

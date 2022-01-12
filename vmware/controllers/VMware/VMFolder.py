@@ -24,7 +24,7 @@ class VMwareVMFolderController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="folder_get", assetId=assetId, objectId=moId) or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="folder_get", assetId=assetId, objectId=moId, object_type="folder") or user["authDisabled"]:
                 Log.actionLog("VMFolder properties", user)
 
                 lock = Lock("vmFolder", locals(), moId)
@@ -84,7 +84,7 @@ class VMwareVMFolderParentListController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="folder_get", assetId=assetId, objectId=moId) or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="folder_get", assetId=assetId, objectId=moId, object_type="folder") or user["authDisabled"]:
                 Log.actionLog("VMFolder properties", user)
 
                 lock = Lock("vmFolder", locals(), moId)

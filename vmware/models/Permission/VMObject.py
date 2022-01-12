@@ -11,7 +11,7 @@ from vmware.helpers.Log import Log
 
 
 class VMObject:
-    def __init__(self, assetId: int, moId: str, objectType: str, name: str = "", description: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, objectType: str="", name: str = "", description: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId = assetId
