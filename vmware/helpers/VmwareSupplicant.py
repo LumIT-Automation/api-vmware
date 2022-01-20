@@ -53,8 +53,10 @@ class VmwareSupplicant(metaclass=Singleton):
 
     # Get all objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
-    def getAllObjs(self, vimType: list = []) -> object:
+    def getAllObjs(self, vimType: list = None) -> object:
         obj = {}
+        vimType = [] if vimType is None else vimType
+
         Log.actionLog("Get all vmware objects.")
         Log.log(self.ran, 'GGGGGGGGGGGGGGGEEEEEEEEEEEEEE')
 
