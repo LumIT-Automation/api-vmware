@@ -5,6 +5,7 @@ class PermissionsSerializer(serializers.Serializer):
     class PermissionsInnerSerializer(serializers.Serializer):
         class PermissionsItemsSerializer(serializers.Serializer):
             class PermissionsPermissionSerializer(serializers.Serializer):
+                object_id = serializers.IntegerField(required=False)
                 name = serializers.CharField(max_length=63, required=False)
                 moId = serializers.CharField(max_length=63, required=False)
                 asset_id = serializers.IntegerField(required=False)

@@ -156,7 +156,7 @@ class IdentityGroup:
                 "FROM identity_group "
                 "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                 "LEFT JOIN role ON role.id = group_role_object.id_role "
-                "LEFT JOIN `vmObject` ON `vmObject`.moId = group_role_object.id_object "
+                "LEFT JOIN `vmObject` ON `vmObject`.id = group_role_object.id_object "
                 "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
                 "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
                 "GROUP BY identity_group.id"

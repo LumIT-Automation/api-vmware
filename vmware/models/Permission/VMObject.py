@@ -14,6 +14,7 @@ class VMObject:
     def __init__(self, assetId: int, moId: str, objectType: str="", name: str = "", description: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.id = None
         self.assetId = assetId
         self.moId = moId
         self.name = name
@@ -29,7 +30,7 @@ class VMObject:
     def exists(self) -> bool:
         c = connection.cursor()
         try:
-            c.execute("SELECT COUNT(*) AS c FROM `vmObject` WHERE `moId` = %s AND id_asset = %s", [
+            c.execute("SELECT COUNT(*) AS c, id FROM `vmObject` WHERE `moId` = %s AND id_asset = %s", [
                 self.moId,
                 self.assetId
             ])
@@ -148,7 +149,7 @@ class VMObject:
             raise CustomException(status=400, payload={"VMware": "Object id not found in vCenter"})
 
         try:
-            c.execute("INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `object_type`, `description`) VALUES (%s, %s, %s, %s, %s)", [
+            c.execute("INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `object_type`, `description`) VALUES (NULL, %s, %s, %s, %s, %s)", [
                 object_id,
                 assetId,
                 object_name,

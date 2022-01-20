@@ -42,7 +42,7 @@ class Authorization:
                         "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                         "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
                         "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                        "LEFT JOIN vmObject ON vmObject.moId = group_role_object.id_object AND vmObject.id_asset = group_role_object.id_asset "
+                        "LEFT JOIN vmObject ON vmObject.id = group_role_object.id_object "
                         "WHERE ("+groupWhere[:-4]+") " +
                         "GROUP BY privilege.privilege "
 

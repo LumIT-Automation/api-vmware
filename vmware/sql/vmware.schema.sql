@@ -53,8 +53,7 @@ CREATE TABLE `group_role_object` (
   `id` int(255) NOT NULL,
   `id_group` int(11) NOT NULL,
   `id_role` int(11) NOT NULL,
-  `id_object` varchar(64) NOT NULL,
-    `id_asset` int(11) NOT NULL
+  `id_object` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -106,6 +105,7 @@ CREATE TABLE `migrations` (
 --
 
 CREATE TABLE `vmObject` (
+  `id` int(11) NOT NULL,
   `moId` varchar(64) NOT NULL,
   `id_asset` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -165,7 +165,7 @@ ALTER TABLE `asset`
 --
 ALTER TABLE `group_role_object`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uniq_perm` (`id_group`,`id_role`,`id_object`,`id_asset`);
+  ADD UNIQUE KEY `uniq_perm` (`id_group`,`id_role`,`id_object`);
 
 --
 -- Indici per le tabelle `identity_group`
@@ -192,7 +192,8 @@ ALTER TABLE `migrations`
 -- Indici per le tabelle `vmObject`
 --
 ALTER TABLE `vmObject`
-  ADD PRIMARY KEY (`moId`,`id_asset`),
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `moId_assetId` (`moId`,`id_asset`),
   ADD KEY `name` (`name`),
   ADD KEY `p_asset` (`id_asset`);
 
@@ -264,6 +265,12 @@ ALTER TABLE `role`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT per la tabella `vmObject`
+--
+ALTER TABLE `vmObject`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- Limiti per le tabelle scaricate
 --
 
@@ -273,7 +280,7 @@ ALTER TABLE `role`
 ALTER TABLE `group_role_object`
   ADD CONSTRAINT `gro_group` FOREIGN KEY (`id_group`) REFERENCES `identity_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `gro_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `gro_assetObject` FOREIGN KEY (`id_object`,`id_asset`) REFERENCES `vmObject` (`moId`,`id_asset`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `gro_object` FOREIGN KEY (`id_object`) REFERENCES `vmObject` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `vmObject`

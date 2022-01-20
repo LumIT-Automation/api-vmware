@@ -1,5 +1,5 @@
 from vmware.models.Permission.Role import Role
-from vmware.models.Permission.VMObject import VMObject as vmObjectPermission
+from vmware.models.Permission.VMObject import VMObject
 
 from vmware.models.VMware.VMFolder import VMFolder
 
@@ -35,20 +35,21 @@ class Permission:
 
                 if role == "admin":
                     moId = "any"  # if admin: "any" is the only valid choice (on selected assetId).
-                else:
-                    # vmObjectPermission id. If vmObject does not exist, create it.
-                    o = vmObjectPermission(assetId=assetId, moId=moId)
-                    if not o.exists():
-                        vmObjectPermission.add(moId, assetId, name, objectType)
+                    objectType = "any_type"
 
-                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s, id_asset=%s WHERE id=%s", [
+                # Get the VMObject id. If the VMObject does not exist in the db, create it.
+                o = VMObject(assetId=assetId, moId=moId, objectType=objectType)
+                try:
+                    objectId = o.info()["id"]
+                except Exception:
+                    objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
+
+                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s WHERE id=%s", [
                     identityGroupId, # AD or RADIUS group.
                     roleId,
-                    moId,
-                    assetId,
+                    objectId,
                     self.permissionId
                 ])
-
             except Exception as e:
                 raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
@@ -99,27 +100,28 @@ class Permission:
                 # Put all the args of the query in a list.
                 if assetId:
                     args.append(assetId)
-                    assetWhere = "AND group_role_object.id_asset = %s "
+                    assetWhere = "AND vmObject.id_asset = %s "
 
                 if objectId:
-                    objectWhere = "AND vmObject.moId = 'any' "  # if "any" appears in the query results so far -> pass.
+                    objectWhere = "AND ( vmObject.moId = 'any' "  # if "any" appears in the query results so far -> pass.
                     if object_type == "folder":
                             f = VMFolder(assetId, objectId)
                             foldersMoIdsList = f.parentList()
                             foldersMoIdsList.append(objectId)
-                            objectWhere = "AND (vmObject.moId = 'any_f' " # "any_f" == any folder -> pass.
+                            objectWhere += "OR (vmObject.moId = 'any_f' " # "any_f" == any folder -> pass.
                             for moId in foldersMoIdsList:
                                 args.append(moId)
                                 objectWhere += "OR vmObject.moId = %s "
                             objectWhere += ") "
                     elif object_type == "datastore":
-                        objectWhere = "AND (vmObject.moId = 'any_d' OR vmObject.moId = %s) " # "any_d" == any datastore -> pass.
+                        objectWhere += "OR (vmObject.moId = 'any_d' OR vmObject.moId = %s) " # "any_d" == any datastore -> pass.
                         args.append(objectId)
                     elif object_type == "network":
-                        objectWhere = "AND (vmObject.moId = 'any_n' OR vmObject.moId = %s) " # "any_n" == any network -> pass.
+                        objectWhere += "OR (vmObject.moId = 'any_n' OR vmObject.moId = %s) " # "any_n" == any network -> pass.
                         args.append(objectId)
                     else:
                         raise CustomException(status=400, payload={"database": "\"object_type\" can have only one of these values: folder,datastore,network"})
+                    objectWhere += ") "
 
                 args.append(action)
 
@@ -128,8 +130,7 @@ class Permission:
                         "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                         "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
                         "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                        "LEFT JOIN asset ON asset.id = group_role_object.id_asset "
-                        "LEFT JOIN vmObject ON vmObject.moId = group_role_object.id_object "
+                        "LEFT JOIN vmObject ON vmObject.id = group_role_object.id_object "
                        
                     "WHERE ("+groupWhere[:-4]+") " +
                     assetWhere +
@@ -162,7 +163,7 @@ class Permission:
                     "identity_group.name AS identity_group_name, "
                     "identity_group.identity_group_identifier AS identity_group_identifier, "
                     "role.role AS role, "
-                    "vmObject.moId AS object_id, "
+                    "vmObject.id AS object_id, vmObject.moId, "
                     "vmObject.id_asset AS object_asset, "
                     "vmObject.name AS object_name, "
                     "vmObject.object_type "
@@ -170,20 +171,22 @@ class Permission:
                     "FROM identity_group "
                     "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                     "LEFT JOIN role ON role.id = group_role_object.id_role "
-                    "LEFT JOIN `vmObject` ON vmObject.moId = group_role_object.id_object AND vmObject.id_asset = group_role_object.id_asset "
+                    "LEFT JOIN `vmObject` ON vmObject.id = group_role_object.id_object "
                     "WHERE role.role IS NOT NULL ")
             l = DBHelper.asDict(c)
 
             for el in l:
                 el["object"] = {
+                    "object_id": el["object_id"],
                     "asset_id": el["object_asset"],
-                    "moId": el["object_id"],
+                    "moId": el["moId"],
                     "name": el["object_name"],
                     "object_type": el["object_type"]
                 }
 
-                del(el["object_asset"])
                 del(el["object_id"])
+                del(el["object_asset"])
+                del(el["moId"])
                 del(el["object_name"])
                 del(el["object_type"])
 
@@ -209,17 +212,19 @@ class Permission:
 
             if role == "admin":
                 moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
-            else:
-                # vmObjectPermission id. If vmObject does not exist, create it.
-                o = vmObjectPermission(assetId=assetId, moId=moId, objectType=objectType)
-                if not o.exists():
-                    vmObjectPermission.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
+                objectType = "any_type"
 
-            c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object, id_asset) VALUES (NULL, %s, %s, %s, %s)", [
+            # Get the VMObject id. If the VMObject does not exist in the db, create it.
+            o = VMObject(assetId=assetId, moId=moId, objectType=objectType)
+            try:
+                objectId = o.info()["id"]
+            except Exception:
+                objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
+
+            c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object) VALUES (NULL, %s, %s, %s)", [
                 identityGroupId, # AD or RADIUS group.
                 roleId,
-                moId,
-                assetId,
+                objectId
             ])
 
         except Exception as e:

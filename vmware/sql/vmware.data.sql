@@ -172,26 +172,26 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 -- Dump dei dati per la tabella `vmObject`
 --
 
-INSERT INTO `vmObject` (`moId`, `id_asset`, `name`, `object_type`, `description`) VALUES
-('any', 1, 'any', 'any_type', 'All the objects of this vCenter'),
-('any_f', 1, 'any_folder', 'folder', 'All the folders of this vCenter'),
-('any_n', 1, 'any_network', 'network', 'All the networks of this vCenter'),
-('any_d', 1, 'any_datastore', 'datastore', 'All the datastores of this vCenter'),
-('group-v2477', 1, 'rrivarie', 'folder', ''),
-('datastore-2341', 1, 'NFS_Datastore', 'datastore', ''),
-('network-1213', 1, 'LumitLab_18', 'network', '');
+INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `object_type`, `description`) VALUES
+(1, 'any', 1, 'any', 'any_type', 'All the objects of this vCenter'),
+(2, 'any_f', 1, 'any_folder', 'folder', 'All the folders of this vCenter'),
+(3, 'any_n', 1, 'any_network', 'network', 'All the networks of this vCenter'),
+(4, 'any_d', 1, 'any_datastore', 'datastore', 'All the datastores of this vCenter'),
+(5, 'group-v2477', 1, 'rrivarie', 'folder', ''),
+(6, 'datastore-2341', 1, 'NFS_Datastore', 'datastore', ''),
+(7, 'network-1213', 1, 'LumitLab_18', 'network', '');
 
 
 --
 -- Dump dei dati per la tabella `group_role_object`
 --
 
-INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`, `id_asset`) VALUES
-(1, 1, 1, 'any', 1),
-(2, 2, 2, 'group-v2477', 1),
-(3, 2, 2, 'datastore-2341', 1),
-(4, 2, 3, 'any_n', 1),
-(5, 3, 3, 'network-1213', 1);
+INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`) VALUES
+(1, 1, 1, 1),
+(2, 2, 2, 3),
+(3, 2, 2, 5),
+(4, 2, 3, 6),
+(5, 3, 3, 7);
 
 
 
