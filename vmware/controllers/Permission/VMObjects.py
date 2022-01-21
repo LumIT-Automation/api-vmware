@@ -16,7 +16,7 @@ class PermissionVMObjectsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         etagCondition = {"responseEtag": ""}
 
         user = CustomController.loggedUser(request)
@@ -25,7 +25,7 @@ class PermissionVMObjectsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_vmobject_get") or user["authDisabled"]:
                 Log.actionLog("Permissions vmware objects list", user)
 
-                itemData["data"] = VMObject.list()
+                itemData["data"]["items"] = VMObject.list()
 
                 serializer = Serializer(data=itemData)
                 if serializer.is_valid():

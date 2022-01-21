@@ -5,8 +5,8 @@ class Role:
     def __init__(self, roleId: int = 0, roleName: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.roleId = roleId
-        self.roleName = roleName
+        self.id = roleId
+        self.role = roleName
         self.description = ""
 
 
@@ -17,7 +17,7 @@ class Role:
 
     def info(self) -> dict:
         try:
-            return Repository.get(self.roleName)
+            return Repository.get(self.role)
         except Exception as e:
             raise e
 

@@ -86,7 +86,7 @@ class Permission:
 
     @staticmethod
     def hasUserPermission(groups: list, action: str, assetId: int = 0, objectMoId: str = "") -> bool:
-        objectType = VMObject.getObjectType(objectMoId) # Get the vmware object type from the moId.
+        objectType = VMObject.getType(objectMoId) # Get the vmware object type from the moId.
 
         if action and groups:
             args = groups.copy()
