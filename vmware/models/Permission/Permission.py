@@ -85,7 +85,9 @@ class Permission:
     ####################################################################################################################
 
     @staticmethod
-    def hasUserPermission(groups: list, action: str, assetId: int = 0, objectId: str = "", object_type: str = "") -> bool:
+    def hasUserPermission(groups: list, action: str, assetId: int = 0, objectMoId: str = "") -> bool:
+        objectType = VMObject.getObjectType(objectMoId) # Get the vmware object type from the moId.
+
         if action and groups:
             args = groups.copy()
             assetWhere = ""
@@ -109,23 +111,23 @@ class Permission:
                     args.append(assetId)
                     assetWhere = "AND vmware_object.id_asset = %s "
 
-                if objectId:
+                if objectMoId:
                     objectWhere = "AND ( vmware_object.moId = 'any' "  # if "any" appears in the query results so far -> pass.
-                    if object_type == "folder":
-                            f = VMFolder(assetId, objectId)
+                    if objectType == "folder":
+                            f = VMFolder(assetId, objectMoId)
                             foldersMoIdsList = f.parentList()
-                            foldersMoIdsList.append(objectId)
-                            objectWhere += "("
+                            foldersMoIdsList.append(objectMoId)
+                            objectWhere += "OR ("
                             for moId in foldersMoIdsList:
                                 args.append(moId)
                                 objectWhere += "vmware_object.moId = %s OR "
                             objectWhere = objectWhere[:-3]+") "
-                    elif object_type == "datastore":
+                    elif objectType == "datastore":
                         objectWhere += "OR (vmware_object.moId = %s) "
-                        args.append(objectId)
-                    elif object_type == "network":
+                        args.append(objectMoId)
+                    elif objectType == "network":
                         objectWhere += "OR (vmware_object.moId = %s) "
-                        args.append(objectId)
+                        args.append(objectMoId)
                     else:
                         raise CustomException(status=400, payload={"database": "\"object_type\" can have only one of these values: folder,datastore,network"})
                     objectWhere += ") "

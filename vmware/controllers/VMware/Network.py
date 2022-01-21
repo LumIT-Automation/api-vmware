@@ -24,7 +24,7 @@ class VMwareNetworkController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="network_get", assetId=assetId, objectId=moId, object_type="network") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="network_get", assetId=assetId, objectMoId=moId) or user["authDisabled"]:
                 Log.actionLog("Network info", user)
 
                 lock = Lock("network", locals(), moId)

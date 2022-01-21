@@ -55,14 +55,7 @@ class VMObject:
             ])
 
             info = DBHelper.asDict(c)[0]
-            moIdPrefix = self.moId.split('-')[0]
-            if moIdPrefix == "group":
-                objectType = "folder"
-            elif moIdPrefix == "datastore":
-                objectType = "datastore"
-            elif moIdPrefix == "network" or moIdPrefix == "dvportgroup":
-                objectType = "network"
-
+            objectType = VMObject.getObjectType(self.moId)
             info["object_type"] = objectType
             return info
 
@@ -91,6 +84,25 @@ class VMObject:
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
+
+    @staticmethod
+    def getObjectType(moId: str):
+        objectType = ""
+        try:
+            moIdPrefix = moId.split('-')[0]
+            if moIdPrefix == "group":
+                objectType = "folder"
+            elif moIdPrefix == "datastore":
+                objectType = "datastore"
+            elif moIdPrefix == "network" or moIdPrefix == "dvportgroup":
+                objectType = "network"
+
+            return objectType
+
+        except Exception as e:
+            raise CustomException(status=400, payload={"VMware": "Object type not found. Wrong moId?"})
+
+
 
     @staticmethod
     def list() -> dict:
