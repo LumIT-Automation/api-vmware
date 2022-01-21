@@ -1,25 +1,22 @@
 from vmware.models.Permission.Role import Role
 from vmware.models.Permission.VMObject import VMObject
 
-from vmware.models.VMware.VMFolder import VMFolder
-
-from django.db import connection
-from django.conf import settings
-
-from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.Database import Database as DBHelper
 
+from vmware.repository.Permission import Permission as Repository
 
 
 class Permission:
 
     # IdentityGroupRoleObject
 
-    def __init__(self, permissionId: int, *args, **kwargs):
+    def __init__(self, id: int, groupId: int = 0, roleId: int = 0, partitionId: int = 0, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.permissionId = permissionId
+        self.id = id
+        self.id_group = groupId
+        self.id_role = roleId
+        self.id_partition = partitionId
 
 
 
@@ -27,59 +24,42 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str="") -> None:
+    def modify(self, identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str = "") -> None:
         objectId = 0
-        c = connection.cursor()
 
-        if self.permissionId:
+        try:
+            # RoleId.
+            r = Role(roleName=role)
+            roleId = r.info()["id"]
+
+            if role == "admin":
+                moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
+                objectType = ""
+
+            # Get the VMObject id. If the VMObject does not exist in the db, create it.
+            o = VMObject(assetId=assetId, moId=moId)
+
             try:
-                # RoleId.
-                r = Role(roleName=role)
-                roleId = r.info()["id"]
+                objectInfo = o.info()
+                if objectInfo["object_type"] == objectType: # also, check if the object has the right object type.
+                    objectId = objectInfo["id"]
+            except Exception:
+                objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
 
-                if role == "admin":
-                    moId = "any"  # if admin: "any" is the only valid choice (on selected assetId).
-                    objectType = ""
-
-                # Get the VMObject id. If the VMObject does not exist in the db, create it.
-                o = VMObject(assetId=assetId, moId=moId)
-                try:
-                    objectInfo = o.info()
-                    if objectInfo["object_type"] == objectType:  # Also, check if the object have the right object type.
-                        objectId = objectInfo["id"]
-                except Exception:
-                    objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
-
-                if objectId:
-                    c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s WHERE id=%s", [
-                        identityGroupId,  # AD or RADIUS group.
-                        roleId,
-                        objectId,
-                        self.permissionId
-                    ])
-                else:
-                    raise CustomException(status=400, payload={"database": "Object not added to the database (wrong object type?)"})
-
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
+            if objectId:
+                Repository.modify(self.id, identityGroupId, roleId, objectId)
+            else:
+                raise CustomException(status=400, payload={"database": "Object not added to the database (wrong object type?)"})
+        except Exception as e:
+            raise e
 
 
 
     def delete(self) -> None:
-        c = connection.cursor()
-
-        if self.permissionId:
-            try:
-                c.execute("DELETE FROM group_role_object WHERE id = %s", [
-                    self.permissionId
-                ])
-
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
+        try:
+            Repository.delete(self.id)
+        except Exception as e:
+            raise e
 
 
 
@@ -89,108 +69,30 @@ class Permission:
 
     @staticmethod
     def hasUserPermission(groups: list, action: str, assetId: int = 0, objectMoId: str = "") -> bool:
-        objectType = VMObject.getType(objectMoId) # Get the vmware object type from the moId.
+        # Superadmin's group.
+        for gr in groups:
+            if gr.lower() == "automation.local":
+                return True
 
-        if action and groups:
-            args = groups.copy()
-            assetWhere = ""
-            objectWhere = ""
-            c = connection.cursor()
-
-            # Superadmin's group.
-            for gr in groups:
-                if gr.lower() == "automation.local":
-                    return True
-
-            try:
-                # Build the first half of the where condition of the query.
-                # Obtain: WHERE (identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || ....)
-                groupWhere = ''
-                for g in groups:
-                    groupWhere += 'identity_group.identity_group_identifier = %s || '
-
-                # Put all the args of the query in a list.
-                if assetId:
-                    args.append(assetId)
-                    assetWhere = "AND vmware_object.id_asset = %s "
-
-                if objectMoId:
-                    objectWhere = "AND ( vmware_object.moId = 'any' "  # if "any" appears in the query results so far -> pass.
-                    if objectType == "folder":
-                            f = VMFolder(assetId, objectMoId)
-                            foldersMoIdsList = f.parentList()
-                            foldersMoIdsList.append(objectMoId)
-                            objectWhere += "OR ("
-                            for moId in foldersMoIdsList:
-                                args.append(moId)
-                                objectWhere += "vmware_object.moId = %s OR "
-                            objectWhere = objectWhere[:-3]+") "
-                    elif objectType == "datastore":
-                        objectWhere += "OR (vmware_object.moId = %s) "
-                        args.append(objectMoId)
-                    elif objectType == "network":
-                        objectWhere += "OR (vmware_object.moId = %s) "
-                        args.append(objectMoId)
-                    else:
-                        raise CustomException(status=400, payload={"database": "\"object_type\" can have only one of these values: folder,datastore,network"})
-                    objectWhere += ") "
-
-                args.append(action)
-
-                query = ("SELECT COUNT(*) AS count "
-                        "FROM identity_group "
-                        "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
-                        "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
-                        "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                        "LEFT JOIN vmware_object ON vmware_object.id = group_role_object.id_object "
-                       
-                    "WHERE ("+groupWhere[:-4]+") " +
-                    assetWhere +
-                    objectWhere +
-                    "AND privilege.privilege = %s "
+        try:
+            return bool(
+                Repository.countUserPermissions(
+                    groups,
+                    action,
+                    VMObject.getType(objectMoId), # vmware object type from the moId.
+                    assetId,
+                    objectMoId
                 )
-
-                Log.log(query, '_')
-                c.execute(query, args)
-                q = DBHelper.asDict(c)[0]["count"]
-                if q:
-                    return bool(q)
-
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
-
-        return False
+            )
+        except Exception as e:
+            raise e
 
 
 
     @staticmethod
-    def list() -> dict:
-        c = connection.cursor()
-
+    def listIdentityGroupsRolesPartitions() -> list:
         try:
-            c.execute("SELECT "
-                    "group_role_object.id, "
-                    "identity_group.name AS identity_group_name, "
-                    "identity_group.identity_group_identifier AS identity_group_identifier, "
-                    "role.role AS role, "
-                    "vmware_object.id AS object_id, vmware_object.moId, "
-                    "vmware_object.id_asset AS object_asset, "
-                    "vmware_object.name AS object_name, "
-                    "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
-                            "WHEN 'group' THEN 'folder' "
-                            "WHEN 'datastore' THEN 'datastore' "
-                            "WHEN 'network' THEN 'network' "
-                            "WHEN 'dvportgroup' THEN 'network' "
-                    "END) AS object_type "              
-                                    
-                    "FROM identity_group "
-                    "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
-                    "LEFT JOIN role ON role.id = group_role_object.id_role "
-                    "LEFT JOIN `vmware_object` ON vmware_object.id = group_role_object.id_object "
-                    "WHERE role.role IS NOT NULL ")
-            l = DBHelper.asDict(c)
+            l = Repository.listIdentityGroupsRolesPartitions()
 
             for el in l:
                 el["object"] = {
@@ -207,21 +109,15 @@ class Permission:
                 del(el["object_name"])
                 del(el["object_type"])
 
-            return {
-                "items": l
-            }
-
+            return l
         except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
+            raise e
 
 
 
     @staticmethod
     def add(identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str = "") -> None:
         objectId = 0
-        c = connection.cursor()
 
         try:
             # RoleId.
@@ -234,39 +130,17 @@ class Permission:
 
             # Get the VMObject id. If the VMObject does not exist in the db, create it.
             o = VMObject(assetId=assetId, moId=moId)
+
             try:
                 objectInfo = o.info()
-                if objectInfo["object_type"] == objectType: # Also, check if the object have the right object type.
+                if objectInfo["object_type"] == objectType: # also, check if the object has the right object type.
                     objectId = objectInfo["id"]
             except Exception:
                 objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
 
             if objectId:
-                c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object) VALUES (NULL, %s, %s, %s)", [
-                    identityGroupId, # AD or RADIUS group.
-                    roleId,
-                    objectId
-                ])
+                Repository.add(identityGroupId, roleId, objectId)
             else:
                 raise CustomException(status=400, payload={"database": "Object not added to the database (wrong object type?)"})
-
         except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
-    @staticmethod
-    def cleanup(identityGroupId: int) -> None:
-        c = connection.cursor()
-
-        try:
-            c.execute("DELETE FROM group_role_object WHERE id_group = %s", [
-                identityGroupId,
-            ])
-
-        except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
+            raise e
