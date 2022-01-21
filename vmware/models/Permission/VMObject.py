@@ -126,15 +126,6 @@ class VMObject:
         if moId == "any":
             object_id = "any"
             object_name = "any"
-        elif moId == "any_f":
-            object_id = "any_f"
-            object_name = "any_folder"
-        elif moId == "any_n":
-            object_id = "any_n"
-            object_name = "any_network"
-        elif moId == "any_d":
-            object_id = "any_d"
-            object_name = "any_datastore"
         else:
             if objectType == 'folder':
                 vCentervmObjects = vCemterVMFolder.list(assetId)["items"]

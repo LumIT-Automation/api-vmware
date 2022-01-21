@@ -174,12 +174,9 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 
 INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES
 (1, 'any', 1, 'any', 'All the objects of this vCenter'),
-(2, 'any_f', 1, 'any_folder', 'All the folders of this vCenter'),
-(3, 'any_n', 1, 'any_network', 'All the networks of this vCenter'),
-(4, 'any_d', 1, 'any_datastore', 'All the datastores of this vCenter'),
-(5, 'group-v2477', 1, 'rrivarie', ''),
-(6, 'datastore-2341', 1, 'NFS_Datastore', ''),
-(7, 'network-1213', 1, 'LumitLab_18', '');
+(2, 'group-v2477', 1, 'rrivarie', ''),
+(3, 'datastore-2341', 1, 'NFS_Datastore', ''),
+(4, 'network-1213', 1, 'LumitLab_18', '');
 
 
 --
@@ -188,10 +185,9 @@ INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VA
 
 INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`) VALUES
 (1, 1, 1, 1),
-(2, 2, 2, 3),
-(3, 2, 2, 5),
-(4, 2, 3, 6),
-(5, 3, 3, 7);
+(3, 2, 2, 2),
+(4, 2, 3, 3),
+(5, 3, 3, 4);
 
 
 

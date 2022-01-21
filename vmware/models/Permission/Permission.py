@@ -115,16 +115,16 @@ class Permission:
                             f = VMFolder(assetId, objectId)
                             foldersMoIdsList = f.parentList()
                             foldersMoIdsList.append(objectId)
-                            objectWhere += "OR (vmware_object.moId = 'any_f' " # "any_f" == any folder -> pass.
+                            objectWhere += "("
                             for moId in foldersMoIdsList:
                                 args.append(moId)
-                                objectWhere += "OR vmware_object.moId = %s "
-                            objectWhere += ") "
+                                objectWhere += "vmware_object.moId = %s OR "
+                            objectWhere = objectWhere[:-3]+") "
                     elif object_type == "datastore":
-                        objectWhere += "OR (vmware_object.moId = 'any_d' OR vmware_object.moId = %s) " # "any_d" == any datastore -> pass.
+                        objectWhere += "OR (vmware_object.moId = %s) "
                         args.append(objectId)
                     elif object_type == "network":
-                        objectWhere += "OR (vmware_object.moId = 'any_n' OR vmware_object.moId = %s) " # "any_n" == any network -> pass.
+                        objectWhere += "OR (vmware_object.moId = %s) "
                         args.append(objectId)
                     else:
                         raise CustomException(status=400, payload={"database": "\"object_type\" can have only one of these values: folder,datastore,network"})
