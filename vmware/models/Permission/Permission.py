@@ -25,6 +25,7 @@ class Permission:
     ####################################################################################################################
 
     def modify(self, identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str="") -> None:
+        objectId = 0
         c = connection.cursor()
 
         if self.permissionId:
@@ -35,21 +36,27 @@ class Permission:
 
                 if role == "admin":
                     moId = "any"  # if admin: "any" is the only valid choice (on selected assetId).
-                    objectType = "any_type"
+                    objectType = ""
 
                 # Get the VMObject id. If the VMObject does not exist in the db, create it.
-                o = VMObject(assetId=assetId, moId=moId, objectType=objectType)
+                o = VMObject(assetId=assetId, moId=moId)
                 try:
-                    objectId = o.info()["id"]
+                    objectInfo = o.info()
+                    if objectInfo["object_type"] == objectType:  # Also, check if the object have the right object type.
+                        objectId = objectInfo["id"]
                 except Exception:
                     objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
 
-                c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s WHERE id=%s", [
-                    identityGroupId, # AD or RADIUS group.
-                    roleId,
-                    objectId,
-                    self.permissionId
-                ])
+                if objectId:
+                    c.execute("UPDATE group_role_object SET id_group=%s, id_role=%s, id_object=%s WHERE id=%s", [
+                        identityGroupId,  # AD or RADIUS group.
+                        roleId,
+                        objectId,
+                        self.permissionId
+                    ])
+                else:
+                    raise CustomException(status=400, payload={"database": "Object not added to the database (wrong object type?)"})
+
             except Exception as e:
                 raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
@@ -166,7 +173,12 @@ class Permission:
                     "vmObject.id AS object_id, vmObject.moId, "
                     "vmObject.id_asset AS object_asset, "
                     "vmObject.name AS object_name, "
-                    "vmObject.object_type "
+                    "(CASE SUBSTRING_INDEX(vmObject.moId, '-', 1) "
+                            "WHEN 'group' THEN 'folder' "
+                            "WHEN 'datastore' THEN 'datastore' "
+                            "WHEN 'network' THEN 'network' "
+                            "WHEN 'dvportgroup' THEN 'network' "
+                    "END) AS object_type "              
                                     
                     "FROM identity_group "
                     "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
@@ -203,6 +215,7 @@ class Permission:
 
     @staticmethod
     def add(identityGroupId: int, role: str, assetId: int, moId: str, objectType: str, name: str = "") -> None:
+        objectId = 0
         c = connection.cursor()
 
         try:
@@ -212,20 +225,25 @@ class Permission:
 
             if role == "admin":
                 moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
-                objectType = "any_type"
+                objectType = ""
 
             # Get the VMObject id. If the VMObject does not exist in the db, create it.
-            o = VMObject(assetId=assetId, moId=moId, objectType=objectType)
+            o = VMObject(assetId=assetId, moId=moId)
             try:
-                objectId = o.info()["id"]
+                objectInfo = o.info()
+                if objectInfo["object_type"] == objectType: # Also, check if the object have the right object type.
+                    objectId = objectInfo["id"]
             except Exception:
                 objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name, objectType=objectType)
 
-            c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object) VALUES (NULL, %s, %s, %s)", [
-                identityGroupId, # AD or RADIUS group.
-                roleId,
-                objectId
-            ])
+            if objectId:
+                c.execute("INSERT INTO group_role_object (id, id_group, id_role, id_object) VALUES (NULL, %s, %s, %s)", [
+                    identityGroupId, # AD or RADIUS group.
+                    roleId,
+                    objectId
+                ])
+            else:
+                raise CustomException(status=400, payload={"database": "Object not added to the database (wrong object type?)"})
 
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})

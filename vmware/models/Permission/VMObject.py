@@ -11,14 +11,13 @@ from vmware.helpers.Log import Log
 
 
 class VMObject:
-    def __init__(self, assetId: int, moId: str, objectType: str="", name: str = "", description: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, name: str = "", description: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.id = None
         self.assetId = assetId
         self.moId = moId
         self.name = name
-        self.object_type = objectType
         self.description = description
 
 
@@ -46,6 +45,8 @@ class VMObject:
 
 
     def info(self) -> dict:
+        objectType = ""
+
         c = connection.cursor()
         try:
             c.execute("SELECT * FROM `vmObject` WHERE `moId` = %s AND id_asset = %s", [
@@ -53,7 +54,17 @@ class VMObject:
                 self.assetId
             ])
 
-            return DBHelper.asDict(c)[0]
+            info = DBHelper.asDict(c)[0]
+            moIdPrefix = self.moId.split('-')[0]
+            if moIdPrefix == "group":
+                objectType = "folder"
+            elif moIdPrefix == "datastore":
+                objectType = "datastore"
+            elif moIdPrefix == "network" or moIdPrefix == "dvportgroup":
+                objectType = "network"
+
+            info["object_type"] = objectType
+            return info
 
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
@@ -101,7 +112,6 @@ class VMObject:
     @staticmethod
     def add(moId: str, assetId: int, objectName: str, objectType: str, description: str = "") -> int:
         object_id = ""
-        object_type = ""
         object_name = ""
         c = connection.cursor()
 
@@ -109,19 +119,15 @@ class VMObject:
         if moId == "any":
             object_id = "any"
             object_name = "any"
-            object_type = "any_type"
         elif moId == "any_f":
             object_id = "any_f"
             object_name = "any_folder"
-            object_type = "folder"
         elif moId == "any_n":
             object_id = "any_n"
             object_name = "any_network"
-            object_type = "network"
         elif moId == "any_d":
             object_id = "any_d"
             object_name = "any_datastore"
-            object_type = "datastore"
         else:
             if objectType == 'folder':
                 vCentervmObjects = vCemterVMFolder.list(assetId)["items"]
@@ -129,31 +135,30 @@ class VMObject:
                     if v["moId"] == moId and v["name"] == objectName:
                         object_id = v["moId"]
                         object_name = v["name"]
-                        object_type = 'folder'
+                        break
             elif objectType == 'network':
                 vCentervmObjects = vCenterNetwork.list(assetId)["items"]
                 for n in vCentervmObjects:
                     if n["moId"] == moId and n["name"] == objectName:
                         object_id = n["moId"]
                         object_name = n["name"]
-                        object_type = 'network'
+                        break
             elif objectType == 'datastore':
                 vCentervmObjects = vCenterDatastore.list(assetId)["items"]
                 for d in vCentervmObjects:
                     if d["moId"] == moId and d["name"] == objectName:
                         object_id = d["moId"]
                         object_name = d["name"]
-                        object_type = 'datastore'
+                        break
 
-        if not object_id or not object_type:
-            raise CustomException(status=400, payload={"VMware": "Object id not found in vCenter"})
+        if not object_id:
+            raise CustomException(status=400, payload={"VMware": "Object with given moId and name not found in vCenter"})
 
         try:
-            c.execute("INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `object_type`, `description`) VALUES (NULL, %s, %s, %s, %s, %s)", [
+            c.execute("INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES (NULL, %s, %s, %s, %s)", [
                 object_id,
                 assetId,
                 object_name,
-                object_type,
                 description
             ])
 

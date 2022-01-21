@@ -172,14 +172,14 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 -- Dump dei dati per la tabella `vmObject`
 --
 
-INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `object_type`, `description`) VALUES
-(1, 'any', 1, 'any', 'any_type', 'All the objects of this vCenter'),
-(2, 'any_f', 1, 'any_folder', 'folder', 'All the folders of this vCenter'),
-(3, 'any_n', 1, 'any_network', 'network', 'All the networks of this vCenter'),
-(4, 'any_d', 1, 'any_datastore', 'datastore', 'All the datastores of this vCenter'),
-(5, 'group-v2477', 1, 'rrivarie', 'folder', ''),
-(6, 'datastore-2341', 1, 'NFS_Datastore', 'datastore', ''),
-(7, 'network-1213', 1, 'LumitLab_18', 'network', '');
+INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES
+(1, 'any', 1, 'any', 'All the objects of this vCenter'),
+(2, 'any_f', 1, 'any_folder', 'All the folders of this vCenter'),
+(3, 'any_n', 1, 'any_network', 'All the networks of this vCenter'),
+(4, 'any_d', 1, 'any_datastore', 'All the datastores of this vCenter'),
+(5, 'group-v2477', 1, 'rrivarie', ''),
+(6, 'datastore-2341', 1, 'NFS_Datastore', ''),
+(7, 'network-1213', 1, 'LumitLab_18', '');
 
 
 --

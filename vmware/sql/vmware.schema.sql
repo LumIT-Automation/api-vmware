@@ -109,7 +109,6 @@ CREATE TABLE `vmObject` (
   `moId` varchar(64) NOT NULL,
   `id_asset` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `object_type` enum('any_type','folder','network','datastore') NOT NULL,
   `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

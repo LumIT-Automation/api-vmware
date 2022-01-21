@@ -9,7 +9,7 @@ class PermissionsSerializer(serializers.Serializer):
                 name = serializers.CharField(max_length=63, required=False)
                 moId = serializers.CharField(max_length=63, required=False)
                 asset_id = serializers.IntegerField(required=False)
-                object_type = serializers.CharField(max_length=63, required=True)
+                object_type = serializers.CharField(max_length=63, required=False, allow_null=True)
 
             id = serializers.IntegerField(required=True)
             identity_group_name = serializers.CharField(max_length=63, required=True)
