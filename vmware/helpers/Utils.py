@@ -40,7 +40,6 @@ class GroupConcatToDict:
         ]
     """
     def makeDict(self, data: str) -> list:
-
         outList = list()
 
         try:
@@ -59,11 +58,5 @@ class GroupConcatToDict:
                 outList.append(outItem)
 
             return outList
-
         except Exception as e:
             raise e
-
-
-
-
-

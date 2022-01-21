@@ -17,7 +17,7 @@ class PermissionIdentityGroupsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         showPrivileges = False
         etagCondition = {"responseEtag": ""}
 
@@ -33,7 +33,7 @@ class PermissionIdentityGroupsController(CustomController):
                     if "privileges" in rList:
                         showPrivileges = True
 
-                itemData["data"] = IdentityGroup.list(showPrivileges)
+                itemData["data"]["items"] = IdentityGroup.listWithRelated(showPrivileges)
                 serializer = GroupsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data["data"]

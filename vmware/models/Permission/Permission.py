@@ -13,6 +13,9 @@ from vmware.helpers.Database import Database as DBHelper
 
 
 class Permission:
+
+    # IdentityGroupRoleObject
+
     def __init__(self, permissionId: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

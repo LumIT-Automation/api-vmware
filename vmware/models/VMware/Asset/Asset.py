@@ -81,7 +81,7 @@ class Asset:
                 c.close()
 
         else:
-            raise CustomException(status=404, payload={"database": {"message": "Non existent VMware endpoint"}})
+            raise CustomException(status=404, payload={"database": "Non existent VMware endpoint"})
 
 
 
@@ -100,7 +100,7 @@ class Asset:
                 c.close()
 
         else:
-            raise CustomException(status=404, payload={"database": {"message": "Non existent VMware endpoint"}})
+            raise CustomException(status=404, payload={"database": "Non existent VMware endpoint"})
 
 
 
@@ -153,9 +153,6 @@ class Asset:
                 # When inserting an asset, add the "any" vmObject (Permission).
                 from vmware.models.Permission.VMObject import VMObject
                 VMObject.add("any", aId, "any", "any_type", "All the folders of this vCenter")
-                VMObject.add("any_f", aId, "any_folder", "folder" "All the folders of this vCenter")
-                VMObject.add("any_n", aId, "any_network", "network", "All the folders of this vCenter")
-                VMObject.add("any_d", aId, "any_datastore", "datastore", "All the folders of this vCenter")
 
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
