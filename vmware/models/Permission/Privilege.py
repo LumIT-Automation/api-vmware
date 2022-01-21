@@ -1,13 +1,14 @@
-from vmware.helpers.Log import Log
-from vmware.helpers.Exception import CustomException
-from vmware.helpers.Database import Database as DBHelper
-from django.db import connection
-
+from vmware.repository.Privilege import Privilege as Repository
 
 
 class Privilege:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.id = id
+        self.privilege = ""
+        self.privilege_type = ""
+        self.description = ""
 
 
 
@@ -16,16 +17,8 @@ class Privilege:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> dict:
-        c = connection.cursor()
+    def list() -> list:
         try:
-            c.execute("SELECT * FROM privilege")
-
-            return dict({
-                "items": DBHelper.asDict(c)
-            })
-
+            return Repository.list()
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-        finally:
-            c.close()
+            raise e
