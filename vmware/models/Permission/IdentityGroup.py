@@ -142,8 +142,8 @@ class IdentityGroup:
                 "identity_group.*, " 
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset,'::',"
-                        "(CASE SUBSTRING_INDEX(vmObject.moId, '-', 1) "
+                    "DISTINCT CONCAT(role.role,'::',CONCAT(vmware_object.moId,'::',vmware_object.name,'::',vmware_object.id_asset,'::',"
+                        "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
                             "WHEN 'group' THEN 'folder' "
                             "WHEN 'datastore' THEN 'datastore' "
                             "WHEN 'network' THEN 'network' "
@@ -155,8 +155,8 @@ class IdentityGroup:
                 "), '') AS roles_object, "
 
                 "IFNULL(GROUP_CONCAT( "
-                    "DISTINCT CONCAT(privilege.privilege,'::',vmObject.moId,'::',vmObject.name,'::',vmObject.id_asset,'::',"
-                        "(CASE SUBSTRING_INDEX(vmObject.moId, '-', 1) "
+                    "DISTINCT CONCAT(privilege.privilege,'::',vmware_object.moId,'::',vmware_object.name,'::',vmware_object.id_asset,'::',"
+                        "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
                             "WHEN 'group' THEN 'folder' "
                             "WHEN 'datastore' THEN 'datastore' "
                             "WHEN 'network' THEN 'network' "
@@ -169,7 +169,7 @@ class IdentityGroup:
                 "FROM identity_group "
                 "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                 "LEFT JOIN role ON role.id = group_role_object.id_role "
-                "LEFT JOIN `vmObject` ON `vmObject`.id = group_role_object.id_object "
+                "LEFT JOIN `vmware_object` ON `vmware_object`.id = group_role_object.id_object "
                 "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
                 "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
                 "GROUP BY identity_group.id"
@@ -184,7 +184,7 @@ class IdentityGroup:
             #    "name": "groupStaff",
             #    "identity_group_identifier": "cn=groupStaff,cn=users,dc=lab,dc=local",
             #    "roles_object": "staff::group-v1082::Varie::1::folder",
-            #    "privileges_object": "asset_get::group-v1082::Varie::1::folder,vmObject_get::group-v1082::Varie::1::folder, ..."
+            #    "privileges_object": "asset_get::group-v1082::Varie::1::folder,vmware_object_get::group-v1082::Varie::1::folder, ..."
             # },
             # ...
             # ]

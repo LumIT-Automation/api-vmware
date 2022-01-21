@@ -29,7 +29,7 @@ class VMObject:
     def exists(self) -> bool:
         c = connection.cursor()
         try:
-            c.execute("SELECT COUNT(*) AS c, id FROM `vmObject` WHERE `moId` = %s AND id_asset = %s", [
+            c.execute("SELECT COUNT(*) AS c, id FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [
                 self.moId,
                 self.assetId
             ])
@@ -49,7 +49,7 @@ class VMObject:
 
         c = connection.cursor()
         try:
-            c.execute("SELECT * FROM `vmObject` WHERE `moId` = %s AND id_asset = %s", [
+            c.execute("SELECT * FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [
                 self.moId,
                 self.assetId
             ])
@@ -76,7 +76,7 @@ class VMObject:
     def delete(self) -> None:
         c = connection.cursor()
         try:
-            c.execute("DELETE FROM `vmObject` WHERE `moId` = %s AND id_asset = %s", [
+            c.execute("DELETE FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [
                 self.moId,
                 self.assetId
             ])
@@ -96,7 +96,14 @@ class VMObject:
     def list() -> dict:
         c = connection.cursor()
         try:
-            c.execute("SELECT * FROM vmObject")
+            c.execute("SELECT *, "
+                        "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
+                            "WHEN 'group' THEN 'folder' "
+                            "WHEN 'datastore' THEN 'datastore' "
+                            "WHEN 'network' THEN 'network' "
+                            "WHEN 'dvportgroup' THEN 'network' "
+                        "END) AS object_type "
+                      "FROM vmware_object")
 
             return {
                 "items": DBHelper.asDict(c)
@@ -155,7 +162,7 @@ class VMObject:
             raise CustomException(status=400, payload={"VMware": "Object with given moId and name not found in vCenter"})
 
         try:
-            c.execute("INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES (NULL, %s, %s, %s, %s)", [
+            c.execute("INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES (NULL, %s, %s, %s, %s)", [
                 object_id,
                 assetId,
                 object_name,

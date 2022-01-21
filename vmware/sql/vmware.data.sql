@@ -169,10 +169,10 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 
 --
 --
--- Dump dei dati per la tabella `vmObject`
+-- Dump dei dati per la tabella `vmware_object`
 --
 
-INSERT INTO `vmObject` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES
+INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES
 (1, 'any', 1, 'any', 'All the objects of this vCenter'),
 (2, 'any_f', 1, 'any_folder', 'All the folders of this vCenter'),
 (3, 'any_n', 1, 'any_network', 'All the networks of this vCenter'),

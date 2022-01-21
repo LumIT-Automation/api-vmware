@@ -101,10 +101,10 @@ CREATE TABLE `migrations` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `vmObject`
+-- Struttura della tabella `vmware_object`
 --
 
-CREATE TABLE `vmObject` (
+CREATE TABLE `vmware_object` (
   `id` int(11) NOT NULL,
   `moId` varchar(64) NOT NULL,
   `id_asset` int(11) NOT NULL,
@@ -188,9 +188,9 @@ ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `vmObject`
+-- Indici per le tabelle `vmware_object`
 --
-ALTER TABLE `vmObject`
+ALTER TABLE `vmware_object`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `moId_assetId` (`moId`,`id_asset`),
   ADD KEY `name` (`name`),
@@ -264,9 +264,9 @@ ALTER TABLE `role`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `vmObject`
+-- AUTO_INCREMENT per la tabella `vmware_object`
 --
-ALTER TABLE `vmObject`
+ALTER TABLE `vmware_object`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -279,12 +279,12 @@ ALTER TABLE `vmObject`
 ALTER TABLE `group_role_object`
   ADD CONSTRAINT `gro_group` FOREIGN KEY (`id_group`) REFERENCES `identity_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `gro_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `gro_object` FOREIGN KEY (`id_object`) REFERENCES `vmObject` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `gro_object` FOREIGN KEY (`id_object`) REFERENCES `vmware_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Limiti per la tabella `vmObject`
+-- Limiti per la tabella `vmware_object`
 --
-ALTER TABLE `vmObject`
+ALTER TABLE `vmware_object`
   ADD CONSTRAINT `p_asset` FOREIGN KEY (`id_asset`) REFERENCES `asset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
