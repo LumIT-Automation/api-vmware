@@ -1,3 +1,4 @@
+from typing import List
 from django.db import connection
 
 from vmware.helpers.Exception import CustomException
@@ -21,7 +22,7 @@ class Privilege:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> list:
+    def list() -> List[dict]:
         c = connection.cursor()
 
         try:

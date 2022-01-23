@@ -1,3 +1,5 @@
+from typing import List
+
 from django.utils.html import strip_tags
 from django.db import connection
 from django.db import transaction
@@ -85,7 +87,7 @@ class IdentityGroup:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> list:
+    def list() -> List[dict]:
         c = connection.cursor()
 
         try:
@@ -139,7 +141,6 @@ class IdentityGroup:
         s = ""
         keys = "("
         values = []
-
         c = connection.cursor()
 
         # Build SQL query according to dict fields (only whitelisted fields pass).
@@ -171,6 +172,7 @@ class IdentityGroup:
     @staticmethod
     def __exists(identityGroupIdentifier: str) -> int:
         c = connection.cursor()
+
         try:
             c.execute("SELECT COUNT(*) AS c FROM identity_group WHERE identity_group_identifier = %s", [
                 identityGroupIdentifier

@@ -1,3 +1,5 @@
+from typing import List
+
 from vmware.helpers.Utils import GroupConcatToDict
 
 from vmware.repository.IdentityGroup import IdentityGroup as Repository
@@ -46,7 +48,7 @@ class IdentityGroup:
     ####################################################################################################################
 
     @staticmethod
-    def listWithRelated(showPrivileges: bool = False) -> list:
+    def listWithRelated(showPrivileges: bool = False) -> List[dict]:
         # List identity groups with related information regarding the associated roles on objects
         # and optionally detailed privileges' descriptions.
         j = 0
@@ -66,8 +68,9 @@ class IdentityGroup:
             # ...
             # ]
 
-            gcR = GroupConcatToDict(["role", "moId", "name", "assetId","object_type"])
-            gcP = GroupConcatToDict(["privilege", "moId", "name","assetId","object_type"])
+            gcR = GroupConcatToDict(["role", "moId", "name", "assetId", "object_type"])
+            gcP = GroupConcatToDict(["privilege", "moId", "name", "assetId", "object_type"])
+
             """
                 rStructure data sample:
                  [
@@ -83,6 +86,7 @@ class IdentityGroup:
                     }
                 ]
             """
+
             for el in items:
                 rStructure = gcR.makeDict(el["roles_object"])
                 roleStructure = dict()

@@ -39,6 +39,7 @@ class GroupConcatToDict:
             }
         ]
     """
+
     def makeDict(self, data: str) -> list:
         outList = list()
 

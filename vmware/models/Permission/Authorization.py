@@ -1,9 +1,9 @@
 from django.db import connection
-from vmware.helpers.Log import Log
+
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
 from vmware.helpers.Utils import GroupConcatToDict
-
+from vmware.helpers.Log import Log
 
 
 class Authorization:

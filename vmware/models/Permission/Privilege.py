@@ -1,3 +1,5 @@
+from typing import List
+
 from vmware.repository.Privilege import Privilege as Repository
 
 
@@ -17,7 +19,7 @@ class Privilege:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> list:
+    def list() -> List[dict]:
         try:
             return Repository.list()
         except Exception as e:
