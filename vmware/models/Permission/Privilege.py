@@ -8,9 +8,9 @@ class Privilege:
         super().__init__(*args, **kwargs)
 
         self.id = id
-        self.privilege = ""
-        self.privilege_type = ""
-        self.description = ""
+        self.privilege: str
+        self.privilege_type: str
+        self.description: str
 
 
 

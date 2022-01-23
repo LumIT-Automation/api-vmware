@@ -7,9 +7,9 @@ class Role:
     def __init__(self, id: int = 0, name: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id = id
-        self.role = name
-        self.description = ""
+        self.id: int = id
+        self.role: str = name
+        self.description: str
 
 
 

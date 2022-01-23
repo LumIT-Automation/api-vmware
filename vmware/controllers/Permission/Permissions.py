@@ -4,6 +4,7 @@ from rest_framework import status
 
 from vmware.models.Permission.IdentityGroup import IdentityGroup
 from vmware.models.Permission.Permission import Permission
+from vmware.models.Permission.VMObject import VMObject
 
 from vmware.serializers.Permission.Permissions import PermissionsSerializer as PermissionsSerializer
 from vmware.serializers.Permission.Permission import PermissionSerializer as PermissionSerializer
@@ -27,7 +28,7 @@ class PermissionsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_identityGroups_get") or user["authDisabled"]:
                 Log.actionLog("Permissions list", user)
 
-                itemData["data"]["items"] = Permission.listIdentityGroupsRolesPartitions()
+                itemData["data"]["items"] = Permission.rawList()
                 serializer = PermissionsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data["data"]
@@ -85,9 +86,11 @@ class PermissionsController(CustomController):
                     Permission.add(
                         identityGroupId,
                         data["role"],
-                        data["object"]["id_asset"],
-                        data["object"]["moId"],
-                        data["object"]["name"]
+                        VMObject(
+                            assetId=data["object"]["id_asset"],
+                            moId=data["object"]["moId"],
+                            name=data["object"]["name"]
+                        )
                     )
 
                     httpStatus = status.HTTP_201_CREATED

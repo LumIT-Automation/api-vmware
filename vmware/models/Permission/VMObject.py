@@ -11,15 +11,14 @@ from vmware.repository.VMObject import VMObject as Repository
 
 
 class VMObject:
-    def __init__(self, assetId: int, moId: str, name: str = "", description: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id = 0
-        self.id_asset = assetId
-        self.moId = moId
-        self.name = name
-        self.description = description
-        self.object_type = ""
+        self.id: int
+        self.id_asset: int = assetId
+        self.moId: str = moId
+        self.name: str = name
+        self.description: str
 
 
 

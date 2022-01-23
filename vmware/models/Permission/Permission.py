@@ -10,13 +10,14 @@ class Permission:
 
     # IdentityGroupRoleObject
 
-    def __init__(self, id: int, groupId: int = 0, roleId: int = 0, objectId: int = 0, *args, **kwargs):
+    def __init__(self, id: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.id = id
-        self.id_group = groupId
-        self.id_role = roleId
-        self.id_object = objectId
+        self.identity_group_identifier: int
+        self.identity_group_name: str
+        self.role: str
+        self.obj = VMObject
 
 
 
@@ -24,27 +25,35 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroupId: int, role: str, assetId: int, moId: str, name: str = "") -> None:
+    def modify(self, identityGroupId: int, role: str, vmwareObject: VMObject) -> None:
         try:
-            # RoleId.
-            r = Role(name=role)
-            roleId = r.info()["id"]
-
             if role == "admin":
-                moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
+                # If admin: "any" is the only valid choice (on selected assetId).
+                moId = "any"
+            else:
+                moId = vmwareObject.moId
 
             # Get the VMObject id. If the VMObject does not exist in the db, create it.
-            o = VMObject(assetId=assetId, moId=moId)
+            o = VMObject(assetId=vmwareObject.id_asset, moId=vmwareObject.moId)
 
             try:
                 objectId = o.info()["id"]
             except Exception:
-                objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name)
+                objectId = VMObject.add(
+                    moId=moId,
+                    assetId=vmwareObject.id_asset,
+                    objectName=vmwareObject.name
+                )
 
             if objectId:
-                Repository.modify(self.id, identityGroupId, roleId, objectId)
+                Repository.modify(
+                    self.id,
+                    identityGroupId,
+                    Role(name=role).info()["id"],
+                    objectId
+                )
             else:
-                raise CustomException(status=400, payload={"database": "Object not added to the database (wrong object type?)"})
+                raise CustomException(status=400, payload={"database": "Object not added: wrong object type?"})
         except Exception as e:
             raise e
 
@@ -85,52 +94,42 @@ class Permission:
 
 
     @staticmethod
-    def listIdentityGroupsRolesPartitions() -> list:
+    def rawList() -> list:
         try:
-            l = Repository.listIdentityGroupsRolesPartitions()
-
-            for el in l:
-                el["object"] = {
-                    "object_id": el["object_id"],
-                    "asset_id": el["object_asset"],
-                    "moId": el["moId"],
-                    "name": el["object_name"],
-                    "object_type": el["object_type"]
-                }
-
-                del(el["object_id"])
-                del(el["object_asset"])
-                del(el["moId"])
-                del(el["object_name"])
-                del(el["object_type"])
-
-            return l
+            return Repository.list()
         except Exception as e:
             raise e
 
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, assetId: int, moId: str, name: str = "") -> None:
+    def add(identityGroupId: int, role: str, vmwareObject: VMObject) -> None:
         try:
-            # RoleId.
-            r = Role(name=role)
-            roleId = r.info()["id"]
-
             if role == "admin":
-                moId = "any" # if admin: "any" is the only valid choice (on selected assetId).
+                # If admin: "any" is the only valid choice (on selected assetId).
+                moId = "any"
+            else:
+                moId = vmwareObject.moId
 
             # Get the VMObject id. If the VMObject does not exist in the db, create it.
-            o = VMObject(assetId=assetId, moId=moId)
+            o = VMObject(assetId=vmwareObject.id_asset, moId=vmwareObject.moId)
 
             try:
                 objectId = o.info()["id"]
             except Exception:
-                objectId = VMObject.add(moId=moId, assetId=assetId, objectName=name)
+                objectId = VMObject.add(
+                    moId=moId,
+                    assetId=vmwareObject.id_asset,
+                    objectName=vmwareObject.name
+                )
 
             if objectId:
-                Repository.add(identityGroupId, roleId, objectId)
+                Repository.add(
+                    identityGroupId,
+                    Role(name=role).info()["id"],
+                    objectId
+                )
             else:
-                raise CustomException(status=400, payload={"database": "Object not added to the database (wrong object type?)"})
+                raise CustomException(status=400, payload={"database": "Object not added: wrong object type?"})
         except Exception as e:
             raise e

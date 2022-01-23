@@ -4,6 +4,7 @@ from rest_framework import status
 
 from vmware.models.Permission.IdentityGroup import IdentityGroup
 from vmware.models.Permission.Permission import Permission
+from vmware.models.Permission.VMObject import VMObject
 
 from vmware.serializers.Permission.Permission import PermissionSerializer as Serializer
 
@@ -58,9 +59,11 @@ class PermissionController(CustomController):
                     p.modify(
                         identityGroupId,
                         data["role"],
-                        data["object"]["id_asset"],
-                        data["object"]["moId"],
-                        data["object"]["name"]
+                        VMObject(
+                            assetId=data["object"]["id_asset"],
+                            moId=data["object"]["moId"],
+                            name=data["object"]["name"]
+                        )
                     )
 
                     httpStatus = status.HTTP_200_OK

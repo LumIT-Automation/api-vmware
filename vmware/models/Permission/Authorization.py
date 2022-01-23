@@ -7,10 +7,6 @@ from vmware.helpers.Log import Log
 
 
 class Authorization:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
 
     ####################################################################################################################
     # Public static methods

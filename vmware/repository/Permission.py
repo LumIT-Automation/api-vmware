@@ -1,3 +1,4 @@
+from typing import List
 from django.db import connection
 
 from vmware.models.VMware.VMFolder import VMFolder
@@ -11,14 +12,12 @@ class Permission:
 
     # IdentityGroupRoleObject
 
-    def __init__(self, id: int, groupId: int = 0, roleId: int = 0, partitionId: int = 0, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    # Table: group_role_object
 
-        self.id = id
-
-        self.id_group = groupId
-        self.id_role = roleId
-        self.id_partition = partitionId
+    #   `id` int(255) NOT NULL,
+    #   `id_group` int(11) NOT NULL,
+    #   `id_role` int(11) NOT NULL,
+    #   `id_object` int(11) NOT NULL
 
 
 
@@ -132,7 +131,7 @@ class Permission:
 
 
     @staticmethod
-    def listIdentityGroupsRolesPartitions() -> list:
+    def list() -> List[dict]:
         c = connection.cursor()
 
         try:
@@ -156,7 +155,24 @@ class Permission:
                     "LEFT JOIN role ON role.id = group_role_object.id_role "
                     "LEFT JOIN `vmware_object` ON vmware_object.id = group_role_object.id_object "
                     "WHERE role.role IS NOT NULL ")
-            return DBHelper.asDict(c)
+            l = DBHelper.asDict(c)
+
+            for el in l:
+                el["object"] = {
+                    "object_id": el["object_id"],
+                    "id_asset": el["object_asset"],
+                    "moId": el["moId"],
+                    "name": el["object_name"],
+                    "object_type": el["object_type"]
+                }
+
+                del(el["object_id"])
+                del(el["object_asset"])
+                del(el["moId"])
+                del(el["object_name"])
+                del(el["object_type"])
+
+            return l
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
