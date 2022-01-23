@@ -1,6 +1,9 @@
+from typing import List
+
+
 class Database:
     @staticmethod
-    def asDict(cursor) -> list:
+    def asDict(cursor) -> List[dict]:
         # Returns all rows from a cursor as a dict.
         r = []
         columns = []

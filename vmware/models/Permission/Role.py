@@ -1,12 +1,14 @@
+from typing import List
+
 from vmware.repository.Role import Role as Repository
 
 
 class Role:
-    def __init__(self, roleId: int = 0, roleName: str = "", *args, **kwargs):
+    def __init__(self, id: int = 0, name: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id = roleId
-        self.role = roleName
+        self.id = id
+        self.role = name
         self.description = ""
 
 
@@ -28,7 +30,7 @@ class Role:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> list:
+    def list() -> List[dict]:
         try:
             return Repository.list()
         except Exception as e:
@@ -37,21 +39,8 @@ class Role:
 
 
     @staticmethod
-    def listWithPrivileges() -> list:
-        j = 0
-
+    def listWithPrivileges() -> List[dict]:
         try:
-            items = Repository.list(True)
-
-            for ln in items:
-                if "privileges" in items[j]:
-                    if "," in ln["privileges"]:
-                        items[j]["privileges"] = ln["privileges"].split(",")
-                    else:
-                        if ln["privileges"]:
-                            items[j]["privileges"] = [ ln["privileges"] ]
-                j = j+1
-
-            return items
+            return Repository.list(True)
         except Exception as e:
             raise e

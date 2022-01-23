@@ -1,4 +1,6 @@
-from vmware.models.VMware.VMFolder import VMFolder as vCemterVMFolder
+from typing import List
+
+from vmware.models.VMware.VMFolder import VMFolder as vCenterVMFolder
 from vmware.models.VMware.Network import Network as vCenterNetwork
 from vmware.models.VMware.Datastore import Datastore as vCenterDatastore
 
@@ -27,7 +29,11 @@ class VMObject:
 
     def info(self) -> dict:
         try:
-            return Repository.get(self.id_asset, self.moId, VMObject.getType)
+            return Repository.get(
+                self.id_asset,
+                self.moId,
+                VMObject.getType # Callable[[str], str].
+            )
         except Exception as e:
             raise e
 
@@ -46,7 +52,7 @@ class VMObject:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> list:
+    def list() -> List[dict]:
         try:
             return Repository.list()
         except Exception as e:
@@ -55,9 +61,10 @@ class VMObject:
 
 
     @staticmethod
-    def add(moId: str, assetId: int, objectName: str, objectType: str, description: str = "") -> int:
+    def add(moId: str, assetId: int, objectName: str, description: str = "") -> int:
         oId = ""
         oName = ""
+        objectType = VMObject.getType(moId)
 
         # Check if the objectName exists in the vCenter. Skip for "any".
         if moId == "any":
@@ -65,12 +72,13 @@ class VMObject:
             oName = "any"
         else:
             if objectType == 'folder':
-                vCentervmObjects = vCemterVMFolder.list(assetId)["items"]
+                vCentervmObjects = vCenterVMFolder.list(assetId)["items"]
                 for v in vCentervmObjects:
                     if v["moId"] == moId and v["name"] == objectName:
                         oId = v["moId"]
                         oName = v["name"]
                         break
+
             elif objectType == 'network':
                 vCentervmObjects = vCenterNetwork.list(assetId)["items"]
                 for n in vCentervmObjects:
@@ -78,6 +86,7 @@ class VMObject:
                         oId = n["moId"]
                         oName = n["name"]
                         break
+
             elif objectType == 'datastore':
                 vCentervmObjects = vCenterDatastore.list(assetId)["items"]
                 for d in vCentervmObjects:
@@ -97,7 +106,7 @@ class VMObject:
 
 
     @staticmethod
-    def getType(moId: str):
+    def getType(moId: str) -> str:
         objectType = ""
 
         try:

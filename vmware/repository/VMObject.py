@@ -1,5 +1,5 @@
 from django.db import connection
-from typing import Callable
+from typing import Callable, List
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
@@ -11,8 +11,8 @@ class VMObject:
     # Table: vmware_object`
 
     #   `id` int(11) NOT NULL,
-    #   `moId` varchar(64) NOT NULL,
     #   `id_asset` int(11) NOT NULL,
+    #   `moId` varchar(64) NOT NULL,
     #   `name` varchar(255) NOT NULL,
     #   `description` varchar(255) DEFAULT NULL
 
@@ -61,7 +61,7 @@ class VMObject:
 
 
     @staticmethod
-    def list() -> list:
+    def list() -> List[dict]:
         c = connection.cursor()
 
         try:
