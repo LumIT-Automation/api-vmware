@@ -16,13 +16,14 @@ class VMwareAssetsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
+        itemData = {"data": dict()}
         user = CustomController.loggedUser(request)
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="assets_get") or user["authDisabled"]:
                 Log.actionLog("Asset list", user)
 
-                itemData = Asset.list()
+                itemData["data"]["items"] = Asset.rawList()
                 serializer = AssetsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data["data"]

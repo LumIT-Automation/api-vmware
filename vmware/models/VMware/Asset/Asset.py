@@ -1,10 +1,21 @@
-from django.utils.html import strip_tags
-from django.db import connection
-from django.db import transaction
+from typing import List
 
-from vmware.helpers.Log import Log
-from vmware.helpers.Exception import CustomException
-from vmware.helpers.Database import Database as DBHelper
+from dataclasses import dataclass
+
+from vmware.repository.Asset import Asset as Repository
+
+
+@dataclass
+class DataConnection:
+    address: str
+    port: int
+    fqdn: str
+    baseurl: str
+    tlsverify: int
+    api_type: str
+    api_additional_data: str
+    username: str
+    password: str
 
 
 
@@ -12,7 +23,13 @@ class Asset:
     def __init__(self, assetId: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.assetId = int(assetId)
+        self.id = int(assetId)
+        self.datacenter: str
+        self.environment: str
+        self.position: str
+        self.dataConnection: DataConnection
+
+        self.__load()
 
 
 
@@ -20,87 +37,19 @@ class Asset:
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        a = dict()
-        c = connection.cursor()
-
-        try:
-            c.execute("SELECT * FROM asset WHERE id = %s", [
-                self.assetId
-            ])
-
-            a = DBHelper.asDict(c)[0]
-
-            a["auth"] = {
-                "username": a["username"],
-                "password": a["password"],
-            }
-
-            if a["api_type"] == "Vmware":
-                a["dataConnection"] = {
-                    "ip": a["address"],
-                    "port": a["port"],
-                    "additional_data": a["api_additional_data"],
-                    "username": a["username"],
-                    "password": a["password"]
-                }
-            del (
-                a["username"],
-                a["password"]
-            )
-
-            return a
-
-        except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
     def modify(self, data: dict) -> None:
-        sql = ""
-        values = []
-
-        c = connection.cursor()
-
-        if self.__exists():
-            # Build SQL query according to dict fields.
-            for k, v in data.items():
-                sql += k+"=%s,"
-                values.append(strip_tags(v)) # no HTML allowed.
-
-            try:
-                c.execute("UPDATE asset SET "+sql[:-1]+" WHERE id = "+str(self.assetId),
-                    values
-                )
-
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-            finally:
-                c.close()
-
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent VMware endpoint"})
+        try:
+            Repository.modify(self.id, data)
+        except Exception as e:
+            raise e
 
 
 
     def delete(self) -> None:
-        c = connection.cursor()
-
-        if self.__exists():
-            try:
-                c.execute("DELETE FROM asset WHERE id = %s", [
-                    self.assetId
-                ])
-
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-            finally:
-                c.close()
-
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent VMware endpoint"})
+        try:
+            Repository.delete(self.id)
+        except Exception as e:
+            raise e
 
 
 
@@ -109,55 +58,24 @@ class Asset:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> dict:
-        c = connection.cursor()
+    def rawList() -> List[dict]:
         try:
-            c.execute("SELECT id, address, fqdn, baseurl, tlsverify, datacenter, environment, position FROM asset")
-
-            return dict({
-                "data": {
-                    "items": DBHelper.asDict(c)
-                }
-            })
-
+            return Repository.list()
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-        finally:
-            c.close()
+            raise e
 
 
 
     @staticmethod
     def add(data: dict) -> None:
-        s = ""
-        keys = "("
-        values = []
-
-        c = connection.cursor()
-
-        # Build SQL query according to dict fields.
-        for k, v in data.items():
-            s += "%s,"
-            keys += k+","
-            values.append(strip_tags(v)) # no HTML allowed.
-
-        keys = keys[:-1]+")"
-
         try:
-            with transaction.atomic():
-                c.execute("INSERT INTO asset "+keys+" VALUES ("+s[:-1]+")",
-                    values
-                )
-                aId = c.lastrowid
+            aId = Repository.add(data)
 
-                # When inserting an asset, add the "any" vmObject (Permission).
-                from vmware.models.Permission.VMObject import VMObject
-                VMObject.add("any", aId, "any", "All the folders of this vCenter")
-
+            # When inserting an asset, add the "any" vmObject (Permission).
+            from vmware.models.Permission.VMObject import VMObject
+            VMObject.add("any", aId, "any", "All the folders of this vCenter")
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-        finally:
-            c.close()
+            raise e
 
 
 
@@ -165,17 +83,12 @@ class Asset:
     # Private methods
     ####################################################################################################################
 
-    def __exists(self) -> int:
-        c = connection.cursor()
+    def __load(self) -> None:
         try:
-            c.execute("SELECT COUNT(*) AS c FROM asset WHERE id = %s", [
-                self.assetId
-            ])
-            o = DBHelper.asDict(c)
+            info = Repository.get(self.id)
 
-            return int(o[0]['c'])
-
+            # Set attributes.
+            for k, v in info.items():
+                setattr(self, k, v)
         except Exception:
-            return 0
-        finally:
-            c.close()
+            pass

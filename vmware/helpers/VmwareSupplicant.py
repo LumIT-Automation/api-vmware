@@ -11,14 +11,14 @@ from vmware.helpers.Exception import CustomException
 
 class VmwareSupplicant(metaclass=Singleton):
 
-    def __init__(self, dataConnection: dict, silent: bool = False, *args, **kwargs):
+    def __init__(self, dataConnection, silent: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for key in [ "ip", "port", "username", "password" ]:
+        for key in [ "address", "port", "username", "password" ]:
             if key not in dataConnection:
                 raise ValueError('Missing key in dataConnection dictionary.')
 
-        self.ipAddr = dataConnection["ip"]
+        self.ipAddr = dataConnection["address"]
         if dataConnection["port"]:
             self.port = dataConnection["port"]
         else:

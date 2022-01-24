@@ -1,9 +1,9 @@
 from django.utils.html import strip_tags
 from django.db import connection
 
-from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
+from vmware.helpers.Log import Log
 
 
 class History:

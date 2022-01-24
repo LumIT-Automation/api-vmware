@@ -23,11 +23,10 @@ class VMwareDjangoObj:
 
     def connectToAssetAndGetContent(self, silent: bool = True):
         try:
-            vmware = Asset(self.assetId)
-            vmwareInfo = vmware.info()
-            dataConnection = vmwareInfo["dataConnection"]
-
-            vClient = VmwareSupplicant(dataConnection, silent)
+            vClient = VmwareSupplicant(
+                Asset(self.assetId).dataConnection,
+                silent
+            )
             vClient.getContent()
 
             return vClient
@@ -44,11 +43,10 @@ class VMwareDjangoObj:
     @staticmethod
     def connectToAssetAndGetContentStatic(assetId, silent: bool = True):
         try:
-            vmware = Asset(assetId)
-            vmwareInfo = vmware.info()
-            dataConnection = vmwareInfo["dataConnection"]
-
-            vClient = VmwareSupplicant(dataConnection, silent)
+            vClient = VmwareSupplicant(
+                Asset(assetId).dataConnection,
+                silent
+            )
             vClient.getContent()
 
             return vClient

@@ -9,6 +9,7 @@ class VMwareAssetsSerializer(serializers.Serializer):
             fqdn = serializers.CharField(max_length=255, required=True) # @todo: only valid data.
             baseurl = serializers.CharField(max_length=255, required=True)
             tlsverify = serializers.IntegerField(required=True)
+            api_type = serializers.CharField(max_length=255, required=True, allow_blank=True)
             datacenter = serializers.CharField(max_length=255, required=True)
             environment = serializers.CharField(max_length=255, required=True)
             position = serializers.CharField(max_length=255, required=True)
