@@ -2,7 +2,7 @@ from pyVmomi import vim, vmodl
 
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 

@@ -2,7 +2,7 @@ from pyVmomi import vim, vmodl
 
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -95,7 +95,7 @@ class VirtualMachine(VMwareDjangoObj):
             vmObjList = VirtualMachine.listVirtualMachinesOnlyObjects(assetId, silent)
 
             for vm in vmObjList:
-                vmList.append(VMwareObj.vmwareObjToDict(vm))
+                vmList.append(VmwareHelper.vmwareObjToDict(vm))
 
             return dict({
                 "items": vmList

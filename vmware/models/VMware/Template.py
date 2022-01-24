@@ -8,7 +8,7 @@ from vmware.models.VMware.Network import Network
 from vmware.models.VMware.VMFolder import VMFolder
 
 from vmware.helpers.Log import Log
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 
 from vmware.helpers.Exception import CustomException
 
@@ -100,7 +100,7 @@ class VirtualMachineTemplate(VirtualMachine):
             tObjList = VirtualMachineTemplate.listTemplatesOnlyObjects(assetId, silent)
 
             for t in tObjList:
-                tList.append(VMwareObj.vmwareObjToDict(t))
+                tList.append(VmwareHelper.vmwareObjToDict(t))
 
             return dict({
                 "items": tList

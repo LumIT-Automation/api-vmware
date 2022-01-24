@@ -2,7 +2,7 @@ from pyVmomi import vim, vmodl
 
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -23,7 +23,7 @@ class Network(VMwareDjangoObj):
 
             configuredHostsObjs = self.listConfiguredHostsObjects()
             for h in configuredHostsObjs:
-                hostData = VMwareObj.vmwareObjToDict(h)
+                hostData = VmwareHelper.vmwareObjToDict(h)
                 try:
                     pgObjList = self.getHostPortGroupsObjects(h)
                     for pgObj in pgObjList:
@@ -111,7 +111,7 @@ class Network(VMwareDjangoObj):
         try:
             netObjList = Network.listNetworksObjects(assetId, silent)
             for n in netObjList:
-                networks.append(VMwareObj.vmwareObjToDict(n))
+                networks.append(VmwareHelper.vmwareObjToDict(n))
 
             return dict({
                 "items": networks

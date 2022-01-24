@@ -2,7 +2,7 @@ from pyVmomi import vim, vmodl
 
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -21,7 +21,7 @@ class Datastore(VMwareDjangoObj):
         try:
             attachedHostsObjs = self.listAttachedHostsObjects()
             for h in attachedHostsObjs:
-                attachedHosts.append(VMwareObj.vmwareObjToDict(h))
+                attachedHosts.append(VmwareHelper.vmwareObjToDict(h))
 
             datastoreInfo = self.getDatastoreInfo()
 
@@ -109,7 +109,7 @@ class Datastore(VMwareDjangoObj):
             dsObjList = Datastore.listDatastoresObjects(assetId, silent)
 
             for ds in dsObjList:
-                datastores.append(VMwareObj.vmwareObjToDict(ds))
+                datastores.append(VmwareHelper.vmwareObjToDict(ds))
 
             return dict({
                 "items": datastores

@@ -5,7 +5,7 @@ from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.Network import Network
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -32,13 +32,13 @@ class Cluster(VMwareDjangoObj):
             networks = self.listNetworksObjects()
 
             for h in hosts:
-                o["hosts"].append(VMwareObj.vmwareObjToDict(h))
+                o["hosts"].append(VmwareHelper.vmwareObjToDict(h))
 
             for d in datastores:
-                o["datastores"].append(VMwareObj.vmwareObjToDict(d))
+                o["datastores"].append(VmwareHelper.vmwareObjToDict(d))
 
             for n in networks:
-                o["networks"].append(VMwareObj.vmwareObjToDict(n))
+                o["networks"].append(VmwareHelper.vmwareObjToDict(n))
 
             return o
 
@@ -98,7 +98,7 @@ class Cluster(VMwareDjangoObj):
         try:
             clustersObjList = Cluster.listClustersObjects(assetId, silent)
             for cl in clustersObjList:
-                clusters.append(VMwareObj.vmwareObjToDict(cl))
+                clusters.append(VmwareHelper.vmwareObjToDict(cl))
 
             return dict({
                 "items": clusters

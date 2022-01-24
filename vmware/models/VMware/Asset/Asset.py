@@ -27,7 +27,7 @@ class Asset:
         self.datacenter: str
         self.environment: str
         self.position: str
-        self.dataConnection: DataConnection
+        self.dataConnection: DataConnection = None
 
         self.__load()
 

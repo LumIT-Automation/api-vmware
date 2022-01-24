@@ -1,7 +1,7 @@
 from pyVmomi import vim, vmodl
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -24,9 +24,9 @@ class VMFolder(VMwareDjangoObj):
         try:
             [ vmList, vAppList ] = self.listVMObjects()
             for vm in vmList:
-                o["vmList"].append(VMwareObj.vmwareObjToDict(vm))
+                o["vmList"].append(VmwareHelper.vmwareObjToDict(vm))
             for app in vAppList:
-                o["vAppList"].append(VMwareObj.vmwareObjToDict(app))
+                o["vAppList"].append(VmwareHelper.vmwareObjToDict(app))
 
             return o
 
@@ -133,7 +133,7 @@ class VMFolder(VMwareDjangoObj):
             try:
                 vmFoldersObjList = VMFolder.listVMFoldersObjects(assetId, silent)
                 for f in vmFoldersObjList:
-                    folders.append(VMwareObj.vmwareObjToDict(f))
+                    folders.append(VmwareHelper.vmwareObjToDict(f))
 
 
             except Exception as e:

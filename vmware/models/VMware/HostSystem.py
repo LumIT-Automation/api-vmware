@@ -2,7 +2,7 @@ from pyVmomi import vim, vmodl
 
 from vmware.models.VMwareDjangoObj import VMwareDjangoObj
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -27,11 +27,11 @@ class HostSystem(VMwareDjangoObj):
             networks = self.listNetworksObjects()
 
             for d in datastores:
-                o["datastores"].append(VMwareObj.vmwareObjToDict(d))
+                o["datastores"].append(VmwareHelper.vmwareObjToDict(d))
 
             # Add also the vlanId information.
             for n in networks:
-                net = VMwareObj.vmwareObjToDict(n)
+                net = VmwareHelper.vmwareObjToDict(n)
                 pgObj = self.getHostPortGroupSpec(net["name"])
                 if pgObj and hasattr(pgObj, 'spec'):    # This works only for standard vSwitches.
                     net["vlanId"] = pgObj.spec.vlanId
@@ -97,7 +97,7 @@ class HostSystem(VMwareDjangoObj):
         try:
             hostsObjList = HostSystem.listHostsObjects(assetId, silent)
             for h in hostsObjList:
-                hosts.append(VMwareObj.vmwareObjToDict(h))
+                hosts.append(VmwareHelper.vmwareObjToDict(h))
 
             return dict({
                 "items": hosts
