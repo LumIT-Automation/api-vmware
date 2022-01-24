@@ -28,19 +28,20 @@ class Permission:
     def modify(self, identityGroupId: int, role: str, vmwareObject: VMObject) -> None:
         try:
             if role == "admin":
-                # If admin: override to "any"
-                moId = "any"
+                moId = "any" # if admin: override to "any".
+                objectId = VMObject(vmwareObject.id_asset, moId).id # get the id of object "any".
             else:
                 moId = vmwareObject.moId
+                objectId = vmwareObject.id
 
-            objectId = vmwareObject.id
             if not objectId:
-                # If the VMObject does not exist (in the db), create it.
-                objectId = VMObject.add(
-                    moId=moId,
-                    assetId=vmwareObject.id_asset,
-                    objectName=vmwareObject.name
-                )
+                if moId != "any":
+                    # If the VMObject does not exist (in the db), create it.
+                    objectId = VMObject.add(
+                        moId=moId,
+                        assetId=vmwareObject.id_asset,
+                        objectName=vmwareObject.name
+                    )
 
             Repository.modify(
                 self.id,
