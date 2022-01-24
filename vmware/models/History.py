@@ -1,69 +1,37 @@
-from django.utils.html import strip_tags
-from django.db import connection
-
-from vmware.helpers.Log import Log
-from vmware.helpers.Exception import CustomException
-from vmware.helpers.Database import Database as DBHelper
+from vmware.repository.History import History as Repository
 
 
 class History:
+    def __init__(self, id: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.id = id
+        self.username = ""
+        self.action = ""
+        self.asset_id = 0
+        self.config_object_type = ""
+        self.config_object = ""
+        self.status = ""
+        self.date = ""
+
+
 
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
     @staticmethod
-    def list(username: str, allUsersHistory: bool) -> dict:
-        j = 0
-        c = connection.cursor()
-
+    def list(username: str, allUsersHistory: bool) -> list:
         try:
-            if allUsersHistory:
-                c.execute("SELECT username, action, asset_id, config_object_type, config_object, status, date FROM log")
-            else:
-                c.execute("SELECT username, action, asset_id, config_object_type, config_object, status, date FROM log WHERE username = %s", [
-                    username
-                ])
-
-            items = DBHelper.asDict(c)
-            for el in items:
-                items[j]["date"] = str(el["date"]) # datetime.datetime() to string.
-                j += 1
-
-            return dict({
-                "data": {
-                    "items": items
-                }
-            })
-
+            return Repository.list(username, allUsersHistory)
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-        finally:
-            c.close()
+            raise e
 
 
 
     @staticmethod
     def add(data: dict) -> None:
-        s = ""
-        keys = "("
-        values = []
-
-        c = connection.cursor()
-
-        # Build SQL query according to dict fields.
-        for k, v in data.items():
-            s += "%s,"
-            keys += k+","
-            values.append(strip_tags(v)) # no HTML allowed.
-
-        keys = keys[:-1]+")"
-
         try:
-            c.execute("INSERT INTO log "+keys+" VALUES ("+s[:-1]+")",
-                values
-            )
+            Repository.add(data)
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-        finally:
-            c.close()
+            raise e
