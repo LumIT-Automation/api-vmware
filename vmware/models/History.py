@@ -6,7 +6,6 @@ from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
 
 
-
 class History:
 
     ####################################################################################################################

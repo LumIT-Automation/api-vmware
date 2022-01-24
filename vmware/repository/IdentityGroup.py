@@ -41,22 +41,22 @@ class IdentityGroup:
 
 
     @staticmethod
-    def modify(identityGroupIdentifier: str, data: dict) -> None:
+    def modify(id: int, data: dict) -> None:
         sql = ""
         values = []
         c = connection.cursor()
 
-        if IdentityGroup.__exists(identityGroupIdentifier):
+        if IdentityGroup.__exists(id):
             # %s placeholders and values for SET.
             for k, v in data.items():
                 sql += k + "=%s,"
                 values.append(strip_tags(v)) # no HTML allowed.
 
             # Condition for WHERE.
-            values.append(identityGroupIdentifier)
+            values.append(id)
 
             try:
-                c.execute("UPDATE identity_group SET "+sql[:-1]+" WHERE identity_group_identifier = %s",
+                c.execute("UPDATE identity_group SET "+sql[:-1]+" WHERE id = %s",
                     values
                 )
             except Exception as e:
@@ -70,13 +70,13 @@ class IdentityGroup:
 
 
     @staticmethod
-    def delete(identityGroupIdentifier: str) -> None:
+    def delete(id: int) -> None:
         c = connection.cursor()
 
-        if IdentityGroup.__exists(identityGroupIdentifier):
+        if IdentityGroup.__exists(id):
             try:
-                c.execute("DELETE FROM identity_group WHERE identity_group_identifier = %s", [
-                    identityGroupIdentifier
+                c.execute("DELETE FROM identity_group WHERE id = %s", [
+                    id
                 ])
 
                 # Foreign keys' on cascade rules will clean the linked items on db.
@@ -178,12 +178,12 @@ class IdentityGroup:
     ####################################################################################################################
 
     @staticmethod
-    def __exists(identityGroupIdentifier: str) -> int:
+    def __exists(id: int) -> int:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT COUNT(*) AS c FROM identity_group WHERE identity_group_identifier = %s", [
-                identityGroupIdentifier
+            c.execute("SELECT COUNT(*) AS c FROM identity_group WHERE id = %s", [
+                id
             ])
             o = DBHelper.asDict(c)
 

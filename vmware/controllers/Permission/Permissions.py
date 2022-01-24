@@ -77,9 +77,8 @@ class PermissionsController(CustomController):
                 if serializer.is_valid():
                     data = serializer.validated_data["data"]
 
-                    ig = IdentityGroup(data["identity_group_identifier"])
                     try:
-                        identityGroupId = ig.info()["id"]
+                        identityGroupId = IdentityGroup(data["identity_group_identifier"]).id
                     except Exception:
                         raise CustomException(status=status.HTTP_422_UNPROCESSABLE_ENTITY, payload={"database": "Group identifier doesn't exist."})
 

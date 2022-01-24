@@ -9,9 +9,11 @@ class IdentityGroup:
     def __init__(self, identityGroupIdentifier: str,  *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id: int
+        self.id: int = 0
         self.identity_group_identifier = identityGroupIdentifier
         self.name: str
+
+        self.__load()
 
 
 
@@ -19,17 +21,9 @@ class IdentityGroup:
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        try:
-            return Repository.get(self.identity_group_identifier)
-        except Exception as e:
-            raise e
-
-
-
     def modify(self, data: dict) -> None:
         try:
-            Repository.modify(self.identity_group_identifier, data)
+            Repository.modify(self.id, data)
         except Exception as e:
             raise e
 
@@ -37,7 +31,7 @@ class IdentityGroup:
 
     def delete(self) -> None:
         try:
-            Repository.delete(self.identity_group_identifier)
+            Repository.delete(self.id)
         except Exception as e:
             raise e
 
@@ -126,3 +120,19 @@ class IdentityGroup:
             Repository.add(data)
         except Exception as e:
             raise e
+
+
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __load(self) -> None:
+        try:
+            info = Repository.get(self.identity_group_identifier)
+
+            # Set attributes.
+            for k, v in info.items():
+                setattr(self, k, v)
+        except Exception:
+            pass

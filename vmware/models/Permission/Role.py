@@ -11,17 +11,7 @@ class Role:
         self.role: str = name
         self.description: str
 
-
-
-    ####################################################################################################################
-    # Public methods
-    ####################################################################################################################
-
-    def info(self) -> dict:
-        try:
-            return Repository.get(self.role)
-        except Exception as e:
-            raise e
+        self.__load()
 
 
 
@@ -44,3 +34,19 @@ class Role:
             return Repository.list(True)
         except Exception as e:
             raise e
+
+
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __load(self) -> None:
+        try:
+            info = Repository.get(self.role)
+
+            # Set attributes.
+            for k, v in info.items():
+                setattr(self, k, v)
+        except Exception:
+            pass

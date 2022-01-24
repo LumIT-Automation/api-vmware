@@ -52,12 +52,9 @@ class PermissionController(CustomController):
                 if serializer.is_valid():
                     data = serializer.validated_data["data"]
 
-                    ig = IdentityGroup(data["identity_group_identifier"])
-                    identityGroupId = ig.info()["id"]
-
                     p = Permission(permissionId)
                     p.modify(
-                        identityGroupId,
+                        IdentityGroup(data["identity_group_identifier"]).id, # identity group id.
                         data["role"],
                         VMObject(
                             assetId=data["object"]["id_asset"],
