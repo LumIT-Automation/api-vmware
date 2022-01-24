@@ -14,11 +14,13 @@ class VMObject:
     def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id: int
+        self.id: int = 0
         self.id_asset: int = assetId
         self.moId: str = moId
         self.name: str = name
         self.description: str
+
+        self.__load()
 
 
 
@@ -26,21 +28,9 @@ class VMObject:
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        try:
-            return Repository.get(
-                self.id_asset,
-                self.moId,
-                VMObject.getType # Callable[[str], str].
-            )
-        except Exception as e:
-            raise e
-
-
-
     def delete(self) -> None:
         try:
-            Repository.delete(self.id_asset, self.moId)
+            Repository.delete(self.id)
         except Exception as e:
             raise e
 
@@ -120,3 +110,23 @@ class VMObject:
             return objectType
         except Exception:
             raise CustomException(status=400, payload={"VMware": "Object type not found. Wrong moId?"})
+
+
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __load(self) -> None:
+        try:
+            info = Repository.get(
+                self.id_asset,
+                self.moId,
+                VMObject.getType # Callable[[str], str].
+            )
+
+            # Set attributes.
+            for k, v in info.items():
+                setattr(self, k, v)
+        except Exception:
+            pass

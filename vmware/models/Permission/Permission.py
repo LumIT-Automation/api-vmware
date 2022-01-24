@@ -1,7 +1,7 @@
 from vmware.models.Permission.Role import Role
 from vmware.models.Permission.VMObject import VMObject
 
-from vmware.helpers.Exception import CustomException
+from vmware.helpers.Log import Log
 
 from vmware.repository.Permission import Permission as Repository
 
@@ -33,27 +33,21 @@ class Permission:
             else:
                 moId = vmwareObject.moId
 
-            # Get the VMObject id. If the VMObject does not exist in the db, create it.
-            o = VMObject(assetId=vmwareObject.id_asset, moId=vmwareObject.moId)
-
-            try:
-                objectId = o.info()["id"]
-            except Exception:
+            objectId = vmwareObject.id
+            if not objectId:
+                # If the VMObject does not exist (in the db), create it.
                 objectId = VMObject.add(
                     moId=moId,
                     assetId=vmwareObject.id_asset,
                     objectName=vmwareObject.name
                 )
 
-            if objectId:
-                Repository.modify(
-                    self.id,
-                    identityGroupId,
-                    Role(name=role).info()["id"],
-                    objectId
-                )
-            else:
-                raise CustomException(status=400, payload={"database": "Object not added: wrong object type?"})
+            Repository.modify(
+                self.id,
+                identityGroupId,
+                Role(name=role).info()["id"],
+                objectId
+            )
         except Exception as e:
             raise e
 
@@ -111,25 +105,19 @@ class Permission:
             else:
                 moId = vmwareObject.moId
 
-            # Get the VMObject id. If the VMObject does not exist in the db, create it.
-            o = VMObject(assetId=vmwareObject.id_asset, moId=vmwareObject.moId)
-
-            try:
-                objectId = o.info()["id"]
-            except Exception:
+            objectId = vmwareObject.id
+            if not objectId:
+                # If the VMObject does not exist (in the db), create it.
                 objectId = VMObject.add(
                     moId=moId,
                     assetId=vmwareObject.id_asset,
                     objectName=vmwareObject.name
                 )
 
-            if objectId:
-                Repository.add(
-                    identityGroupId,
-                    Role(name=role).info()["id"],
-                    objectId
-                )
-            else:
-                raise CustomException(status=400, payload={"database": "Object not added: wrong object type?"})
+            Repository.add(
+                identityGroupId,
+                Role(name=role).info()["id"],
+                objectId
+            )
         except Exception as e:
             raise e

@@ -45,13 +45,12 @@ class VMObject:
 
 
     @staticmethod
-    def delete(assetId: int, moId: str) -> None:
+    def delete(id: int) -> None:
         c = connection.cursor()
 
         try:
-            c.execute("DELETE FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [
-                moId,
-                assetId
+            c.execute("DELETE FROM `vmware_object` WHERE id = %s", [
+                id
             ])
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
