@@ -18,7 +18,7 @@ class VMwareDatacentersController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,7 +30,7 @@ class VMwareDatacentersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = Datacenter.list(assetId)
+                    itemData["data"]["items"] = Datacenter.list(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

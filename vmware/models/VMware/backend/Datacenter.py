@@ -7,13 +7,13 @@ from vmware.helpers.Log import Log
 
 
 
-class Cluster(VmwareContractor):
+class Datacenter(VmwareContractor):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
-        self.oCluster = self.__oClusterLoad()
+        self.oDatacenter = self.__oDatacenterLoad()
 
 
 
@@ -21,25 +21,10 @@ class Cluster(VmwareContractor):
     # Public methods
     ####################################################################################################################
 
-    def oHosts(self) -> list:
+
+    def oClusters(self) -> list:
         try:
-            return self.oCluster.host
-        except Exception as e:
-            raise e
-
-
-
-    def oDatastores(self) -> list:
-        try:
-            return self.oCluster.datastore
-        except Exception as e:
-            raise e
-
-
-
-    def oNetworks(self) -> list:
-        try:
-            return self.oCluster.network
+            return self.oDatacenter.hostFolder.childEntity
         except Exception as e:
             raise e
 
@@ -50,16 +35,16 @@ class Cluster(VmwareContractor):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter cluster pyVmomi objects list.
-    def oClusters(assetId) -> list:
-        oClusterList = list()
+    # vCenter datacenter pyVmomi objects list.
+    def oDatacenters(assetId) -> list:
+        oDatacenterList = list()
 
         try:
-            clList = VmwareContractor(assetId).getContainer(vim.ComputeResource)
-            for cl in clList:
-                oClusterList.append(cl)
+            dclList = VmwareContractor(assetId).getContainer(vim.Datacenter)
+            for d in dclList:
+                oDatacenterList.append(d)
 
-            return oClusterList
+            return oDatacenterList
 
         except Exception as e:
             raise e
@@ -70,7 +55,7 @@ class Cluster(VmwareContractor):
     # Private methods
     ####################################################################################################################
 
-    def __oClusterLoad(self):
-        for k, v in self.getContainer(vim.ComputeResource).items():
+    def __oDatacenterLoad(self):
+        for k, v in self.getContainer(vim.Datacenter).items():
             if k._GetMoId() == self.moId:
                 return k

@@ -1,25 +1,20 @@
 from typing import List
 
-from pyVmomi import vim, vmodl
-
-from vmware.models.VmwareContractor import VmwareContractor
-from vmware.models.VMware.Cluster import Cluster
-
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
+from vmware.models.VMware.backend.Datacenter import Datacenter as Backend
 
 
-class Datacenter(VmwareContractor):
+class Datacenter(Backend):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
 
-        self.clusters: List[Cluster] = []
+        self.clusters: List[dict] = []
 
-        self.__load()
 
 
 
@@ -27,46 +22,28 @@ class Datacenter(VmwareContractor):
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        clusters = []
+    def loadClusters(self) -> None:
         try:
-            computeResourcesList = self.listComputeResourcesObjects()
-            # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
-            for c in computeResourcesList:
-                clusters.append(VmwareHelper.vmwareObjToDict(c))
-
-            return dict({
-                "clusters": clusters,
-            })
-
+            for c in self.oClusters():
+                self.clusters.append(VmwareHelper.vmwareObjToDict(c))
         except Exception as e:
             raise e
 
 
 
-    def listComputeResourcesObjects(self) -> list:
-        computeResources = []
-        try:
-            self.getVMwareObject()
-            for child in self.oCluster.hostFolder.childEntity:
-                if isinstance(child, vim.ComputeResource):
-                    computeResources.append(child)
-            return computeResources
-
-        except Exception as e:
-            raise e
+    def loadRelated(self):
+        self.loadClusters()
 
 
 
+    def info(self):
+        self.loadRelated()
 
-
-
-    def getVMwareObject(self) -> None:
-        try:
-            self._getContainer(vim.Datacenter)
-
-        except Exception as e:
-            raise e
+        return {
+            "assetId": self.assetId,
+            "moId": self.moId,
+            "clusters": self.clusters
+        }
 
 
 
@@ -76,54 +53,13 @@ class Datacenter(VmwareContractor):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def list(assetId, silent: bool = True) -> dict:
-        datacenters = []
+    def list(assetId) -> list:
+        datacenters = list()
+
         try:
-            dcObjList = Datacenter.listDatacentersObjects(assetId, silent)
+            for d in Backend.oDatacenters(assetId):
+                datacenters.append(VmwareHelper.vmwareObjToDict(d))
 
-            for dc in dcObjList:
-                datacenters.append(VmwareHelper.vmwareObjToDict(dc))
-
-            return dict({
-                "items": datacenters
-            })
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # vCenter datacenter pyVmomi objects list.
-    def listDatacentersObjects(assetId, silent: bool = True) -> list:
-        try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
-            dcObjList = vClient.getAllObjs([vim.Datacenter])
-
-            return dcObjList
-        except Exception as e:
-            raise e
-
-
-
-
-
-
-
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __load(self) -> None:
-        try:
-            computeResourcesList = self.listComputeResourcesObjects()
-            # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
-            for c in computeResourcesList:
-                z = VmwareHelper.vmwareObjToDict(c)
-                self.clusters.append(
-                    Cluster(self.assetId, z["moId"])
-                )
-            Log.log(self.clusters, "_")
+            return datacenters
         except Exception as e:
             raise e
