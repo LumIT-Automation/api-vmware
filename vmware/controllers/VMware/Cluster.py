@@ -31,10 +31,7 @@ class VMwareClusterController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    cl = Cluster(assetId, moId)
-                    itemData["data"]["hosts"] = cl.hosts
-                    itemData["data"]["datastores"] = cl.datastores
-                    itemData["data"]["networks"] = cl.networks
+                    itemData["data"] = Cluster(assetId, moId).info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

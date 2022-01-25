@@ -25,22 +25,17 @@ class Cluster(Backend):
 
 
     ####################################################################################################################
-    # Public methods
+    # Public static methods
     ####################################################################################################################
 
-    def oDatastores(self) -> list:
-        try:
-            return self.client.datastore
-        except Exception as e:
-            raise e
-
-
-
-    def oNetworks(self) -> list:
-        try:
-            return self.client.network
-        except Exception as e:
-            raise e
+    def info(self):
+        return {
+            "assetId": self.assetId,
+            "moId": self.moId,
+            "hosts": self.hosts,
+            "datastores": self.datastores,
+            "networks": self.networks,
+        }
 
 
 
