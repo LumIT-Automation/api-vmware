@@ -19,7 +19,7 @@ class VMwareDatastoreController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 

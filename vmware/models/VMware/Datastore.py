@@ -1,13 +1,20 @@
-from pyVmomi import vim, vmodl
-
-from vmware.models.VmwareContractor import VmwareContractor
+from typing import List
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
+from vmware.models.VMware.backend.Datastore import Datastore as Backend
 
 
-class Datastore(VmwareContractor):
+class Datastore(Backend):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
+
+        self.assetId = int(assetId)
+        self.moId = moId
+
+        self.attachedHosts: List[dict] = []
+        self.datastoreInfo = dict()
 
 
 
@@ -15,35 +22,28 @@ class Datastore(VmwareContractor):
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        attachedHosts = []
-        datastoreInfo = []
+    def loadAttachedHosts(self) -> None:
         try:
-            attachedHostsObjs = self.listAttachedHostsObjects()
-            for h in attachedHostsObjs:
-                attachedHosts.append(VmwareHelper.vmwareObjToDict(h))
-
-            datastoreInfo = self.getDatastoreInfo()
-
-            return dict({
-                "attachedHosts": attachedHosts,
-                "datastoreInfo": datastoreInfo
-            })
-
+            for h in self.oAttachedHosts():
+                self.attachedHosts.append(VmwareHelper.vmwareObjToDict(h))
         except Exception as e:
             raise e
 
 
 
-    def getDatastoreInfo(self) -> dict:
+    def loadInfo(self) -> dict:
         info = dict()
         try:
-            dsInfo = self.getDatastoreInfoObject()
+            dsInfo = self.oInfoLoad()
+            dsSummary = self.oSummaryLoad()
+            Log.log(dsInfo, '_')
+            Log.log(dsSummary, '_')
             info["name"] = dsInfo.name
             info["url"] = dsInfo.url
             info["freeSpace"] = dsInfo.freeSpace
             info["maxFileSize"] = dsInfo.maxFileSize
             info["maxVirtualDiskCapacity"] = dsInfo.maxVirtualDiskCapacity
+            info["multipleHostAccess"] = dsSummary.multipleHostAccess
 
             if hasattr(dsInfo, 'nas'):
                 info["type"] = dsInfo.nas.type
@@ -55,45 +55,25 @@ class Datastore(VmwareContractor):
                 info["majorVersion"] = dsInfo.vmfs.majorVersion
                 info["local"] = dsInfo.vmfs.local
 
-            return info
+            self.datastoreInfo = info
 
         except Exception as e:
             raise e
 
 
 
-    def getDatastoreInfoObject(self) -> object:
-        try:
-            self.getVMwareObject()
-            return self.oCluster.info
-
-        except Exception as e:
-            raise e
+    def loadRelated(self):
+        self.loadAttachedHosts()
+        self.loadInfo()
 
 
 
-    def listAttachedHostsObjects(self) -> list:
-        hosts = []
-        try:
-            self.getVMwareObject()
-            hostMounts = self.oCluster.host
-            for h in hostMounts:
-                if h.mountInfo.mounted is True and h.mountInfo.accessible is True and h.mountInfo.accessMode == "readWrite":
-                    hosts.append(h.key)
-
-            return hosts
-
-        except Exception as e:
-            raise e
-
-
-
-    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getContainer(vim.Datastore)
-
-        except Exception as e:
-            raise e
+    def info(self):
+        self.loadRelated()
+        return dict({
+            "attachedHosts": self.attachedHosts,
+            "datastoreInfo": self.datastoreInfo
+        })
 
 
 
@@ -102,39 +82,18 @@ class Datastore(VmwareContractor):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter datastores list.
-    def list(assetId, silent: bool = True) -> dict:
-        datastores = []
+    # Plain vCenter datacenters list.
+    def list(assetId) -> list:
+        datastores = list()
+
         try:
-            dsObjList = Datastore.listDatastoresObjects(assetId, silent)
+            for d in Backend.oDatastores(assetId):
+                datastores.append(VmwareHelper.vmwareObjToDict(d))
 
-            for ds in dsObjList:
-                datastores.append(VmwareHelper.vmwareObjToDict(ds))
-
-            return dict({
-                "items": datastores
-            })
-
+            return datastores
         except Exception as e:
             raise e
 
 
-
-
-
-
-    @staticmethod
-    # vCenter datastores pyVmomi objects list.
-    def listDatastoresObjects(assetId, silent: bool = True) -> list:
-        dsObjList = list()
-
-        try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
-            dsObjList = vClient.getAllObjs([vim.Datastore])
-
-            return dsObjList
-
-        except Exception as e:
-            raise e
 
 

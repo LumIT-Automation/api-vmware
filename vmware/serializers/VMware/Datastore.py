@@ -17,6 +17,7 @@ class VMwareDatastoreSerializer(serializers.Serializer):
             majorVersion = serializers.IntegerField(required=False)
             ssd = serializers.BooleanField(required=False)
             local = serializers.BooleanField(required=False,allow_null=True)
+            multipleHostAccess = serializers.BooleanField(required=False)
 
         attachedHosts = VMwareDatastoreAttachedHostsSerializer(many=True)
         datastoreInfo = VMwareDatastoreInfoSerializer()

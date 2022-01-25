@@ -18,7 +18,7 @@ class VMwareDatastoresController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,7 +30,7 @@ class VMwareDatastoresController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = Datastore.list(assetId)
+                    itemData["data"]["items"] = Datastore.list(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
