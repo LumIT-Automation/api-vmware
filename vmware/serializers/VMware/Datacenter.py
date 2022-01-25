@@ -7,7 +7,5 @@ class VMwareDatacenterSerializer(serializers.Serializer):
             name = serializers.CharField(max_length=255, required=False)
 
         clusters = VMwareDatacenterItemsSerializer(many=True)
-        datastores = VMwareDatacenterItemsSerializer(many=True)
-        networks = VMwareDatacenterItemsSerializer(many=True)
 
     data = VMwareDatacenterInnerSerializer(required=True)

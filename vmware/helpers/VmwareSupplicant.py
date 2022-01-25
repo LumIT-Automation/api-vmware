@@ -8,9 +8,17 @@ from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
-class VmwareSupplicant: # singleton.
-    __instances = {}
+class Singleton(type):
+    _instances = {}
 
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+
+class VmwareSupplicant(metaclass=Singleton):
     def __init__(self, dataConnection, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -29,14 +37,6 @@ class VmwareSupplicant: # singleton.
         self.connection = None
         self.content = None
         self.ran = random.random()
-
-
-
-    def __new__(cls, *args, **kwargs):
-        if cls not in cls.__instances:
-            cls.__instances[cls] = super(VmwareSupplicant, cls).__new__(cls)
-
-        return cls.__instances[cls]
 
 
 

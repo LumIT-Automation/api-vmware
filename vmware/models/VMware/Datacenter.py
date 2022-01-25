@@ -19,15 +19,7 @@ class Datacenter(VmwareContractor):
 
         self.clusters: List[Cluster] = []
 
-        computeResourcesList = self.listComputeResourcesObjects()
-        # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
-        for c in computeResourcesList:
-            z = VmwareHelper.vmwareObjToDict(c)
-            self.clusters.append(
-                Cluster(self.assetId, z["moId"])
-            )
-
-        Log.log(self.clusters, "_")
+        self.__load()
 
 
 
@@ -37,30 +29,14 @@ class Datacenter(VmwareContractor):
 
     def info(self) -> dict:
         clusters = []
-        datastores = []
-        networks = []
         try:
             computeResourcesList = self.listComputeResourcesObjects()
             # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
             for c in computeResourcesList:
                 clusters.append(VmwareHelper.vmwareObjToDict(c))
 
-            dsList = self.listDatastoresObjects()
-            # each element of dsList is a set containing a vmware Datastore object.
-            for ds in dsList:
-                for d in ds:
-                    datastores.append(VmwareHelper.vmwareObjToDict(d))
-
-            nList = self.listNetworksObjects()
-            # each element of computeResources is a set containing a vmware Network object.
-            for net in nList:
-                for n in net:
-                    networks.append(VmwareHelper.vmwareObjToDict(n))
-
             return dict({
                 "clusters": clusters,
-                "datastores": datastores,
-                "networks": networks
             })
 
         except Exception as e:
@@ -82,35 +58,10 @@ class Datacenter(VmwareContractor):
 
 
 
-    def listDatastoresObjects(self) -> list:
-        datastores = []
-        try:
-            self.getVMwareObject()
-            for child in self.oCluster.datastoreFolder.childEntity:
-                if isinstance(child, vim.Datastore):
-                    datastores.append({child})
-            return datastores
-
-        except Exception as e:
-            raise e
 
 
 
-    def listNetworksObjects(self) -> list:
-        networks = []
-        try:
-            self.getVMwareObject()
-            for child in self.oCluster.networkFolder.childEntity:
-                if isinstance(child, vim.Network):
-                    networks.append({child})
-            return networks
-
-        except Exception as e:
-            raise e
-
-
-
-    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
+    def getVMwareObject(self) -> None:
         try:
             self._getContainer(vim.Datacenter)
 
@@ -150,5 +101,29 @@ class Datacenter(VmwareContractor):
             dcObjList = vClient.getAllObjs([vim.Datacenter])
 
             return dcObjList
+        except Exception as e:
+            raise e
+
+
+
+
+
+
+
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __load(self) -> None:
+        try:
+            computeResourcesList = self.listComputeResourcesObjects()
+            # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
+            for c in computeResourcesList:
+                z = VmwareHelper.vmwareObjToDict(c)
+                self.clusters.append(
+                    Cluster(self.assetId, z["moId"])
+                )
+            Log.log(self.clusters, "_")
         except Exception as e:
             raise e
