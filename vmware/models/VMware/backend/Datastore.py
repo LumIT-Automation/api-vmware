@@ -23,6 +23,7 @@ class Datastore(VmwareContractor):
 
     def oAttachedHosts(self) -> list:
         hosts = []
+
         try:
             hostMounts = self.oDatastore.host
             for h in hostMounts:
@@ -30,7 +31,6 @@ class Datastore(VmwareContractor):
                     hosts.append(h.key)
 
             return hosts
-
         except Exception as e:
             raise e
 
@@ -39,7 +39,6 @@ class Datastore(VmwareContractor):
     def oInfoLoad(self) -> object:
         try:
             return self.oDatastore.info
-
         except Exception as e:
             raise e
 
@@ -48,7 +47,6 @@ class Datastore(VmwareContractor):
     def oSummaryLoad(self) -> object:
         try:
             return self.oDatastore.summary
-
         except Exception as e:
             raise e
 
@@ -69,7 +67,6 @@ class Datastore(VmwareContractor):
                 oDatastoresList.append(d)
 
             return oDatastoresList
-
         except Exception as e:
             raise e
 

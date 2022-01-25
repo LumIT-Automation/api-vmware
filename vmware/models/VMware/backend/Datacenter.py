@@ -6,7 +6,6 @@ from vmware.models.VmwareContractor import VmwareContractor
 from vmware.helpers.Log import Log
 
 
-
 class Datacenter(VmwareContractor):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
@@ -20,7 +19,6 @@ class Datacenter(VmwareContractor):
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
-
 
     def oClusters(self) -> list:
         try:

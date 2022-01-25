@@ -31,13 +31,13 @@ class Datastore(Backend):
 
 
 
-    def loadInfo(self) -> dict:
+    def loadInfo(self) -> None:
         info = dict()
+
         try:
             dsInfo = self.oInfoLoad()
             dsSummary = self.oSummaryLoad()
-            Log.log(dsInfo, '_')
-            Log.log(dsSummary, '_')
+
             info["name"] = dsInfo.name
             info["url"] = dsInfo.url
             info["freeSpace"] = dsInfo.freeSpace
@@ -56,7 +56,6 @@ class Datastore(Backend):
                 info["local"] = dsInfo.vmfs.local
 
             self.datastoreInfo = info
-
         except Exception as e:
             raise e
 
@@ -70,6 +69,7 @@ class Datastore(Backend):
 
     def info(self):
         self.loadRelated()
+
         return dict({
             "attachedHosts": self.attachedHosts,
             "datastoreInfo": self.datastoreInfo
@@ -93,7 +93,3 @@ class Datastore(Backend):
             return datastores
         except Exception as e:
             raise e
-
-
-
-
