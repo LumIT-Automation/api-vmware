@@ -83,7 +83,7 @@ class Datastore(Backend):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def list(assetId) -> list:
+    def list(assetId) -> List[dict]:
         datastores = list()
 
         try:

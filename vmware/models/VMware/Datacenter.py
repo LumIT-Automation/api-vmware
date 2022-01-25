@@ -3,17 +3,20 @@ from typing import List
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
+from vmware.models.VMware.Cluster import Cluster
+
 from vmware.models.VMware.backend.Datacenter import Datacenter as Backend
 
 
 class Datacenter(Backend):
-    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
+        self.name = name
 
-        self.clusters: List[dict] = []
+        self.clusters: List[Cluster] = []
 
 
 
@@ -24,7 +27,13 @@ class Datacenter(Backend):
     def loadClusters(self) -> None:
         try:
             for c in self.oClusters():
-                self.clusters.append(VmwareHelper.vmwareObjToDict(c))
+                self.clusters.append(
+                    Cluster(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(c)["moId"],
+                        VmwareHelper.vmwareObjToDict(c)["name"],
+                    )
+                )
         except Exception as e:
             raise e
 
@@ -36,12 +45,17 @@ class Datacenter(Backend):
 
 
     def info(self):
+        lc = list()
         self.loadRelated()
+
+        for cluster in self.clusters:
+            lc.append(cluster.info(False))
 
         return {
             "assetId": self.assetId,
             "moId": self.moId,
-            "clusters": self.clusters
+            "name": self.oDatacenter.name,
+            "clusters": lc
         }
 
 
@@ -52,12 +66,15 @@ class Datacenter(Backend):
 
     @staticmethod
     # Plain vCenter datacenters list.
-    def list(assetId) -> list:
+    def list(assetId) -> List[dict]:
         datacenters = list()
 
         try:
             for d in Backend.oDatacenters(assetId):
-                datacenters.append(VmwareHelper.vmwareObjToDict(d))
+                data = {"assetId": assetId}
+                data.update(VmwareHelper.vmwareObjToDict(d))
+
+                datacenters.append(data)
 
             return datacenters
         except Exception as e:

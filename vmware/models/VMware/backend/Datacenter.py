@@ -43,7 +43,6 @@ class Datacenter(VmwareContractor):
                 oDatacenterList.append(d)
 
             return oDatacenterList
-
         except Exception as e:
             raise e
 

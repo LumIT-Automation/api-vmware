@@ -6,6 +6,9 @@ class VMwareDatacenterSerializer(serializers.Serializer):
             moId = serializers.CharField(max_length=64, required=True)
             name = serializers.CharField(max_length=255, required=False)
 
+        assetId = serializers.IntegerField(required=True)
+        moId = serializers.CharField(max_length=64, required=True)
+        name = serializers.CharField(max_length=255, required=False)
         clusters = VMwareDatacenterItemsSerializer(many=True)
 
     data = VMwareDatacenterInnerSerializer(required=True)
