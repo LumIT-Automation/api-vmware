@@ -17,15 +17,49 @@ class Cluster(Backend):
         self.datastores: List[dict] = []
         self.networks: List[dict] = []
 
-        self.__load()
-
 
 
     ####################################################################################################################
-    # Public static methods
+    # Public methods
     ####################################################################################################################
+
+    def loadHosts(self) -> None:
+        try:
+            for h in self.oHosts():
+                self.hosts.append(VmwareHelper.vmwareObjToDict(h))
+        except Exception as e:
+            raise e
+
+
+
+    def loadDatastores(self) -> None:
+        try:
+            for d in self.oDatastores():
+                self.datastores.append(VmwareHelper.vmwareObjToDict(d))
+        except Exception as e:
+            raise e
+
+
+
+    def loadNetworks(self) -> None:
+        try:
+            for n in self.oNetworks():
+                self.networks.append(VmwareHelper.vmwareObjToDict(n))
+        except Exception as e:
+            raise e
+
+
+
+    def loadRelated(self):
+        self.loadHosts()
+        self.loadDatastores()
+        self.loadNetworks()
+
+
 
     def info(self):
+        self.loadRelated()
+
         return {
             "assetId": self.assetId,
             "moId": self.moId,
@@ -50,24 +84,5 @@ class Cluster(Backend):
                 clusters.append(VmwareHelper.vmwareObjToDict(el))
 
             return clusters
-        except Exception as e:
-            raise e
-
-
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __load(self) -> None:
-        try:
-            for h in self.oHosts():
-                self.hosts.append(VmwareHelper.vmwareObjToDict(h))
-
-            for d in self.oDatastores():
-                self.datastores.append(VmwareHelper.vmwareObjToDict(d))
-
-            for n in self.oNetworks():
-                self.networks.append(VmwareHelper.vmwareObjToDict(n))
         except Exception as e:
             raise e
