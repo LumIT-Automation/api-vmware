@@ -3,7 +3,6 @@ from pyVmomi import vim, vmodl
 
 from vmware.models.VmwareContractor import VmwareContractor
 
-from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -13,9 +12,7 @@ class Cluster(VmwareContractor):
 
         self.assetId = int(assetId)
         self.moId = moId
-        self.client = None
-
-        self._getContract(vim.ComputeResource)
+        self.oCluster = self.__oClusterLoad()
 
 
 
@@ -25,7 +22,7 @@ class Cluster(VmwareContractor):
 
     def oHosts(self) -> list:
         try:
-            return self.client.host
+            return self.oCluster.host
         except Exception as e:
             raise e
 
@@ -33,7 +30,7 @@ class Cluster(VmwareContractor):
 
     def oDatastores(self) -> list:
         try:
-            return self.client.datastore
+            return self.oCluster.datastore
         except Exception as e:
             raise e
 
@@ -41,7 +38,7 @@ class Cluster(VmwareContractor):
 
     def oNetworks(self) -> list:
         try:
-            return self.client.network
+            return self.oCluster.network
         except Exception as e:
             raise e
 
@@ -52,38 +49,27 @@ class Cluster(VmwareContractor):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter clusters list.
-    def list(assetId, silent: bool = True) -> dict:
-        clusters = list()
-        try:
-            clustersObjList = Cluster.listClustersObjects(assetId, silent)
-            for cl in clustersObjList:
-                clusters.append(VmwareHelper.vmwareObjToDict(cl))
-
-            return dict({
-                "items": clusters
-            })
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
     # vCenter cluster pyVmomi objects list.
-    def listClustersObjects(assetId, silent: bool = True) -> list:
-        clustersObjList = list()
+    def oClusters(assetId) -> list:
+        oClusterList = list()
 
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
-            clList = vClient.getAllObjs([vim.ComputeResource])
-
+            clList = VmwareContractor(assetId).getContainer(vim.ComputeResource)
             for cl in clList:
-                clustersObjList.append(cl)
+                oClusterList.append(cl)
 
-            return clustersObjList
+            return oClusterList
 
         except Exception as e:
             raise e
 
 
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __oClusterLoad(self):
+        for k, v in self.getContainer(vim.ComputeResource).items():
+            if k._GetMoId() == self.moId:
+                return k

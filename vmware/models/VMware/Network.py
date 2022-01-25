@@ -63,7 +63,7 @@ class Network(VmwareContractor):
     def getNetworkInfoObject(self) -> object:
         try:
             self.getVMwareObject()
-            return self.client.summary
+            return self.oCluster.summary
 
         except Exception as e:
             raise e
@@ -73,7 +73,7 @@ class Network(VmwareContractor):
     def listConfiguredHostsObjects(self) -> list:
         try:
             self.getVMwareObject()
-            return self.client.host
+            return self.oCluster.host
 
         except Exception as e:
             raise e
@@ -93,7 +93,7 @@ class Network(VmwareContractor):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
         try:
-            self._getContract(vim.Network)
+            self._getContainer(vim.Network)
 
         except Exception as e:
             raise e

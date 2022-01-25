@@ -65,7 +65,7 @@ class Datastore(VmwareContractor):
     def getDatastoreInfoObject(self) -> object:
         try:
             self.getVMwareObject()
-            return self.client.info
+            return self.oCluster.info
 
         except Exception as e:
             raise e
@@ -76,7 +76,7 @@ class Datastore(VmwareContractor):
         hosts = []
         try:
             self.getVMwareObject()
-            hostMounts = self.client.host
+            hostMounts = self.oCluster.host
             for h in hostMounts:
                 if h.mountInfo.mounted is True and h.mountInfo.accessible is True and h.mountInfo.accessMode == "readWrite":
                     hosts.append(h.key)
@@ -90,7 +90,7 @@ class Datastore(VmwareContractor):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            self._getContract(vim.Datastore)
+            self._getContainer(vim.Datastore)
 
         except Exception as e:
             raise e

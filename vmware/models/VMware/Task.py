@@ -56,7 +56,7 @@ class Task(VmwareContractor):
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
             vClient = VmwareContractor.connectToAssetAndGetContentStatic(self.assetId, silent)
-            taskManager = vClient.content.taskManager
+            taskManager = vClient.oCluster.taskManager
             for task in taskManager.recentTask:
                 Log.log(task, 'TTTTTTTTTTTTTT')
                 if task.info.key == self.moId:

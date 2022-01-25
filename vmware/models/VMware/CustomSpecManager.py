@@ -216,7 +216,7 @@ class CustomSpecManager(VmwareContractor):
     def __getVMwareObject(assetId, silent: bool = True) -> object:
         try:
             vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
-            return vClient.content.customizationSpecManager
+            return vClient.oCluster.customizationSpecManager
 
         except Exception as e:
             raise e

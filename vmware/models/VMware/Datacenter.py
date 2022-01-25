@@ -72,7 +72,7 @@ class Datacenter(VmwareContractor):
         computeResources = []
         try:
             self.getVMwareObject()
-            for child in self.client.hostFolder.childEntity:
+            for child in self.oCluster.hostFolder.childEntity:
                 if isinstance(child, vim.ComputeResource):
                     computeResources.append(child)
             return computeResources
@@ -86,7 +86,7 @@ class Datacenter(VmwareContractor):
         datastores = []
         try:
             self.getVMwareObject()
-            for child in self.client.datastoreFolder.childEntity:
+            for child in self.oCluster.datastoreFolder.childEntity:
                 if isinstance(child, vim.Datastore):
                     datastores.append({child})
             return datastores
@@ -100,7 +100,7 @@ class Datacenter(VmwareContractor):
         networks = []
         try:
             self.getVMwareObject()
-            for child in self.client.networkFolder.childEntity:
+            for child in self.oCluster.networkFolder.childEntity:
                 if isinstance(child, vim.Network):
                     networks.append({child})
             return networks
@@ -112,7 +112,7 @@ class Datacenter(VmwareContractor):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            self._getContract(vim.Datacenter)
+            self._getContainer(vim.Datacenter)
 
         except Exception as e:
             raise e

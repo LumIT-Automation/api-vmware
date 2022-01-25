@@ -69,7 +69,7 @@ class VMFolder(VmwareContractor):
         vAppList = list()
         try:
             self.getVMwareObject()
-            children = self.client.childEntity
+            children = self.oCluster.childEntity
             for child in children:
                 if isinstance(child, vim.VirtualMachine):
                     vmList.append(child)
@@ -85,7 +85,7 @@ class VMFolder(VmwareContractor):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            self._getContract(vim.Folder)
+            self._getContainer(vim.Folder)
 
         except Exception as e:
             raise e

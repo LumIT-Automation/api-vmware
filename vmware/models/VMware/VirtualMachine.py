@@ -64,10 +64,10 @@ class VirtualMachine(VmwareContractor):
     def getVirtualMachineConfigObject(self) -> object:
         try:
             self.getVMwareObject()
-            if not hasattr(self.client, 'config'):
+            if not hasattr(self.oCluster, 'config'):
                 raise CustomException(status=400, payload={"VMware: this object is not a virtual machine."})
 
-            return self.client.config
+            return self.oCluster.config
 
         except Exception as e:
             raise e
@@ -76,7 +76,7 @@ class VirtualMachine(VmwareContractor):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            self._getContract(vim.VirtualMachine)
+            self._getContainer(vim.VirtualMachine)
 
         except Exception as e:
             raise e

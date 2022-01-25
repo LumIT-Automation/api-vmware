@@ -63,7 +63,7 @@ class VirtualMachineTemplate(VirtualMachine):
 
             vmFolder = VMFolder(self.assetId, data["vmFolderId"])
             vmFolder.getVMwareObject()
-            vmFolderObj = vmFolder.client
+            vmFolderObj = vmFolder.oCluster
 
             # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
             relocateSpec = vim.vm.RelocateSpec()
@@ -77,7 +77,7 @@ class VirtualMachineTemplate(VirtualMachine):
 
             self.getVMwareObject()
             # Deploy
-            task = self.client.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
+            task = self.oCluster.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
 
             return dict({
                 "task": task._GetMoId()

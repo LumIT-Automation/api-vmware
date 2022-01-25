@@ -126,7 +126,7 @@ class HostSystem(VmwareContractor):
     ####################################################################################################################
 
     def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        if not self.client or refresh:
+        if not self.oCluster or refresh:
             try:
                 vClient = self.connectToAssetAndGetContent(silent)
                 objList = vClient.getAllObjs([vim.ComputeResource])

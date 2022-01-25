@@ -1,7 +1,4 @@
 from typing import List
-from pyVmomi import vim, vmodl
-
-from vmware.models.VmwareContractor import VmwareContractor
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
@@ -45,36 +42,14 @@ class Cluster(Backend):
 
     @staticmethod
     # Plain vCenter clusters list.
-    def list(assetId, silent: bool = True) -> dict:
+    def list(assetId) -> list:
         clusters = list()
-        try:
-            clustersObjList = Cluster.listClustersObjects(assetId, silent)
-            for cl in clustersObjList:
-                clusters.append(VmwareHelper.vmwareObjToDict(cl))
-
-            return dict({
-                "items": clusters
-            })
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # vCenter cluster pyVmomi objects list.
-    def listClustersObjects(assetId, silent: bool = True) -> list:
-        clustersObjList = list()
 
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
-            clList = vClient.getAllObjs([vim.ComputeResource])
+            for el in Backend.oClusters(assetId):
+                clusters.append(VmwareHelper.vmwareObjToDict(el))
 
-            for cl in clList:
-                clustersObjList.append(cl)
-
-            return clustersObjList
-
+            return clusters
         except Exception as e:
             raise e
 
