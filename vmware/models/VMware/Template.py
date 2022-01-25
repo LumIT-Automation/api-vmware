@@ -47,14 +47,14 @@ class VirtualMachineTemplate(VirtualMachine):
                 raise CustomException(status=400, payload={"VMware": "clusterId not found in this datacenter."})
 
             cluster = Cluster(self.assetId, clusterObj._GetMoId())
-            cluDatastoreObjList = cluster.listDatastoresObjects()
+            cluDatastoreObjList = cluster.oDatastores()
             for d in cluDatastoreObjList:
                 if data["datastoreId"] == d._GetMoId(): # VMware pvmomi method.
                     datastoreObj = d
             if not datastoreObj:
                 raise CustomException(status=400, payload={"VMware": "datastoreId not found attached to this cluster."})
 
-            cluNetworkObjList = cluster.listNetworksObjects()
+            cluNetworkObjList = cluster.oNetworks()
             for n in cluNetworkObjList:
                 if data["networkId"] == n._GetMoId():
                     networkObj = n
@@ -63,7 +63,7 @@ class VirtualMachineTemplate(VirtualMachine):
 
             vmFolder = VMFolder(self.assetId, data["vmFolderId"])
             vmFolder.getVMwareObject()
-            vmFolderObj = vmFolder.vmwareObj
+            vmFolderObj = vmFolder.client
 
             # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
             relocateSpec = vim.vm.RelocateSpec()
@@ -77,7 +77,7 @@ class VirtualMachineTemplate(VirtualMachine):
 
             self.getVMwareObject()
             # Deploy
-            task = self.vmwareObj.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
+            task = self.client.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
 
             return dict({
                 "task": task._GetMoId()

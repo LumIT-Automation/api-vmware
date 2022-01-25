@@ -6,27 +6,30 @@ from vmware.models.VmwareContractor import VmwareContractor
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
-from vmware.models.VMware.backend.Cluster import Cluster as Backend
 
-
-class Cluster(Backend):
+class Cluster(VmwareContractor):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
+        self.client = None
 
-        self.hosts: List[dict] = []
-        self.datastores: List[dict] = []
-        self.networks: List[dict] = []
-
-        self.__load()
+        self._getContract(vim.ComputeResource)
 
 
 
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
+
+    def oHosts(self) -> list:
+        try:
+            return self.client.host
+        except Exception as e:
+            raise e
+
+
 
     def oDatastores(self) -> list:
         try:
@@ -84,20 +87,3 @@ class Cluster(Backend):
             raise e
 
 
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __load(self) -> None:
-        try:
-            for h in self.oHosts():
-                self.hosts.append(VmwareHelper.vmwareObjToDict(h))
-
-            for d in self.oDatastores():
-                self.datastores.append(VmwareHelper.vmwareObjToDict(d))
-
-            for n in self.oNetworks():
-                self.networks.append(VmwareHelper.vmwareObjToDict(n))
-        except Exception as e:
-            raise e

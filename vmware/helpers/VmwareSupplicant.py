@@ -11,7 +11,7 @@ from vmware.helpers.Log import Log
 class VmwareSupplicant: # singleton.
     __instances = {}
 
-    def __init__(self, dataConnection, silent: bool = False, *args, **kwargs):
+    def __init__(self, dataConnection, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for key in [ "address", "port", "username", "password" ]:
@@ -28,7 +28,6 @@ class VmwareSupplicant: # singleton.
 
         self.connection = None
         self.content = None
-        self.silent = silent
         self.ran = random.random()
 
 
@@ -58,7 +57,7 @@ class VmwareSupplicant: # singleton.
 
     # Get all objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
-    def getAllObjs(self, vimType: list = None) -> object:
+    def getAllObjs(self, vimType: list = None) -> dict:
         obj = {}
         vimType = [] if vimType is None else vimType
 
@@ -69,7 +68,7 @@ class VmwareSupplicant: # singleton.
             try:
                 container = self.content.viewManager.CreateContainerView(self.content.rootFolder, vimType, True)
                 for managedObject_ref in container.view:
-                    obj.update({managedObject_ref: managedObject_ref.name})
+                    obj[managedObject_ref] = managedObject_ref.name
 
             except Exception as e:
                 raise e

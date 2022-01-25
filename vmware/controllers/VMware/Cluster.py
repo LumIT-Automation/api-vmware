@@ -19,7 +19,7 @@ class VMwareClusterController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -32,7 +32,9 @@ class VMwareClusterController(CustomController):
                     lock.lock()
 
                     cl = Cluster(assetId, moId)
-                    itemData["data"] = cl.info()
+                    itemData["data"]["hosts"] = cl.hosts
+                    itemData["data"]["datastores"] = cl.datastores
+                    itemData["data"]["networks"] = cl.networks
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

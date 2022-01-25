@@ -1,13 +1,13 @@
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VmwareContractor import VmwareContractor
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
 
-class Network(VMwareDjangoObj):
+class Network(VmwareContractor):
 
 
 
@@ -63,7 +63,7 @@ class Network(VMwareDjangoObj):
     def getNetworkInfoObject(self) -> object:
         try:
             self.getVMwareObject()
-            return self.vmwareObj.summary
+            return self.client.summary
 
         except Exception as e:
             raise e
@@ -73,7 +73,7 @@ class Network(VMwareDjangoObj):
     def listConfiguredHostsObjects(self) -> list:
         try:
             self.getVMwareObject()
-            return self.vmwareObj.host
+            return self.client.host
 
         except Exception as e:
             raise e
@@ -93,7 +93,7 @@ class Network(VMwareDjangoObj):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
         try:
-            self._getVMwareObject(vim.Network, refresh, silent)
+            self._getContract(vim.Network)
 
         except Exception as e:
             raise e
@@ -123,22 +123,12 @@ class Network(VMwareDjangoObj):
 
 
     @staticmethod
-    def listNetworksInClusterObjects(cluster: object) -> list: # (List of vim.Hostsystem)
-        try:
-            return cluster.network
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
     # vCenter networks pyVmomi objects list.
     def listNetworksObjects(assetId, silent: bool = None) -> list:
         netObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
             netObjList = vClient.getAllObjs([vim.Network])
 
             return netObjList

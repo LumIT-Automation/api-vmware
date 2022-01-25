@@ -1,12 +1,12 @@
 from pyVmomi import vim, vmodl
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VmwareContractor import VmwareContractor
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
 
-class VMFolder(VMwareDjangoObj):
+class VMFolder(VmwareContractor):
 
 
 
@@ -69,7 +69,7 @@ class VMFolder(VMwareDjangoObj):
         vAppList = list()
         try:
             self.getVMwareObject()
-            children = self.vmwareObj.childEntity
+            children = self.client.childEntity
             for child in children:
                 if isinstance(child, vim.VirtualMachine):
                     vmList.append(child)
@@ -85,7 +85,7 @@ class VMFolder(VMwareDjangoObj):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            self._getVMwareObject(vim.Folder, refresh, silent)
+            self._getContract(vim.Folder)
 
         except Exception as e:
             raise e
@@ -151,7 +151,7 @@ class VMFolder(VMwareDjangoObj):
         vmFoldersObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
             vmFoldersObjList = vClient.getAllObjs([vim.Folder])
 
             return vmFoldersObjList

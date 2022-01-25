@@ -1,6 +1,6 @@
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VmwareContractor import VmwareContractor
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
@@ -12,7 +12,7 @@ from vmware.helpers.Log import Log
 # For documentation about VMware CustomSpecManager methods and properties:
 # https://developer.vmware.com/apis/704/vsphere/vim.CustomizationSpecManager.html
 
-class CustomSpecManager(VMwareDjangoObj):
+class CustomSpecManager(VmwareContractor):
 
 
 
@@ -215,7 +215,7 @@ class CustomSpecManager(VMwareDjangoObj):
     @staticmethod
     def __getVMwareObject(assetId, silent: bool = True) -> object:
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
             return vClient.content.customizationSpecManager
 
         except Exception as e:

@@ -1,13 +1,33 @@
+from typing import List
+
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VmwareContractor import VmwareContractor
+from vmware.models.VMware.Cluster import Cluster
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
 
-class Datacenter(VMwareDjangoObj):
+class Datacenter(VmwareContractor):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
+
+        self.assetId = int(assetId)
+        self.moId = moId
+
+        self.clusters: List[Cluster] = []
+
+        computeResourcesList = self.listComputeResourcesObjects()
+        # each element of computeResourcesList is a set containing a vmware ClusterComputeResource object.
+        for c in computeResourcesList:
+            z = VmwareHelper.vmwareObjToDict(c)
+            self.clusters.append(
+                Cluster(self.assetId, z["moId"])
+            )
+
+        Log.log(self.clusters, "_")
 
 
 
@@ -52,7 +72,7 @@ class Datacenter(VMwareDjangoObj):
         computeResources = []
         try:
             self.getVMwareObject()
-            for child in self.vmwareObj.hostFolder.childEntity:
+            for child in self.client.hostFolder.childEntity:
                 if isinstance(child, vim.ComputeResource):
                     computeResources.append(child)
             return computeResources
@@ -66,7 +86,7 @@ class Datacenter(VMwareDjangoObj):
         datastores = []
         try:
             self.getVMwareObject()
-            for child in self.vmwareObj.datastoreFolder.childEntity:
+            for child in self.client.datastoreFolder.childEntity:
                 if isinstance(child, vim.Datastore):
                     datastores.append({child})
             return datastores
@@ -80,7 +100,7 @@ class Datacenter(VMwareDjangoObj):
         networks = []
         try:
             self.getVMwareObject()
-            for child in self.vmwareObj.networkFolder.childEntity:
+            for child in self.client.networkFolder.childEntity:
                 if isinstance(child, vim.Network):
                     networks.append({child})
             return networks
@@ -92,7 +112,7 @@ class Datacenter(VMwareDjangoObj):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            self._getVMwareObject(vim.Datacenter, refresh, silent)
+            self._getContract(vim.Datacenter)
 
         except Exception as e:
             raise e
@@ -126,7 +146,7 @@ class Datacenter(VMwareDjangoObj):
     # vCenter datacenter pyVmomi objects list.
     def listDatacentersObjects(assetId, silent: bool = True) -> list:
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
             dcObjList = vClient.getAllObjs([vim.Datacenter])
 
             return dcObjList

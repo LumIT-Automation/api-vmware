@@ -5,7 +5,7 @@ from vmware.helpers.Log import Log
 
 
 
-class VMwareDjangoObj:
+class VmwareContractor:
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -13,7 +13,7 @@ class VMwareDjangoObj:
         # Can be obtained from the _GetMoId() method or from the "_moId" property of a managed object.
         self.assetId = int(assetId)
         self.moId = moId
-        self.vmwareObj = None
+        self.client = None
 
 
 
@@ -21,11 +21,10 @@ class VMwareDjangoObj:
     # Public methods
     ####################################################################################################################
 
-    def connectToAssetAndGetContent(self, silent: bool = True):
+    def connectToAssetAndGetContent(self):
         try:
             vClient = VmwareSupplicant(
-                Asset(self.assetId).dataConnection,
-                silent
+                Asset(self.assetId).dataConnection
             )
             vClient.getContent()
 
@@ -72,18 +71,13 @@ class VMwareDjangoObj:
     # Protected methods
     ####################################################################################################################
 
-    def _getVMwareObject(self, vimType: str, refresh: bool = False, silent: bool = True) -> object:
-        if not self.vmwareObj or refresh:
-            try:
-                vClient = self.connectToAssetAndGetContent(silent)
-                objList = vClient.getAllObjs([vimType])
-                for obj in objList:
-                    if obj._GetMoId() == self.moId:
-                        self.vmwareObj = obj
-
-            except Exception as e:
-                raise e
-        else:
-            pass
-
+    def _getContract(self, vimType: str) -> None:
+        try:
+            vClient = self.connectToAssetAndGetContent()
+            objList = vClient.getAllObjs([vimType])
+            for obj, v in objList.items():
+                if obj._GetMoId() == self.moId:
+                    self.client = obj
+        except Exception as e:
+            raise e
 

@@ -1,13 +1,13 @@
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VmwareContractor import VmwareContractor
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
 
-class HostSystem(VMwareDjangoObj):
+class HostSystem(VmwareContractor):
 
 
 
@@ -80,13 +80,7 @@ class HostSystem(VMwareDjangoObj):
     # Public static methods
     ####################################################################################################################
 
-    @staticmethod
-    def listHostsInClusterObjects(cluster: object) -> list: # (List of vim.Hostsystem)
-        try:
-            return cluster.host
 
-        except Exception as e:
-            raise e
 
 
 
@@ -114,7 +108,7 @@ class HostSystem(VMwareDjangoObj):
         hostsObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
             hList = vClient.getAllObjs([vim.ComputeResource])
 
             for h in hList:
@@ -132,7 +126,7 @@ class HostSystem(VMwareDjangoObj):
     ####################################################################################################################
 
     def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        if not self.vmwareObj or refresh:
+        if not self.client or refresh:
             try:
                 vClient = self.connectToAssetAndGetContent(silent)
                 objList = vClient.getAllObjs([vim.ComputeResource])

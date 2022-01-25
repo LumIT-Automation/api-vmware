@@ -1,13 +1,13 @@
 from pyVmomi import vim, vmodl
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VmwareContractor import VmwareContractor
 
 from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
 
-class Datastore(VMwareDjangoObj):
+class Datastore(VmwareContractor):
 
 
 
@@ -65,7 +65,7 @@ class Datastore(VMwareDjangoObj):
     def getDatastoreInfoObject(self) -> object:
         try:
             self.getVMwareObject()
-            return self.vmwareObj.info
+            return self.client.info
 
         except Exception as e:
             raise e
@@ -76,7 +76,7 @@ class Datastore(VMwareDjangoObj):
         hosts = []
         try:
             self.getVMwareObject()
-            hostMounts = self.vmwareObj.host
+            hostMounts = self.client.host
             for h in hostMounts:
                 if h.mountInfo.mounted is True and h.mountInfo.accessible is True and h.mountInfo.accessMode == "readWrite":
                     hosts.append(h.key)
@@ -90,7 +90,7 @@ class Datastore(VMwareDjangoObj):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            self._getVMwareObject(vim.Datastore, refresh, silent)
+            self._getContract(vim.Datastore)
 
         except Exception as e:
             raise e
@@ -120,13 +120,6 @@ class Datastore(VMwareDjangoObj):
 
 
 
-    @staticmethod
-    def listDatastoresInClusterObjects(cluster: object) -> list: # (List of vim.Hostsystem)
-        try:
-            return cluster.datastore
-
-        except Exception as e:
-            raise e
 
 
 
@@ -136,7 +129,7 @@ class Datastore(VMwareDjangoObj):
         dsObjList = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
             dsObjList = vClient.getAllObjs([vim.Datastore])
 
             return dsObjList
