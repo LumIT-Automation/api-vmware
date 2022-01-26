@@ -6,6 +6,8 @@ from vmware.helpers.Log import Log
 
 
 class VmwareHandler:
+    content = None
+
     def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -13,9 +15,6 @@ class VmwareHandler:
         # Can be obtained from the _GetMoId() method or from the "_moId" property of a managed object.
         self.assetId = int(assetId)
         self.moId = moId
-        self.oCluster = None
-
-        self.content = None
 
 
 
@@ -23,29 +22,16 @@ class VmwareHandler:
     # Public methods
     ####################################################################################################################
 
-    def fetchContent(self) -> None:
-        try:
-            Log.actionLog("Fetch VMware content.")
-
-            supplicant = VmwareSupplicant(Asset(self.assetId).connectionData)
-            connection = supplicant.connect()
-
-            self.content = connection.RetrieveContent()
-        except Exception as e:
-            raise e
-
-
-
     # Get objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
     def getObjects(self, vimType: str) -> dict:
         obj = {}
 
         try:
-            if not self.content:
-                self.fetchContent()
+            if not VmwareHandler.content:
+                self.__fetchContent()
 
-            if self.content:
+            if VmwareHandler.content:
                 c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
                 for managedObject_ref in c.view:
                     obj[managedObject_ref] = managedObject_ref.name
@@ -55,3 +41,20 @@ class VmwareHandler:
             raise e
 
         return obj
+
+
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __fetchContent(self) -> None:
+        try:
+            Log.actionLog("Fetch VMware content.")
+
+            supplicant = VmwareSupplicant(Asset(self.assetId).connectionData)
+            connection = supplicant.connect()
+
+            VmwareHandler.content = connection.RetrieveContent()
+        except Exception as e:
+            raise e

@@ -44,7 +44,7 @@ class Datacenter(Backend):
         self.loadClusters()
 
         for cluster in self.clusters:
-            lc.append(cluster.info(True))
+            lc.append(cluster.info(False))
 
         return {
             "assetId": self.assetId,
