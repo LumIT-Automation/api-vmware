@@ -69,7 +69,13 @@ class Cluster(Backend):
             self.loadRelated()
 
         for datastore in self.datastores:
-            ds.append(datastore.info())
+            d = datastore.info(False)
+            if not d["attachedHosts"]:
+                del(d["attachedHosts"])
+
+            # List only multipleHostAccess: true.
+            if d["multipleHostAccess"]:
+                ds.append(d)
 
         return {
             "assetId": self.assetId,

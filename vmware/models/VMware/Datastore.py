@@ -72,14 +72,10 @@ class Datastore(Backend):
 
 
 
-    def loadRelated(self):
+    def info(self, related: bool = True):
         self.loadInfo()
-        self.loadAttachedHosts()
-
-
-
-    def info(self):
-        self.loadRelated()
+        if related:
+            self.loadAttachedHosts()
 
         info = self.datastoreInfo
         info.update({
