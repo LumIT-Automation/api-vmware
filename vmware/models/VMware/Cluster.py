@@ -63,7 +63,7 @@ class Cluster(Backend):
 
 
 
-    def info(self, related: bool = True):
+    def info(self, related: bool = True) -> dict:
         ds = list()
         if related:
             self.loadRelated()

@@ -41,7 +41,18 @@ class Datacenter(Backend):
         self.loadClusters()
 
         for cluster in self.clusters:
-            lc.append(cluster.info(False))
+            c = cluster.info(False)
+
+            if not c["hosts"]:
+                del(c["hosts"])
+
+            if not c["datastores"]:
+                del(c["datastores"])
+
+            if not c["networks"]:
+                del(c["networks"])
+
+            lc.append(c)
 
         return {
             "assetId": self.assetId,
