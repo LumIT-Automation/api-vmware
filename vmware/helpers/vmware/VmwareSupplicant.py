@@ -19,24 +19,23 @@ class Singleton(type):
 
 
 class VmwareSupplicant(metaclass=Singleton):
-    def __init__(self, dataConnection, *args, **kwargs):
+    def __init__(self, connectionData, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for key in [ "address", "port", "username", "password" ]:
-            if key not in dataConnection:
-                raise ValueError('Missing key in dataConnection dictionary.')
+        try:
+            self.ipAddr = connectionData["address"]
+            self.port = connectionData["port"] \
+                if connectionData["port"] else 443
 
-        self.ipAddr = dataConnection["address"]
-        if dataConnection["port"]:
-            self.port = dataConnection["port"]
-        else:
-            self.port = 443
-        self.username = dataConnection["username"]
-        self.password = dataConnection["password"]
+            self.username = connectionData["username"]
+            self.password = connectionData["password"]
 
-        self.connection = None
-        self.content = None
-        self.ran = random.random()
+            self.connection = None
+            self.content = None
+
+            self.ran = random.random()
+        except Exception:
+            raise ValueError('Missing key in connection data.')
 
 
 
@@ -44,7 +43,7 @@ class VmwareSupplicant(metaclass=Singleton):
     # Public methods
     ####################################################################################################################
 
-    def getContent(self) -> None:
+    def fetchContent(self) -> None:
         try:
             if not self.connection:
                 self.__connect()
@@ -55,29 +54,27 @@ class VmwareSupplicant(metaclass=Singleton):
 
 
 
-    # Get all objects of type vimType.
+    # Get objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
-    def getAllObjs(self, vimType: list = None) -> dict:
+    def getObjects(self, vimType: list = None) -> dict:
         obj = {}
         vimType = [] if vimType is None else vimType
 
-        Log.actionLog("Get all vmware objects.")
-        Log.log(self.ran, 'GGGGGGGGGGGGGGGEEEEEEEEEEEEEE')
+        try:
+            if not self.content:
+                Log.actionLog("["+str(self.ran)+"] Get VMware "+str(vimType)+" objects.")
+                self.fetchContent()
 
-        if self.content:
-            try:
-                container = self.content.viewManager.CreateContainerView(self.content.rootFolder, vimType, True)
-                for managedObject_ref in container.view:
+            if self.content:
+                c = self.content.viewManager.CreateContainerView(self.content.rootFolder, vimType, True)
+                for managedObject_ref in c.view:
                     obj[managedObject_ref] = managedObject_ref.name
-
-            except Exception as e:
-                raise e
+            else:
+                raise CustomException(status=400, payload={"VMware": "cannot fetch VMware objects."})
+        except Exception as e:
+            raise e
 
         return obj
-
-
-
-
 
 
 
@@ -90,9 +87,16 @@ class VmwareSupplicant(metaclass=Singleton):
         context.verify_mode = ssl.CERT_NONE
 
         try:
-            Log.actionLog("Connecting to: "+str(self.ipAddr))
+            Log.actionLog("Connecting to VMware server: "+str(self.ipAddr))
 
-            self.connection = SmartConnect(host=self.ipAddr, user=self.username, pwd=self.password, port=self.port, connectionPoolTimeout=60, sslContext=context)
+            self.connection = SmartConnect(
+                host=self.ipAddr,
+                user=self.username,
+                pwd=self.password,
+                port=self.port,
+                connectionPoolTimeout=60,
+                sslContext=context
+            )
             atexit.register(Disconnect, self.connection)
         except Exception as e:
             raise e

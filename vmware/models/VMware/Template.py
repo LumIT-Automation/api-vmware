@@ -1,14 +1,11 @@
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 from vmware.models.VMware.Datacenter import Datacenter
 from vmware.models.VMware.Cluster import Cluster
-from vmware.models.VMware.Datastore import Datastore
-from vmware.models.VMware.Network import Network
 from vmware.models.VMware.VMFolder import VMFolder
 
-from vmware.helpers.Log import Log
-from vmware.helpers.VmwareHelper import VmwareHelper
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 from vmware.helpers.Exception import CustomException
 

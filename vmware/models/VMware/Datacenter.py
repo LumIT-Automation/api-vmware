@@ -1,7 +1,6 @@
 from typing import List
 
-from vmware.helpers.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 from vmware.models.VMware.Cluster import Cluster
 
@@ -25,6 +24,7 @@ class Datacenter(Backend):
     ####################################################################################################################
 
     def loadClusters(self) -> None:
+        # Load VMware cluster objects.
         try:
             for c in self.oClusters():
                 self.clusters.append(
@@ -39,17 +39,12 @@ class Datacenter(Backend):
 
 
 
-    def loadRelated(self):
-        self.loadClusters()
-
-
-
     def info(self):
         lc = list()
-        self.loadRelated()
+        self.loadClusters()
 
         for cluster in self.clusters:
-            lc.append(cluster.info(False))
+            lc.append(cluster.info(True))
 
         return {
             "assetId": self.assetId,

@@ -1,12 +1,10 @@
-from pyVmomi import vim, vmodl
-from vmware.models.VmwareContractor import VmwareContractor
+from pyVmomi import vim
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
-from vmware.helpers.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
-
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
-class VMFolder(VmwareContractor):
+class VMFolder(VmwareHandler):
 
 
 
@@ -151,7 +149,7 @@ class VMFolder(VmwareContractor):
         vmFoldersObjList = list()
 
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
             vmFoldersObjList = vClient.getAllObjs([vim.Folder])
 
             return vmFoldersObjList

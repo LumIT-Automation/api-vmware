@@ -1,13 +1,9 @@
-from typing import List
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
-from vmware.models.VmwareContractor import VmwareContractor
-
-from vmware.helpers.Log import Log
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
 
-
-class Cluster(VmwareContractor):
+class Cluster(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
@@ -55,7 +51,7 @@ class Cluster(VmwareContractor):
         oClusterList = list()
 
         try:
-            clList = VmwareContractor(assetId).getContainer(vim.ComputeResource)
+            clList = VmwareHandler(assetId).getObjects(vimType=vim.ComputeResource)
             for cl in clList:
                 oClusterList.append(cl)
 
@@ -71,6 +67,6 @@ class Cluster(VmwareContractor):
     ####################################################################################################################
 
     def __oClusterLoad(self):
-        for k, v in self.getContainer(vim.ComputeResource).items():
+        for k, v in self.getObjects(vimType=vim.ComputeResource).items():
             if k._GetMoId() == self.moId:
                 return k

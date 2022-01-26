@@ -1,13 +1,11 @@
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
-from vmware.models.VmwareContractor import VmwareContractor
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
-from vmware.helpers.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
-
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
-class HostSystem(VmwareContractor):
+class HostSystem(VmwareHandler):
 
 
 
@@ -108,7 +106,7 @@ class HostSystem(VmwareContractor):
         hostsObjList = list()
 
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
             hList = vClient.getAllObjs([vim.ComputeResource])
 
             for h in hList:

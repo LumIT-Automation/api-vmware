@@ -1,12 +1,9 @@
-from typing import List
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
-from vmware.models.VmwareContractor import VmwareContractor
-
-from vmware.helpers.Log import Log
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
 
-class Datacenter(VmwareContractor):
+class Datacenter(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
@@ -38,7 +35,7 @@ class Datacenter(VmwareContractor):
         oDatacenterList = list()
 
         try:
-            dclList = VmwareContractor(assetId).getContainer(vim.Datacenter)
+            dclList = VmwareHandler(assetId).getObjects(vimType=vim.Datacenter)
             for d in dclList:
                 oDatacenterList.append(d)
 
@@ -53,6 +50,6 @@ class Datacenter(VmwareContractor):
     ####################################################################################################################
 
     def __oDatacenterLoad(self):
-        for k, v in self.getContainer(vim.Datacenter).items():
+        for k, v in self.getObjects(vimType=vim.Datacenter).items():
             if k._GetMoId() == self.moId:
                 return k

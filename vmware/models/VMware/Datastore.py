@@ -1,7 +1,6 @@
 from typing import List
 
-from vmware.helpers.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 from vmware.models.VMware.backend.Datastore import Datastore as Backend
 

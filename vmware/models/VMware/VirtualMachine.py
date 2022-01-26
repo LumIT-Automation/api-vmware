@@ -1,13 +1,11 @@
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
-from vmware.models.VmwareContractor import VmwareContractor
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
-
-class VirtualMachine(VmwareContractor):
+class VirtualMachine(VmwareHandler):
 
 
 
@@ -128,7 +126,7 @@ class VirtualMachine(VmwareContractor):
     def listVirtualMachinesObjects(assetId, silent: bool = True) -> list:
         objList = list()
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
             objList = vClient.getAllObjs([vim.VirtualMachine])
             return objList
 

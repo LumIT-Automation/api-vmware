@@ -1,13 +1,9 @@
-from typing import List
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
-from vmware.models.VmwareContractor import VmwareContractor
-
-from vmware.helpers.Log import Log
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
 
-
-class Datastore(VmwareContractor):
+class Datastore(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
@@ -62,7 +58,7 @@ class Datastore(VmwareContractor):
         oDatastoresList = list()
 
         try:
-            dsList = VmwareContractor(assetId).getContainer(vim.Datastore)
+            dsList = VmwareHandler(assetId).getObjects(vimType=vim.Datastore)
             for d in dsList:
                 oDatastoresList.append(d)
 
@@ -77,7 +73,7 @@ class Datastore(VmwareContractor):
     ####################################################################################################################
 
     def __oDatastoreLoad(self):
-        for k, v in self.getContainer(vim.Datastore).items():
+        for k, v in self.getObjects(vimType=vim.Datastore).items():
             if k._GetMoId() == self.moId:
                 return k
 

@@ -1,9 +1,6 @@
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
-from vmware.models.VmwareContractor import VmwareContractor
-
-from vmware.helpers.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
 
 # In VMware, the CustomizationSpecManager is the (unique) Managed Object that can administer the virtual machines customization specifications.
@@ -12,7 +9,7 @@ from vmware.helpers.Log import Log
 # For documentation about VMware CustomSpecManager methods and properties:
 # https://developer.vmware.com/apis/704/vsphere/vim.CustomizationSpecManager.html
 
-class CustomSpecManager(VmwareContractor):
+class CustomSpecManager(VmwareHandler):
 
 
 
@@ -215,7 +212,7 @@ class CustomSpecManager(VmwareContractor):
     @staticmethod
     def __getVMwareObject(assetId, silent: bool = True) -> object:
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
             return vClient.oCluster.customizationSpecManager
 
         except Exception as e:

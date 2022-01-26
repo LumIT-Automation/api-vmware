@@ -1,13 +1,11 @@
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
-from vmware.models.VmwareContractor import VmwareContractor
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
-from vmware.helpers.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
-
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
-class Network(VmwareContractor):
+class Network(VmwareHandler):
 
 
 
@@ -128,7 +126,7 @@ class Network(VmwareContractor):
         netObjList = list()
 
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(assetId, silent)
+            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
             netObjList = vClient.getAllObjs([vim.Network])
 
             return netObjList

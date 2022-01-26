@@ -1,13 +1,10 @@
-from pyVmomi import vim, vmodl
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
-from vmware.models.VmwareContractor import VmwareContractor
-
-from vmware.helpers.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
 
-class Task(VmwareContractor):
+class Task(VmwareHandler):
 
 
 
@@ -55,7 +52,7 @@ class Task(VmwareContractor):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            vClient = VmwareContractor.connectToAssetAndGetContentStatic(self.assetId, silent)
+            vClient = VmwareHandler.connectToAssetAndGetContentStatic(self.assetId, silent)
             taskManager = vClient.oCluster.taskManager
             for task in taskManager.recentTask:
                 Log.log(task, 'TTTTTTTTTTTTTT')
