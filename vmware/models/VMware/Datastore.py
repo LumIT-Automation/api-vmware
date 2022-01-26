@@ -1,8 +1,8 @@
 from typing import List
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-
 from vmware.models.VMware.backend.Datastore import Datastore as Backend
+
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
 class Datastore(Backend):
@@ -11,8 +11,17 @@ class Datastore(Backend):
 
         self.assetId = int(assetId)
         self.moId = moId
+        self.name: str
+        self.url: str
+        self.freeSpace: int
+        self.maxFileSize: int
+        self.maxVirtualDiskCapacity: int
+        self.type: str
+        self.capacity: str
+        self.multipleHostAccess: bool
 
         self.attachedHosts: List[dict] = []
+
         self.datastoreInfo = dict()
 
 
@@ -36,6 +45,9 @@ class Datastore(Backend):
         try:
             dsInfo = self.oInfoLoad()
             dsSummary = self.oSummaryLoad()
+
+            info["assetId"] = self.assetId
+            info["moId"] = self.moId
 
             info["name"] = dsInfo.name
             info["url"] = dsInfo.url
@@ -61,18 +73,20 @@ class Datastore(Backend):
 
 
     def loadRelated(self):
-        self.loadAttachedHosts()
         self.loadInfo()
+        self.loadAttachedHosts()
 
 
 
     def info(self):
         self.loadRelated()
 
-        return dict({
+        info = self.datastoreInfo
+        info.update({
             "attachedHosts": self.attachedHosts,
-            "datastoreInfo": self.datastoreInfo
         })
+
+        return info
 
 
 

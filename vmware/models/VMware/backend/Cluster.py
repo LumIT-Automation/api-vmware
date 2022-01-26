@@ -56,7 +56,6 @@ class Cluster(VmwareHandler):
                 oClusterList.append(cl)
 
             return oClusterList
-
         except Exception as e:
             raise e
 

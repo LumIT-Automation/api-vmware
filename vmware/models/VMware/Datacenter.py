@@ -1,10 +1,9 @@
 from typing import List
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-
 from vmware.models.VMware.Cluster import Cluster
-
 from vmware.models.VMware.backend.Datacenter import Datacenter as Backend
+
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
 class Datacenter(Backend):
@@ -27,12 +26,10 @@ class Datacenter(Backend):
         # Load VMware cluster objects.
         try:
             for c in self.oClusters():
+                cl = VmwareHelper.vmwareObjToDict(c)
+
                 self.clusters.append(
-                    Cluster(
-                        self.assetId,
-                        VmwareHelper.vmwareObjToDict(c)["moId"],
-                        VmwareHelper.vmwareObjToDict(c)["name"],
-                    )
+                    Cluster(self.assetId, cl["moId"], cl["name"])
                 )
         except Exception as e:
             raise e

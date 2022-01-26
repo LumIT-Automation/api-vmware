@@ -2,6 +2,7 @@ from typing import List
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
+from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.backend.Cluster import Cluster as Backend
 
 
@@ -14,7 +15,7 @@ class Cluster(Backend):
         self.name = name
 
         self.hosts: List[dict] = []
-        self.datastores: List[dict] = []
+        self.datastores: List[Datastore] = []
         self.networks: List[dict] = []
 
 
@@ -35,7 +36,12 @@ class Cluster(Backend):
     def loadDatastores(self) -> None:
         try:
             for d in self.oDatastores():
-                self.datastores.append(VmwareHelper.vmwareObjToDict(d))
+                self.datastores.append(
+                    Datastore(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(d)["moId"]
+                    )
+                )
         except Exception as e:
             raise e
 
@@ -58,15 +64,19 @@ class Cluster(Backend):
 
 
     def info(self, related: bool = True):
+        ds = list()
         if related:
             self.loadRelated()
+
+        for datastore in self.datastores:
+            ds.append(datastore.info())
 
         return {
             "assetId": self.assetId,
             "moId": self.moId,
             "name": self.name,
             "hosts": self.hosts,
-            "datastores": self.datastores,
+            "datastores": ds,
             "networks": self.networks,
         }
 
