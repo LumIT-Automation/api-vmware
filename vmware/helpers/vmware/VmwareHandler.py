@@ -1,3 +1,5 @@
+from typing import Dict, Any
+
 from vmware.models.VMware.Asset.Asset import Asset
 
 from vmware.helpers.vmware.VmwareSupplicant import VmwareSupplicant
@@ -22,9 +24,9 @@ class VmwareHandler:
     # Public methods
     ####################################################################################################################
 
-    # Get objects of type vimType.
+    # Get VMware objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
-    def getObjects(self, vimType: str) -> dict:
+    def getObjects(self, vimType: str) -> Dict[Any, str]:
         obj = {}
 
         try:
@@ -50,11 +52,10 @@ class VmwareHandler:
 
     def __fetchContent(self) -> None:
         try:
-            Log.actionLog("Fetch VMware content.")
-
             supplicant = VmwareSupplicant(Asset(self.assetId).connectionData)
             connection = supplicant.connect()
 
+            Log.actionLog("Fetch VMware content.")
             VmwareHandler.content = connection.RetrieveContent()
         except Exception as e:
             raise e
