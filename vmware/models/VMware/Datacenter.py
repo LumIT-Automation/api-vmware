@@ -43,6 +43,7 @@ class Datacenter(Backend):
         for cluster in self.clusters:
             c = cluster.info(False)
 
+            # Remove some related objects' information if not loaded.
             if not c["hosts"]:
                 del(c["hosts"])
 
@@ -76,6 +77,10 @@ class Datacenter(Backend):
             for d in Backend.oDatacenters(assetId):
                 data = {"assetId": assetId}
                 data.update(VmwareHelper.vmwareObjToDict(d))
+
+                # Add clusters information.
+                dc = Datacenter(data["assetId"], data["moId"])
+                data.update({"clusters": dc.info()["clusters"]})
 
                 datacenters.append(data)
 

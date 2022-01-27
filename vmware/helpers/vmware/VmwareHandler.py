@@ -8,7 +8,7 @@ from vmware.helpers.Log import Log
 
 
 class VmwareHandler:
-    content = None
+    content = None # share content amongst all instances: do not re-fetch it during a "session".
 
     def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
