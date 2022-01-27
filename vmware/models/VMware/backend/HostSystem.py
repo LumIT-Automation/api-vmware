@@ -1,15 +1,16 @@
 from pyVmomi import vim
 
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+from vmware.helpers.Log import Log
 
 
-class Cluster(VmwareHandler):
+class HostSystem(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
-        self.oCluster = self.__oClusterLoad()
+        self.oHostSystem = self.__oHostSystemLoad()
 
 
 
@@ -17,17 +18,9 @@ class Cluster(VmwareHandler):
     # Public methods
     ####################################################################################################################
 
-    def oHosts(self) -> list:
-        try:
-            return self.oCluster.host
-        except Exception as e:
-            raise e
-
-
-
     def oDatastores(self) -> list:
         try:
-            return self.oCluster.datastore
+            return self.oHostSystem.datastore
         except Exception as e:
             raise e
 
@@ -35,7 +28,7 @@ class Cluster(VmwareHandler):
 
     def oNetworks(self) -> list:
         try:
-            return self.oCluster.network
+            return self.oHostSystem.network
         except Exception as e:
             raise e
 
@@ -46,16 +39,19 @@ class Cluster(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter cluster pyVmomi objects list.
-    def oClusters(assetId) -> list:
-        oClusterList = list()
+    # vCenter hostsystem pyVmomi objects list.
+    def oHostSystems(assetId) -> list:
+        oHostSystemList = list()
 
         try:
-            clList = VmwareHandler(assetId).getObjects(vimType=vim.ClusterComputeResource)
-            for cl in clList:
-                oClusterList.append(cl)
-
-            return oClusterList
+            hList = VmwareHandler(assetId).getObjects(vimType=vim.ComputeResource)
+            for hs in hList:
+                if not hasattr(hs, 'host'): # Standalone host.
+                    oHostSystemList.append(hs)
+                else:
+                    for h in hs.host:
+                        oHostSystemList.append(h) # In cluster host.
+            return oHostSystemList
         except Exception as e:
             raise e
 
@@ -65,9 +61,13 @@ class Cluster(VmwareHandler):
     # Private methods
     ####################################################################################################################
 
-    def __oClusterLoad(self):
-        o = self.getObjects(vimType=vim.ClusterComputeResource)
-
+    def __oHostSystemLoad(self):
+        o = self.getObjects(vimType=vim.ComputeResource)
         for k, v in o.items():
-            if k._GetMoId() == self.moId:
+            if k._GetMoId() == self.moId: # Standalone host.
                 return k
+            if hasattr(k, 'host'):  # If this is a cluster, loop into it.
+                for h in k.host:
+                    if h._GetMoId() == self.moId:  # Standalone host.
+                        return h
+

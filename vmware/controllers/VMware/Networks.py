@@ -18,7 +18,7 @@ class VMwareNetworksController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,8 +30,7 @@ class VMwareNetworksController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = Network.list(assetId)
-                    Log.log(itemData, '_')
+                    itemData["data"]["items"] = Network.list(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

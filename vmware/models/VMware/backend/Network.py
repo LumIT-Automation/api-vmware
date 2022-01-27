@@ -3,13 +3,13 @@ from pyVmomi import vim
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
 
-class Cluster(VmwareHandler):
+class Network(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
-        self.oCluster = self.__oClusterLoad()
+        self.oNetwork = self.__oNetworkLoad()
 
 
 
@@ -17,45 +17,35 @@ class Cluster(VmwareHandler):
     # Public methods
     ####################################################################################################################
 
-    def oHosts(self) -> list:
+    def oHostSystems(self) -> list:
         try:
-            return self.oCluster.host
+            return self.oNetwork.host
         except Exception as e:
             raise e
 
 
 
-    def oDatastores(self) -> list:
+    def oSummaryLoad(self) -> object:
         try:
-            return self.oCluster.datastore
+            return self.oNetwork.summary
         except Exception as e:
             raise e
-
-
-
-    def oNetworks(self) -> list:
-        try:
-            return self.oCluster.network
-        except Exception as e:
-            raise e
-
-
 
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
     @staticmethod
-    # vCenter cluster pyVmomi objects list.
-    def oClusters(assetId) -> list:
-        oClusterList = list()
+    # vCenter network pyVmomi objects list.
+    def oNetworks(assetId) -> list:
+        oNetworkList = list()
 
         try:
-            clList = VmwareHandler(assetId).getObjects(vimType=vim.ClusterComputeResource)
-            for cl in clList:
-                oClusterList.append(cl)
+            nlList = VmwareHandler(assetId).getObjects(vimType=vim.Network)
+            for n in nlList:
+                oNetworkList.append(n)
 
-            return oClusterList
+            return oNetworkList
         except Exception as e:
             raise e
 
@@ -65,9 +55,7 @@ class Cluster(VmwareHandler):
     # Private methods
     ####################################################################################################################
 
-    def __oClusterLoad(self):
-        o = self.getObjects(vimType=vim.ClusterComputeResource)
-
-        for k, v in o.items():
+    def __oNetworkLoad(self):
+        for k, v in self.getObjects(vimType=vim.Network).items():
             if k._GetMoId() == self.moId:
                 return k

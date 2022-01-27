@@ -1,11 +1,20 @@
-from pyVmomi import vim
+from typing import List
 
-from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+
+from vmware.models.VMware.backend.Network import Network as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
-class Network(VmwareHandler):
+class Network(Backend):
+    def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
+
+        self.assetId = int(assetId)
+        self.moId = moId
+        self.name = name
+
+        self.cHostSystems: List[HostSystem] = []
 
 
 
@@ -13,125 +22,64 @@ class Network(VmwareHandler):
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        configuredHosts = []
-        networkInfo = None
+    def loadConfiguredHostSystems(self) -> None:
+        from vmware.models.VMware.HostSystem import HostSystem
+        # Load VMware hostsystems objects.
         try:
-            networkInfo = self.getNetworkInfo()
+            for h in self.oHostSystems():
+                cfH = VmwareHelper.vmwareObjToDict(h)
 
-            configuredHostsObjs = self.listConfiguredHostsObjects()
-            for h in configuredHostsObjs:
-                hostData = VmwareHelper.vmwareObjToDict(h)
-                try:
-                    pgObjList = self.getHostPortGroupsObjects(h)
-                    for pgObj in pgObjList:
-                        if pgObj.spec.name == networkInfo["name"]:
-                            hostData["vlanId"] = pgObj.spec.vlanId
-                except:
-                    pass
-
-                configuredHosts.append(hostData)
-
-            networkInfo = self.getNetworkInfo()
-
-            return dict({
-                "configuredHosts": configuredHosts,
-                "networkInfo": networkInfo
-            })
-
+                self.cHostSystems.append(
+                    HostSystem(self.assetId, cfH["moId"])
+                )
         except Exception as e:
             raise e
 
 
 
-    def getNetworkInfo(self) -> dict:
-        info = dict()
+    def info(self, related: bool = True) -> dict:
+        hosts = list()
+        netInfo = dict()
         try:
-            netInfo = self.getNetworkInfoObject()
-            info["name"] = netInfo.name
-            info["accessible"] = netInfo.accessible
+            netSummary = self.oSummaryLoad()
+            netInfo["name"] = netSummary.name
+            netInfo["accessible"] = netSummary.accessible
+            self.loadConfiguredHostSystems()
 
-            return info
+            for h in self.cHostSystems:
+                hInfo = h.info(False)
 
+                # Remove some related objects' information, if not loaded.
+                #if not c["networks"]:
+                #    del(c["networks"])
+
+                hosts.append(hInfo)
+
+            return {
+                "networkInfo": netInfo,
+                "configuredHosts": hosts
+            }
         except Exception as e:
             raise e
-
-
-
-    def getNetworkInfoObject(self) -> object:
-        try:
-            self.getVMwareObject()
-            return self.oCluster.summary
-
-        except Exception as e:
-            raise e
-
-
-
-    def listConfiguredHostsObjects(self) -> list:
-        try:
-            self.getVMwareObject()
-            return self.oCluster.host
-
-        except Exception as e:
-            raise e
-
-
-
-    # TODO: move to Hostsystem class.
-    def getHostPortGroupsObjects(self, hostRef) -> list:
-        try:
-            pgObjList = hostRef.config.network.portgroup
-            return pgObjList
-
-        except Exception as e:
-            raise e
-
-
-
-    def getVMwareObject(self, refresh: bool = False, silent: bool = None) -> None:
-        try:
-            self._getContainer(vim.Network)
-
-        except Exception as e:
-            raise e
-
-
 
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter networks list.
-    def list(assetId, silent: bool = None) -> dict:
-        networks = []
+    def list(assetId) -> List[dict]:
+        networks = list()
+
         try:
-            netObjList = Network.listNetworksObjects(assetId, silent)
-            for n in netObjList:
-                networks.append(VmwareHelper.vmwareObjToDict(n))
+            for n in Backend.oNetworks(assetId):
+                data = {"assetId": assetId}
+                data.update(VmwareHelper.vmwareObjToDict(n))
+                networks.append(data)
 
-            return dict({
-                "items": networks
-            })
-
+            return networks
         except Exception as e:
             raise e
 
 
-
-    @staticmethod
-    # vCenter networks pyVmomi objects list.
-    def listNetworksObjects(assetId, silent: bool = None) -> list:
-        netObjList = list()
-
-        try:
-            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
-            netObjList = vClient.getAllObjs([vim.Network])
-
-            return netObjList
-
-        except Exception as e:
-            raise e
 
 
