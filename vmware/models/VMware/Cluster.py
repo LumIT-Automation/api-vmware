@@ -7,12 +7,12 @@ from vmware.models.VMware.backend.Cluster import Cluster as Backend
 
 
 class Cluster(Backend):
-    def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
-        self.name = name
+        self.name: str
 
         self.hosts: List[dict] = []
         self.datastores: List[Datastore] = []
@@ -80,7 +80,7 @@ class Cluster(Backend):
         return {
             "assetId": self.assetId,
             "moId": self.moId,
-            "name": self.name,
+            "name": self.oCluster.name,
             "hosts": self.hosts,
             "datastores": ds,
             "networks": self.networks,
@@ -99,7 +99,16 @@ class Cluster(Backend):
 
         try:
             for el in Backend.oClusters(assetId):
-                clusters.append(VmwareHelper.vmwareObjToDict(el))
+                data = {"assetId": assetId}
+                data.update(VmwareHelper.vmwareObjToDict(el))
+
+                # Add related information.
+                #dc = Cluster(data["assetId"], data["moId"])
+                #data.update({"hosts": dc.info()["hosts"]})
+                #data.update({"datastores": dc.info()["datastores"]})
+                #data.update({"networks": dc.info()["networks"]})
+
+                clusters.append(data)
 
             return clusters
         except Exception as e:

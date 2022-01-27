@@ -10,6 +10,7 @@ class VMwareClusterInnerSerializer(serializers.Serializer):
 
     assetId = serializers.CharField(max_length=64, required=True)
     moId = serializers.CharField(max_length=255, required=False)
+    name = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
     hosts = VMwareClusterItemsSerializer(many=True, required=False)
     datastores = VMwareDatastoreInnerSerializer(many=True, required=False)

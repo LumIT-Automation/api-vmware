@@ -29,7 +29,7 @@ class Datacenter(Backend):
                 cl = VmwareHelper.vmwareObjToDict(c)
 
                 self.clusters.append(
-                    Cluster(self.assetId, cl["moId"], cl["name"])
+                    Cluster(self.assetId, cl["moId"])
                 )
         except Exception as e:
             raise e
@@ -43,7 +43,7 @@ class Datacenter(Backend):
         for cluster in self.clusters:
             c = cluster.info(False)
 
-            # Remove some related objects' information if not loaded.
+            # Remove some related objects' information, if not loaded.
             if not c["hosts"]:
                 del(c["hosts"])
 
@@ -69,7 +69,6 @@ class Datacenter(Backend):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter datacenters list.
     def list(assetId) -> List[dict]:
         datacenters = list()
 
@@ -78,9 +77,9 @@ class Datacenter(Backend):
                 data = {"assetId": assetId}
                 data.update(VmwareHelper.vmwareObjToDict(d))
 
-                # Add clusters information.
-                dc = Datacenter(data["assetId"], data["moId"])
-                data.update({"clusters": dc.info()["clusters"]})
+                # Add clusters' information.
+                #dc = Datacenter(data["assetId"], data["moId"])
+                #data.update({"clusters": dc.info()["clusters"]})
 
                 datacenters.append(data)
 
