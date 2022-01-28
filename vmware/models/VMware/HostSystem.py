@@ -6,6 +6,7 @@ from vmware.models.VMware.Network import Network
 from vmware.models.VMware.backend.HostSystem import HostSystem as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 
 class HostSystem(Backend):
@@ -16,7 +17,7 @@ class HostSystem(Backend):
         self.moId = moId
         self.name = name
 
-        self.networks: List[Network] = []
+        self.networks: List[dict] = []
         self.datastores: List[Datastore] = []
 
 
@@ -38,15 +39,17 @@ class HostSystem(Backend):
             raise e
 
 
+
     def loadNetworks(self) -> None:
         try:
+            pgList = self.oHostSystem.config.network.portgroup
             for n in self.oNetworks():
-                self.networks.append(
-                    Network(
-                        self.assetId,
-                        VmwareHelper.vmwareObjToDict(n)["moId"]
-                    )
-                )
+                net = VmwareHelper.vmwareObjToDict(n)
+                for pg in pgList:
+                    if pg.spec.name == net["name"]: # Standard switch. This works because standard switch names cannot be duplicated.
+                        net["vlanId"] = pg.spec.vlanId
+                self.networks.append(net)
+
         except Exception as e:
             raise e
 
@@ -59,35 +62,26 @@ class HostSystem(Backend):
 
 
     def info(self, related: bool = True) -> dict:
-        data = {
+        ds = list()
+        if related:
+            self.loadRelated()
+
+        for datastore in self.datastores:
+            d = datastore.info(False)
+            if not d["attachedHosts"]:
+                del(d["attachedHosts"])
+
+            # List only multipleHostAccess: true.
+            if d["multipleHostAccess"]:
+                ds.append(d)
+
+        return {
             "assetId": self.assetId,
             "moId": self.moId,
             "name": self.oHostSystem.name,
+            "datastores": ds,
+            "networks": self.networks
         }
-
-        if related:
-            self.loadRelated()
-            ds = list()
-            net = list()
-
-            for d in self.datastores:
-                dsData = {
-                    "moId": d.moId,
-                    "name": ""
-                }
-                ds.append(dsData)
-            data["datastores"] = ds
-
-            for n in self.networks:
-                netData = {
-                    "moId": n.moId,
-                    "name": "",
-                    "vlanId": ""
-                }
-                net.append(netData)
-            data["networks"] = net
-
-        return data
 
 
 

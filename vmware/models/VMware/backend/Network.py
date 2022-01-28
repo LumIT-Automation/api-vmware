@@ -1,6 +1,7 @@
 from pyVmomi import vim
 
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+from vmware.helpers.Log import Log
 
 
 class Network(VmwareHandler):
@@ -25,9 +26,18 @@ class Network(VmwareHandler):
 
 
 
-    def oSummaryLoad(self) -> object:
+    def oInfoLoad(self) -> object:
         try:
-            return self.oNetwork.summary
+            netInfo = dict()
+
+            netSummary = self.oNetwork.summary
+            netInfo["name"] = netSummary.name
+            netInfo["accessible"] = netSummary.accessible
+
+            if hasattr(self.oNetwork, 'config'): # distributed port group. Standard switch vlan id should be taken from the host.
+                netInfo["vlanId"] = self.oNetwork.config.defaultPortConfig.vlan.vlanId
+
+            return netInfo
         except Exception as e:
             raise e
 

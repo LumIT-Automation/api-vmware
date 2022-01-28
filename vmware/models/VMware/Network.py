@@ -41,18 +41,11 @@ class Network(Backend):
         hosts = list()
         netInfo = dict()
         try:
-            netSummary = self.oSummaryLoad()
-            netInfo["name"] = netSummary.name
-            netInfo["accessible"] = netSummary.accessible
+            netInfo = self.oInfoLoad()
             self.loadConfiguredHostSystems()
 
             for h in self.cHostSystems:
                 hInfo = h.info(False)
-
-                # Remove some related objects' information, if not loaded.
-                #if not c["networks"]:
-                #    del(c["networks"])
-
                 hosts.append(hInfo)
 
             return {
