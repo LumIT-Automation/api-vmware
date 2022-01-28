@@ -4,6 +4,7 @@ from typing import List
 from vmware.models.VMware.backend.Network import Network as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 
 class Network(Backend):
@@ -45,8 +46,17 @@ class Network(Backend):
             self.loadConfiguredHostSystems()
 
             for h in self.cHostSystems:
-                hInfo = h.info(False)
-                hosts.append(hInfo)
+                hInfo = h.info(True)
+                info = {
+                    "assetId":hInfo["assetId"],
+                    "moId": hInfo["moId"],
+                    "name": hInfo["name"]
+                }
+                for n in hInfo["networks"]:
+                    if n["moId"] == self.moId and hasattr(info, 'vlanId'):
+                        info["vlanId"] = n["vlanId"]
+
+                hosts.append(info)
 
             return {
                 "networkInfo": netInfo,
