@@ -69,7 +69,7 @@ class Datacenter(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId) -> List[dict]:
+    def list(assetId, related: bool = False) -> List[dict]:
         datacenters = list()
 
         try:
@@ -77,9 +77,10 @@ class Datacenter(Backend):
                 data = {"assetId": assetId}
                 data.update(VmwareHelper.vmwareObjToDict(d))
 
-                # Add clusters' information.
-                #dc = Datacenter(data["assetId"], data["moId"])
-                #data.update({"clusters": dc.info()["clusters"]})
+                if related:
+                    # Add clusters' information.
+                    dc = Datacenter(data["assetId"], data["moId"])
+                    data.update({"clusters": dc.info()["clusters"]})
 
                 datacenters.append(data)
 

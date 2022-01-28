@@ -94,7 +94,7 @@ class Cluster(Backend):
 
     @staticmethod
     # Plain vCenter clusters list.
-    def list(assetId) -> List[dict]:
+    def list(assetId, related: bool = False) -> List[dict]:
         clusters = list()
 
         try:
@@ -102,11 +102,13 @@ class Cluster(Backend):
                 data = {"assetId": assetId}
                 data.update(VmwareHelper.vmwareObjToDict(el))
 
-                # Add related information.
-                #dc = Cluster(data["assetId"], data["moId"])
-                #data.update({"hosts": dc.info()["hosts"]})
-                #data.update({"datastores": dc.info()["datastores"]})
-                #data.update({"networks": dc.info()["networks"]})
+                if related:
+                    # Add related information.
+                    dc = Cluster(data["assetId"], data["moId"])
+
+                    data.update({"hosts": dc.info()["hosts"]})
+                    data.update({"datastores": dc.info()["datastores"]})
+                    data.update({"networks": dc.info()["networks"]})
 
                 clusters.append(data)
 
