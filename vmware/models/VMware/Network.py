@@ -53,7 +53,7 @@ class Network(Backend):
                     "name": hInfo["name"]
                 }
                 for n in hInfo["networks"]:
-                    if n["moId"] == self.moId and hasattr(info, 'vlanId'):
+                    if n["moId"] == self.moId and 'vlanId' in n:
                         info["vlanId"] = n["vlanId"]
 
                 hosts.append(info)
