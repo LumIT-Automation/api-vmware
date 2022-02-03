@@ -26,7 +26,7 @@ class Network(VmwareHandler):
 
 
 
-    def oInfoLoad(self) -> object:
+    def oInfoLoad(self) -> dict:
         try:
             netInfo = dict()
 

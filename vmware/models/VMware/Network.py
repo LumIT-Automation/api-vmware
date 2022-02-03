@@ -43,25 +43,27 @@ class Network(Backend):
         netInfo = dict()
         try:
             netInfo = self.oInfoLoad()
-            self.loadConfiguredHostSystems()
+            if related:
+                self.loadConfiguredHostSystems()
 
-            for h in self.cHostSystems:
-                hInfo = h.info(True)
-                info = {
-                    "assetId":hInfo["assetId"],
-                    "moId": hInfo["moId"],
-                    "name": hInfo["name"]
-                }
-                for n in hInfo["networks"]:
-                    if n["moId"] == self.moId and 'vlanId' in n:
-                        info["vlanId"] = n["vlanId"]
+                for h in self.cHostSystems:
+                    hInfo = h.info(True)
+                    info = {
+                        "assetId":hInfo["assetId"],
+                        "moId": hInfo["moId"],
+                        "name": hInfo["name"]
+                    }
+                    for n in hInfo["networks"]:
+                        if n["moId"] == self.moId and 'vlanId' in n:
+                            info["vlanId"] = n["vlanId"]
 
-                hosts.append(info)
+                    hosts.append(info)
 
-            return {
-                "networkInfo": netInfo,
+            netInfo.update({
                 "configuredHosts": hosts
-            }
+            })
+            return netInfo
+
         except Exception as e:
             raise e
 

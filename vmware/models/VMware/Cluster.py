@@ -1,9 +1,13 @@
 from typing import List
-
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from pyVmomi import vim
 
 from vmware.models.VMware.Datastore import Datastore
+from vmware.models.VMware.Network import Network
 from vmware.models.VMware.backend.Cluster import Cluster as Backend
+
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
+
 
 
 class Cluster(Backend):
@@ -16,7 +20,7 @@ class Cluster(Backend):
 
         self.hosts: List[dict] = []
         self.datastores: List[Datastore] = []
-        self.networks: List[dict] = []
+        self.networks: List[Network] = []
 
 
 
@@ -50,7 +54,13 @@ class Cluster(Backend):
     def loadNetworks(self) -> None:
         try:
             for n in self.oNetworks():
-                self.networks.append(VmwareHelper.vmwareObjToDict(n))
+                self.networks.append(
+                    Network(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(n)["moId"]
+                    )
+                )
+                #self.networks.append(VmwareHelper.vmwareObjToDict(n))
         except Exception as e:
             raise e
 
@@ -65,6 +75,7 @@ class Cluster(Backend):
 
     def info(self, related: bool = True) -> dict:
         ds = list()
+        net = list()
         if related:
             self.loadRelated()
 
@@ -77,13 +88,31 @@ class Cluster(Backend):
             if d["multipleHostAccess"]:
                 ds.append(d)
 
+        for network in self.networks:
+            info = network.info(False)
+            i = {
+                "name": info["name"],
+                "accessible": info["accessible"],
+            }
+            if 'vlanId' in info:
+                if type(info["vlanId"]) == int:
+                    i["vlanId"] = str(info["vlanId"])
+
+                elif isinstance(info["vlanId"], list): # Trunk network here.
+                    try:
+                        for idRange in info["vlanId"]:
+                            i["vlanId"] = str(idRange.start) + "-" + str(idRange.end)
+                    except Exception:
+                        pass
+            net.append(i)
+
         return {
             "assetId": self.assetId,
             "moId": self.moId,
             "name": self.oCluster.name,
             "hosts": self.hosts,
             "datastores": ds,
-            "networks": self.networks,
+            "networks": net
         }
 
 

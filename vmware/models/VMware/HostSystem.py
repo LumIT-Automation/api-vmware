@@ -45,9 +45,14 @@ class HostSystem(Backend):
             pgList = self.oHostSystem.config.network.portgroup
             for n in self.oNetworks():
                 net = VmwareHelper.vmwareObjToDict(n)
-                for pg in pgList:
-                    if pg.spec.name == net["name"]: # Standard switch. This works because standard switch names cannot be duplicated.
-                        net["vlanId"] = pg.spec.vlanId
+
+                if hasattr(n,'config'):  # distributed port group. Standard switch vlan id should be taken from the host.
+                    Log.log('ggggg')
+                    net["vlanId"] = n.config.defaultPortConfig.vlan.vlanId
+                else:
+                    for pg in pgList:
+                        if pg.spec.name == net["name"]: # Standard switch. This works because standard switch names cannot be duplicated.
+                            net["vlanId"] = pg.spec.vlanId
                 self.networks.append(net)
 
         except Exception as e:

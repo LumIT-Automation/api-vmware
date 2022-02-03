@@ -1,6 +1,7 @@
 from pyVmomi import vim
 
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+from vmware.helpers.Log import Log
 
 
 class Cluster(VmwareHandler):
