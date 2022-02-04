@@ -26,21 +26,6 @@ class Network(VmwareHandler):
 
 
 
-    def oInfoLoad(self) -> dict:
-        try:
-            netInfo = dict()
-
-            netSummary = self.oNetwork.summary
-            netInfo["name"] = netSummary.name
-            netInfo["accessible"] = netSummary.accessible
-
-            if hasattr(self.oNetwork, 'config'): # distributed port group. Standard switch vlan id should be taken from the host.
-                netInfo["vlanId"] = self.oNetwork.config.defaultPortConfig.vlan.vlanId
-
-            return netInfo
-        except Exception as e:
-            raise e
-
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################

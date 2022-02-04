@@ -60,7 +60,6 @@ class Cluster(Backend):
                         VmwareHelper.vmwareObjToDict(n)["moId"]
                     )
                 )
-                #self.networks.append(VmwareHelper.vmwareObjToDict(n))
         except Exception as e:
             raise e
 
@@ -79,37 +78,30 @@ class Cluster(Backend):
         if related:
             self.loadRelated()
 
+        # Datastores' information.
         for datastore in self.datastores:
             d = datastore.info(False)
-            if not d["attachedHosts"]:
-                del(d["attachedHosts"])
 
             # List only multipleHostAccess: true.
             if d["multipleHostAccess"]:
+                if not d["attachedHosts"]:
+                    del (d["attachedHosts"])
+
                 ds.append(d)
 
+        # Networks' information.
         for network in self.networks:
-            info = network.info(False)
-            i = {
-                "name": info["name"],
-                "accessible": info["accessible"],
-            }
-            if 'vlanId' in info:
-                if type(info["vlanId"]) == int:
-                    i["vlanId"] = str(info["vlanId"])
+            n = network.info(False)
+            if not n["configuredHosts"]:
+                del (n["configuredHosts"])
 
-                elif isinstance(info["vlanId"], list): # Trunk network here.
-                    try:
-                        for idRange in info["vlanId"]:
-                            i["vlanId"] = str(idRange.start) + "-" + str(idRange.end)
-                    except Exception:
-                        pass
-            net.append(i)
+            net.append(n)
 
         return {
             "assetId": self.assetId,
             "moId": self.moId,
             "name": self.oCluster.name,
+
             "hosts": self.hosts,
             "datastores": ds,
             "networks": net

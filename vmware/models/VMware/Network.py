@@ -41,31 +41,48 @@ class Network(Backend):
     def info(self, related: bool = True) -> dict:
         hosts = list()
         netInfo = dict()
-        try:
-            netInfo = self.oInfoLoad()
-            if related:
-                self.loadConfiguredHostSystems()
 
-                for h in self.cHostSystems:
-                    hInfo = h.info(True)
-                    info = {
-                        "assetId":hInfo["assetId"],
-                        "moId": hInfo["moId"],
-                        "name": hInfo["name"]
-                    }
-                    for n in hInfo["networks"]:
-                        if n["moId"] == self.moId and 'vlanId' in n:
-                            info["vlanId"] = n["vlanId"]
+        # @todo.
+        # Distributed port group.
+        # Standard switch vlan id should be taken from the host.
+        #if "config" in self.oNetwork:
+        #    netInfo["vlanId"] = self.oNetwork.config.defaultPortConfig.vlan.vlanId
 
-                    hosts.append(info)
+        if related:
+            self.loadConfiguredHostSystems()
 
-            netInfo.update({
-                "configuredHosts": hosts
-            })
-            return netInfo
+            for h in self.cHostSystems:
+                hInfo = h.info(True)
+                info = {
+                    "assetId": hInfo["assetId"],
+                    "moId": hInfo["moId"],
+                    "name": hInfo["name"]
+                }
+                for n in hInfo["networks"]:
+                    if n["moId"] == self.moId and 'vlanId' in n:
+                        if type(n["vlanId"]) == int:
+                            info["vlanId"] = str(n["vlanId"])
+                        elif isinstance(n["vlanId"], list):
+                            # Trunk network.
+                            try:
+                                for idRange in n["vlanId"]:
+                                    info["vlanId"] = str(idRange.start)+"-"+str(idRange.end)
+                            except Exception:
+                                pass
 
-        except Exception as e:
-            raise e
+                hosts.append(info)
+
+
+        return {
+            "assetId": self.assetId,
+            "moId": self.moId,
+            "name": self.oNetwork.summary.name,
+            "accessible": self.oNetwork.summary.accessible,
+
+            "configuredHosts": hosts
+        }
+
+
 
     ####################################################################################################################
     # Public static methods
