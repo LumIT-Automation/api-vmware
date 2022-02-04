@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 from pyVmomi import vim
 
-
+if TYPE_CHECKING:
+    from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.backend.Network import Network as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
@@ -26,6 +27,7 @@ class Network(Backend):
 
     def loadConfiguredHostSystems(self) -> None:
         from vmware.models.VMware.HostSystem import HostSystem
+
         # Load VMware hostsystems objects.
         try:
             for h in self.oHostSystems():

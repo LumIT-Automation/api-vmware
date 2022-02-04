@@ -17,7 +17,7 @@ class HostSystem(Backend):
         self.moId = moId
         self.name = name
 
-        self.networks: List[dict] = []
+        self.networks: List[Network] = []
         self.datastores: List[Datastore] = []
 
 
@@ -42,49 +42,48 @@ class HostSystem(Backend):
 
     def loadNetworks(self) -> None:
         try:
-            pgList = self.oHostSystem.config.network.portgroup
             for n in self.oNetworks():
-                net = VmwareHelper.vmwareObjToDict(n)
-
-                if hasattr(n,'config'):  # distributed port group. Standard switch vlan id should be taken from the host.
-                    net["vlanId"] = n.config.defaultPortConfig.vlan.vlanId
-                else:
-                    for pg in pgList:
-                        if pg.spec.name == net["name"]: # Standard switch. This works because standard switch names cannot be duplicated.
-                            net["vlanId"] = pg.spec.vlanId
-                self.networks.append(net)
-
+                self.networks.append(
+                    Network(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(n)["moId"]
+                    )
+                )
         except Exception as e:
             raise e
 
 
 
-    def loadRelated(self):
-        self.loadDatastores()
-        self.loadNetworks()
-
-
-
     def info(self, related: bool = True) -> dict:
         ds = list()
+        net = list()
         if related:
-            self.loadRelated()
+            self.loadDatastores()
+            self.loadNetworks()
 
+        # Datastores' information.
         for datastore in self.datastores:
             d = datastore.info(False)
             if not d["attachedHosts"]:
                 del(d["attachedHosts"])
 
-            # List only multipleHostAccess: true.
-            if d["multipleHostAccess"]:
-                ds.append(d)
+            ds.append(d)
+
+        # Networks' information.
+        for network in self.networks:
+            n = network.info(False)
+            if not n["configuredHosts"]:
+                del (n["configuredHosts"])
+
+            net.append(n)
 
         return {
             "assetId": self.assetId,
             "moId": self.moId,
             "name": self.oHostSystem.name,
+
             "datastores": ds,
-            "networks": self.networks
+            "networks": net
         }
 
 

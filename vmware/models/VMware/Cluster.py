@@ -3,6 +3,7 @@ from pyVmomi import vim
 
 from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.Network import Network
+from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.backend.Cluster import Cluster as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
@@ -65,18 +66,13 @@ class Cluster(Backend):
 
 
 
-    def loadRelated(self):
-        self.loadHosts()
-        self.loadDatastores()
-        self.loadNetworks()
-
-
-
     def info(self, related: bool = True) -> dict:
         ds = list()
         net = list()
         if related:
-            self.loadRelated()
+            self.loadHosts()
+            self.loadDatastores()
+            self.loadNetworks()
 
         # Datastores' information.
         for datastore in self.datastores:

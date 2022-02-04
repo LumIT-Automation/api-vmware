@@ -41,24 +41,17 @@ class Datacenter(Backend):
         self.loadClusters()
 
         for cluster in self.clusters:
-            c = cluster.info(False)
-
-            # Remove some related objects' information, if not loaded.
-            if not c["hosts"]:
-                del(c["hosts"])
-
-            if not c["datastores"]:
-                del(c["datastores"])
-
-            if not c["networks"]:
-                del(c["networks"])
-
-            lc.append(c)
+            lc.append(
+                Datacenter.__cleanup(
+                    cluster.info(False)
+                )
+            )
 
         return {
             "assetId": self.assetId,
             "moId": self.moId,
             "name": self.oDatacenter.name,
+
             "clusters": lc
         }
 
@@ -87,3 +80,23 @@ class Datacenter(Backend):
             return datacenters
         except Exception as e:
             raise e
+
+
+
+    ####################################################################################################################
+    # Public static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __cleanup(o: dict):
+        # Remove some related objects' information, if not loaded.
+        if not o["hosts"]:
+            del (o["hosts"])
+
+        if not o["datastores"]:
+            del (o["datastores"])
+
+        if not o["networks"]:
+            del (o["networks"])
+
+        return o
