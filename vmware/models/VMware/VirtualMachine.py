@@ -1,4 +1,6 @@
 from typing import List
+from pyVmomi import vim
+
 
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 
@@ -27,7 +29,7 @@ class VirtualMachine(Backend):
         }
 
         try:
-            config = self.getVirtualMachineConfigObject()
+            config = self.oVirtualMachine.config
             info.update({
                 "name": config.name,
                 "guestName": config.guestFullName,
@@ -71,47 +73,16 @@ class VirtualMachine(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId, related: bool = False) -> List[dict]:
+    def list(assetId, templatesAlso: bool = True) -> List[dict]:
         virtualmachines = list()
 
         try:
             for v in Backend.oVirtualMachines(assetId):
-                data = VmwareHelper.vmwareObjToDict(v)
-                virtualmachines.append(data)
+                if templatesAlso or not v.config.template:
+                    data = VmwareHelper.vmwareObjToDict(v)
+                    virtualmachines.append(data)
 
             return virtualmachines
-        except Exception as e:
-            raise e
-
-
-
-
-    @staticmethod
-    # vCenter virtual machines (not templates) pyVmomi objects list.
-    def listVirtualMachinesOnlyObjects(assetId, silent: bool = True) -> list:
-        vmObjList = list()
-        try:
-            objList = VirtualMachine.listVirtualMachinesObjects(assetId, silent)
-            for obj in objList:
-                if not obj.config.template:
-                    vmObjList.append(obj)
-
-            return vmObjList
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # vCenter virtual machines and templates pyVmomi objects list.
-    def listVirtualMachinesObjects(assetId, silent: bool = True) -> list:
-        objList = list()
-        try:
-            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
-            objList = vClient.getAllObjs([vim.VirtualMachine])
-            return objList
-
         except Exception as e:
             raise e
 
