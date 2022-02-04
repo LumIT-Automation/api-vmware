@@ -1,5 +1,4 @@
 from typing import List
-from pyVmomi import vim
 
 from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.Network import Network
@@ -10,7 +9,6 @@ from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
-
 class Cluster(Backend):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
@@ -19,7 +17,7 @@ class Cluster(Backend):
         self.moId = moId
         self.name: str
 
-        self.hosts: List[dict] = []
+        self.hosts: List[HostSystem] = []
         self.datastores: List[Datastore] = []
         self.networks: List[Network] = []
 
@@ -32,7 +30,12 @@ class Cluster(Backend):
     def loadHosts(self) -> None:
         try:
             for h in self.oHosts():
-                self.hosts.append(VmwareHelper.vmwareObjToDict(h))
+                self.hosts.append(
+                    HostSystem(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(h)["moId"]
+                    )
+                )
         except Exception as e:
             raise e
 
@@ -67,38 +70,51 @@ class Cluster(Backend):
 
 
     def info(self, related: bool = True) -> dict:
+        ho = list()
         ds = list()
         net = list()
+
         if related:
             self.loadHosts()
             self.loadDatastores()
             self.loadNetworks()
 
+        # Hosts' information.
+        for host in self.hosts:
+            ho.append(
+                Cluster.__cleanup(
+                    "cluster",
+                    host.info(False)
+                )
+            )
+
         # Datastores' information.
         for datastore in self.datastores:
-            d = datastore.info(False)
-
-            # List only multipleHostAccess: true.
-            if d["multipleHostAccess"]:
-                if not d["attachedHosts"]:
-                    del (d["attachedHosts"])
-
-                ds.append(d)
+            try:
+                ds.append(
+                    Cluster.__cleanup(
+                        "datastore",
+                        datastore.info(False)
+                    )
+                )
+            except ValueError:
+                pass
 
         # Networks' information.
         for network in self.networks:
-            n = network.info(False)
-            if not n["configuredHosts"]:
-                del (n["configuredHosts"])
-
-            net.append(n)
+            net.append(
+                Cluster.__cleanup(
+                    "network",
+                    network.info(False)
+                )
+            )
 
         return {
             "assetId": self.assetId,
             "moId": self.moId,
             "name": self.oCluster.name,
 
-            "hosts": self.hosts,
+            "hosts": ho,
             "datastores": ds,
             "networks": net
         }
@@ -132,3 +148,32 @@ class Cluster(Backend):
             return clusters
         except Exception as e:
             raise e
+
+
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __cleanup(oType: str, o: dict):
+        # Remove some related objects' information, if not loaded.
+        if oType == "cluster":
+            if not o["datastores"]:
+                del (o["datastores"])
+            if not o["networks"]:
+                del (o["networks"])
+
+        if oType == "datastore":
+            # List only multipleHostAccess: true.
+            if o["multipleHostAccess"]:
+                if not o["attachedHosts"]:
+                    del (o["attachedHosts"])
+            else:
+                raise ValueError
+
+        if oType == "network":
+            if not o["configuredHosts"]:
+                del (o["configuredHosts"])
+
+        return o

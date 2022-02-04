@@ -1,4 +1,3 @@
-from pyVmomi import vim
 from typing import List
 
 from vmware.models.VMware.Datastore import Datastore
@@ -57,25 +56,28 @@ class HostSystem(Backend):
     def info(self, related: bool = True) -> dict:
         ds = list()
         net = list()
+
         if related:
             self.loadDatastores()
             self.loadNetworks()
 
         # Datastores' information.
         for datastore in self.datastores:
-            d = datastore.info(False)
-            if not d["attachedHosts"]:
-                del(d["attachedHosts"])
-
-            ds.append(d)
+            ds.append(
+                HostSystem.__cleanup(
+                    "datastore",
+                    datastore.info(False)
+                )
+            )
 
         # Networks' information.
         for network in self.networks:
-            n = network.info(False)
-            if not n["configuredHosts"]:
-                del (n["configuredHosts"])
-
-            net.append(n)
+            net.append(
+                HostSystem.__cleanup(
+                    "network",
+                    network.info(False)
+                )
+            )
 
         return {
             "assetId": self.assetId,
@@ -107,3 +109,21 @@ class HostSystem(Backend):
         except Exception as e:
             raise e
 
+
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __cleanup(oType: str, o: dict):
+        # Remove some related objects' information, if not loaded.
+        if oType == "datastore":
+            if not o["attachedHosts"]:
+                del(o["attachedHosts"])
+
+        if oType == "network":
+            if not o["configuredHosts"]:
+                del (o["configuredHosts"])
+
+        return o
