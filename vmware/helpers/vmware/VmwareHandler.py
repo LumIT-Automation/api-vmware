@@ -26,7 +26,7 @@ class VmwareHandler:
 
     # Get VMware objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
-    def getObjects(self, vimType: str) -> Dict[Any, str]:
+    def getObjects(self, vimType: str, moId: str = "") -> Dict[Any, str]:
         obj = {}
 
         try:
@@ -34,9 +34,18 @@ class VmwareHandler:
                 self.__fetchContent()
 
             if VmwareHandler.content:
-                c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
-                for managedObject_ref in c.view:
-                    obj[managedObject_ref] = managedObject_ref.name
+                if moId:
+                    # Return one moId (need an exact search here).
+                    c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
+                    for managedObject_ref in c.view:
+                        if managedObject_ref._GetMoId() == moId:
+                            obj[managedObject_ref] = managedObject_ref.name
+                            return obj
+                else:
+                    # Return complete list.
+                    c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
+                    for managedObject_ref in c.view:
+                        obj[managedObject_ref] = managedObject_ref.name
             else:
                 raise CustomException(status=400, payload={"VMware": "cannot fetch VMware objects."})
         except Exception as e:

@@ -73,7 +73,6 @@ class Datastore(VmwareHandler):
     ####################################################################################################################
 
     def __oDatastoreLoad(self):
-        for k, v in self.getObjects(vimType=vim.Datastore).items():
-            if k._GetMoId() == self.moId:
-                return k
+        for k, v in self.getObjects(vimType=vim.Datastore, moId=self.moId).items():
+            return k
 

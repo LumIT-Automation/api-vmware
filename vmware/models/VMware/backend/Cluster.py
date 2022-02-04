@@ -67,8 +67,5 @@ class Cluster(VmwareHandler):
     ####################################################################################################################
 
     def __oClusterLoad(self):
-        o = self.getObjects(vimType=vim.ClusterComputeResource)
-
-        for k, v in o.items():
-            if k._GetMoId() == self.moId:
-                return k
+        for k, v in self.getObjects(vimType=vim.ClusterComputeResource, moId=self.moId).items():
+            return k
