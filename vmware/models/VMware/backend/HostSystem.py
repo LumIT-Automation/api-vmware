@@ -44,7 +44,7 @@ class HostSystem(VmwareHandler):
         oHostSystemList = list()
 
         try:
-            hList = VmwareHandler(assetId).getObjects(vimType=vim.ComputeResource)
+            hList = VmwareHandler(assetId).getObjects(vimType=vim.HostSystem)
             for hs in hList:
                 if not hasattr(hs, 'host'): # Standalone host.
                     oHostSystemList.append(hs)
@@ -62,12 +62,8 @@ class HostSystem(VmwareHandler):
     ####################################################################################################################
 
     def __oHostSystemLoad(self):
-        o = self.getObjects(vimType=vim.ComputeResource)
+        o = self.getObjects(vimType=vim.HostSystem)
         for k, v in o.items():
-            if k._GetMoId() == self.moId: # Standalone host.
+            if k._GetMoId() == self.moId:
                 return k
-            if hasattr(k, 'host'):  # If this is a cluster, loop into it.
-                for h in k.host:
-                    if h._GetMoId() == self.moId:  # Standalone host.
-                        return h
 
