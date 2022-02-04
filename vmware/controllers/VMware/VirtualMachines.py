@@ -18,7 +18,7 @@ class VMwareVirtualMachinesController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
-        itemData = dict()
+        itemData = {"data": dict()}
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,7 +30,7 @@ class VMwareVirtualMachinesController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = VirtualMachine.list(assetId)
+                    itemData["data"]["items"] = VirtualMachine.list(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

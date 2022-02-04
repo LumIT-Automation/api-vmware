@@ -1,11 +1,18 @@
-from pyVmomi import vim
+from typing import List
 
-from vmware.helpers.vmware.VmwareHandler import VmwareHandler
-from vmware.helpers.Exception import CustomException
+from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
+
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
 
-class VirtualMachine(VmwareHandler):
+
+class VirtualMachine(Backend):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
+
+        self.assetId = int(assetId)
+        self.moId = moId
+        self.name = self.oVirtualMachine.name
 
 
 
@@ -59,48 +66,23 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def getVirtualMachineConfigObject(self) -> object:
-        try:
-            self.getVMwareObject()
-            if not hasattr(self.oCluster, 'config'):
-                raise CustomException(status=400, payload={"VMware: this object is not a virtual machine."})
-
-            return self.oCluster.config
-
-        except Exception as e:
-            raise e
-
-
-
-    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getContainer(vim.VirtualMachine)
-
-        except Exception as e:
-            raise e
-
-
-
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter datacenters list.
-    def list(assetId, silent: bool = True) -> dict:
-        vmList = []
+    def list(assetId, related: bool = False) -> List[dict]:
+        virtualmachines = list()
+
         try:
-            vmObjList = VirtualMachine.listVirtualMachinesOnlyObjects(assetId, silent)
+            for v in Backend.oVirtualMachines(assetId):
+                data = VmwareHelper.vmwareObjToDict(v)
+                virtualmachines.append(data)
 
-            for vm in vmObjList:
-                vmList.append(VmwareHelper.vmwareObjToDict(vm))
-
-            return dict({
-                "items": vmList
-            })
-
+            return virtualmachines
         except Exception as e:
             raise e
+
 
 
 
