@@ -53,6 +53,34 @@ class HostSystem(Backend):
 
 
 
+    # OLD CODE: this one get the vlan id also.
+    #def loadNetworks(self) -> None:
+    #    try:
+    #        pgList = self.oHostSystem.config.network.portgroup
+    #        for n in self.oNetworks():
+    #            net = VmwareHelper.vmwareObjToDict(n)
+
+    #            if hasattr(n,
+    #                      'config'):  # distributed port group. Standard switch vlan id should be taken from the host.
+    #                net["vlanId"] = n.config.defaultPortConfig.vlan.vlanId
+    #           else:
+    #                for pg in pgList:
+    #                    if pg.spec.name == net[
+    #                        "name"]:  # Standard switch. This works because standard switch names cannot be duplicated.
+    #                        net["vlanId"] = pg.spec.vlanId
+    #            self.networks.append(net)
+
+    #           self.networks.append(
+    #                Network(
+    #                    self.assetId,
+    #                    VmwareHelper.vmwareObjToDict(n)["moId"]
+    #                )
+    #            )
+    #    except Exception as e:
+    #        raise e
+
+
+
     def info(self, related: bool = True) -> dict:
         ds = list()
         net = list()
