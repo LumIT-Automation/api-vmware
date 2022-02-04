@@ -1,4 +1,5 @@
 from typing import List
+from pyVmomi import vim
 
 
 from vmware.models.VMware.backend.Network import Network as Backend
@@ -40,13 +41,12 @@ class Network(Backend):
 
     def info(self, related: bool = True) -> dict:
         hosts = list()
-        netInfo = dict()
+        portGroupType = ""
 
-        # @todo.
-        # Distributed port group.
-        # Standard switch vlan id should be taken from the host.
-        #if "config" in self.oNetwork:
-        #    netInfo["vlanId"] = self.oNetwork.config.defaultPortConfig.vlan.vlanId
+        if isinstance(self.oNetwork, vim.Network):
+            portGroupType = "standard"
+        if isinstance(self.oNetwork, vim.dvs.DistributedVirtualPortgroup):
+            portGroupType = "distributed"
 
         if related:
             self.loadConfiguredHostSystems()
@@ -58,7 +58,11 @@ class Network(Backend):
                     "moId": hInfo["moId"],
                     "name": hInfo["name"]
                 }
-                for n in hInfo["networks"]:
+                # Get port group information from each host. This is the right way for standard port group,
+                # but works for distributed port group also.
+                for n in hInfo["networks"]: # Data from HostSystem.info() method.
+                    # The vlanId field is an integer for if the port group is configurad with an access vlan id.
+                    # For a trunk port group the vlanId field is a list of vim.NumericRange data type.
                     if n["moId"] == self.moId and 'vlanId' in n:
                         if type(n["vlanId"]) == int:
                             info["vlanId"] = str(n["vlanId"])
@@ -78,7 +82,7 @@ class Network(Backend):
             "moId": self.moId,
             "name": self.oNetwork.summary.name,
             "accessible": self.oNetwork.summary.accessible,
-
+            "type": portGroupType,
             "configuredHosts": hosts
         }
 

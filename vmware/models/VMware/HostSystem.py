@@ -47,7 +47,6 @@ class HostSystem(Backend):
                 net = VmwareHelper.vmwareObjToDict(n)
 
                 if hasattr(n,'config'):  # distributed port group. Standard switch vlan id should be taken from the host.
-                    Log.log('ggggg')
                     net["vlanId"] = n.config.defaultPortConfig.vlan.vlanId
                 else:
                     for pg in pgList:
