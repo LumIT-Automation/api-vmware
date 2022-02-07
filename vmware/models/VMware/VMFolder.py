@@ -1,12 +1,18 @@
+from typing import List
 from pyVmomi import vim
-from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+
+from vmware.models.VMware.backend.VMFolder import VMFolder as Backend
+from vmware.models.VMware.Datacenter import Datacenter
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
+class VMFolder(Backend):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
 
-class VMFolder(VmwareHandler):
-
-
+        self.assetId = int(assetId)
+        self.moId = moId
+        self.name = self.oVMFolder.name
 
     ####################################################################################################################
     # Public methods
@@ -36,11 +42,10 @@ class VMFolder(VmwareHandler):
     # For a vCenter virtual machine folder get the plain list of the parent folders moIds.
     def parentList(self, silent: bool = True) -> list:
         parentList = list()
-        vClient = None
 
         try:
-            vClient = self.connectToAssetAndGetContent(silent)
-            allFolders = vClient.getAllObjs([vim.Folder])
+
+            allFolders = Backend.oVMFolders(self.assetId)
 
             moId = self.moId
             folder = None
@@ -66,8 +71,8 @@ class VMFolder(VmwareHandler):
         vmList = list()
         vAppList = list()
         try:
-            self.getVMwareObject()
-            children = self.oCluster.childEntity
+            self.oVMFolder
+            children = self.oVMFolder.childEntity
             for child in children:
                 if isinstance(child, vim.VirtualMachine):
                     vmList.append(child)
@@ -81,27 +86,17 @@ class VMFolder(VmwareHandler):
 
 
 
-    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getContainer(vim.Folder)
-
-        except Exception as e:
-            raise e
-
-
-
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
     # vCenter folders tree built using pvmomi.
     @staticmethod
-    def folderTree(assetId, silent: bool = True) -> list:
+    def folderTree(assetId) -> list:
         treeList = list()
 
         try:
-            from vmware.models.VMware.Datacenter import Datacenter
-            datacenters = Datacenter.listDatacentersObjects(assetId)
+            datacenters = Datacenter.oDatacenters(assetId)
 
             for dc in datacenters:
                 if isinstance(dc, vim.Datacenter):
@@ -122,40 +117,22 @@ class VMFolder(VmwareHandler):
 
 
     @staticmethod
-    # Plain vCenter networks list by default, otherwise show the folderTree output.
-    def list(assetId, formatTree: bool = False, silent: bool = True) -> dict:
-        folders = []
+    # Plain vCenter vmirtual machine folders list by default, otherwise show the folderTree output.
+    def list(assetId, formatTree: bool = False) -> dict:
+        folders = list()
+
         if formatTree:
-            folders = VMFolder.folderTree(assetId, silent)
+            folders = VMFolder.folderTree(assetId)
         else:
             try:
-                vmFoldersObjList = VMFolder.listVMFoldersObjects(assetId, silent)
-                for f in vmFoldersObjList:
-                    folders.append(VmwareHelper.vmwareObjToDict(f))
-
+                for f in Backend.oVMFolders(assetId):
+                    data = VmwareHelper.vmwareObjToDict(f)
+                    folders.append(data)
 
             except Exception as e:
                 raise e
 
-        return dict({
-            "items": folders
-        })
-
-
-
-    @staticmethod
-    # vCenter networks pyVmomi objects list.
-    def listVMFoldersObjects(assetId, silent: bool = True) -> list:
-        vmFoldersObjList = list()
-
-        try:
-            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
-            vmFoldersObjList = vClient.getAllObjs([vim.Folder])
-
-            return vmFoldersObjList
-
-        except Exception as e:
-            raise e
+        return folders
 
 
 
