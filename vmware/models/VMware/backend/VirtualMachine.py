@@ -1,7 +1,7 @@
 from pyVmomi import vim
 
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
-
+from vmware.helpers.Log import Log
 
 
 class VirtualMachine(VmwareHandler):
@@ -27,18 +27,37 @@ class VirtualMachine(VmwareHandler):
 
 
 
+    def listVMDiskInfo(self) -> list:
+        devs = list()
+
+        try:
+            for dev in self.oDevices():
+                if isinstance(dev, vim.vm.device.VirtualDisk):
+                    if hasattr(dev, 'backing') and hasattr(dev.backing, 'datastore'):
+                        devs.append({
+                            "datastore": str(dev.backing.datastore).strip("'").split(':')[1],
+                            "label": dev.deviceInfo.label,
+                            "size": str(dev.deviceInfo.summary)
+                        })
+            return devs
+        except Exception as e:
+            raise e
+
+
+
     def listVMNetworkInfo(self) -> list:
         nets = list()
+
         try:
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualEthernetCard):
                     if hasattr(dev, 'backing'):
-                        if hasattr(dev.backing, 'network'):  # Standard port group.
+                        if hasattr(dev.backing, 'network'): # standard port group.
                             nets.append({
                                 "label": dev.deviceInfo.label,
                                 "network": str(dev.backing.network).strip("'").split(':')[1]
                             })
-                        elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'):  # Distributed port group.
+                        elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'): # distributed port group.
                             nets.append({
                                 "label": dev.deviceInfo.label,
                                 "network": str(dev.backing.port.portgroupKey).strip("'").split(':')[1]

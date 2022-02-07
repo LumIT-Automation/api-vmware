@@ -2,6 +2,7 @@ from typing import List
 from pyVmomi import vim
 
 from vmware.models.VMware.VirtualMachineNetwork import VirtualMachineNetwork
+from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
@@ -17,12 +18,29 @@ class VirtualMachine(Backend):
         self.name = self.oVirtualMachine.name
 
         self.vmNetworks: List[VirtualMachineNetwork] = []
+        self.vmDatastores: List[VirtualMachineDatastore] = []
 
 
 
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
+
+    def loadVMDatastores(self) -> None:
+        try:
+            for l in self.listVMDiskInfo():
+                self.vmDatastores.append(
+                    VirtualMachineDatastore(
+                        self.assetId,
+                        l["datastore"],
+                        l["label"],
+                        l["size"]
+                    )
+                )
+        except Exception as e:
+            raise e
+
+
 
     def loadVMNetworks(self) -> None:
         try:
@@ -45,8 +63,9 @@ class VirtualMachine(Backend):
 
         try:
             config = self.oVirtualMachine.config
+            self.loadVMDatastores()
             self.loadVMNetworks()
-            
+
             # Get network devices info.
             for net in self.vmNetworks:
                 vmNets.append(
@@ -54,13 +73,10 @@ class VirtualMachine(Backend):
                 )
 
             # Get virtual disks info.
-            # @todo: to VirtualMachineDisk class; use vim.vm.device.VirtualDisk.backing.datastore.
-            for dev in config.hardware.device:
-                if isinstance(dev, vim.vm.device.VirtualDisk):
-                    vmDisks.append({
-                        "label": dev.deviceInfo.label,
-                        "size": str(dev.deviceInfo.summary)
-                    })
+            for disk in self.vmDatastores:
+                vmDisks.append(
+                    disk.info()
+                )
 
             return {
                 "name": config.name,

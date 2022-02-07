@@ -1,7 +1,6 @@
 from typing import List
 from pyVmomi import vim
 
-
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 from vmware.models.VMware.Datacenter import Datacenter
@@ -13,9 +12,9 @@ from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Exception import CustomException
 
 
-
 class VirtualMachineTemplate(VirtualMachine):
-
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
 
 
     ####################################################################################################################
