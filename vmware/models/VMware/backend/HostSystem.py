@@ -62,6 +62,4 @@ class HostSystem(VmwareHandler):
     ####################################################################################################################
 
     def __oHostSystemLoad(self):
-        for k, v in self.getObjects(vimType=vim.HostSystem, moId=self.moId).items():
-            return k
-
+        return self.getObjects(vimType=vim.HostSystem, moId=self.moId)[0]

@@ -38,5 +38,4 @@ class VirtualMachine(VmwareHandler):
     ####################################################################################################################
 
     def __oVirtualMachineLoad(self):
-        for k, v in self.getObjects(vimType=vim.VirtualMachine, moId=self.moId).items():
-            return k
+        return self.getObjects(vimType=vim.VirtualMachine, moId=self.moId)[0]

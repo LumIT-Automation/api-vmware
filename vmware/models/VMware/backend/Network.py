@@ -51,5 +51,4 @@ class Network(VmwareHandler):
     ####################################################################################################################
 
     def __oNetworkLoad(self):
-        for k, v in self.getObjects(vimType=vim.Network, moId=self.moId).items():
-            return k
+        return self.getObjects(vimType=vim.Network, moId=self.moId)[0]

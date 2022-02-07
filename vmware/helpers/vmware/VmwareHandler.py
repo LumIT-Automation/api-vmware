@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import List, Any
 
 from vmware.models.VMware.Asset.Asset import Asset
 
@@ -26,8 +26,8 @@ class VmwareHandler:
 
     # Get VMware objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
-    def getObjects(self, vimType: str, moId: str = "") -> Dict[Any, str]:
-        obj = {}
+    def getObjects(self, vimType: str, moId: str = "") -> List[Any]:
+        obj = []
 
         try:
             if not VmwareHandler.content:
@@ -39,13 +39,12 @@ class VmwareHandler:
                     c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
                     for managedObject_ref in c.view:
                         if managedObject_ref._GetMoId() == moId:
-                            obj[managedObject_ref] = managedObject_ref.name
-                            return obj
+                            return [managedObject_ref]
                 else:
                     # Return complete list.
                     c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
                     for managedObject_ref in c.view:
-                        obj[managedObject_ref] = managedObject_ref.name
+                        obj.append(managedObject_ref)
             else:
                 raise CustomException(status=400, payload={"VMware": "cannot fetch VMware objects."})
         except Exception as e:

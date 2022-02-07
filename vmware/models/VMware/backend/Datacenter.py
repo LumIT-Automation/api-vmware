@@ -50,5 +50,4 @@ class Datacenter(VmwareHandler):
     ####################################################################################################################
 
     def __oDatacenterLoad(self):
-        for k, v in self.getObjects(vimType=vim.Datacenter, moId=self.moId).items():
-            return k
+        return self.getObjects(vimType=vim.Datacenter, moId=self.moId)[0]
