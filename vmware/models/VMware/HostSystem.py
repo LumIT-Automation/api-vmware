@@ -45,17 +45,23 @@ class HostSystem(Backend):
             for net in self.oNetworks(specificMoId):
                 moId: str = ""
                 name: str = ""
-                vlanId: int = None
+                vlanId: str = ""
 
                 if hasattr(net, "config"):
                     # Distributed port group, first. The vmware DistributedVirtualPortgroup object type extends the Network type.
                     # Standard port group vlan id info should be taken from the host instead.
                     moId = net._GetMoId()
                     name = net.config.name
-                    if isinstance(net.config.defaultPortConfig.vlan.vlanId, int):
-                        vlanId = net.config.defaultPortConfig.vlan.vlanId
-                    else:
-                        pass # @ todo: trunk port
+                    vlan = net.config.defaultPortConfig.vlan.vlanId
+                    if isinstance(vlan, int):
+                        vlanId = str(vlan)
+                    elif isinstance(vlan, list):
+                        # For a trunk port group the vlanId field is a list of vim.NumericRange data type.
+                        try:
+                            for idRange in vlan:
+                                vlanId = str(idRange.start) + "-" + str(idRange.end)
+                        except Exception:
+                            pass
                 else:
                     # Standard port group.
                     for pg in pgList:

@@ -10,7 +10,7 @@ from vmware.helpers.Log import Log
 
 
 class Network(Backend):
-    def __init__(self, assetId: int, moId: str, name: str = "", vlanId: int = None, *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, name: str = "", vlanId: str = "", *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
@@ -56,12 +56,7 @@ class Network(Backend):
             self.loadConfiguredHostSystems()
 
             for chost in self.configuredHosts:
-                hosts.append(
-                    Network.__info(
-                        chost.info(loadDatastores=False, specificNetworkMoId=self.moId),
-                        self.moId
-                    )
-                )
+                hosts.append(chost.info(loadDatastores=False, specificNetworkMoId=self.moId))
 
         return {
             "assetId": self.assetId,
@@ -93,34 +88,3 @@ class Network(Backend):
         except Exception as e:
             raise e
 
-
-
-    ####################################################################################################################
-    # Private static methods
-    ####################################################################################################################
-
-    @staticmethod
-    def __info(o: dict, moId: str):
-        info = {
-            "assetId": o["assetId"],
-            "moId": o["moId"],
-            "name": o["name"]
-        }
-
-        # Get port group information from each host. This is the right way for standard port group,
-        # but works for distributed port group also.
-        for n in o["networks"]:  # Data from HostSystem.info() method.
-            # The vlanId field is an integer for if the port group is configured with an access vlan id.
-            # For a trunk port group the vlanId field is a list of vim.NumericRange data type.
-            if n["moId"] == moId and 'vlanId' in n:
-                if type(n["vlanId"]) == int:
-                    info["vlanId"] = str(n["vlanId"])
-                elif isinstance(n["vlanId"], list):
-                    # Trunk network.
-                    try:
-                        for idRange in n["vlanId"]:
-                            info["vlanId"] = str(idRange.start) + "-" + str(idRange.end)
-                    except Exception:
-                        pass
-
-        return o
