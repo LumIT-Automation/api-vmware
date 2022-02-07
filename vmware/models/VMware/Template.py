@@ -77,7 +77,7 @@ class VirtualMachineTemplate(VirtualMachine):
 
             self.getVMwareObject()
             # Deploy
-            task = self.oCluster.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
+            task = self.oVirtualMachine.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
 
             return dict({
                 "task": task._GetMoId()
