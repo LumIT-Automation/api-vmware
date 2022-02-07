@@ -41,43 +41,32 @@ class HostSystem(Backend):
 
     def loadNetworks(self) -> None:
         try:
-            for n in self.oNetworks():
+            pgList = self.oHostSystem.config.network.portgroup # Get Standard port groups basic info.
+            for net in self.oNetworks():
+                moId: str = ""
+                name: str = ""
+                vlanId: int = None
+                # Distributed port group first. The vmware DistributedVirtualPortgroup object type extends the Network type.
+                # Standard port group vlan id info should be taken from the host instead.
+                if hasattr(net, 'config'):
+                    moId = net._GetMoId()
+                    name = net.config.name
+                    if isinstance(net.config.defaultPortConfig.vlan.vlanId, int):
+                        vlanId = net.config.defaultPortConfig.vlan.vlanId
+                else:
+                    # Standard port group.
+                    for pg in pgList:
+                        if pg.spec.name == net.name:
+                            moId = net._GetMoId()
+                            name = net.name
+                            vlanId = pg.spec.vlanId
+
                 self.networks.append(
-                    Network(
-                        self.assetId,
-                        VmwareHelper.vmwareObjToDict(n)["moId"]
-                    )
+                    Network(self.assetId, moId, name, vlanId)
                 )
+
         except Exception as e:
             raise e
-
-
-
-    # OLD CODE: this one get the vlan id also.
-    #def loadNetworks(self) -> None:
-    #    try:
-    #        pgList = self.oHostSystem.config.network.portgroup
-    #        for n in self.oNetworks():
-    #            net = VmwareHelper.vmwareObjToDict(n)
-
-    #            if hasattr(n,
-    #                      'config'):  # distributed port group. Standard switch vlan id should be taken from the host.
-    #                net["vlanId"] = n.config.defaultPortConfig.vlan.vlanId
-    #           else:
-    #                for pg in pgList:
-    #                    if pg.spec.name == net[
-    #                        "name"]:  # Standard switch. This works because standard switch names cannot be duplicated.
-    #                        net["vlanId"] = pg.spec.vlanId
-    #            self.networks.append(net)
-
-    #           self.networks.append(
-    #                Network(
-    #                    self.assetId,
-    #                    VmwareHelper.vmwareObjToDict(n)["moId"]
-    #                )
-    #            )
-    #    except Exception as e:
-    #        raise e
 
 
 
@@ -100,12 +89,12 @@ class HostSystem(Backend):
 
         # Networks' information.
         for network in self.networks:
-            net.append(
-                HostSystem.__cleanup(
-                    "network",
-                    network.info(False)
-                )
-            )
+            net.append({
+                "assetId": network.assetId,
+                "moId": network.moId,
+                "name": network.name,
+                "vlanId": network.vlanId
+            })
 
         return {
             "assetId": self.assetId,

@@ -10,12 +10,13 @@ from vmware.helpers.Log import Log
 
 
 class Network(Backend):
-    def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
+    def __init__(self, assetId: int, moId: str, name: str = "", vlanId: int = None, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
         self.name = name
+        self.vlanId = vlanId
 
         self.configuredHosts: List[HostSystem] = []
 
