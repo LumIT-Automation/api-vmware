@@ -56,7 +56,9 @@ class Network(Backend):
             self.loadConfiguredHostSystems()
 
             for chost in self.configuredHosts:
-                hosts.append(chost.info(loadDatastores=False, specificNetworkMoId=self.moId))
+                hosts.append(
+                    chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+                )
 
         return {
             "assetId": self.assetId,

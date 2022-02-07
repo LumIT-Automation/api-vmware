@@ -1,6 +1,9 @@
-from typing import List
+from typing import List, TYPE_CHECKING
+
 
 from vmware.models.VMware.backend.Datastore import Datastore as Backend
+if TYPE_CHECKING:
+    from vmware.models.VMware.HostSystem import HostSystem
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
@@ -20,9 +23,7 @@ class Datastore(Backend):
         self.capacity: str
         self.multipleHostAccess: bool
 
-        self.attachedHosts: List[dict] = []
-
-        self.datastoreInfo = dict()
+        self.attachedHosts: List[HostSystem] = []
 
 
 
@@ -31,58 +32,68 @@ class Datastore(Backend):
     ####################################################################################################################
 
     def loadAttachedHosts(self) -> None:
+        from vmware.models.VMware.HostSystem import HostSystem
+
         try:
             for h in self.oAttachedHosts():
-                self.attachedHosts.append(VmwareHelper.vmwareObjToDict(h))
-        except Exception as e:
-            raise e
+                c = VmwareHelper.vmwareObjToDict(h)
 
-
-
-    def loadInfo(self) -> None:
-        info = dict()
-
-        try:
-            dsInfo = self.oInfoLoad()
-            dsSummary = self.oSummaryLoad()
-
-            info["assetId"] = self.assetId
-            info["moId"] = self.moId
-
-            info["name"] = dsInfo.name
-            info["url"] = dsInfo.url
-            info["freeSpace"] = dsInfo.freeSpace
-            info["maxFileSize"] = dsInfo.maxFileSize
-            info["maxVirtualDiskCapacity"] = dsInfo.maxVirtualDiskCapacity
-            info["multipleHostAccess"] = dsSummary.multipleHostAccess
-
-            if hasattr(dsInfo, 'nas'):
-                info["type"] = dsInfo.nas.type
-                info["capacity"] = dsInfo.nas.capacity
-            elif hasattr(dsInfo, 'vmfs'):
-                info["type"] = dsInfo.vmfs.type
-                info["capacity"] = dsInfo.vmfs.capacity
-                info["ssd"] = dsInfo.vmfs.ssd
-                info["majorVersion"] = dsInfo.vmfs.majorVersion
-                info["local"] = dsInfo.vmfs.local
-
-            self.datastoreInfo = info
+                self.attachedHosts.append(
+                    HostSystem(self.assetId, c["moId"])
+                )
         except Exception as e:
             raise e
 
 
 
     def info(self, related: bool = True):
-        self.loadInfo()
+        vmfsType = ""
+        capacity = ""
+        ssd = ""
+        majorVersion = ""
+        local = ""
+        hosts = list()
+
         if related:
             self.loadAttachedHosts()
 
-        info = self.datastoreInfo
-        info.update({
-            "attachedHosts": self.attachedHosts,
-        })
+        for chost in self.attachedHosts:
+            hosts.append(
+                Datastore.__cleanup(
+                    chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+                )
+            )
 
-        return info
+        dsInfo = self.oInfoLoad()
+        dsSummary = self.oSummaryLoad()
+
+        if hasattr(dsInfo, "nas"):
+            vmfsType = dsInfo.nas.type
+            capacity = dsInfo.nas.capacity
+        elif hasattr(dsInfo, "vmfs"):
+            vmfsType = dsInfo.vmfs.type
+            capacity = dsInfo.vmfs.capacity
+            ssd = dsInfo.vmfs.ssd
+            majorVersion = dsInfo.vmfs.majorVersion
+            local = dsInfo.vmfs.local
+
+        return {
+            "assetId": self.assetId,
+            "moId": self.moId,
+            "name": dsInfo.name,
+            "url": dsInfo.url,
+            "freeSpace": dsInfo.freeSpace,
+            "maxFileSize": dsInfo.maxFileSize,
+            "maxVirtualDiskCapacity": dsInfo.maxVirtualDiskCapacity,
+            "multipleHostAccess": dsSummary.multipleHostAccess,
+            "vmfsType": vmfsType,
+            "capacity": capacity,
+            "ssd": ssd,
+            "majorVersion": majorVersion,
+            "local": local,
+
+            "attachedHosts": hosts
+        }
 
 
 
@@ -102,3 +113,20 @@ class Datastore(Backend):
             return datastores
         except Exception as e:
             raise e
+
+
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __cleanup(o: dict):
+        # Remove some related objects' information, if not loaded.
+        if not o["datastores"]:
+            del (o["datastores"])
+
+        if not o["networks"]:
+            del (o["networks"])
+
+        return o
