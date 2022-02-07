@@ -50,7 +50,7 @@ class Datastore(Backend):
         vmfsType = ""
         capacity = ""
         ssd = ""
-        majorVersion = ""
+        majorVersion = None
         local = ""
         hosts = list()
 

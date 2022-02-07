@@ -14,8 +14,8 @@ class VMwareDatastoreInnerSerializer(serializers.Serializer):
     maxVirtualDiskCapacity = serializers.IntegerField(required=True, allow_null=True)
     type = serializers.CharField(max_length=64, required=False)
     capacity = serializers.IntegerField(required=True)
-    majorVersion = serializers.IntegerField(required=False)
-    ssd = serializers.BooleanField(required=False)
+    majorVersion = serializers.IntegerField(required=False, allow_null=True)
+    ssd = serializers.BooleanField(required=False, allow_null=True)
     local = serializers.BooleanField(required=False, allow_null=True)
     multipleHostAccess = serializers.BooleanField(required=False)
 
