@@ -44,7 +44,9 @@ class VmwareHandler:
                         for managedObject_ref in c.view:
                             if managedObject_ref._GetMoId() == moId:
                                 obj.append(managedObject_ref)
+
                                 VmwareHandler.managedObjectCache[moId] = managedObject_ref
+                                break
                 else:
                     # Return complete list.
                     c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
