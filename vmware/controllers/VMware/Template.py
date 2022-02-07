@@ -34,9 +34,11 @@ class VMwareVirtualMachineTemplateController(CustomController):
 
                     template = VirtualMachineTemplate(assetId, moId)
                     itemData["data"] = template.info()
-                    serializer = Serializer(data=itemData)
-                    if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
+                    #serializer = Serializer(data=itemData)
+                    #if serializer.is_valid():
+                    if True:
+                        #data["data"] = serializer.validated_data["data"]
+                        data["data"] = itemData["data"]
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -90,7 +92,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
                         lock.lock()
 
                         template = VirtualMachineTemplate(assetId, moId)
-                        template.deployVM(serializer.validated_data["data"])
+                        template.deploy(serializer.validated_data["data"])
                         httpStatus = status.HTTP_202_ACCEPTED
                         lock.release()
                     else:

@@ -1,11 +1,15 @@
 from typing import List
 from pyVmomi import vim
 
+from vmware.models.VMware.Datacenter import Datacenter
+from vmware.models.VMware.Cluster import Cluster
+from vmware.models.VMware.VMFolder import VMFolder
 from vmware.models.VMware.VirtualMachineNetwork import VirtualMachineNetwork
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
@@ -26,16 +30,67 @@ class VirtualMachine(Backend):
     # Public methods
     ####################################################################################################################
 
+    def deploy(self, data: dict) -> dict:
+        try:
+            # Perform some preliminary checks.
+            if not self.__isClusterValid(data["datacenterId"], data["clusterId"]):
+                raise CustomException(status=400, payload={"VMware": "clusterId not found in this datacenter."})
+
+            raise Exception
+            # @todo.
+
+            cluster = Cluster(self.assetId, clusterObj._GetMoId())
+            cluDatastoreObjList = cluster.oDatastores()
+            for d in cluDatastoreObjList:
+                if data["datastoreId"] == d._GetMoId(): # VMware pvmomi method.
+                    datastoreObj = d
+            if not datastoreObj:
+                raise CustomException(status=400, payload={"VMware": "datastoreId not found attached to this cluster."})
+
+            cluNetworkObjList = cluster.oNetworks()
+            for n in cluNetworkObjList:
+                if data["networkId"] == n._GetMoId():
+                    networkObj = n
+            if not networkObj:
+                raise CustomException(status=400, payload={"VMware": "networkId not found attached to this cluster."})
+
+            vmFolder = VMFolder(self.assetId, data["vmFolderId"])
+            vmFolder.getVMwareObject()
+            vmFolderObj = vmFolder.oCluster
+
+            # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
+            relocateSpec = vim.vm.RelocateSpec()
+            relocateSpec.datastore = datastoreObj
+            relocateSpec.pool = clusterObj.resourcePool # The resource pool associated to this cluster.
+
+            # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
+            cloneSpec = vim.vm.CloneSpec()
+            cloneSpec.location = relocateSpec
+            cloneSpec.powerOn = data["powerOn"]
+
+            self.getVMwareObject()
+            # Deploy
+            task = self.oVirtualMachine.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
+
+            return dict({
+                "task": task._GetMoId()
+            })
+
+        except Exception as e:
+            raise e
+
+
+
+    def clone(self, data: dict): # alias.
+        self.deploy(data)
+
+
+
     def loadVMDatastores(self) -> None:
         try:
             for l in self.listVMDiskInfo():
                 self.vmDatastores.append(
-                    VirtualMachineDatastore(
-                        self.assetId,
-                        l["datastore"],
-                        l["label"],
-                        l["size"]
-                    )
+                    VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["size"])
                 )
         except Exception as e:
             raise e
@@ -46,11 +101,7 @@ class VirtualMachine(Backend):
         try:
             for l in self.listVMNetworkInfo():
                 self.vmNetworks.append(
-                    VirtualMachineNetwork(
-                        self.assetId,
-                        l["network"],
-                        l["label"]
-                    )
+                    VirtualMachineNetwork(self.assetId, l["network"], l["label"])
                 )
         except Exception as e:
             raise e
@@ -92,6 +143,21 @@ class VirtualMachine(Backend):
             }
         except Exception as e:
             raise e
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __isClusterValid(self, datacenterMoId: str, clusterMoId: str) -> bool:
+        datacenter = Datacenter(self.assetId, datacenterMoId)
+
+        datacenter.loadClusters()
+        for cluster in datacenter.clusters:
+            if clusterMoId == cluster.moId:
+                # @todo: need to perform some checks on cluster?
+                return True
+
+        return False
 
 
 
