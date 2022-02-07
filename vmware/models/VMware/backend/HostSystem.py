@@ -26,9 +26,20 @@ class HostSystem(VmwareHandler):
 
 
 
-    def oNetworks(self) -> list:
+    def oNetworks(self, networkMoId: str = "") -> list:
+        oNetwork = []
+
         try:
-            return self.oHostSystem.network
+            networks = self.oHostSystem.network
+            if networkMoId:
+                for net in networks:
+                    if networkMoId == net._GetMoId():
+                        oNetwork.append(net)
+                        break
+            else:
+                oNetwork = networks
+
+            return oNetwork
         except Exception as e:
             raise e
 

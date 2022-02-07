@@ -14,10 +14,8 @@ class VmwareHandler:
     def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # The moId is the VMware Managed Object Id.
-        # Can be obtained from the _GetMoId() method or from the "_moId" property of a managed object.
         self.assetId = int(assetId)
-        self.moId = moId
+        self.moId = moId # VMware Managed Object Id.
 
 
 
@@ -38,6 +36,7 @@ class VmwareHandler:
                 if moId:
                     # Return one moId (need an exact search here).
                     if moId in VmwareHandler.managedObjectCache:
+                        # Search within the class "cache", first.
                         obj.append(VmwareHandler.managedObjectCache[moId])
                     else:
                         c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
@@ -45,7 +44,7 @@ class VmwareHandler:
                             if managedObject_ref._GetMoId() == moId:
                                 obj.append(managedObject_ref)
 
-                                VmwareHandler.managedObjectCache[moId] = managedObject_ref
+                                VmwareHandler.managedObjectCache[moId] = managedObject_ref # put in "cache".
                                 break
                 else:
                     # Return complete list.

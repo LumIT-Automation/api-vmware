@@ -39,20 +39,23 @@ class HostSystem(Backend):
 
 
 
-    def loadNetworks(self) -> None:
+    def loadNetworks(self, specificMoId: str = "") -> None:
         try:
-            pgList = self.oHostSystem.config.network.portgroup # Get Standard port groups basic info.
-            for net in self.oNetworks():
+            pgList = self.oHostSystem.config.network.portgroup # standard port groups, basic info.
+            for net in self.oNetworks(specificMoId):
                 moId: str = ""
                 name: str = ""
                 vlanId: int = None
-                # Distributed port group first. The vmware DistributedVirtualPortgroup object type extends the Network type.
-                # Standard port group vlan id info should be taken from the host instead.
-                if hasattr(net, 'config'):
+
+                if hasattr(net, "config"):
+                    # Distributed port group, first. The vmware DistributedVirtualPortgroup object type extends the Network type.
+                    # Standard port group vlan id info should be taken from the host instead.
                     moId = net._GetMoId()
                     name = net.config.name
                     if isinstance(net.config.defaultPortConfig.vlan.vlanId, int):
                         vlanId = net.config.defaultPortConfig.vlan.vlanId
+                    else:
+                        pass # @ todo: trunk port
                 else:
                     # Standard port group.
                     for pg in pgList:
@@ -64,19 +67,20 @@ class HostSystem(Backend):
                 self.networks.append(
                     Network(self.assetId, moId, name, vlanId)
                 )
-
         except Exception as e:
             raise e
 
 
 
-    def info(self, related: bool = True) -> dict:
+    def info(self, loadDatastores: bool = True, loadNetworks: bool = True, specificNetworkMoId: str = "") -> dict:
         ds = list()
         net = list()
 
-        if related:
+        if loadDatastores:
             self.loadDatastores()
-            self.loadNetworks()
+
+        if loadNetworks:
+            self.loadNetworks(specificNetworkMoId)
 
         # Datastores' information.
         for datastore in self.datastores:

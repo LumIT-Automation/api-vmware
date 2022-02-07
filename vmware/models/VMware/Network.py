@@ -52,12 +52,13 @@ class Network(Backend):
 
         if related:
             # Configured hosts' information.
+            # Need to load hosts' data in order to fetch related network information for each host.
             self.loadConfiguredHostSystems()
 
             for chost in self.configuredHosts:
                 hosts.append(
                     Network.__info(
-                        chost.info(True),
+                        chost.info(loadDatastores=False, specificNetworkMoId=self.moId),
                         self.moId
                     )
                 )
