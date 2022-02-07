@@ -9,6 +9,7 @@ from vmware.helpers.Log import Log
 
 class VmwareHandler:
     content = None # share content amongst all instances: do not re-fetch it during a "session".
+    managedObjectCache = dict()
 
     def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -36,10 +37,14 @@ class VmwareHandler:
             if VmwareHandler.content:
                 if moId:
                     # Return one moId (need an exact search here).
-                    c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
-                    for managedObject_ref in c.view:
-                        if managedObject_ref._GetMoId() == moId:
-                            return [managedObject_ref]
+                    if moId in VmwareHandler.managedObjectCache:
+                        obj.append(VmwareHandler.managedObjectCache[moId])
+                    else:
+                        c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
+                        for managedObject_ref in c.view:
+                            if managedObject_ref._GetMoId() == moId:
+                                obj.append(managedObject_ref)
+                                VmwareHandler.managedObjectCache[moId] = managedObject_ref
                 else:
                     # Return complete list.
                     c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
