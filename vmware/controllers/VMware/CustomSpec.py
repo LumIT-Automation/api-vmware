@@ -31,7 +31,6 @@ class VMwareCustomSpecController(CustomController):
                     lock.lock()
 
                     itemData["data"] = CustomSpecManager.getCustomSpecInfo(assetId, specName)
-                    Log.log(itemData, 'TTTTTTTTTTTTTTTTT')
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

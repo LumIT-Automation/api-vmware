@@ -84,7 +84,7 @@ class Cluster(Backend):
             ho.append(
                 Cluster.__cleanup(
                     "cluster",
-                    host.info(False)
+                    host.info(loadDatastores = False, loadNetworks = False)
                 )
             )
 

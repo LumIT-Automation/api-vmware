@@ -32,11 +32,9 @@ class VMwareClusterController(CustomController):
                     lock.lock()
 
                     itemData["data"] = Cluster(assetId, moId).info()
-                    #serializer = Serializer(data=itemData)
-                    #if serializer.is_valid():
-                    #    data["data"] = serializer.validated_data["data"]
-                    if True:
-                        data["data"] = itemData["data"]
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data["data"]
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
