@@ -1,29 +1,11 @@
 from typing import List
 from pyVmomi import vim
 
-from vmware.models.VMware.Network import Network
+from vmware.models.VMware.VirtualMachineNetwork import VirtualMachineNetwork
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
-
-
-class VMNetwork:
-    def __init__(self, assetId: int, networkMoId: str, adapterLabel: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.assetId = assetId
-        self.network: Network = Network(assetId, networkMoId)
-        self.adapter = adapterLabel
-
-
-
-    def info(self):
-        return {
-            "networkMoId": self.network.moId,
-            "label": self.adapter
-        }
-
 
 
 class VirtualMachine(Backend):
@@ -34,7 +16,7 @@ class VirtualMachine(Backend):
         self.moId = moId
         self.name = self.oVirtualMachine.name
 
-        self.vmNetworks: List[VMNetwork] = []
+        self.vmNetworks: List[VirtualMachineNetwork] = []
 
 
 
@@ -45,7 +27,13 @@ class VirtualMachine(Backend):
     def loadVMNetworks(self) -> None:
         try:
             for l in self.listVMNetworkInfo():
-                self.vmNetworks.append(VMNetwork(self.assetId, l["network"], l["label"]))
+                self.vmNetworks.append(
+                    VirtualMachineNetwork(
+                        self.assetId,
+                        l["network"],
+                        l["label"]
+                    )
+                )
         except Exception as e:
             raise e
 
@@ -66,6 +54,7 @@ class VirtualMachine(Backend):
                 )
 
             # Get virtual disks info.
+            # @todo: to VirtualMachineDisk class; use vim.vm.device.VirtualDisk.backing.datastore.
             for dev in config.hardware.device:
                 if isinstance(dev, vim.vm.device.VirtualDisk):
                     vmDisks.append({
@@ -85,7 +74,6 @@ class VirtualMachine(Backend):
                 "networkDevices": vmNets,
                 "diskDevices": vmDisks
             }
-
         except Exception as e:
             raise e
 
@@ -108,5 +96,3 @@ class VirtualMachine(Backend):
             return virtualmachines
         except Exception as e:
             raise e
-
-

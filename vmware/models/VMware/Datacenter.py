@@ -38,22 +38,26 @@ class Datacenter(Backend):
 
     def info(self):
         lc = list()
-        self.loadClusters()
 
-        for cluster in self.clusters:
-            lc.append(
-                Datacenter.__cleanup(
-                    cluster.info(False)
+        try:
+            self.loadClusters()
+
+            for cluster in self.clusters:
+                lc.append(
+                    Datacenter.__cleanup(
+                        cluster.info(False)
+                    )
                 )
-            )
 
-        return {
-            "assetId": self.assetId,
-            "moId": self.moId,
-            "name": self.oDatacenter.name,
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": self.oDatacenter.name,
 
-            "clusters": lc
-        }
+                "clusters": lc
+            }
+        except Exception as e:
+            raise e
 
 
 

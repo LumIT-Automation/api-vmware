@@ -54,46 +54,49 @@ class Datastore(Backend):
         local = ""
         hosts = list()
 
-        if related:
-            self.loadAttachedHosts()
+        try:
+            if related:
+                self.loadAttachedHosts()
 
-        for chost in self.attachedHosts:
-            hosts.append(
-                Datastore.__cleanup(
-                    chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+            for chost in self.attachedHosts:
+                hosts.append(
+                    Datastore.__cleanup(
+                        chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+                    )
                 )
-            )
 
-        dsInfo = self.oInfoLoad()
-        dsSummary = self.oSummaryLoad()
+            dsInfo = self.oInfoLoad()
+            dsSummary = self.oSummaryLoad()
 
-        if hasattr(dsInfo, "nas"):
-            vmfsType = dsInfo.nas.type
-            capacity = dsInfo.nas.capacity
-        elif hasattr(dsInfo, "vmfs"):
-            vmfsType = dsInfo.vmfs.type
-            capacity = dsInfo.vmfs.capacity
-            ssd = dsInfo.vmfs.ssd
-            majorVersion = dsInfo.vmfs.majorVersion
-            local = dsInfo.vmfs.local
+            if hasattr(dsInfo, "nas"):
+                vmfsType = dsInfo.nas.type
+                capacity = dsInfo.nas.capacity
+            elif hasattr(dsInfo, "vmfs"):
+                vmfsType = dsInfo.vmfs.type
+                capacity = dsInfo.vmfs.capacity
+                ssd = dsInfo.vmfs.ssd
+                majorVersion = dsInfo.vmfs.majorVersion
+                local = dsInfo.vmfs.local
 
-        return {
-            "assetId": self.assetId,
-            "moId": self.moId,
-            "name": dsInfo.name,
-            "url": dsInfo.url,
-            "freeSpace": dsInfo.freeSpace,
-            "maxFileSize": dsInfo.maxFileSize,
-            "maxVirtualDiskCapacity": dsInfo.maxVirtualDiskCapacity,
-            "multipleHostAccess": dsSummary.multipleHostAccess,
-            "vmfsType": vmfsType,
-            "capacity": capacity,
-            "ssd": ssd,
-            "majorVersion": majorVersion,
-            "local": local,
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": dsInfo.name,
+                "url": dsInfo.url,
+                "freeSpace": dsInfo.freeSpace,
+                "maxFileSize": dsInfo.maxFileSize,
+                "maxVirtualDiskCapacity": dsInfo.maxVirtualDiskCapacity,
+                "multipleHostAccess": dsSummary.multipleHostAccess,
+                "vmfsType": vmfsType,
+                "capacity": capacity,
+                "ssd": ssd,
+                "majorVersion": majorVersion,
+                "local": local,
 
-            "attachedHosts": hosts
-        }
+                "attachedHosts": hosts
+            }
+        except Exception as e:
+            raise e
 
 
 

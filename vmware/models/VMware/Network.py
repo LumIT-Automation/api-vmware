@@ -45,30 +45,33 @@ class Network(Backend):
         hosts = list()
         portGroupType = ""
 
-        if isinstance(self.oNetwork, vim.Network):
-            portGroupType = "standard"
-        if isinstance(self.oNetwork, vim.dvs.DistributedVirtualPortgroup):
-            portGroupType = "distributed"
+        try:
+            if isinstance(self.oNetwork, vim.Network):
+                portGroupType = "standard"
+            if isinstance(self.oNetwork, vim.dvs.DistributedVirtualPortgroup):
+                portGroupType = "distributed"
 
-        if related:
-            # Configured hosts' information.
-            # Need to load hosts' data in order to fetch related network information for each host.
-            self.loadConfiguredHostSystems()
+            if related:
+                # Configured hosts' information.
+                # Need to load hosts' data in order to fetch related network information for each host.
+                self.loadConfiguredHostSystems()
 
-            for chost in self.configuredHosts:
-                hosts.append(
-                    chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
-                )
+                for chost in self.configuredHosts:
+                    hosts.append(
+                        chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+                    )
 
-        return {
-            "assetId": self.assetId,
-            "moId": self.moId,
-            "name": self.oNetwork.summary.name,
-            "accessible": self.oNetwork.summary.accessible,
-            "type": portGroupType,
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": self.oNetwork.summary.name,
+                "accessible": self.oNetwork.summary.accessible,
+                "type": portGroupType,
 
-            "configuredHosts": hosts
-        }
+                "configuredHosts": hosts
+            }
+        except Exception as e:
+            raise e
 
 
 

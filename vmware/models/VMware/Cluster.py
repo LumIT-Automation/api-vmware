@@ -74,50 +74,53 @@ class Cluster(Backend):
         ds = list()
         net = list()
 
-        if related:
-            self.loadHosts()
-            self.loadDatastores()
-            self.loadNetworks()
+        try:
+            if related:
+                self.loadHosts()
+                self.loadDatastores()
+                self.loadNetworks()
 
-        # Hosts' information.
-        for host in self.hosts:
-            ho.append(
-                Cluster.__cleanup(
-                    "cluster",
-                    host.info(loadDatastores=False, loadNetworks=False)
-                )
-            )
-
-        # Datastores' information.
-        for datastore in self.datastores:
-            try:
-                ds.append(
+            # Hosts' information.
+            for host in self.hosts:
+                ho.append(
                     Cluster.__cleanup(
-                        "datastore",
-                        datastore.info(False)
+                        "cluster",
+                        host.info(loadDatastores=False, loadNetworks=False)
                     )
                 )
-            except ValueError:
-                pass
 
-        # Networks' information.
-        for network in self.networks:
-            net.append(
-                Cluster.__cleanup(
-                    "network",
-                    network.info(False)
+            # Datastores' information.
+            for datastore in self.datastores:
+                try:
+                    ds.append(
+                        Cluster.__cleanup(
+                            "datastore",
+                            datastore.info(False)
+                        )
+                    )
+                except ValueError:
+                    pass
+
+            # Networks' information.
+            for network in self.networks:
+                net.append(
+                    Cluster.__cleanup(
+                        "network",
+                        network.info(False)
+                    )
                 )
-            )
 
-        return {
-            "assetId": self.assetId,
-            "moId": self.moId,
-            "name": self.oCluster.name,
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": self.oCluster.name,
 
-            "hosts": ho,
-            "datastores": ds,
-            "networks": net
-        }
+                "hosts": ho,
+                "datastores": ds,
+                "networks": net
+            }
+        except Exception as e:
+            raise e
 
 
 

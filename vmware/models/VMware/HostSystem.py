@@ -82,38 +82,41 @@ class HostSystem(Backend):
         ds = list()
         net = list()
 
-        if loadDatastores:
-            self.loadDatastores()
+        try:
+            if loadDatastores:
+                self.loadDatastores()
 
-        if loadNetworks:
-            self.loadNetworks(specificNetworkMoId)
+            if loadNetworks:
+                self.loadNetworks(specificNetworkMoId)
 
-        # Datastores' information.
-        for datastore in self.datastores:
-            ds.append(
-                HostSystem.__cleanup(
-                    "datastore",
-                    datastore.info(False)
+            # Datastores' information.
+            for datastore in self.datastores:
+                ds.append(
+                    HostSystem.__cleanup(
+                        "datastore",
+                        datastore.info(False)
+                    )
                 )
-            )
 
-        # Networks' information.
-        for network in self.networks:
-            net.append({
-                "assetId": network.assetId,
-                "moId": network.moId,
-                "name": network.name,
-                "vlanId": network.vlanId
-            })
+            # Networks' information.
+            for network in self.networks:
+                net.append({
+                    "assetId": network.assetId,
+                    "moId": network.moId,
+                    "name": network.name,
+                    "vlanId": network.vlanId
+                })
 
-        return {
-            "assetId": self.assetId,
-            "moId": self.moId,
-            "name": self.oHostSystem.name,
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": self.oHostSystem.name,
 
-            "datastores": ds,
-            "networks": net
-        }
+                "datastores": ds,
+                "networks": net
+            }
+        except Exception as e:
+            raise e
 
 
 
