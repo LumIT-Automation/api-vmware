@@ -23,7 +23,6 @@ class Datacenter(Backend):
     ####################################################################################################################
 
     def loadClusters(self) -> None:
-        # Load VMware cluster objects.
         try:
             for c in self.oClusters():
                 cl = VmwareHelper.vmwareObjToDict(c)
@@ -66,20 +65,13 @@ class Datacenter(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId, related: bool = False) -> List[dict]:
+    def list(assetId: int) -> List[dict]:
         datacenters = list()
 
         try:
-            for d in Backend.oDatacenters(assetId):
-                data = {"assetId": assetId}
-                data.update(VmwareHelper.vmwareObjToDict(d))
-
-                if related:
-                    # Add clusters' information.
-                    dc = Datacenter(data["assetId"], data["moId"])
-                    data.update({"clusters": dc.info()["clusters"]})
-
-                datacenters.append(data)
+            for o in Backend.oDatacenters(assetId):
+                datacenter = Datacenter(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                datacenters.append(datacenter.info())
 
             return datacenters
         except Exception as e:

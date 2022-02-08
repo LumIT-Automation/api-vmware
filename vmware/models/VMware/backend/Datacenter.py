@@ -31,16 +31,9 @@ class Datacenter(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter datacenter pyVmomi objects list.
     def oDatacenters(assetId) -> list:
-        oDatacenterList = list()
-
         try:
-            dclList = VmwareHandler(assetId).getObjects(vimType=vim.Datacenter)
-            for d in dclList:
-                oDatacenterList.append(d)
-
-            return oDatacenterList
+            return VmwareHandler(assetId).getObjects(vimType=vim.Datacenter)
         except Exception as e:
             raise e
 

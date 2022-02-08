@@ -48,16 +48,9 @@ class Cluster(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter cluster pyVmomi objects list.
     def oClusters(assetId) -> list:
-        oClusterList = list()
-
         try:
-            clList = VmwareHandler(assetId).getObjects(vimType=vim.ClusterComputeResource)
-            for cl in clList:
-                oClusterList.append(cl)
-
-            return oClusterList
+            return VmwareHandler(assetId).getObjects(vimType=vim.ClusterComputeResource)
         except Exception as e:
             raise e
 

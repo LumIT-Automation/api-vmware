@@ -129,24 +129,18 @@ class Cluster(Backend):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter clusters list.
-    def list(assetId, related: bool = False) -> List[dict]:
+    def list(assetId: int, related: bool = True) -> List[dict]:
         clusters = list()
 
         try:
-            for el in Backend.oClusters(assetId):
-                data = {"assetId": assetId}
-                data.update(VmwareHelper.vmwareObjToDict(el))
-
-                if related:
-                    # Add related information.
-                    dc = Cluster(data["assetId"], data["moId"])
-
-                    data.update({"hosts": dc.info()["hosts"]})
-                    data.update({"datastores": dc.info()["datastores"]})
-                    data.update({"networks": dc.info()["networks"]})
-
-                clusters.append(data)
+            for o in Backend.oClusters(assetId):
+                cluster = Cluster(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                clusters.append(
+                    Cluster.__cleanup(
+                        "cluster",
+                        cluster.info(related)
+                    )
+                )
 
             return clusters
         except Exception as e:

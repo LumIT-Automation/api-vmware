@@ -1,6 +1,5 @@
 from typing import List, TYPE_CHECKING
 
-
 from vmware.models.VMware.backend.Datastore import Datastore as Backend
 if TYPE_CHECKING:
     from vmware.models.VMware.HostSystem import HostSystem
@@ -14,14 +13,17 @@ class Datastore(Backend):
 
         self.assetId = int(assetId)
         self.moId = moId
-        self.name: str
-        self.url: str
+        self.name: str = ""
+        self.url: str = ""
         self.freeSpace: int
         self.maxFileSize: int
         self.maxVirtualDiskCapacity: int
-        self.type: str
-        self.capacity: str
+        self.vmfsType: str = ""
+        self.capacity: str = ""
         self.multipleHostAccess: bool
+        self.majorVersion: int = 0
+        self.ssd: str = ""
+        self.local: str = ""
 
         self.attachedHosts: List[HostSystem] = []
 
@@ -47,11 +49,6 @@ class Datastore(Backend):
 
 
     def info(self, related: bool = True):
-        vmfsType = ""
-        capacity = ""
-        ssd = ""
-        majorVersion = None
-        local = ""
         hosts = list()
 
         try:
@@ -69,14 +66,14 @@ class Datastore(Backend):
             dsSummary = self.oSummaryLoad()
 
             if hasattr(dsInfo, "nas"):
-                vmfsType = dsInfo.nas.type
-                capacity = dsInfo.nas.capacity
+                self.vmfsType = dsInfo.nas.type
+                self.capacity = dsInfo.nas.capacity
             elif hasattr(dsInfo, "vmfs"):
-                vmfsType = dsInfo.vmfs.type
-                capacity = dsInfo.vmfs.capacity
-                ssd = dsInfo.vmfs.ssd
-                majorVersion = dsInfo.vmfs.majorVersion
-                local = dsInfo.vmfs.local
+                self.vmfsType = dsInfo.vmfs.type
+                self.capacity = dsInfo.vmfs.capacity
+                self.ssd = dsInfo.vmfs.ssd
+                self.majorVersion = dsInfo.vmfs.majorVersion
+                self.local = dsInfo.vmfs.local
 
             return {
                 "assetId": self.assetId,
@@ -87,11 +84,11 @@ class Datastore(Backend):
                 "maxFileSize": dsInfo.maxFileSize,
                 "maxVirtualDiskCapacity": dsInfo.maxVirtualDiskCapacity,
                 "multipleHostAccess": dsSummary.multipleHostAccess,
-                "vmfsType": vmfsType,
-                "capacity": capacity,
-                "ssd": ssd,
-                "majorVersion": majorVersion,
-                "local": local,
+                "vmfsType": self.vmfsType,
+                "capacity": self.capacity,
+                "ssd": self.ssd,
+                "majorVersion": self.majorVersion,
+                "local": self.local,
 
                 "attachedHosts": hosts
             }
@@ -105,13 +102,20 @@ class Datastore(Backend):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter datacenters list.
-    def list(assetId) -> List[dict]:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         datastores = list()
 
         try:
             for d in Backend.oDatastores(assetId):
-                datastores.append(VmwareHelper.vmwareObjToDict(d))
+                data = {"assetId": assetId}
+                data.update(VmwareHelper.vmwareObjToDict(d))
+
+                if related:
+                    # Add related information.
+                    d = Datastore(data["assetId"], data["moId"])
+                    data.update({"attachedHosts": d.info()["attachedHosts"]})
+
+                datastores.append(data)
 
             return datastores
         except Exception as e:

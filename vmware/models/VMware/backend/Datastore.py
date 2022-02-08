@@ -54,16 +54,9 @@ class Datastore(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter datastore pyVmomi objects list.
     def oDatastores(assetId) -> list:
-        oDatastoresList = list()
-
         try:
-            dsList = VmwareHandler(assetId).getObjects(vimType=vim.Datastore)
-            for d in dsList:
-                oDatastoresList.append(d)
-
-            return oDatastoresList
+            return VmwareHandler(assetId).getObjects(vimType=vim.Datastore)
         except Exception as e:
             raise e
 

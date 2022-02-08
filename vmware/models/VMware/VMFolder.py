@@ -8,6 +8,7 @@ from vmware.models.VMware.VirtualMachine import VirtualMachine
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
+
 class VMFolder(Backend):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
@@ -18,6 +19,8 @@ class VMFolder(Backend):
 
         self.folders: List[VMFolder] = []
         self.virtualmachines: List[VirtualMachine] = []
+
+
 
     ####################################################################################################################
     # Public methods
@@ -41,7 +44,6 @@ class VMFolder(Backend):
 
 
 
-    # For a vCenter virtual machine folder get the list of the virtual machines and vApps.
     def info(self) -> dict:
         subFolders = list()
         vms = list()
