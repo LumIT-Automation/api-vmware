@@ -1,5 +1,6 @@
 from pyVmomi import vim
 
+from vmware.helpers.Exception import CustomException
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 from vmware.helpers.Log import Log
 
@@ -93,4 +94,7 @@ class VirtualMachine(VmwareHandler):
     ####################################################################################################################
 
     def __oVirtualMachineLoad(self):
-        return self.getObjects(vimType=vim.VirtualMachine, moId=self.moId)[0]
+        try:
+            return self.getObjects(vimType=vim.VirtualMachine, moId=self.moId)[0]
+        except Exception:
+            raise CustomException(status=400, payload={"VMware": "cannot load resource."})

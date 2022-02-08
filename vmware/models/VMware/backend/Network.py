@@ -1,5 +1,6 @@
 from pyVmomi import vim
 
+from vmware.helpers.Exception import CustomException
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 from vmware.helpers.Log import Log
 
@@ -51,4 +52,7 @@ class Network(VmwareHandler):
     ####################################################################################################################
 
     def __oNetworkLoad(self):
-        return self.getObjects(vimType=vim.Network, moId=self.moId)[0]
+        try:
+            return self.getObjects(vimType=vim.Network, moId=self.moId)[0]
+        except Exception:
+            raise CustomException(status=400, payload={"VMware": "cannot load resource."})

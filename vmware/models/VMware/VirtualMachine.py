@@ -2,6 +2,8 @@ from typing import List
 from pyVmomi import vim
 
 from vmware.models.VMware.Datacenter import Datacenter
+from vmware.models.VMware.Datastore import Datastore
+from vmware.models.VMware.Network import Network
 from vmware.models.VMware.Cluster import Cluster
 from vmware.models.VMware.VMFolder import VMFolder
 from vmware.models.VMware.VirtualMachineNetwork import VirtualMachineNetwork
@@ -34,25 +36,20 @@ class VirtualMachine(Backend):
         try:
             # Perform some preliminary checks.
             if not self.__isClusterValid(data["datacenterId"], data["clusterId"]):
-                raise CustomException(status=400, payload={"VMware": "clusterId not found in this datacenter."})
+                raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
+
+            if not self.__isClusterValid(data["datacenterId"], data["clusterId"]):
+                raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
+
+            if not self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
+                raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
+
+            if not self.__isNetworkValid(data["clusterId"], data["networkId"]):
+                raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
+
 
             raise Exception
             # @todo.
-
-            cluster = Cluster(self.assetId, clusterObj._GetMoId())
-            cluDatastoreObjList = cluster.oDatastores()
-            for d in cluDatastoreObjList:
-                if data["datastoreId"] == d._GetMoId(): # VMware pvmomi method.
-                    datastoreObj = d
-            if not datastoreObj:
-                raise CustomException(status=400, payload={"VMware": "datastoreId not found attached to this cluster."})
-
-            cluNetworkObjList = cluster.oNetworks()
-            for n in cluNetworkObjList:
-                if data["networkId"] == n._GetMoId():
-                    networkObj = n
-            if not networkObj:
-                raise CustomException(status=400, payload={"VMware": "networkId not found attached to this cluster."})
 
             vmFolder = VMFolder(self.assetId, data["vmFolderId"])
             vmFolder.getVMwareObject()
@@ -144,20 +141,55 @@ class VirtualMachine(Backend):
         except Exception as e:
             raise e
 
+
+
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
 
     def __isClusterValid(self, datacenterMoId: str, clusterMoId: str) -> bool:
-        datacenter = Datacenter(self.assetId, datacenterMoId)
+        try:
+            try:
+                datacenter = Datacenter(self.assetId, datacenterMoId)
+            except Exception:
+                raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
 
-        datacenter.loadClusters()
-        for cluster in datacenter.clusters:
-            if clusterMoId == cluster.moId:
-                # @todo: need to perform some checks on cluster?
-                return True
+            datacenter.loadClusters()
+            for cluster in datacenter.clusters:
+                if clusterMoId == cluster.moId:
+                    return True
 
-        return False
+            return False
+        except Exception as e:
+            raise e
+
+
+
+    def __isDatastoreValid(self, clusterMoId: str, datastoreMoId: str) -> bool:
+        try:
+            cluster = Cluster(self.assetId, clusterMoId)
+            cluster.loadDatastores()
+            for datastore in cluster.datastores:
+                if datastoreMoId == datastore.moId:
+                    return True
+
+            return False
+        except Exception as e:
+            raise e
+
+
+
+    def __isNetworkValid(self, clusterMoId: str, networkMoId: str) -> bool:
+        try:
+            cluster = Cluster(self.assetId, clusterMoId)
+            cluster.loadNetworks()
+            for network in cluster.networks:
+                if networkMoId == network.moId:
+                    return True
+
+            return False
+        except Exception as e:
+            raise e
 
 
 
