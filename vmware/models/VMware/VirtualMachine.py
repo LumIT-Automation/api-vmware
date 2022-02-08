@@ -35,43 +35,34 @@ class VirtualMachine(Backend):
     def deploy(self, data: dict) -> dict:
         try:
             # Perform some preliminary checks.
-            if not self.__isClusterValid(data["datacenterId"], data["clusterId"]):
-                raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
+            if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
+                if self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
+                    if self.__isNetworkValid(data["clusterId"], data["networkId"]):
 
-            if not self.__isClusterValid(data["datacenterId"], data["clusterId"]):
-                raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
+                        raise Exception
+                        # @todo.
 
-            if not self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
-                raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
+                        vmFolder = VMFolder(self.assetId, data["vmFolderId"])
+                        vmFolder.getVMwareObject()
+                        vmFolderObj = vmFolder.oCluster
 
-            if not self.__isNetworkValid(data["clusterId"], data["networkId"]):
-                raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
+                        # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
+                        relocateSpec = vim.vm.RelocateSpec()
+                        relocateSpec.datastore = datastoreObj
+                        relocateSpec.pool = clusterObj.resourcePool # The resource pool associated to this cluster.
 
+                        # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
+                        cloneSpec = vim.vm.CloneSpec()
+                        cloneSpec.location = relocateSpec
+                        cloneSpec.powerOn = data["powerOn"]
 
-            raise Exception
-            # @todo.
+                        self.getVMwareObject()
+                        # Deploy
+                        task = self.oVirtualMachine.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
 
-            vmFolder = VMFolder(self.assetId, data["vmFolderId"])
-            vmFolder.getVMwareObject()
-            vmFolderObj = vmFolder.oCluster
-
-            # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
-            relocateSpec = vim.vm.RelocateSpec()
-            relocateSpec.datastore = datastoreObj
-            relocateSpec.pool = clusterObj.resourcePool # The resource pool associated to this cluster.
-
-            # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
-            cloneSpec = vim.vm.CloneSpec()
-            cloneSpec.location = relocateSpec
-            cloneSpec.powerOn = data["powerOn"]
-
-            self.getVMwareObject()
-            # Deploy
-            task = self.oVirtualMachine.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
-
-            return dict({
-                "task": task._GetMoId()
-            })
+                        return dict({
+                            "task": task._GetMoId()
+                        })
 
         except Exception as e:
             raise e
@@ -149,17 +140,17 @@ class VirtualMachine(Backend):
 
     def __isClusterValid(self, datacenterMoId: str, clusterMoId: str) -> bool:
         try:
-            try:
-                datacenter = Datacenter(self.assetId, datacenterMoId)
-            except Exception:
-                raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+            datacenter = Datacenter(self.assetId, datacenterMoId)
+        except Exception:
+            raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
 
+        try:
             datacenter.loadClusters()
             for cluster in datacenter.clusters:
                 if clusterMoId == cluster.moId:
                     return True
 
-            return False
+            raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
         except Exception as e:
             raise e
 
@@ -173,9 +164,10 @@ class VirtualMachine(Backend):
                 if datastoreMoId == datastore.moId:
                     return True
 
-            return False
+            raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
         except Exception as e:
             raise e
+
 
 
 
@@ -187,7 +179,7 @@ class VirtualMachine(Backend):
                 if networkMoId == network.moId:
                     return True
 
-            return False
+            raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
         except Exception as e:
             raise e
 
