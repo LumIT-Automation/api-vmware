@@ -117,6 +117,7 @@ class VirtualMachine(Backend):
                 )
 
             return {
+                "moId": self.moId,
                 "name": config.name,
                 "guestName": config.guestFullName,
                 "version": config.version,

@@ -6,6 +6,7 @@ from vmware.models.VMware.Datacenter import Datacenter
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 class VMFolder(Backend):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
@@ -50,7 +51,10 @@ class VMFolder(Backend):
 
             for f in self.folders:
                 subFolders.append(
-                    f.info()
+                    VMFolder.__cleanup(
+                        "folder",
+                        f.info()
+                    )
                 )
             for v in self.virtualmachines:
                 vms.append(
@@ -61,7 +65,10 @@ class VMFolder(Backend):
                 )
 
             return {
-                "folders": subFolders,
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": self.name,
+                "subFolders": subFolders,
                 "virtualmachines": vms
             }
         except Exception as e:
@@ -91,26 +98,6 @@ class VMFolder(Backend):
                     break
 
             return parentList
-
-        except Exception as e:
-            raise e
-
-
-
-    def listVMObjects(self) -> list:
-        folderList = list()
-        vmList = list()
-        vAppList = list()
-        try:
-            children = self.oFolderObjects()
-            for child in children:
-                if isinstance(child, vim.Folder):
-                    folderList.append(child)
-                if isinstance(child, vim.VirtualMachine):
-                    vmList.append(child)
-                # Do not consider vim.VirtualApp object type for now.
-
-            return [ folderList, vmList ]
 
         except Exception as e:
             raise e
@@ -198,5 +185,10 @@ class VMFolder(Backend):
                 del (o["networkDevices"])
             if not o["diskDevices"]:
                 del (o["diskDevices"])
-
+            del (o["numCpu"])
+            del (o["numCoresPerSocket"])
+            del (o["memoryMB"])
+            del (o["version"])
+        if oType == "folder":
+             del (o["assetId"])
         return o
