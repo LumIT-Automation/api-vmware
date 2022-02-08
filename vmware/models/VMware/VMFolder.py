@@ -3,6 +3,7 @@ from pyVmomi import vim
 
 from vmware.models.VMware.backend.VMFolder import VMFolder as Backend
 from vmware.models.VMware.Datacenter import Datacenter
+from vmware.models.VMware.VirtualMachine import VirtualMachine
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 
@@ -14,26 +15,55 @@ class VMFolder(Backend):
         self.moId = moId
         self.name = self.oVMFolder.name
 
+        self.folders: List[VMFolder] = []
+        self.virtualmachines: List[VirtualMachine] = []
+
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
 
+    def loadContents(self) -> None:
+        try:
+            for o in self.oContents():
+                objData = VmwareHelper.vmwareObjToDict(o)
+
+                if isinstance(o, vim.Folder):
+                    self.folders.append(
+                        VMFolder(self.assetId, objData["moId"])
+                    )
+                if isinstance(o, vim.VirtualMachine):
+                    self.virtualmachines.append(
+                        VirtualMachine(self.assetId, objData["moId"])
+                    )
+        except Exception as e:
+            raise e
+
+
+
     # For a vCenter virtual machine folder get the list of the virtual machines and vApps.
-    def info(self, silent: bool = True) -> dict:
-        o = {
-            "vmList": [],
-            "vAppList": []
-        }
+    def info(self) -> dict:
+        subFolders = list()
+        vms = list()
 
         try:
-            [ vmList, vAppList ] = self.listVMObjects()
-            for vm in vmList:
-                o["vmList"].append(VmwareHelper.vmwareObjToDict(vm))
-            for app in vAppList:
-                o["vAppList"].append(VmwareHelper.vmwareObjToDict(app))
+            self.loadContents()
 
-            return o
+            for f in self.folders:
+                subFolders.append(
+                    f.info()
+                )
+            for v in self.virtualmachines:
+                vms.append(
+                    VMFolder.__cleanup(
+                        "vm",
+                        v.info(related=False)
+                    )
+                )
 
+            return {
+                "folders": subFolders,
+                "virtualmachines": vms
+            }
         except Exception as e:
             raise e
 
@@ -68,18 +98,19 @@ class VMFolder(Backend):
 
 
     def listVMObjects(self) -> list:
+        folderList = list()
         vmList = list()
         vAppList = list()
         try:
-            self.oVMFolder
-            children = self.oVMFolder.childEntity
+            children = self.oFolderObjects()
             for child in children:
+                if isinstance(child, vim.Folder):
+                    folderList.append(child)
                 if isinstance(child, vim.VirtualMachine):
                     vmList.append(child)
-                if isinstance(child, vim.VirtualApp):
-                    vAppList.append(child)
+                # Do not consider vim.VirtualApp object type for now.
 
-            return [ vmList, vAppList]
+            return [ folderList, vmList ]
 
         except Exception as e:
             raise e
@@ -159,3 +190,13 @@ class VMFolder(Backend):
         return tree
 
 
+
+    @staticmethod
+    def __cleanup(oType: str, o: dict):
+        if oType == "vm":
+            if not o["networkDevices"]:
+                del (o["networkDevices"])
+            if not o["diskDevices"]:
+                del (o["diskDevices"])
+
+        return o

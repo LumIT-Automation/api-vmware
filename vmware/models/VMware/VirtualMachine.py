@@ -1,11 +1,6 @@
 from typing import List
 from pyVmomi import vim
 
-from vmware.models.VMware.Datacenter import Datacenter
-from vmware.models.VMware.Datastore import Datastore
-from vmware.models.VMware.Network import Network
-from vmware.models.VMware.Cluster import Cluster
-from vmware.models.VMware.VMFolder import VMFolder
 from vmware.models.VMware.VirtualMachineNetwork import VirtualMachineNetwork
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
@@ -33,6 +28,9 @@ class VirtualMachine(Backend):
     ####################################################################################################################
 
     def deploy(self, data: dict) -> dict:
+        #from vmware.models.VMware.Network import Network
+        #from vmware.models.VMware.Cluster import Cluster
+        #from vmware.models.VMware.VMFolder import VMFolder
         try:
             # Perform some preliminary checks.
             if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
@@ -96,14 +94,15 @@ class VirtualMachine(Backend):
 
 
 
-    def info(self) -> dict:
+    def info(self, related: bool = False) -> dict:
         vmDisks = list()
         vmNets = list()
 
         try:
             config = self.oVirtualMachine.config
-            self.loadVMDatastores()
-            self.loadVMNetworks()
+            if related:
+                self.loadVMDatastores()
+                self.loadVMNetworks()
 
             # Get network devices info.
             for net in self.vmNetworks:
@@ -139,6 +138,8 @@ class VirtualMachine(Backend):
     ####################################################################################################################
 
     def __isClusterValid(self, datacenterMoId: str, clusterMoId: str) -> bool:
+        from vmware.models.VMware.Datacenter import Datacenter
+
         try:
             datacenter = Datacenter(self.assetId, datacenterMoId)
         except Exception:
@@ -157,6 +158,8 @@ class VirtualMachine(Backend):
 
 
     def __isDatastoreValid(self, clusterMoId: str, datastoreMoId: str) -> bool:
+        from vmware.models.VMware.Cluster import Cluster
+
         try:
             cluster = Cluster(self.assetId, clusterMoId)
             cluster.loadDatastores()
@@ -172,6 +175,8 @@ class VirtualMachine(Backend):
 
 
     def __isNetworkValid(self, clusterMoId: str, networkMoId: str) -> bool:
+        from vmware.models.VMware.Cluster import Cluster
+
         try:
             cluster = Cluster(self.assetId, clusterMoId)
             cluster.loadNetworks()
