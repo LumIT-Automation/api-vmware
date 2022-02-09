@@ -32,14 +32,13 @@ class VMFolder(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter virtual machine pyVmomi objects list.
     def oVMFolders(assetId) -> list:
         oVMFoldersList = list()
 
         try:
             vmFoldersList = VmwareHandler(assetId).getObjects(vimType=vim.Folder)
             for f in vmFoldersList:
-                if f.childType == [ 'Folder', 'VirtualMachine', 'VirtualApp' ]:
+                if f.childType == ['Folder', 'VirtualMachine', 'VirtualApp']:
                     oVMFoldersList.append(f)
 
             return oVMFoldersList

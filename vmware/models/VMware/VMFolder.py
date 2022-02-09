@@ -26,17 +26,16 @@ class VMFolder(Backend):
     # Public methods
     ####################################################################################################################
 
-    def loadContents(self, loadSubFolders: bool = True, loadVirtualMachines: bool = True) -> None:
+    def loadContents(self, loadVms: bool = True) -> None:
         try:
             for o in self.oContents():
                 objData = VmwareHelper.vmwareObjToDict(o)
+                if isinstance(o, vim.Folder):
+                    self.folders.append(
+                        VMFolder(self.assetId, objData["moId"])
+                    )
 
-                if loadSubFolders:
-                    if isinstance(o, vim.Folder):
-                        self.folders.append(
-                            VMFolder(self.assetId, objData["moId"])
-                        )
-                if loadVirtualMachines:
+                if loadVms:
                     if isinstance(o, vim.VirtualMachine):
                         self.virtualmachines.append(
                             VirtualMachine(self.assetId, objData["moId"])
@@ -46,58 +45,48 @@ class VMFolder(Backend):
 
 
 
-    # For a vCenter virtual machine folder get the list of the virtual machines and vApps.
-    def info(self, getSubFolders: bool = True, getVirtualmachines: bool = True) -> dict:
-        subFolders = list()
+    def info(self, loadVms: bool = True) -> dict:
+        folders = list()
         vms = list()
 
         try:
-            self.loadContents(getSubFolders, getVirtualmachines)
-            if getSubFolders:
-                for f in self.folders:
-                    subFolders.append(
-                        VMFolder.__cleanup(
-                            "folder",
-                            f.info(getSubFolders, getVirtualmachines)
-                        )
-                    )
-            if getVirtualmachines:
+            self.loadContents(loadVms)
+            for f in self.folders:
+                folders.append(
+                    VMFolder.__cleanup("", f.info(loadVms))
+                )
+
+            if loadVms:
                 for v in self.virtualmachines:
                     vms.append(
-                        VMFolder.__cleanup(
-                            "vm",
-                            v.info(related=False)
-                        )
+                        VMFolder.__cleanup("info.vm", v.info(False))
                     )
 
             out = {
                 "assetId": self.assetId,
                 "moId": self.moId,
-                "name": self.name
+                "name": self.name,
+                "folders": folders
             }
-            if subFolders:
-                out["subFolders"] = subFolders
-            if vms:
-                out["virtualmachines"] = vms
+
+            if loadVms:
+                out.update({"virtualmachines": vms})
 
             return out
-
         except Exception as e:
             raise e
 
 
 
-
-
-
-    # For a vCenter virtual machine folder get the plain list of the parent folders moIds.
+    # Plain list of the parent folders.
     def parentList(self) -> list:
+        moId = self.moId
+        folder = None
         parentList = list()
+
         try:
             allFolders = Backend.oVMFolders(self.assetId)
 
-            moId = self.moId
-            folder = None
             while True:
                 for f in allFolders:
                     if f._GetMoId() == moId:
@@ -110,7 +99,6 @@ class VMFolder(Backend):
                     break
 
             return parentList
-
         except Exception as e:
             raise e
 
@@ -120,29 +108,25 @@ class VMFolder(Backend):
     # Public static methods
     ####################################################################################################################
 
-    # vCenter folders tree built using pvmomi.
     @staticmethod
-    def folderTreeN(assetId) -> list:
+    def folderTree(assetId) -> list:
         treeList = list()
         try:
             datacenters = Datacenter.oDatacenters(assetId)
             for dc in datacenters:
-                parentFolderObj = dc.vmFolder
-                moId = parentFolderObj._GetMoId()
-                parentFolder = VMFolder(assetId, moId)
-                subTree = parentFolder.info(getVirtualmachines=False)
+                rootFolder = VMFolder(assetId, dc.vmFolder._GetMoId())
+
+                subTree = rootFolder.info(False) # recursive by composition.
                 treeList.append(subTree)
 
             return treeList
-
         except Exception as e:
             raise e
 
 
 
-    # vCenter folders tree built using pvmomi.
     @staticmethod
-    def folderTree(assetId) -> list:
+    def folderTreeQuick(assetId) -> list:
         treeList = list()
 
         try:
@@ -154,7 +138,7 @@ class VMFolder(Backend):
                     tree = {
                         parentFolder._GetMoId(): {
                             "name": dc.name,
-                            "subFolders": {}
+                            "folders": {}
                         }
                     }
                     treeList.append(VMFolder.__folderTree(parentFolder, tree))
@@ -167,8 +151,7 @@ class VMFolder(Backend):
 
 
     @staticmethod
-    # Plain vCenter vmirtual machine folders list by default, otherwise show the folderTree output.
-    def list(assetId, formatTree: bool = False) -> dict:
+    def list(assetId, formatTree: bool = False) -> list:
         folders = list()
 
         if formatTree:
@@ -199,10 +182,10 @@ class VMFolder(Backend):
                     subTree = {
                         child._GetMoId(): {
                             "name": child.name,
-                            "subFolders": {}
+                            "folders": {}
                         }
                     }
-                    tree[folderObj._GetMoId()]["subFolders"].update(subTree)
+                    tree[folderObj._GetMoId()]["folders"].update(subTree)
                     VMFolder.__folderTree(child, subTree)
 
         return tree
@@ -211,19 +194,17 @@ class VMFolder(Backend):
 
     @staticmethod
     def __cleanup(oType: str, o: dict):
-        if oType == "vm":
-            if not o["networkDevices"]:
-                del (o["networkDevices"])
-            if not o["diskDevices"]:
-                del (o["diskDevices"])
-            del (o["numCpu"])
-            del (o["numCoresPerSocket"])
-            del (o["memoryMB"])
-            del (o["version"])
-        if oType == "folder":
-             del (o["assetId"])
-        if oType == "output":
-            if not o["virtualmachines"]:
-                del (o["virtualmachines"])
+        try:
+            if oType == "info.vm":
+                if not o["networkDevices"]:
+                    del (o["networkDevices"])
+                if not o["diskDevices"]:
+                    del (o["diskDevices"])
+
+            if oType == "output":
+                if not o["virtualmachines"]:
+                    del (o["virtualmachines"])
+        except Exception:
+            pass
 
         return o
