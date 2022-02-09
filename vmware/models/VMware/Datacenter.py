@@ -35,18 +35,16 @@ class Datacenter(Backend):
 
 
 
-    def info(self):
+    def info(self, related: bool = True):
         lc = list()
 
         try:
-            self.loadClusters()
-
-            for cluster in self.clusters:
-                lc.append(
-                    Datacenter.__cleanup(
-                        cluster.info(False)
+            if related:
+                self.loadClusters()
+                for cluster in self.clusters:
+                    lc.append(
+                        Datacenter.__cleanup("info", cluster.info(False))
                     )
-                )
 
             return {
                 "assetId": self.assetId,
@@ -65,13 +63,15 @@ class Datacenter(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId: int) -> List[dict]:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         datacenters = list()
 
         try:
             for o in Backend.oDatacenters(assetId):
                 datacenter = Datacenter(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
-                datacenters.append(datacenter.info())
+                datacenters.append(
+                    Datacenter.__cleanup("list", datacenter.info(related))
+                )
 
             return datacenters
         except Exception as e:
@@ -84,15 +84,22 @@ class Datacenter(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def __cleanup(o: dict):
+    def __cleanup(oType: str, o: dict):
         # Remove some related objects' information, if not loaded.
-        if not o["hosts"]:
-            del (o["hosts"])
+        try:
+            if oType == "list":
+                if not o["clusters"]:
+                    del (o["clusters"])
+            else:
+                if not o["hosts"]:
+                    del (o["hosts"])
 
-        if not o["datastores"]:
-            del (o["datastores"])
+                if not o["datastores"]:
+                    del (o["datastores"])
 
-        if not o["networks"]:
-            del (o["networks"])
+                if not o["networks"]:
+                    del (o["networks"])
+        except Exception:
+            pass
 
         return o

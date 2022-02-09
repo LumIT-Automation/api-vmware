@@ -31,9 +31,11 @@ class VMwareNetworksController(CustomController):
                     lock.lock()
 
                     itemData["data"]["items"] = Network.list(assetId)
-                    serializer = Serializer(data=itemData)
-                    if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
+                    #serializer = Serializer(data=itemData)
+                    #if serializer.is_valid():
+                    if True:
+                        #data["data"] = serializer.validated_data["data"]
+                        data["data"] = itemData["data"]
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).

@@ -54,13 +54,10 @@ class Datastore(Backend):
         try:
             if related:
                 self.loadAttachedHosts()
-
-            for chost in self.attachedHosts:
-                hosts.append(
-                    Datastore.__cleanup(
-                        chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+                for chost in self.attachedHosts:
+                    hosts.append(
+                        Datastore.__cleanup("info", chost.info(loadDatastores=False, specificNetworkMoId=self.moId))
                     )
-                )
 
             dsInfo = self.oInfoLoad()
             dsSummary = self.oSummaryLoad()
@@ -106,16 +103,11 @@ class Datastore(Backend):
         datastores = list()
 
         try:
-            for d in Backend.oDatastores(assetId):
-                data = {"assetId": assetId}
-                data.update(VmwareHelper.vmwareObjToDict(d))
-
-                if related:
-                    # Add related information.
-                    d = Datastore(data["assetId"], data["moId"])
-                    data.update({"attachedHosts": d.info()["attachedHosts"]})
-
-                datastores.append(data)
+            for o in Backend.oDatastores(assetId):
+                datastore = Datastore(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                datastores.append(
+                    Datastore.__cleanup("list", datastore.info(related))
+                )
 
             return datastores
         except Exception as e:
@@ -128,12 +120,20 @@ class Datastore(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def __cleanup(o: dict):
+    def __cleanup(oType: str, o: dict):
         # Remove some related objects' information, if not loaded.
-        if not o["datastores"]:
-            del (o["datastores"])
+        try:
+            if oType == "info":
+                if not o["datastores"]:
+                    del (o["datastores"])
 
-        if not o["networks"]:
-            del (o["networks"])
+                if not o["networks"]:
+                    del (o["networks"])
+
+            if oType == "list":
+                if not o["attachedHosts"]:
+                    del (o["attachedHosts"])
+        except Exception:
+            pass
 
         return o

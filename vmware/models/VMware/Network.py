@@ -17,6 +17,7 @@ class Network(Backend):
         self.moId = moId
         self.name = name
         self.vlanId = vlanId
+        self.type: str
 
         self.configuredHosts: List[HostSystem] = []
 
@@ -55,7 +56,6 @@ class Network(Backend):
                 # Configured hosts' information.
                 # Need to load hosts' data in order to fetch related network information for each host.
                 self.loadConfiguredHostSystems()
-
                 for chost in self.configuredHosts:
                     hosts.append(
                         chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
@@ -80,15 +80,31 @@ class Network(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId) -> List[dict]:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         networks = list()
 
         try:
-            for n in Backend.oNetworks(assetId):
-                data = {"assetId": assetId}
-                data.update(VmwareHelper.vmwareObjToDict(n))
-                networks.append(data)
+            for o in Backend.oNetworks(assetId):
+                network = Network(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                networks.append(
+                    Network.__cleanup("list", network.info(related))
+                )
 
             return networks
         except Exception as e:
             raise e
+
+
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __cleanup(oType: str, o: dict):
+        # Remove some related objects' information, if not loaded.
+        if oType == "list":
+            if not o["configuredHosts"]:
+                del (o["configuredHosts"])
+
+        return o

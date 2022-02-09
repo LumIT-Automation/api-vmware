@@ -76,39 +76,29 @@ class Cluster(Backend):
 
         try:
             if related:
+                # Hosts' information.
                 self.loadHosts()
+                for host in self.hosts:
+                    ho.append(
+                        Cluster.__cleanup("info.cluster", host.info(loadDatastores=False, loadNetworks=False))
+                    )
+
+                # Datastores' information.
                 self.loadDatastores()
-                self.loadNetworks()
-
-            # Hosts' information.
-            for host in self.hosts:
-                ho.append(
-                    Cluster.__cleanup(
-                        "cluster",
-                        host.info(loadDatastores=False, loadNetworks=False)
-                    )
-                )
-
-            # Datastores' information.
-            for datastore in self.datastores:
-                try:
-                    ds.append(
-                        Cluster.__cleanup(
-                            "datastore",
-                            datastore.info(False)
+                for datastore in self.datastores:
+                    try:
+                        ds.append(
+                            Cluster.__cleanup("info.datastore", datastore.info(False))
                         )
-                    )
-                except ValueError:
-                    pass
+                    except ValueError:
+                        pass
 
-            # Networks' information.
-            for network in self.networks:
-                net.append(
-                    Cluster.__cleanup(
-                        "network",
-                        network.info(False)
+                # Networks' information.
+                self.loadNetworks()
+                for network in self.networks:
+                    net.append(
+                        Cluster.__cleanup("info.network", network.info(False))
                     )
-                )
 
             return {
                 "assetId": self.assetId,
@@ -129,17 +119,14 @@ class Cluster(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId: int, related: bool = True) -> List[dict]:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         clusters = list()
 
         try:
             for o in Backend.oClusters(assetId):
                 cluster = Cluster(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
                 clusters.append(
-                    Cluster.__cleanup(
-                        "cluster",
-                        cluster.info(related)
-                    )
+                    Cluster.__cleanup("list", cluster.info(related))
                 )
 
             return clusters
@@ -155,22 +142,33 @@ class Cluster(Backend):
     @staticmethod
     def __cleanup(oType: str, o: dict):
         # Remove some related objects' information, if not loaded.
-        if oType == "cluster":
-            if not o["datastores"]:
-                del (o["datastores"])
-            if not o["networks"]:
-                del (o["networks"])
+        try:
+            if oType == "info.cluster":
+                if not o["datastores"]:
+                    del (o["datastores"])
+                if not o["networks"]:
+                    del (o["networks"])
 
-        if oType == "datastore":
-            # List only multipleHostAccess: true.
-            if o["multipleHostAccess"]:
-                if not o["attachedHosts"]:
-                    del (o["attachedHosts"])
-            else:
-                raise ValueError
+            if oType == "info.datastore":
+                # List only multipleHostAccess: true.
+                if o["multipleHostAccess"]:
+                    if not o["attachedHosts"]:
+                        del (o["attachedHosts"])
+                else:
+                    raise ValueError
 
-        if oType == "network":
-            if not o["configuredHosts"]:
-                del (o["configuredHosts"])
+            if oType == "info.network":
+                if not o["configuredHosts"]:
+                    del (o["configuredHosts"])
+
+            if oType == "list":
+                if not o["hosts"]:
+                    del (o["hosts"])
+                if not o["datastores"]:
+                    del (o["datastores"])
+                if not o["networks"]:
+                    del (o["networks"])
+        except Exception:
+            pass
 
         return o

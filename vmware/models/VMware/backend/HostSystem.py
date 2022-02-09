@@ -51,18 +51,17 @@ class HostSystem(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter hostsystem pyVmomi objects list.
     def oHostSystems(assetId) -> list:
         oHostSystemList = list()
 
         try:
             hList = VmwareHandler(assetId).getObjects(vimType=vim.HostSystem)
             for hs in hList:
-                if not hasattr(hs, 'host'): # Standalone host.
+                if not hasattr(hs, 'host'): # standalone host.
                     oHostSystemList.append(hs)
                 else:
                     for h in hs.host:
-                        oHostSystemList.append(h) # In cluster host.
+                        oHostSystemList.append(h) # in cluster host.
             return oHostSystemList
         except Exception as e:
             raise e

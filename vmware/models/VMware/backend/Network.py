@@ -32,16 +32,9 @@ class Network(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter network pyVmomi objects list.
     def oNetworks(assetId) -> list:
-        oNetworkList = list()
-
         try:
-            nlList = VmwareHandler(assetId).getObjects(vimType=vim.Network)
-            for n in nlList:
-                oNetworkList.append(n)
-
-            return oNetworkList
+            return VmwareHandler(assetId).getObjects(vimType=vim.Network)
         except Exception as e:
             raise e
 

@@ -16,7 +16,7 @@ class VirtualMachineTemplate(VirtualMachine):
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
+    def info(self, related: bool = True) -> dict:
         if not self.__isVmTemplate():
             raise CustomException(status=400, payload={"VMware": "this object is not a virtual machine template."})
 
@@ -30,14 +30,16 @@ class VirtualMachineTemplate(VirtualMachine):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId) -> List[dict]:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         virtualmachines = list()
 
         try:
-            for v in Backend.oVirtualMachines(assetId):
-                if v.config.template:
-                    data = VmwareHelper.vmwareObjToDict(v)
-                    virtualmachines.append(data)
+            for o in Backend.oVirtualMachines(assetId):
+                if o.config.template:
+                    virtualmachine = VirtualMachine(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                    virtualmachines.append(
+                        VirtualMachine._cleanup("list", virtualmachine.info(related))
+                    )
 
             return virtualmachines
         except Exception as e:

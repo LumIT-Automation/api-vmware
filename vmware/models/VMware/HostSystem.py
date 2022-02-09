@@ -84,28 +84,23 @@ class HostSystem(Backend):
 
         try:
             if loadDatastores:
+                # Datastores' information.
                 self.loadDatastores()
+                for datastore in self.datastores:
+                    ds.append(
+                        HostSystem.__cleanup("info.datastore", datastore.info(False))
+                    )
 
             if loadNetworks:
+                # Networks' information.
                 self.loadNetworks(specificNetworkMoId)
-
-            # Datastores' information.
-            for datastore in self.datastores:
-                ds.append(
-                    HostSystem.__cleanup(
-                        "datastore",
-                        datastore.info(False)
-                    )
-                )
-
-            # Networks' information.
-            for network in self.networks:
-                net.append({
-                    "assetId": network.assetId,
-                    "moId": network.moId,
-                    "name": network.name,
-                    "vlanId": network.vlanId
-                })
+                for network in self.networks:
+                    net.append({
+                        "assetId": network.assetId,
+                        "moId": network.moId,
+                        "name": network.name,
+                        "vlanId": network.vlanId
+                    })
 
             return {
                 "assetId": self.assetId,
@@ -125,15 +120,15 @@ class HostSystem(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId) -> List[dict]:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         hostsystems = list()
 
         try:
-            for h in Backend.oHostSystems(assetId):
-                data = {"assetId": assetId}
-                data.update(VmwareHelper.vmwareObjToDict(h))
-
-                hostsystems.append(data)
+            for o in Backend.oHostSystems(assetId):
+                hostsystem = HostSystem(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                hostsystems.append(
+                    HostSystem.__cleanup("list", hostsystem.info(loadDatastores=related, loadNetworks=related))
+                )
 
             return hostsystems
         except Exception as e:
@@ -148,12 +143,17 @@ class HostSystem(Backend):
     @staticmethod
     def __cleanup(oType: str, o: dict):
         # Remove some related objects' information, if not loaded.
-        if oType == "datastore":
-            if not o["attachedHosts"]:
-                del(o["attachedHosts"])
+        try:
+            if oType == "info.datastore":
+                if not o["attachedHosts"]:
+                    del(o["attachedHosts"])
 
-        if oType == "network":
-            if not o["configuredHosts"]:
-                del (o["configuredHosts"])
+            if oType == "list":
+                if not o["datastores"]:
+                    del (o["datastores"])
+                if not o["networks"]:
+                    del (o["networks"])
+        except Exception:
+            pass
 
         return o

@@ -53,16 +53,19 @@ class VirtualMachine(VmwareHandler):
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualEthernetCard):
                     if hasattr(dev, 'backing'):
-                        if hasattr(dev.backing, 'network'): # standard port group.
-                            nets.append({
-                                "label": dev.deviceInfo.label,
-                                "network": str(dev.backing.network).strip("'").split(':')[1]
-                            })
-                        elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'): # distributed port group.
-                            nets.append({
-                                "label": dev.deviceInfo.label,
-                                "network": str(dev.backing.port.portgroupKey).strip("'").split(':')[1]
-                            })
+                        try:
+                            if hasattr(dev.backing, 'network'): # standard port group.
+                                nets.append({
+                                    "label": dev.deviceInfo.label,
+                                    "network": str(dev.backing.network).strip("'").split(':')[1]
+                                })
+                            elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'): # distributed port group.
+                                nets.append({
+                                    "label": dev.deviceInfo.label,
+                                    "network": str(dev.backing.port.portgroupKey).strip("'").split(':')[1]
+                                })
+                        except Exception:
+                            pass
             return nets
         except Exception as e:
             raise e
@@ -74,16 +77,9 @@ class VirtualMachine(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    # vCenter virtual machine pyVmomi objects list.
     def oVirtualMachines(assetId) -> list:
-        oVirtualMachineList = list()
-
         try:
-            vmList = VmwareHandler(assetId).getObjects(vimType=vim.VirtualMachine)
-            for v in vmList:
-                oVirtualMachineList.append(v)
-
-            return oVirtualMachineList
+            return VmwareHandler(assetId).getObjects(vimType=vim.VirtualMachine)
         except Exception as e:
             raise e
 

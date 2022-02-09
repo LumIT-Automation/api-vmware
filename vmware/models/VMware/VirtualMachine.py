@@ -17,9 +17,16 @@ class VirtualMachine(Backend):
         self.assetId = int(assetId)
         self.moId = moId
         self.name = self.oVirtualMachine.name
+        self.guestName: str
+        self.version: str
+        self.uuid: str
+        self.numCpu: int
+        self.numCoresPerSocket: int
+        self.memoryMB: int
+        self.template: bool
 
-        self.vmNetworks: List[VirtualMachineNetwork] = []
-        self.vmDatastores: List[VirtualMachineDatastore] = []
+        self.networkDevices: List[VirtualMachineNetwork] = []
+        self.diskDevices: List[VirtualMachineDatastore] = []
 
 
 
@@ -75,7 +82,7 @@ class VirtualMachine(Backend):
     def loadVMDatastores(self) -> None:
         try:
             for l in self.listVMDiskInfo():
-                self.vmDatastores.append(
+                self.diskDevices.append(
                     VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["size"])
                 )
         except Exception as e:
@@ -86,7 +93,7 @@ class VirtualMachine(Backend):
     def loadVMNetworks(self) -> None:
         try:
             for l in self.listVMNetworkInfo():
-                self.vmNetworks.append(
+                self.networkDevices.append(
                     VirtualMachineNetwork(self.assetId, l["network"], l["label"])
                 )
         except Exception as e:
@@ -94,29 +101,30 @@ class VirtualMachine(Backend):
 
 
 
-    def info(self, related: bool = False) -> dict:
+    def info(self, related: bool = True) -> dict:
         vmDisks = list()
         vmNets = list()
 
         try:
             config = self.oVirtualMachine.config
+
             if related:
+                # Get virtual disks info.
                 self.loadVMDatastores()
+                for disk in self.diskDevices:
+                    vmDisks.append(
+                        disk.info()
+                    )
+
+                # Get network devices info.
                 self.loadVMNetworks()
-
-            # Get network devices info.
-            for net in self.vmNetworks:
-                vmNets.append(
-                    net.info()
-                )
-
-            # Get virtual disks info.
-            for disk in self.vmDatastores:
-                vmDisks.append(
-                    disk.info()
-                )
+                for net in self.networkDevices:
+                    vmNets.append(
+                        net.info()
+                    )
 
             return {
+                "assetId": self.assetId,
                 "moId": self.moId,
                 "name": config.name,
                 "guestName": config.guestFullName,
@@ -126,6 +134,7 @@ class VirtualMachine(Backend):
                 "numCoresPerSocket": config.hardware.numCoresPerSocket,
                 "memoryMB": config.hardware.memoryMB,
                 "template": config.template,
+
                 "networkDevices": vmNets,
                 "diskDevices": vmDisks
             }
@@ -174,7 +183,6 @@ class VirtualMachine(Backend):
 
 
 
-
     def __isNetworkValid(self, clusterMoId: str, networkMoId: str) -> bool:
         from vmware.models.VMware.Cluster import Cluster
 
@@ -196,15 +204,36 @@ class VirtualMachine(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def list(assetId, templatesAlso: bool = True) -> List[dict]:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         virtualmachines = list()
 
         try:
-            for v in Backend.oVirtualMachines(assetId):
-                if templatesAlso or not v.config.template:
-                    data = VmwareHelper.vmwareObjToDict(v)
-                    virtualmachines.append(data)
+            for o in Backend.oVirtualMachines(assetId):
+                virtualmachine = VirtualMachine(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                virtualmachines.append(
+                    VirtualMachine._cleanup("list", virtualmachine.info(related))
+                )
 
             return virtualmachines
         except Exception as e:
             raise e
+
+
+
+    ####################################################################################################################
+    # Protected static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def _cleanup(oType: str, o: dict):
+        # Remove some related objects' information, if not loaded.
+        try:
+            if oType == "list":
+                if not o["networkDevices"]:
+                    del (o["networkDevices"])
+                if not o["diskDevices"]:
+                    del (o["diskDevices"])
+        except Exception:
+            pass
+
+        return o
