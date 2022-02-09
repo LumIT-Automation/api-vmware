@@ -26,64 +26,78 @@ class VMFolder(Backend):
     # Public methods
     ####################################################################################################################
 
-    def loadContents(self) -> None:
+    def loadContents(self, loadSubFolders: bool = True, loadVirtualMachines: bool = True) -> None:
         try:
             for o in self.oContents():
                 objData = VmwareHelper.vmwareObjToDict(o)
 
-                if isinstance(o, vim.Folder):
-                    self.folders.append(
-                        VMFolder(self.assetId, objData["moId"])
-                    )
-                if isinstance(o, vim.VirtualMachine):
-                    self.virtualmachines.append(
-                        VirtualMachine(self.assetId, objData["moId"])
-                    )
+                if loadSubFolders:
+                    if isinstance(o, vim.Folder):
+                        self.folders.append(
+                            VMFolder(self.assetId, objData["moId"])
+                        )
+                if loadVirtualMachines:
+                    if isinstance(o, vim.VirtualMachine):
+                        self.virtualmachines.append(
+                            VirtualMachine(self.assetId, objData["moId"])
+                        )
         except Exception as e:
             raise e
 
 
 
+<<<<<<< HEAD
     def info(self) -> dict:
+=======
+    # For a vCenter virtual machine folder get the list of the virtual machines and vApps.
+    def info(self, getSubFolders: bool = True, getVirtualmachines: bool = True) -> dict:
+>>>>>>> f7d6ff6 (vmfolder)
         subFolders = list()
         vms = list()
 
         try:
-            self.loadContents()
-
-            for f in self.folders:
-                subFolders.append(
-                    VMFolder.__cleanup(
-                        "folder",
-                        f.info()
+            self.loadContents(getSubFolders, getVirtualmachines)
+            if getSubFolders:
+                for f in self.folders:
+                    subFolders.append(
+                        VMFolder.__cleanup(
+                            "folder",
+                            f.info(getSubFolders, getVirtualmachines)
+                        )
                     )
-                )
-            for v in self.virtualmachines:
-                vms.append(
-                    VMFolder.__cleanup(
-                        "vm",
-                        v.info(related=False)
+            if getVirtualmachines:
+                for v in self.virtualmachines:
+                    vms.append(
+                        VMFolder.__cleanup(
+                            "vm",
+                            v.info(related=False)
+                        )
                     )
-                )
 
-            return {
+            out = {
                 "assetId": self.assetId,
                 "moId": self.moId,
-                "name": self.name,
-                "subFolders": subFolders,
-                "virtualmachines": vms
+                "name": self.name
             }
+            if subFolders:
+                out["subFolders"] = subFolders
+            if vms:
+                out["virtualmachines"] = vms
+
+            return out
+
         except Exception as e:
             raise e
 
 
 
+
+
+
     # For a vCenter virtual machine folder get the plain list of the parent folders moIds.
-    def parentList(self, silent: bool = True) -> list:
+    def parentListO(self) -> list:
         parentList = list()
-
         try:
-
             allFolders = Backend.oVMFolders(self.assetId)
 
             moId = self.moId
@@ -113,6 +127,26 @@ class VMFolder(Backend):
     # vCenter folders tree built using pvmomi.
     @staticmethod
     def folderTree(assetId) -> list:
+        treeList = list()
+        try:
+            datacenters = Datacenter.oDatacenters(assetId)
+            for dc in datacenters:
+                parentFolderObj = dc.vmFolder
+                moId = parentFolderObj._GetMoId()
+                parentFolder = VMFolder(assetId, moId)
+                subTree = parentFolder.info(getVirtualmachines=False)
+                treeList.append(subTree)
+
+            return treeList
+
+        except Exception as e:
+            raise e
+
+
+
+    # vCenter folders tree built using pvmomi.
+    @staticmethod
+    def folderTreeO(assetId) -> list:
         treeList = list()
 
         try:
@@ -146,8 +180,7 @@ class VMFolder(Backend):
         else:
             try:
                 for f in Backend.oVMFolders(assetId):
-                    data = VmwareHelper.vmwareObjToDict(f)
-                    folders.append(data)
+                    folders.append(VmwareHelper.vmwareObjToDict(f))
 
             except Exception as e:
                 raise e
@@ -193,4 +226,8 @@ class VMFolder(Backend):
             del (o["version"])
         if oType == "folder":
              del (o["assetId"])
+        if oType == "output":
+            if not o["virtualmachines"]:
+                del (o["virtualmachines"])
+
         return o
