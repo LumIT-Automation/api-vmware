@@ -46,12 +46,8 @@ class VMFolder(Backend):
 
 
 
-<<<<<<< HEAD
-    def info(self) -> dict:
-=======
     # For a vCenter virtual machine folder get the list of the virtual machines and vApps.
     def info(self, getSubFolders: bool = True, getVirtualmachines: bool = True) -> dict:
->>>>>>> f7d6ff6 (vmfolder)
         subFolders = list()
         vms = list()
 
@@ -95,7 +91,7 @@ class VMFolder(Backend):
 
 
     # For a vCenter virtual machine folder get the plain list of the parent folders moIds.
-    def parentListO(self) -> list:
+    def parentList(self) -> list:
         parentList = list()
         try:
             allFolders = Backend.oVMFolders(self.assetId)
@@ -126,7 +122,7 @@ class VMFolder(Backend):
 
     # vCenter folders tree built using pvmomi.
     @staticmethod
-    def folderTree(assetId) -> list:
+    def folderTreeN(assetId) -> list:
         treeList = list()
         try:
             datacenters = Datacenter.oDatacenters(assetId)
@@ -146,7 +142,7 @@ class VMFolder(Backend):
 
     # vCenter folders tree built using pvmomi.
     @staticmethod
-    def folderTreeO(assetId) -> list:
+    def folderTree(assetId) -> list:
         treeList = list()
 
         try:
