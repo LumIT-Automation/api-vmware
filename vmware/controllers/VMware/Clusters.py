@@ -8,8 +8,8 @@ from vmware.models.Permission.Permission import Permission
 from vmware.serializers.VMware.Clusters import VMwareClustersSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
-from vmware.helpers.Conditional import Conditional
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
@@ -18,7 +18,7 @@ class VMwareClustersController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,10 +30,10 @@ class VMwareClustersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"]["items"] = Cluster.list(assetId)
+                    itemData["items"] = Cluster.list(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
+                        data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
