@@ -20,7 +20,7 @@ class VMwareVirtualMachineSerializer(serializers.Serializer):
         memoryMB = serializers.IntegerField(required=True)
         template = serializers.BooleanField(required=False)
 
-        networkDevices = VMwareVirtualMachineNetworkDevicesSerializer(many=True)
-        diskDevices = VMwareVirtualMachineDisksSerializer(many=True)
+        networkDevices = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
+        diskDevices = VMwareVirtualMachineDisksSerializer(many=True, required=False, allow_null=True)
 
     data = VMwareVirtualMachineInnerSerializer(required=True)

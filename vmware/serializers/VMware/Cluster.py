@@ -18,6 +18,6 @@ class VMwareClusterSerializer(serializers.Serializer):
     moId = serializers.CharField(max_length=255, required=False)
     name = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
-    hosts = VMwareClusterItemsSerializer(many=True, required=False)
-    datastores = VMwareDatastoreSerializer(many=True, required=False)
-    networks = VMwareClusterNetworksSerializer(many=True, required=False)
+    hosts = VMwareClusterItemsSerializer(many=True, required=False, allow_null=True)
+    datastores = VMwareDatastoreSerializer(many=True, required=False, allow_null=True)
+    networks = VMwareClusterNetworksSerializer(many=True, required=False, allow_null=True)
