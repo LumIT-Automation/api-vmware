@@ -1,10 +1,7 @@
 from rest_framework import serializers
 
-from vmware.serializers.VMware.Datacenter import VMwareDatacenterInnerSerializer
+from vmware.serializers.VMware.Datacenter import VMwareDatacenterSerializer
 
 
 class VMwareDatacentersSerializer(serializers.Serializer):
-    class VMwareDatacentersInnerSerializer(serializers.Serializer):
-        items = VMwareDatacenterInnerSerializer(many=True)
-
-    data = VMwareDatacentersInnerSerializer(required=True)
+    items = VMwareDatacenterSerializer(many=True)
