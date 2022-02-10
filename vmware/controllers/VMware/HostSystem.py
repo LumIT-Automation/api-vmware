@@ -8,11 +8,10 @@ from vmware.models.Permission.Permission import Permission
 from vmware.serializers.VMware.HostSystem import VMwareHostSystemSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
-from vmware.helpers.Conditional import Conditional
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
-
 
 
 class VMwareHostSystemController(CustomController):
@@ -31,13 +30,10 @@ class VMwareHostSystemController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    h = HostSystem(assetId, moId)
-                    itemData["data"] = h.info()
-                    #serializer = Serializer(data=itemData)
-                    #if serializer.is_valid():
-                    if True:
-                        #data["data"] = serializer.validated_data["data"]
-                        data["data"] = itemData["data"]
+                    itemData = HostSystem(assetId, moId).info()
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
