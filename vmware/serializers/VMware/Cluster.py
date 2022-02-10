@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from vmware.serializers.VMware.Datastore import VMwareDatastoreInnerSerializer
+from vmware.serializers.VMware.Datastore import VMwareDatastoreSerializer
 
 
 class VMwareClusterSerializer(serializers.Serializer):
@@ -19,5 +19,5 @@ class VMwareClusterSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
     hosts = VMwareClusterItemsSerializer(many=True, required=False)
-    datastores = VMwareDatastoreInnerSerializer(many=True, required=False)
+    datastores = VMwareDatastoreSerializer(many=True, required=False)
     networks = VMwareClusterNetworksSerializer(many=True, required=False)

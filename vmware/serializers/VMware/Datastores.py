@@ -1,12 +1,7 @@
 from rest_framework import serializers
 
+from vmware.serializers.VMware.Datastore import VMwareDatastoreSerializer
+
 
 class VMwareDatastoresSerializer(serializers.Serializer):
-    class VMwareDatastoresInnerSerializer(serializers.Serializer):
-        class VMwareDatastoresItemsSerializer(serializers.Serializer):
-            moId = serializers.CharField(max_length=64, required=True)
-            name = serializers.CharField(max_length=255, required=False)
-
-        items = VMwareDatastoresItemsSerializer(many=True)
-
-    data = VMwareDatastoresInnerSerializer(required=True)
+    items = VMwareDatastoreSerializer(many=True)

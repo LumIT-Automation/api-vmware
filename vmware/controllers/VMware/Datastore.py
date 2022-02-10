@@ -19,7 +19,7 @@ class VMwareDatastoreController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -31,11 +31,10 @@ class VMwareDatastoreController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    ds = Datastore(assetId, moId)
-                    itemData["data"] = ds.info()
+                    itemData = Datastore(assetId, moId).info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
+                        data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
