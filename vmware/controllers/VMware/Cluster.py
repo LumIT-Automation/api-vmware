@@ -14,7 +14,6 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-
 class VMwareClusterController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
