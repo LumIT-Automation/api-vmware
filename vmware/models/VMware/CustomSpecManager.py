@@ -1,10 +1,6 @@
-from typing import List
-from pyVmomi import vim
-
 from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as Backend
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+
 
 # In VMware, the CustomizationSpecManager is the (unique) Managed Object that can administer the virtual machines customization specifications.
 class CustomSpecManager(Backend):

@@ -1,10 +1,12 @@
-from vmware.helpers.vmware.VmwareHandler import VmwareHandler
-
-from vmware.helpers.Log import Log
+from vmware.models.VMware.backend.Task import Task as Backend
 
 
+class Task(Backend):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
 
-class Task(VmwareHandler):
+        self.assetId = int(assetId)
+        self.moId = moId
 
 
 
@@ -14,14 +16,13 @@ class Task(VmwareHandler):
 
     def info(self) -> dict:
         try:
-            self.getVMwareObject()
             info = {
-                "entityName": self.vmwareObj.info.entityName,
-                "entity_moId": self.vmwareObj.info.entity._GetMoId(),
-                "queueTime": str(self.vmwareObj.info.queueTime),
-                "startTime": str(self.vmwareObj.info.startTime),
-                "progress": self.vmwareObj.info.progress,
-                "state": self.vmwareObj.info.state
+                "entityName": self.oTask.info.entityName,
+                "entity_moId": self.oTask.info.entity._GetMoId(),
+                "queueTime": str(self.oTask.info.queueTime),
+                "startTime": str(self.oTask.info.startTime),
+                "progress": self.oTask.info.progress,
+                "state": self.oTask.info.state
             }
             return info
 
@@ -32,8 +33,7 @@ class Task(VmwareHandler):
 
     def cancel(self) -> None:
         try:
-            self.getVMwareObject()
-            self.vmwareObj.CancelTask()
+            self.oCancel()
 
         except Exception as e:
             raise e
@@ -42,22 +42,8 @@ class Task(VmwareHandler):
 
     def setDescription(self, description: str = "") -> None:
         try:
-            self.getVMwareObject()
-            self.vmwareObj.SetTaskDescription(description)
+            self.oSetDescription(description)
 
         except Exception as e:
             raise e
 
-
-
-    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            vClient = VmwareHandler.connectToAssetAndGetContentStatic(self.assetId, silent)
-            taskManager = vClient.oCluster.taskManager
-            for task in taskManager.recentTask:
-                Log.log(task, 'TTTTTTTTTTTTTT')
-                if task.info.key == self.moId:
-                    self.vmwareObj = task
-
-        except Exception as e:
-            raise e
