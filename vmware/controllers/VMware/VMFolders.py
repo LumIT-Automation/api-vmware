@@ -5,13 +5,10 @@ from rest_framework import status
 from vmware.models.VMware.VMFolder import VMFolder
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.VMFolders import VMwareVMFoldersSerializer as Serializer
-
 from vmware.controllers.CustomController import CustomController
 
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
-
 
 
 class VMwareVMFoldersController(CustomController):
@@ -37,16 +34,7 @@ class VMwareVMFoldersController(CustomController):
                         if "tree" in rList:
                             formatTree = True
 
-                    itemData = VMFolder.list(assetId, formatTree)
-
-                    # Filter vmFolders' list basing on permissions.
-                    # For any result, check if the user has got at least a pools_get permission on the vmFolder.
-                    #for p in itemData["data"]["items"]:
-                    #    if Permission.hasUserPermission(groups=user["groups"], action="pools_get", assetId=assetId, vmFolderName=str(p["fullPath"])) or user["authDisabled"]:
-                    #        allowedData["data"]["items"].append(p)
-
-                    #data["data"] = Serializer(allowedData).data["data"]
-                    data["data"] = itemData
+                    data["data"] = VMFolder.list(assetId, formatTree)
                     data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK

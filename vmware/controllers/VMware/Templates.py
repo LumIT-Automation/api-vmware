@@ -8,8 +8,8 @@ from vmware.models.Permission.Permission import Permission
 from vmware.serializers.VMware.VirtualMachines import VMwareVirtualMachinesSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
-from vmware.helpers.Conditional import Conditional
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
@@ -18,7 +18,7 @@ class VMwareTemplatesController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,12 +30,10 @@ class VMwareTemplatesController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"]["items"] = VirtualMachineTemplate.list(assetId)
-                    #serializer = Serializer(data=itemData)
-                    #if serializer.is_valid():
-                    if True:
-                        #data["data"] = serializer.validated_data["data"]
-                        data["data"] = itemData["data"]
+                    itemData["items"] = VirtualMachineTemplate.list(assetId)
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
