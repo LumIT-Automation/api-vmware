@@ -8,11 +8,10 @@ from vmware.models.Permission.Permission import Permission
 from vmware.serializers.VMware.Task import VMwareTaskSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
-from vmware.helpers.Conditional import Conditional
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
-
 
 
 class VMwareTaskController(CustomController):
@@ -36,7 +35,7 @@ class VMwareTaskController(CustomController):
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
-                        data["data"] =  itemData["data"]
+                        data["data"] = itemData["data"]
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
