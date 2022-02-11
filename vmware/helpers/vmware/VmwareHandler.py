@@ -60,11 +60,7 @@ class VmwareHandler:
 
 
 
-    ####################################################################################################################
-    # Protected methods
-    ####################################################################################################################
-
-    def _getSubContent(self, prop: str) -> object:
+    def getSubContent(self, prop: str) -> object:
         try:
             if not VmwareHandler.content:
                 self.__fetchContent()
