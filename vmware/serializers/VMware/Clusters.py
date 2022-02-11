@@ -1,12 +1,7 @@
 from rest_framework import serializers
 
+from vmware.serializers.VMware.Cluster import VMwareClusterSerializer
+
 
 class VMwareClustersSerializer(serializers.Serializer):
-    class VMwareClustersInnerSerializer(serializers.Serializer):
-        class VMwareClustersItemsSerializer(serializers.Serializer):
-            moId = serializers.CharField(max_length=64, required=True)
-            name = serializers.CharField(max_length=255, required=False)
-
-        items = VMwareClustersItemsSerializer(many=True)
-
-    data = VMwareClustersInnerSerializer(required=True)
+    items = VMwareClusterSerializer(many=True)

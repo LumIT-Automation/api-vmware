@@ -9,11 +9,10 @@ from vmware.serializers.VMware.VirtualMachine import VMwareVirtualMachineSeriali
 from vmware.serializers.VMware.Template import VMwareDeployTemplateSerializer as DeploySerializer
 
 from vmware.controllers.CustomController import CustomController
-from vmware.helpers.Conditional import Conditional
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
-
 
 
 class VMwareVirtualMachineTemplateController(CustomController):
@@ -33,10 +32,10 @@ class VMwareVirtualMachineTemplateController(CustomController):
                     lock.lock()
 
                     template = VirtualMachineTemplate(assetId, moId)
-                    itemData["data"] = template.info()
+                    itemData = template.info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
+                        data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -72,6 +71,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
 
 
 
+    # @todo: move away.
     @staticmethod
     def post(request: Request, assetId: int, moId: str) -> Response:
         response = None
@@ -90,8 +90,8 @@ class VMwareVirtualMachineTemplateController(CustomController):
                         lock.lock()
 
                         template = VirtualMachineTemplate(assetId, moId)
-                        template.deployVM(serializer.validated_data["data"])
-                        httpStatus = status.HTTP_201_CREATED
+                        template.deploy(serializer.validated_data["data"])
+                        httpStatus = status.HTTP_202_ACCEPTED
                         lock.release()
                     else:
                         httpStatus = status.HTTP_423_LOCKED

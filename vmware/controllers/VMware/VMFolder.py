@@ -5,21 +5,17 @@ from rest_framework import status
 from vmware.models.VMware.VMFolder import VMFolder
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.VMFolder import VMwareVMFolderSerializer as InfoSerializer, VMwareVMFolderParentListSerializer as ParentSerializer
-
 from vmware.controllers.CustomController import CustomController
-from vmware.helpers.Conditional import Conditional
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
-
 
 
 class VMwareVMFolderController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
-        itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -31,28 +27,18 @@ class VMwareVMFolderController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    vmFolder = VMFolder(assetId, moId)
+                    data["data"] = VMFolder(assetId, moId).info()
+                    data["href"] = request.get_full_path()
 
-                    itemData["data"] = vmFolder.info()
-                    serializer = InfoSerializer(data=itemData)
-                    if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
-                        data["href"] = request.get_full_path()
-
-                        # Check the response's ETag validity (against client request).
-                        conditional = Conditional(request)
-                        etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
-                        if etagCondition["state"] == "fresh":
-                            data = None
-                            httpStatus = status.HTTP_304_NOT_MODIFIED
-                        else:
-                            httpStatus = status.HTTP_200_OK
+                    # Check the response's ETag validity (against client request).
+                    conditional = Conditional(request)
+                    etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                    if etagCondition["state"] == "fresh":
+                        data = None
+                        httpStatus = status.HTTP_304_NOT_MODIFIED
                     else:
-                        httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
-                        data = {
-                            "VMware": "Upstream data mismatch."
-                        }
-                        Log.log("Upstream data incorrect: "+str(serializer.errors))
+                        httpStatus = status.HTTP_200_OK
+
                     lock.release()
                 else:
                     data = None
@@ -76,10 +62,7 @@ class VMwareVMFolderController(CustomController):
 class VMwareVMFolderParentListController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
-        data = {
-            "data": ""
-        }
-        itemData = dict()
+        data = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -91,29 +74,18 @@ class VMwareVMFolderParentListController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    vmFolder = VMFolder(assetId, moId)
+                    data["data"] = VMFolder(assetId, moId).parentList()
+                    data["href"] = request.get_full_path()
 
-                    itemData["data"] = vmFolder.parentList()
-                    Log.log(itemData, '_')
-                    serializer = ParentSerializer(data=itemData)
-                    if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
-                        data["href"] = request.get_full_path()
-
-                        # Check the response's ETag validity (against client request).
-                        conditional = Conditional(request)
-                        etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
-                        if etagCondition["state"] == "fresh":
-                            data = None
-                            httpStatus = status.HTTP_304_NOT_MODIFIED
-                        else:
-                            httpStatus = status.HTTP_200_OK
+                    # Check the response's ETag validity (against client request).
+                    conditional = Conditional(request)
+                    etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                    if etagCondition["state"] == "fresh":
+                        data = None
+                        httpStatus = status.HTTP_304_NOT_MODIFIED
                     else:
-                        httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
-                        data = {
-                            "VMware": "Upstream data mismatch."
-                        }
-                        Log.log("Upstream data incorrect: " + str(serializer.errors))
+                        httpStatus = status.HTTP_200_OK
+
                     lock.release()
                 else:
                     data = None

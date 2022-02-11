@@ -1,13 +1,10 @@
-from pyVmomi import vim, vmodl
+from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
-
-from vmware.helpers.VMwareObj import VMwareObj
 from vmware.helpers.Log import Log
 
 
 
-class Task(VMwareDjangoObj):
+class Task(VmwareHandler):
 
 
 
@@ -55,8 +52,8 @@ class Task(VMwareDjangoObj):
 
     def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(self.assetId, silent)
-            taskManager = vClient.content.taskManager
+            vClient = VmwareHandler.connectToAssetAndGetContentStatic(self.assetId, silent)
+            taskManager = vClient.oCluster.taskManager
             for task in taskManager.recentTask:
                 Log.log(task, 'TTTTTTTTTTTTTT')
                 if task.info.key == self.moId:

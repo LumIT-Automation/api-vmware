@@ -1,13 +1,23 @@
-from pyVmomi import vim, vmodl
+from typing import List
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VMware.Datastore import Datastore
+from vmware.models.VMware.Network import Network
+from vmware.models.VMware.backend.HostSystem import HostSystem as Backend
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
+class HostSystem(Backend):
+    def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
 
-class HostSystem(VMwareDjangoObj):
+        self.assetId = int(assetId)
+        self.moId = moId
+        self.name = name
+
+        self.networks: List[Network] = []
+        self.datastores: List[Datastore] = []
 
 
 
@@ -15,138 +25,135 @@ class HostSystem(VMwareDjangoObj):
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        datastores = networks = []
-        o = {
-            "datastores": [],
-            "networks": []
-        }
-
+    def loadDatastores(self) -> None:
         try:
-            datastores = self.listDatastoresObjects()
-            networks = self.listNetworksObjects()
-
-            for d in datastores:
-                o["datastores"].append(VMwareObj.vmwareObjToDict(d))
-
-            # Add also the vlanId information.
-            for n in networks:
-                net = VMwareObj.vmwareObjToDict(n)
-                pgObj = self.getHostPortGroupSpec(net["name"])
-                if pgObj and hasattr(pgObj, 'spec'):    # This works only for standard vSwitches.
-                    net["vlanId"] = pgObj.spec.vlanId
-                    o["networks"].append(net)
-
-            return o
-
+            for d in self.oDatastores():
+                self.datastores.append(
+                    Datastore(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(d)["moId"]
+                    )
+                )
         except Exception as e:
             raise e
 
 
 
-    def listDatastoresObjects(self) -> list:
+    def loadNetworks(self, specificMoId: str = "") -> None:
         try:
-            self.__getVMwareObject()
-            return self.vmwareObj.datastore
+            pgList = self.oHostSystem.config.network.portgroup # standard port groups, basic info.
+            for net in self.oNetworks(specificMoId):
+                moId: str = ""
+                name: str = ""
+                vlanId: str = ""
 
+                if hasattr(net, "config"):
+                    # Distributed port group, first. The vmware DistributedVirtualPortgroup object type extends the Network type.
+                    # Standard port group vlan id info should be taken from the host instead.
+                    moId = net._GetMoId()
+                    name = net.config.name
+                    vlan = net.config.defaultPortConfig.vlan.vlanId
+                    if isinstance(vlan, int):
+                        vlanId = str(vlan)
+                    elif isinstance(vlan, list):
+                        # For a trunk port group the vlanId field is a list of vim.NumericRange data type.
+                        try:
+                            for idRange in vlan:
+                                vlanId = str(idRange.start) + "-" + str(idRange.end)
+                        except Exception:
+                            pass
+                else:
+                    # Standard port group.
+                    for pg in pgList:
+                        if pg.spec.name == net.name:
+                            moId = net._GetMoId()
+                            name = net.name
+                            vlanId = pg.spec.vlanId
+
+                self.networks.append(
+                    Network(self.assetId, moId, name, vlanId)
+                )
         except Exception as e:
             raise e
 
 
 
-    def listNetworksObjects(self) -> list:
-        try:
-            self.__getVMwareObject()
-            return self.vmwareObj.network
+    def info(self, loadDatastores: bool = True, loadNetworks: bool = True, specificNetworkMoId: str = "") -> dict:
+        ds = list()
+        net = list()
 
+        try:
+            if loadDatastores:
+                # Datastores' information.
+                self.loadDatastores()
+                for datastore in self.datastores:
+                    ds.append(
+                        HostSystem.__cleanup("info.datastore", datastore.info(False))
+                    )
+
+            if loadNetworks:
+                # Networks' information.
+                self.loadNetworks(specificNetworkMoId)
+                for network in self.networks:
+                    net.append({
+                        "assetId": network.assetId,
+                        "moId": network.moId,
+                        "name": network.name,
+                        "vlanId": network.vlanId
+                    })
+
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": self.oHostSystem.name,
+
+                "datastores": ds,
+                "networks": net
+            }
         except Exception as e:
             raise e
 
 
-
-    # Host port group specifications. This is a vmware property, not a Managed Object, so it haven't a moId.
-    def getHostPortGroupSpec(self, name) -> object:
-        try:
-            self.__getVMwareObject()
-            pgList = self.vmwareObj.config.network.portgroup
-            for pg in pgList:
-                if pg.spec.name == name:
-                     return pg
-
-        except Exception as e:
-            raise e
 
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
     @staticmethod
-    def listHostsInClusterObjects(cluster: object) -> list: # (List of vim.Hostsystem)
-        try:
-            return cluster.host
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # vCenter cluster pyVmomi objects list.
-    def list(assetId, silent: bool = True) -> dict:
-        hosts = list()
-        try:
-            hostsObjList = HostSystem.listHostsObjects(assetId, silent)
-            for h in hostsObjList:
-                hosts.append(VMwareObj.vmwareObjToDict(h))
-
-            return dict({
-                "items": hosts
-            })
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # Plain vCenter hosts list.
-    def listHostsObjects(assetId, silent: bool = True) -> list:
-        hostsObjList = list()
+    def list(assetId: int, related: bool = False) -> List[dict]:
+        hostsystems = list()
 
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
-            hList = vClient.getAllObjs([vim.ComputeResource])
+            for o in Backend.oHostSystems(assetId):
+                hostsystem = HostSystem(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                hostsystems.append(
+                    HostSystem.__cleanup("list", hostsystem.info(loadDatastores=related, loadNetworks=related))
+                )
 
-            for h in hList:
-                hostsObjList.extend(h.host)
-
-            return hostsObjList
-
+            return hostsystems
         except Exception as e:
             raise e
 
 
 
     ####################################################################################################################
-    # Private methods
+    # Private static methods
     ####################################################################################################################
 
-    def __getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        if not self.vmwareObj or refresh:
-            try:
-                vClient = self.connectToAssetAndGetContent(silent)
-                objList = vClient.getAllObjs([vim.ComputeResource])
-                for obj in objList:
-                    if obj._GetMoId() == self.moId:  # Standalone host.
-                        self.vmwareObj = obj
-                        break
-                    if hasattr(obj, 'host'):  # If this is a cluster, loop into it.
-                        for h in obj.host:
-                            if h._GetMoId() == self.moId:  # In cluster host.
-                                self.vmwareObj = h
-                                break
+    @staticmethod
+    def __cleanup(oType: str, o: dict):
+        # Remove some related objects' information, if not loaded.
+        try:
+            if oType == "info.datastore":
+                if not o["attachedHosts"]:
+                    del(o["attachedHosts"])
 
-            except Exception as e:
-                raise e
-        else:
+            if oType == "list":
+                if not o["datastores"]:
+                    del (o["datastores"])
+                if not o["networks"]:
+                    del (o["networks"])
+        except Exception:
             pass
+
+        return o

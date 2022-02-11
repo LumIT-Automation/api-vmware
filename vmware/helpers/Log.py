@@ -1,9 +1,6 @@
+import re
 import logging
 import traceback
-
-from django.utils.html import strip_tags
-from django.db import connection
-
 
 
 class Log:
@@ -21,6 +18,25 @@ class Log:
 
         if title:
             log.debug(title)
+
+
+
+    @staticmethod
+    def dump(o: any) -> None:
+        log = logging.getLogger("django")
+
+        oOut = dict()
+        oVars = vars(o)
+        oDir = dir(o)
+
+        for i, v in enumerate(oDir):
+            if v in oVars:
+                oOut[v] = oVars[v]
+            else:
+                if not re.search("^__(.*)__$", str(v)):
+                    oOut[v] = getattr(o, v)
+
+        log.debug(oOut)
 
 
 

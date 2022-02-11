@@ -8,8 +8,8 @@ from vmware.models.Permission.Permission import Permission
 from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
-from vmware.helpers.Conditional import Conditional
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
@@ -31,7 +31,6 @@ class VMwareCustomSpecController(CustomController):
                     lock.lock()
 
                     itemData["data"] = CustomSpecManager.getCustomSpecInfo(assetId, specName)
-                    Log.log(itemData, 'TTTTTTTTTTTTTTTTT')
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]

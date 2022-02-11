@@ -1,9 +1,8 @@
 from rest_framework import serializers
 
+
 class VMwareDeployTemplateSerializer(serializers.Serializer):
-
     class VMwareDeployTemplateInnerSerializer(serializers.Serializer):
-
         vmName = serializers.CharField(max_length=255, required=True)
         datacenterId = serializers.CharField(max_length=64, required=True)
         clusterId = serializers.CharField(max_length=64, required=True)

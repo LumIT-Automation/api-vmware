@@ -1,13 +1,32 @@
-from pyVmomi import vim, vmodl
+from typing import List
+from pyVmomi import vim
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
+from vmware.models.VMware.VirtualMachineNetwork import VirtualMachineNetwork
+from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
+from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
+
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.VMwareObj import VMwareObj
 from vmware.helpers.Log import Log
 
 
+class VirtualMachine(Backend):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
 
-class VirtualMachine(VMwareDjangoObj):
+        self.assetId = int(assetId)
+        self.moId = moId
+        self.name = self.oVirtualMachine.name
+        self.guestName: str
+        self.version: str
+        self.uuid: str
+        self.numCpu: int
+        self.numCoresPerSocket: int
+        self.memoryMB: int
+        self.template: bool
+
+        self.networkDevices: List[VirtualMachineNetwork] = []
+        self.diskDevices: List[VirtualMachineDatastore] = []
 
 
 
@@ -15,15 +34,98 @@ class VirtualMachine(VMwareDjangoObj):
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        info = {
-            "diskDevices": [],
-            "networkDevices": []
-        }
+    def deploy(self, data: dict) -> dict:
+        #from vmware.models.VMware.Network import Network
+        #from vmware.models.VMware.Cluster import Cluster
+        #from vmware.models.VMware.VMFolder import VMFolder
+        try:
+            # Perform some preliminary checks.
+            if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
+                if self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
+                    if self.__isNetworkValid(data["clusterId"], data["networkId"]):
+
+                        raise Exception
+                        # @todo.
+
+                        vmFolder = VMFolder(self.assetId, data["vmFolderId"])
+                        vmFolder.getVMwareObject()
+                        vmFolderObj = vmFolder.oCluster
+
+                        # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
+                        relocateSpec = vim.vm.RelocateSpec()
+                        relocateSpec.datastore = datastoreObj
+                        relocateSpec.pool = clusterObj.resourcePool # The resource pool associated to this cluster.
+
+                        # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
+                        cloneSpec = vim.vm.CloneSpec()
+                        cloneSpec.location = relocateSpec
+                        cloneSpec.powerOn = data["powerOn"]
+
+                        self.getVMwareObject()
+                        # Deploy
+                        task = self.oVirtualMachine.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
+
+                        return dict({
+                            "task": task._GetMoId()
+                        })
+
+        except Exception as e:
+            raise e
+
+
+
+    def clone(self, data: dict): # alias.
+        self.deploy(data)
+
+
+
+    def loadVMDatastores(self) -> None:
+        try:
+            for l in self.listVMDiskInfo():
+                self.diskDevices.append(
+                    VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["size"])
+                )
+        except Exception as e:
+            raise e
+
+
+
+    def loadVMNetworks(self) -> None:
+        try:
+            for l in self.listVMNetworkInfo():
+                self.networkDevices.append(
+                    VirtualMachineNetwork(self.assetId, l["network"], l["label"])
+                )
+        except Exception as e:
+            raise e
+
+
+
+    def info(self, related: bool = True) -> dict:
+        vmDisks = list()
+        vmNets = list()
 
         try:
-            config = self.getVirtualMachineConfigObject()
-            info.update({
+            config = self.oVirtualMachine.config
+
+            if related:
+                # Get virtual disks info.
+                self.loadVMDatastores()
+                for disk in self.diskDevices:
+                    vmDisks.append(
+                        disk.info()
+                    )
+
+                # Get network devices info.
+                self.loadVMNetworks()
+                for net in self.networkDevices:
+                    vmNets.append(
+                        net.info()
+                    )
+
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
                 "name": config.name,
                 "guestName": config.guestFullName,
                 "version": config.version,
@@ -31,53 +133,67 @@ class VirtualMachine(VMwareDjangoObj):
                 "numCpu": config.hardware.numCPU,
                 "numCoresPerSocket": config.hardware.numCoresPerSocket,
                 "memoryMB": config.hardware.memoryMB,
-                "template": config.template
-            })
+                "template": config.template,
 
-            for dev in config.hardware.device:
-                if isinstance(dev, vim.vm.device.VirtualDisk):
-                    info["diskDevices"].append({
-                        "label": dev.deviceInfo.label,
-                        "size": str(dev.deviceInfo.summary)
-                    })
-
-                if isinstance(dev, vim.vm.device.VirtualEthernetCard):
-                    if hasattr(dev, 'backing'):
-                        if hasattr(dev.backing, 'network'): # Standard port group.
-                            info["networkDevices"].append({
-                                "label": dev.deviceInfo.label,
-                                "network": str(dev.backing.network)
-                            })
-                        elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'): # Distributed port group.
-                            info["networkDevices"].append({
-                                "label": dev.deviceInfo.label,
-                                "network": str(dev.backing.port.portgroupKey)
-                            })
-
-            return info
-
+                "networkDevices": vmNets,
+                "diskDevices": vmDisks
+            }
         except Exception as e:
             raise e
 
 
 
-    def getVirtualMachineConfigObject(self) -> object:
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __isClusterValid(self, datacenterMoId: str, clusterMoId: str) -> bool:
+        from vmware.models.VMware.Datacenter import Datacenter
+
         try:
-            self.getVMwareObject()
-            if not hasattr(self.vmwareObj, 'config'):
-                raise CustomException(status=400, payload={"VMware: this object is not a virtual machine."})
+            datacenter = Datacenter(self.assetId, datacenterMoId)
+        except Exception:
+            raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
 
-            return self.vmwareObj.config
+        try:
+            datacenter.loadClusters()
+            for cluster in datacenter.clusters:
+                if clusterMoId == cluster.moId:
+                    return True
 
+            raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
         except Exception as e:
             raise e
 
 
 
-    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> None:
-        try:
-            self._getVMwareObject(vim.VirtualMachine, refresh, silent)
+    def __isDatastoreValid(self, clusterMoId: str, datastoreMoId: str) -> bool:
+        from vmware.models.VMware.Cluster import Cluster
 
+        try:
+            cluster = Cluster(self.assetId, clusterMoId)
+            cluster.loadDatastores()
+            for datastore in cluster.datastores:
+                if datastoreMoId == datastore.moId:
+                    return True
+
+            raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
+        except Exception as e:
+            raise e
+
+
+
+    def __isNetworkValid(self, clusterMoId: str, networkMoId: str) -> bool:
+        from vmware.models.VMware.Cluster import Cluster
+
+        try:
+            cluster = Cluster(self.assetId, clusterMoId)
+            cluster.loadNetworks()
+            for network in cluster.networks:
+                if networkMoId == network.moId:
+                    return True
+
+            raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
         except Exception as e:
             raise e
 
@@ -88,51 +204,36 @@ class VirtualMachine(VMwareDjangoObj):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter datacenters list.
-    def list(assetId, silent: bool = True) -> dict:
-        vmList = []
+    def list(assetId: int, related: bool = False) -> List[dict]:
+        virtualmachines = list()
+
         try:
-            vmObjList = VirtualMachine.listVirtualMachinesOnlyObjects(assetId, silent)
+            for o in Backend.oVirtualMachines(assetId):
+                virtualmachine = VirtualMachine(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                virtualmachines.append(
+                    VirtualMachine._cleanup("list", virtualmachine.info(related))
+                )
 
-            for vm in vmObjList:
-                vmList.append(VMwareObj.vmwareObjToDict(vm))
-
-            return dict({
-                "items": vmList
-            })
-
+            return virtualmachines
         except Exception as e:
             raise e
 
 
+
+    ####################################################################################################################
+    # Protected static methods
+    ####################################################################################################################
 
     @staticmethod
-    # vCenter virtual machines (not templates) pyVmomi objects list.
-    def listVirtualMachinesOnlyObjects(assetId, silent: bool = True) -> list:
-        vmObjList = list()
+    def _cleanup(oType: str, o: dict):
+        # Remove some related objects' information, if not loaded.
         try:
-            objList = VirtualMachine.listVirtualMachinesObjects(assetId, silent)
-            for obj in objList:
-                if not obj.config.template:
-                    vmObjList.append(obj)
+            if oType == "list":
+                if not o["networkDevices"]:
+                    del (o["networkDevices"])
+                if not o["diskDevices"]:
+                    del (o["diskDevices"])
+        except Exception:
+            pass
 
-            return vmObjList
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    # vCenter virtual machines and templates pyVmomi objects list.
-    def listVirtualMachinesObjects(assetId, silent: bool = True) -> list:
-        objList = list()
-        try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
-            objList = vClient.getAllObjs([vim.VirtualMachine])
-            return objList
-
-        except Exception as e:
-            raise e
-
-
+        return o

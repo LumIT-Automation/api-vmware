@@ -44,7 +44,7 @@ class Asset:
 
             a = DBHelper.asDict(c)[0]
             if a["api_type"] == "vmware":
-                a["dataConnection"] = {
+                a["connectionData"] = {
                     "address": a["address"],
                     "port": a["port"],
                     "fqdn": a["fqdn"],

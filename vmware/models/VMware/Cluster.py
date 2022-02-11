@@ -1,16 +1,25 @@
-from pyVmomi import vim, vmodl
+from typing import List
 
-from vmware.models.VMwareDjangoObj import VMwareDjangoObj
-from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.Network import Network
+from vmware.models.VMware.HostSystem import HostSystem
+from vmware.models.VMware.backend.Cluster import Cluster as Backend
 
-from vmware.helpers.VMwareObj import VMwareObj
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
+class Cluster(Backend):
+    def __init__(self, assetId: int, moId: str, *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
 
-class Cluster(VMwareDjangoObj):
+        self.assetId = int(assetId)
+        self.moId = moId
+        self.name: str
+
+        self.hosts: List[HostSystem] = []
+        self.datastores: List[Datastore] = []
+        self.networks: List[Network] = []
 
 
 
@@ -18,70 +27,88 @@ class Cluster(VMwareDjangoObj):
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
-        hosts = datastores = networks = []
-        o = {
-            "hosts": [],
-            "datastores": [],
-            "networks": []
-        }
-
+    def loadHosts(self) -> None:
         try:
-            hosts = self.listHostsObjects()
-            datastores = self.listDatastoresObjects()
-            networks = self.listNetworksObjects()
-
-            for h in hosts:
-                o["hosts"].append(VMwareObj.vmwareObjToDict(h))
-
-            for d in datastores:
-                o["datastores"].append(VMwareObj.vmwareObjToDict(d))
-
-            for n in networks:
-                o["networks"].append(VMwareObj.vmwareObjToDict(n))
-
-            return o
-
+            for h in self.oHosts():
+                self.hosts.append(
+                    HostSystem(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(h)["moId"]
+                    )
+                )
         except Exception as e:
             raise e
 
 
 
-    def listHostsObjects(self) -> list: # (List of vim.Hostsystem)
+    def loadDatastores(self) -> None:
         try:
-            self.getVMwareObject()
-            return HostSystem.listHostsInClusterObjects(self.vmwareObj)
-
+            for d in self.oDatastores():
+                self.datastores.append(
+                    Datastore(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(d)["moId"]
+                    )
+                )
         except Exception as e:
             raise e
 
 
 
-    def listDatastoresObjects(self) -> list:
+    def loadNetworks(self) -> None:
         try:
-            self.getVMwareObject()
-            return Datastore.listDatastoresInClusterObjects(self.vmwareObj)
-
+            for n in self.oNetworks():
+                self.networks.append(
+                    Network(
+                        self.assetId,
+                        VmwareHelper.vmwareObjToDict(n)["moId"]
+                    )
+                )
         except Exception as e:
             raise e
 
 
 
-    def listNetworksObjects(self) -> list:
+    def info(self, related: bool = True) -> dict:
+        ho = list()
+        ds = list()
+        net = list()
+
         try:
-            self.getVMwareObject()
-            return Network.listNetworksInClusterObjects(self.vmwareObj)
+            if related:
+                # Hosts' information.
+                self.loadHosts()
+                for host in self.hosts:
+                    ho.append(
+                        Cluster.__cleanup("info.cluster", host.info(loadDatastores=False, loadNetworks=False))
+                    )
 
-        except Exception as e:
-            raise e
+                # Datastores' information.
+                self.loadDatastores()
+                for datastore in self.datastores:
+                    try:
+                        ds.append(
+                            Cluster.__cleanup("info.datastore", datastore.info(False))
+                        )
+                    except ValueError:
+                        pass
 
+                # Networks' information.
+                self.loadNetworks()
+                for network in self.networks:
+                    net.append(
+                        Cluster.__cleanup("info.network", network.info(False))
+                    )
 
+            return {
+                "assetId": self.assetId,
+                "moId": self.moId,
+                "name": self.oCluster.name,
 
-    def getVMwareObject(self, refresh: bool = False, silent: bool = True) -> object:
-        obj = None
-        try:
-            self._getVMwareObject(vim.ComputeResource, refresh, silent)
-
+                "hosts": ho,
+                "datastores": ds,
+                "networks": net
+            }
         except Exception as e:
             raise e
 
@@ -92,41 +119,56 @@ class Cluster(VMwareDjangoObj):
     ####################################################################################################################
 
     @staticmethod
-    # Plain vCenter clusters list.
-    def list(assetId, silent: bool = True) -> dict:
+    def list(assetId: int, related: bool = False) -> List[dict]:
         clusters = list()
+
         try:
-            clustersObjList = Cluster.listClustersObjects(assetId, silent)
-            for cl in clustersObjList:
-                clusters.append(VMwareObj.vmwareObjToDict(cl))
+            for o in Backend.oClusters(assetId):
+                cluster = Cluster(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                clusters.append(
+                    Cluster.__cleanup("list", cluster.info(related))
+                )
 
-            return dict({
-                "items": clusters
-            })
-
+            return clusters
         except Exception as e:
             raise e
 
 
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
 
     @staticmethod
-    # vCenter cluster pyVmomi objects list.
-    def listClustersObjects(assetId, silent: bool = True) -> list:
-        clustersObjList = list()
-
+    def __cleanup(oType: str, o: dict):
+        # Remove some related objects' information, if not loaded.
         try:
-            vClient = VMwareDjangoObj.connectToAssetAndGetContentStatic(assetId, silent)
-            clList = vClient.getAllObjs([vim.ComputeResource])
+            if oType == "info.cluster":
+                if not o["datastores"]:
+                    del (o["datastores"])
+                if not o["networks"]:
+                    del (o["networks"])
 
-            for cl in clList:
-                clustersObjList.append(cl)
+            if oType == "info.datastore":
+                # List only multipleHostAccess: true.
+                if o["multipleHostAccess"]:
+                    if not o["attachedHosts"]:
+                        del (o["attachedHosts"])
+                else:
+                    raise ValueError
 
-            return clustersObjList
+            if oType == "info.network":
+                if not o["configuredHosts"]:
+                    del (o["configuredHosts"])
 
-        except Exception as e:
-            raise e
+            if oType == "list":
+                if not o["hosts"]:
+                    del (o["hosts"])
+                if not o["datastores"]:
+                    del (o["datastores"])
+                if not o["networks"]:
+                    del (o["networks"])
+        except Exception:
+            pass
 
-
-
-
-
+        return o
