@@ -34,14 +34,13 @@ class CustomSpecManager(VmwareHandler):
 
 
 
+
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
 
     def __oCustomSpecManagerLoad(self):
         try:
-            if not self.content:
-                self._fetchContent()
-            return self.content.customizationSpecManager
+            return self._getSubContent('customizationSpecManager')
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})

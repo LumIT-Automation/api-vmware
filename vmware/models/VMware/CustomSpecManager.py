@@ -86,10 +86,9 @@ class CustomSpecManager(Backend):
 
 
     @staticmethod
-    def deleteVMwareCustomSpec(assetId, specName, silent: bool = True) -> None:
+    def deleteVMwareCustomSpec(assetId, specName) -> None:
         try:
             specManager = CustomSpecManager(assetId)
-            Log.log(specManager, '_')
             if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
                 specManager.oCustomSpecManager.DeleteCustomizationSpec(specName)
 
