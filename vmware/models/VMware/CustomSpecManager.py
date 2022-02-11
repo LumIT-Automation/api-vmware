@@ -1,15 +1,18 @@
+from typing import List
 from pyVmomi import vim
 
-from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as Backend
 
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 # In VMware, the CustomizationSpecManager is the (unique) Managed Object that can administer the virtual machines customization specifications.
-# The customization specs are properties, not Managed Objects, so they don't have the moId.
-#
-# For documentation about VMware CustomSpecManager methods and properties:
-# https://developer.vmware.com/apis/704/vsphere/vim.CustomizationSpecManager.html
+class CustomSpecManager(Backend):
+    def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
+        super().__init__(assetId, moId, *args, **kwargs)
 
-class CustomSpecManager(VmwareHandler):
+        self.assetId = int(assetId)
+        self.moId = moId
 
 
 
@@ -18,7 +21,7 @@ class CustomSpecManager(VmwareHandler):
     ####################################################################################################################
 
     @staticmethod
-    def getCustomSpecInfo(assetId, specName, silent: bool = True) -> dict:
+    def getCustomSpecInfo(assetId, specName) -> dict:
         o = {
             "ip": "",
             "netMask": "",
@@ -32,7 +35,8 @@ class CustomSpecManager(VmwareHandler):
         dns = list()
 
         try:
-            spec = CustomSpecManager.getCustomSpecObject(assetId, specName, silent)
+            specManager = CustomSpecManager(assetId)
+            spec = specManager.oCustomSpec(specName)
             if hasattr(spec, "spec"):
                 if hasattr(spec.spec, "identity"):
                     if hasattr(spec.spec.identity, "hostName") and hasattr(spec.spec.identity.hostName, "name"):
@@ -70,9 +74,9 @@ class CustomSpecManager(VmwareHandler):
     @staticmethod
     def cloneVMwareCustomSpec(assetId, data: dict, silent: bool = True) -> bool:
         try:
-            specManager = CustomSpecManager.__getVMwareObject(assetId, silent)
-            if specManager.DoesCustomizationSpecExist(data["sourceSpec"]):
-                specManager.DuplicateCustomizationSpec(name=data["sourceSpec"], newName=data["newSpec"])
+            specManager = CustomSpecManager(assetId)
+            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(data["sourceSpec"]):
+                specManager.oCustomSpecManager.DuplicateCustomizationSpec(name=data["sourceSpec"], newName=data["newSpec"])
             else:
                 return False
 
@@ -84,9 +88,10 @@ class CustomSpecManager(VmwareHandler):
     @staticmethod
     def deleteVMwareCustomSpec(assetId, specName, silent: bool = True) -> None:
         try:
-            specManager = CustomSpecManager.__getVMwareObject(assetId, silent)
-            if specManager.DoesCustomizationSpecExist(specName):
-                specManager.DeleteCustomizationSpec(specName)
+            specManager = CustomSpecManager(assetId)
+            Log.log(specManager, '_')
+            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
+                specManager.oCustomSpecManager.DeleteCustomizationSpec(specName)
 
         except Exception as e:
             raise e
@@ -96,9 +101,9 @@ class CustomSpecManager(VmwareHandler):
     @staticmethod
     def overwriteVMwareCustomSpec(assetId, specName, data:dict, silent: bool = True) -> None:
         try:
-            specManager = CustomSpecManager.__getVMwareObject(assetId, silent)
-            if specManager.DoesCustomizationSpecExist(specName):
-                specManager.OverwriteCustomizationSpec(specName)
+            specManager = CustomSpecManager(assetId)
+            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
+                specManager.oCustomSpecManager.OverwriteCustomizationSpec(specName)
 
         except Exception as e:
             raise e
@@ -108,25 +113,11 @@ class CustomSpecManager(VmwareHandler):
     # Full procedure: clone a spec and edit the new one.
     def editVMwareCustomSpec(assetId, specName, data: dict) -> None:
         try:
-            specManager = CustomSpecManager.__getVMwareObject(assetId)
-            if specManager.DoesCustomizationSpecExist(specName):
-                spec = specManager.GetCustomizationSpec(specName)
+            specManager = CustomSpecManager(assetId)
+            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
+                spec = specManager.oCustomSpecManager.GetCustomizationSpec(specName)
                 specEdited = CustomSpecManager.replaceSpecObjectAttr(spec, data)
-                specManager.OverwriteCustomizationSpec(specEdited)
-
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    def getCustomSpecObject(assetId, specName, silent: bool = True) -> object:
-        try:
-            specManager = CustomSpecManager.__getVMwareObject(assetId, silent)
-            if specManager.DoesCustomizationSpecExist(specName):
-                return specManager.GetCustomizationSpec(specName)
-            else:
-                return None
+                specManager.oCustomSpecManager.OverwriteCustomizationSpec(specEdited)
 
         except Exception as e:
             raise e
@@ -177,12 +168,13 @@ class CustomSpecManager(VmwareHandler):
 
     # PlainvVirtual machines customization specifications list.
     @staticmethod
-    def list(assetId, silent: bool = True) -> dict:
+    def list(assetId) -> dict:
         customSpecs = []
         try:
-            specObjList = CustomSpecManager.listCustomizationSpecObjects(assetId, silent)
-            for spec in specObjList:
-                customSpecs.append(spec.name)
+            specManager = CustomSpecManager(assetId)
+            specs = specManager.oCustomSpecs()
+            for s in specs:
+                customSpecs.append(s.name)
 
             return dict({
                 "items": customSpecs
@@ -192,30 +184,5 @@ class CustomSpecManager(VmwareHandler):
             raise e
 
 
-
-    # Virtual machines customization specifications objects list.
-    @staticmethod
-    def listCustomizationSpecObjects(assetId, silent: bool = True) -> list:
-        try:
-            specManager = CustomSpecManager.__getVMwareObject(assetId, silent)
-            return specManager.info
-
-        except Exception as e:
-            raise e
-
-
-
-    ####################################################################################################################
-    # Private static methods
-    ####################################################################################################################
-
-    @staticmethod
-    def __getVMwareObject(assetId, silent: bool = True) -> object:
-        try:
-            vClient = VmwareHandler.connectToAssetAndGetContentStatic(assetId, silent)
-            return vClient.oCluster.customizationSpecManager
-
-        except Exception as e:
-            raise e
 
 
