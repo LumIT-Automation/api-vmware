@@ -1,10 +1,9 @@
 from rest_framework import serializers
 
-class VMwareDatastoreSerializer(serializers.Serializer):
-    class VMwareDatastoreAttachedHostsSerializer(serializers.Serializer):
-        moId = serializers.CharField(max_length=64, required=True)
-        name = serializers.CharField(max_length=255, required=False)
+from vmware.serializers.VMware.HostSystem import VMwareHostSystemSerializer
 
+
+class VMwareDatastoreSerializer(serializers.Serializer):
     assetId = serializers.IntegerField(required=True)
     moId = serializers.CharField(max_length=255, required=False)
     name = serializers.CharField(max_length=255, required=False)
@@ -19,4 +18,4 @@ class VMwareDatastoreSerializer(serializers.Serializer):
     local = serializers.BooleanField(required=False, allow_null=True)
     multipleHostAccess = serializers.BooleanField(required=False)
 
-    attachedHosts = VMwareDatastoreAttachedHostsSerializer(many=True, required=False, allow_null=True)
+    attachedHosts = VMwareHostSystemSerializer(many=True, required=False, allow_null=True)

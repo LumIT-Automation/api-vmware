@@ -58,7 +58,7 @@ class Network(Backend):
                 self.loadConfiguredHostSystems()
                 for chost in self.configuredHosts:
                     hosts.append(
-                        chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+                        Network.__cleanup("info", chost.info(loadDatastores=False, specificNetworkMoId=self.moId))
                     )
 
             return {
@@ -103,6 +103,10 @@ class Network(Backend):
     @staticmethod
     def __cleanup(oType: str, o: dict):
         # Remove some related objects' information, if not loaded.
+        if oType == "info":
+            if not o["datastores"]:
+                del (o["datastores"])
+
         if oType == "list":
             if not o["configuredHosts"]:
                 del (o["configuredHosts"])
