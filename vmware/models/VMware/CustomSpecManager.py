@@ -21,7 +21,7 @@ class CustomSpecManager(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def getCustomSpecInfo(assetId, specName) -> dict:
+    def info(assetId, specName) -> dict:
         o = {
             "ip": "",
             "netMask": "",
@@ -72,13 +72,10 @@ class CustomSpecManager(Backend):
 
 
     @staticmethod
-    def cloneVMwareCustomSpec(assetId, data: dict, silent: bool = True) -> bool:
+    def clone(assetId, sourceSpec: str, newSpec: str) -> bool:
         try:
             specManager = CustomSpecManager(assetId)
-            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(data["sourceSpec"]):
-                specManager.oCustomSpecManager.DuplicateCustomizationSpec(name=data["sourceSpec"], newName=data["newSpec"])
-            else:
-                return False
+            specManager.cloneoCustomSpec(sourceSpec, newSpec)
 
         except Exception as e:
             raise e
@@ -86,32 +83,23 @@ class CustomSpecManager(Backend):
 
 
     @staticmethod
-    def deleteVMwareCustomSpec(assetId, specName) -> None:
+    def delete(assetId, specName) -> None:
         try:
             specManager = CustomSpecManager(assetId)
-            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
-                specManager.oCustomSpecManager.DeleteCustomizationSpec(specName)
+            specManager.deleteCustomSpec(specName)
 
         except Exception as e:
             raise e
 
 
 
+    # Edit a spec.
     @staticmethod
-    def overwriteVMwareCustomSpec(assetId, specName, data:dict, silent: bool = True) -> None:
+    def modify(assetId, specName: str, data: dict) -> None:
         try:
             specManager = CustomSpecManager(assetId)
-            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
-                specManager.oCustomSpecManager.OverwriteCustomizationSpec(specName)
+            specManager.editoCustomSpec(specName, data)
 
-        except Exception as e:
-            raise e
-
-
-
-    # Full procedure: clone a spec and edit the new one.
-    def editVMwareCustomSpec(assetId, specName, data: dict) -> None:
-        try:
             specManager = CustomSpecManager(assetId)
             if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
                 spec = specManager.oCustomSpecManager.GetCustomizationSpec(specName)
@@ -120,48 +108,6 @@ class CustomSpecManager(Backend):
 
         except Exception as e:
             raise e
-
-
-
-    # Edit attributes of a VMware customization specification.
-    @staticmethod
-    def replaceSpecObjectAttr(spec, data: dict):
-        if spec.info.type == "Linux":
-            if data["ip"]:
-                newIp = vim.vm.customization.FixedIp()
-                newIp.ipAddress = data["ip"]
-                spec.spec.nicSettingMap[0].adapter.ip = newIp
-
-            if data["netMask"]:
-                spec.spec.nicSettingMap[0].adapter.subnetMask = data["netMask"]
-
-            if data["gw"]:
-                spec.spec.nicSettingMap[0].adapter.gateway = data["gw"]
-
-            dns = []
-            if data["dns1"]:
-                dns.append(data["dns1"])
-
-            if data["dns2"]:
-                dns.append(data["dns2"])
-
-            if dns:
-                spec.spec.nicSettingMap[0].adapter.dnsServerList = dns
-                spec.spec.globalIPSettings.dnsServerList = dns
-
-            if data["hostName"]:
-                newComputerName = vim.vm.customization.FixedName()
-                newComputerName.name = data["hostName"]
-                spec.spec.identity.hostName = newComputerName
-
-            if data["domainName"]:
-                spec.spec.identity.domain = data["domainName"]
-                spec.spec.globalIPSettings.dnsSuffixList = [ data["domainName"] ]
-
-            if data["timeZone"]:
-                spec.spec.identity.timeZone = data["timeZone"]
-
-        return spec
 
 
 

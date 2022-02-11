@@ -30,7 +30,7 @@ class VMwareCustomSpecController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = CustomSpecManager.getCustomSpecInfo(assetId, specName)
+                    itemData["data"] = CustomSpecManager.info(assetId, specName)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
@@ -81,7 +81,7 @@ class VMwareCustomSpecController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    CustomSpecManager.deleteVMwareCustomSpec(assetId, specName)
+                    CustomSpecManager.delete(assetId, specName)
                     httpStatus = status.HTTP_200_OK
                     lock.release()
                 else:
@@ -116,7 +116,7 @@ class VMwareCustomSpecController(CustomController):
                     if lock.isUnlocked():
                         lock.lock()
 
-                        CustomSpecManager.editVMwareCustomSpec(assetId, specName, data)
+                        CustomSpecManager.modify(assetId, specName, data)
                         httpStatus = status.HTTP_200_OK
                         lock.release()
                     else:

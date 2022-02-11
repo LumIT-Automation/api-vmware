@@ -86,7 +86,7 @@ class VMwareCustomSpecsController(CustomController):
                     lock = Lock("custom_specs", locals(), data["data"]["sourceSpec"])
                     if lock.isUnlocked():
                         lock.lock()
-                        CustomSpecManager.cloneVMwareCustomSpec(assetId, serializer.validated_data["data"])
+                        CustomSpecManager.clone(assetId, serializer.validated_data["data"]["sourceSpec"], serializer.validated_data["data"]["newSpec"])
 
                         httpStatus = status.HTTP_201_CREATED
                         lock.release()
