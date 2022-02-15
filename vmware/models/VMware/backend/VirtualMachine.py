@@ -52,34 +52,24 @@ class VirtualMachine(VmwareHandler):
         try:
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualEthernetCard):
+                    net = dict({
+                        "label": dev.deviceInfo.label
+                    })
                     if hasattr(dev, 'backing'):
                         try:
                             if hasattr(dev.backing, 'network'): # standard port group.
-                                nets.append({
-                                    "label": dev.deviceInfo.label,
+                                net.update({
                                     "network": str(dev.backing.network).strip("'").split(':')[1]
                                 })
                             elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'): # distributed port group.
-                                nets.append({
-                                    "label": dev.deviceInfo.label,
+                                net.update({
                                     "network": str(dev.backing.port.portgroupKey).strip("'").split(':')[1]
                                 })
                         except Exception:
                             pass
+                    nets.append(net)
+
             return nets
-        except Exception as e:
-            raise e
-
-
-
-    def listVMNetworkCardLabels(self) -> list:
-        nics = list()
-
-        try:
-            for dev in self.oDevices():
-                if isinstance(dev, vim.vm.device.VirtualEthernetCard):
-                    nics.append(dev.deviceInfo.label)
-            return nics
         except Exception as e:
             raise e
 

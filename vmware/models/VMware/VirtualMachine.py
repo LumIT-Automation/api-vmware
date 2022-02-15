@@ -61,7 +61,7 @@ class VirtualMachine(Backend):
                         cloneSpec.config = vim.vm.ConfigSpec()
 
                         # Get the first network card and plug it in the wanted network.
-                        nicLabel = self.listVMNetworkCardLabels()[0]
+                        nicLabel = self.listVMNetworkInfo()[0]["label"]
                         nicDevice = self.getNetworkCard(nicLabel)
                         net = Network(self.assetId, data["networkId"])
                         nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
