@@ -10,5 +10,6 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
         networkId = serializers.CharField(max_length=64, required=True)
         vmFolderId = serializers.CharField(max_length=64, required=True)
         powerOn = serializers.BooleanField(required=False)
+        guestSpec = serializers.CharField(max_length=255, required=False)
 
     data = VMwareDeployTemplateInnerSerializer(required=True)

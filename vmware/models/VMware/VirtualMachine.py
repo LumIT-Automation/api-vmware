@@ -39,6 +39,7 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.Cluster import Cluster
         from vmware.models.VMware.Datastore import Datastore
         from vmware.models.VMware.VMFolder import VMFolder
+        from vmware.models.VMware.CustomSpecManager import CustomSpecManager
         try:
             # Perform some preliminary checks.
             if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
@@ -60,13 +61,18 @@ class VirtualMachine(Backend):
                         cloneSpec.powerOn = data["powerOn"]
                         cloneSpec.config = vim.vm.ConfigSpec()
 
-                        # Get the first network card.
+                        # Get the first network card and plug it in the wanted network.
                         nicLabel = self.listVMNetworkCardLabels()[0]
                         nicDevice = self.getNetworkCard(nicLabel)
                         net = Network(self.assetId, data["networkId"])
-
                         nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
                         cloneSpec.config.deviceChange = [nicSpec]
+
+                        # Apply the guest OS customization specifications.
+                        if "guestSpec" in data and data["guestSpec"]:
+                            customSpecManager = CustomSpecManager(self.assetId)
+                            customSpec = customSpecManager.oCustomSpec(data["guestSpec"])
+                            cloneSpec.customization = customSpec.spec
 
                         # Deploy
                         task = self.oVirtualMachine.Clone(folder=vmFolder.oVMFolder, name=data["vmName"], spec=cloneSpec)
