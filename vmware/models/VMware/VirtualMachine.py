@@ -57,7 +57,6 @@ class VirtualMachine(Backend):
 
                         # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
                         cloneSpec = vim.vm.CloneSpec()
-                        cloneSpec.location = relocateSpec
                         cloneSpec.powerOn = data["powerOn"]
                         cloneSpec.config = vim.vm.ConfigSpec()
 
@@ -66,7 +65,9 @@ class VirtualMachine(Backend):
                         nicDevice = self.getNetworkCard(nicLabel)
                         net = Network(self.assetId, data["networkId"])
                         nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
-                        cloneSpec.config.deviceChange = [nicSpec]
+                        relocateSpec.deviceChange = [nicSpec]
+
+                        cloneSpec.location = relocateSpec
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
