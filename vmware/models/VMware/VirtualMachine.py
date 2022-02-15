@@ -60,29 +60,14 @@ class VirtualMachine(Backend):
                         cloneSpec.powerOn = data["powerOn"]
                         cloneSpec.config = vim.vm.ConfigSpec()
 
-                        # Get network card
-                        nicNum = 1
-                        nicLabel = 'Network adapter ' + str(nicNum)
-                        nicDevice = None
-                        for dev in self.oVirtualMachine.config.hardware.device:
-                            if isinstance(dev, vim.vm.device.VirtualEthernetCard) and dev.deviceInfo.label == nicLabel:
-                                nicDevice = dev
-                        if not nicDevice:
-                            raise CustomException(status=400, payload={"VMware": "Can't find the network card."})
-
+                        # Get the first network card.
+                        nicLabel = self.listVMNetworkCardLabels()[0]
+                        nicDevice = self.getNetworkCard(nicLabel)
                         net = Network(self.assetId, data["networkId"])
-                        nicSpec = vim.vm.device.VirtualDeviceSpec()
-                        nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
-                        nicSpec.device = nicDevice
-                        nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
-                        nicSpec.device.connectable.startConnected = True
-                        nicSpec.device.connectable.allowGuestControl = True
-                        nicSpec.device.connectable.connected = False
-                        nicSpec.device.deviceInfo.summary = net.name
-                        nicSpec.device.backing.deviceName = net.name
-                        nicSpec.device.backing.network = net.oNetwork
+
+                        nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
                         cloneSpec.config.deviceChange = [nicSpec]
-                        Log.log(cloneSpec, '_')
+
                         # Deploy
                         task = self.oVirtualMachine.Clone(folder=vmFolder.oVMFolder, name=data["vmName"], spec=cloneSpec)
                         taskId = task._GetMoId()

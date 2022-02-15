@@ -15,12 +15,11 @@ class Network(Backend):
 
         self.assetId = int(assetId)
         self.moId = moId
+        self.name = name
         self.vlanId = vlanId
         self.type: str
-        if name:
-            self.name = name
-        else:
-            self.name = self.oNetwork.name
+
+
 
         self.configuredHosts: List[HostSystem] = []
 

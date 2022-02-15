@@ -72,6 +72,58 @@ class VirtualMachine(VmwareHandler):
 
 
 
+    def listVMNetworkCardLabels(self) -> list:
+        nics = list()
+
+        try:
+            for dev in self.oDevices():
+                if isinstance(dev, vim.vm.device.VirtualEthernetCard):
+                    nics.append(dev.deviceInfo.label)
+            return nics
+        except Exception as e:
+            raise e
+
+
+
+    def getNetworkCard(self, nicLabel):
+        try:
+            for dev in self.oVirtualMachine.config.hardware.device:
+                if isinstance(dev, vim.vm.device.VirtualEthernetCard) and dev.deviceInfo.label == nicLabel:
+                    return dev
+            raise CustomException(status=400, payload={"VMware": "Can't find the network card "+str(nicLabel)+"."})
+        except Exception as e:
+            raise e
+
+
+
+    def buildNicSpec(self, nicDevice: object, oNetwork: object, operation: str = 'edit'):
+        try:
+            nicSpec = vim.vm.device.VirtualDeviceSpec()
+            nicSpec.device = nicDevice
+            nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+            nicSpec.device.connectable.startConnected = True
+            nicSpec.device.connectable.allowGuestControl = True
+            nicSpec.device.connectable.connected = False
+
+            if operation == 'edit':
+                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
+            elif operation == 'add':
+                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+            elif operation == 'remove':
+                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
+            else:
+                raise CustomException(status=400, payload={"VMware": "buildNicSpec: not an operation."})
+
+            nicSpec.device.deviceInfo.summary = oNetwork.name
+            nicSpec.device.backing.deviceName = oNetwork.name
+            nicSpec.device.backing.network = oNetwork
+
+            return nicSpec
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
