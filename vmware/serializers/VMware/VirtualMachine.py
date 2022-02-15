@@ -24,3 +24,15 @@ class VMwareVirtualMachineSerializer(serializers.Serializer):
 
     networkDevices = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
     diskDevices = VMwareVirtualMachineDisksSerializer(many=True, required=False, allow_null=True)
+
+
+
+class VMwareVirtualMachineModifySerializer(serializers.Serializer):
+    class VMwareVirtualMachineModifyInnerSerializer(serializers.Serializer):
+        diskLabel = serializers.CharField(max_length=63, required=False)
+        diskSizeMB = serializers.IntegerField(required=False)
+        numCpu = serializers.IntegerField(required=False)
+        numCoresPerSocket = serializers.IntegerField(required=False)
+        memoryMB = serializers.IntegerField(required=False)
+
+    data = VMwareVirtualMachineModifyInnerSerializer(required=True)

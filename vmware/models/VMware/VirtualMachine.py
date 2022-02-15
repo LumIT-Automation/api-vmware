@@ -44,7 +44,7 @@ class VirtualMachine(Backend):
             # Perform some preliminary checks.
             if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
                 if self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
-                    if self.__isNetworkValid(data["clusterId"], data["networkId"]):
+                    if "networkId" not in data or self.__isNetworkValid(data["clusterId"], data["networkId"]): # Allow to deploy a VM without touch the network card.
 
                         cluster = Cluster(self.assetId, data["clusterId"])
                         datastore = Datastore(self.assetId, data["datastoreId"])
@@ -61,11 +61,12 @@ class VirtualMachine(Backend):
                         cloneSpec.config = vim.vm.ConfigSpec()
 
                         # Get the first network card and plug it in the wanted network.
-                        nicLabel = self.listVMNetworkInfo()[0]["label"]
-                        nicDevice = self.getNetworkCard(nicLabel)
-                        net = Network(self.assetId, data["networkId"])
-                        nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
-                        relocateSpec.deviceChange = [nicSpec]
+                        if "networkId" in data and data["networkId"]:
+                            nicLabel = self.listVMNetworkInfo()[0]["label"]
+                            nicDevice = self.getVMNic(nicLabel)
+                            net = Network(self.assetId, data["networkId"])
+                            nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
+                            relocateSpec.deviceChange.append(nicSpec)
 
                         cloneSpec.location = relocateSpec
 
@@ -87,8 +88,42 @@ class VirtualMachine(Backend):
 
 
 
-    def clone(self, data: dict): # alias.
-        self.deploy(data)
+    def clone(self, data: dict) -> dict: # alias.
+        return self.deploy(data)
+
+
+
+    def modify(self, data: dict) -> dict:
+        diskDevice = None
+        diskSpec = None
+        modifySpec = vim.vm.ConfigSpec()
+        try:
+            if "numCpu" in data and data["numCpu"]:
+                modifySpec.numCPUs = data["numCpu"]
+            if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
+                modifySpec.numCoresPerSocket = data["numCoresPerSocket"]
+            if  "memoryMB" in data and data["memoryMB"]:
+                modifySpec.memoryMB = data["memoryMB"]
+
+            if "diskLabel" in data and data["diskLabel"]:
+                diskDevice = self.getVMDisk(data["diskLabel"])
+            else:
+                # Get the first virtual disk.
+                diskLabel = self.listVMDiskInfo()[0]["label"]
+                diskDevice = self.getVMDisk(diskLabel)
+            if diskDevice and "diskSizeMB" in data and data["diskSizeMB"]:
+                diskSpec = self.buildDiskSpec(diskDevice, data["diskSizeMB"])
+
+            if diskSpec:
+                modifySpec.deviceChange.append(diskSpec)
+                task = self.oVirtualMachine.ReconfigVM_Task(spec=modifySpec)
+                taskId = task._GetMoId()
+                return dict({
+                    "task": taskId
+                })
+
+        except Exception as e:
+            raise e
 
 
 

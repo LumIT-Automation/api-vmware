@@ -78,7 +78,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="template_post") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="template_post", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Deploy new virtual machines from template", user)
                 Log.actionLog("User data: " + str(request.data), user)
 
@@ -115,3 +115,6 @@ class VMwareVirtualMachineTemplateController(CustomController):
         return Response(response, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
+
+
+
