@@ -12,7 +12,6 @@ class Task(VmwareHandler):
         self.assetId = int(assetId)
         self.moId = moId
         self.oTask = self.__oTaskLoad()
-        Log.log(self.oTask.info, '_')
 
 
 
@@ -47,7 +46,6 @@ class Task(VmwareHandler):
         try:
             taskManager = self.getSubContent('taskManager')
             for task in taskManager.recentTask:
-                Log.log(task, '_')
                 if task.info.key == self.moId:
                     return task
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})

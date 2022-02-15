@@ -36,37 +36,34 @@ class VirtualMachine(Backend):
 
     def deploy(self, data: dict) -> dict:
         #from vmware.models.VMware.Network import Network
-        #from vmware.models.VMware.Cluster import Cluster
-        #from vmware.models.VMware.VMFolder import VMFolder
+        from vmware.models.VMware.Cluster import Cluster
+        from vmware.models.VMware.Datastore import Datastore
+        from vmware.models.VMware.VMFolder import VMFolder
         try:
             # Perform some preliminary checks.
             if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
                 if self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
                     if self.__isNetworkValid(data["clusterId"], data["networkId"]):
 
-                        raise Exception
-                        # @todo.
-
+                        cluster = Cluster(self.assetId, data["clusterId"])
+                        datastore = Datastore(self.assetId, data["datastoreId"])
                         vmFolder = VMFolder(self.assetId, data["vmFolderId"])
-                        vmFolder.getVMwareObject()
-                        vmFolderObj = vmFolder.oCluster
 
                         # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
                         relocateSpec = vim.vm.RelocateSpec()
-                        relocateSpec.datastore = datastoreObj
-                        relocateSpec.pool = clusterObj.resourcePool # The resource pool associated to this cluster.
+                        relocateSpec.datastore = datastore.oDatastore
+                        relocateSpec.pool = cluster.oCluster.resourcePool # The resource pool associated to this cluster.
 
                         # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
                         cloneSpec = vim.vm.CloneSpec()
                         cloneSpec.location = relocateSpec
                         cloneSpec.powerOn = data["powerOn"]
 
-                        self.getVMwareObject()
                         # Deploy
-                        task = self.oVirtualMachine.Clone(folder=vmFolderObj, name=data["vmName"], spec=cloneSpec)
-
+                        task = self.oVirtualMachine.Clone(folder=vmFolder.oVMFolder, name=data["vmName"], spec=cloneSpec)
+                        taskId = task._GetMoId()
                         return dict({
-                            "task": task._GetMoId()
+                            "task": taskId
                         })
 
         except Exception as e:
