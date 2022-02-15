@@ -79,7 +79,7 @@ class VMwareTaskController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="task_delete", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Cancel task", user)
 
-                lock = Lock("task_delete", locals(), moId)
+                lock = Lock("task", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -92,10 +92,58 @@ class VMwareTaskController(CustomController):
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("task_delete", locals(), locals()["moId"]).release()
+            Lock("task", locals(), locals()["moId"]).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
         return Response(None, status=httpStatus, headers={
+            "Cache-Control": "no-cache"
+        })
+
+
+
+    @staticmethod
+    def patch(request: Request, assetId: int, moId: str) -> Response:
+        response = None
+        user = CustomController.loggedUser(request)
+
+        try:
+            if Permission.hasUserPermission(groups=user["groups"], action="task_patch", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("Virtual machine customization specification edit", user)
+                Log.actionLog("User data: "+str(request.data), user)
+
+
+                #serializer = Serializer(data=request.data, partial=True)
+                #if serializer.is_valid():
+                if True:
+                    #data = serializer.validated_data["data"]
+                    data = request.data
+                    lock = Lock("task", locals(), moId)
+                    if lock.isUnlocked():
+                        lock.lock()
+
+                        t = Task(assetId, moId)
+                        Log.log(data["data"], '_')
+                        t. setDescription(data["data"]["message"])
+                        httpStatus = status.HTTP_200_OK
+                        lock.release()
+                    else:
+                        httpStatus = status.HTTP_423_LOCKED
+                else:
+                    httpStatus = status.HTTP_400_BAD_REQUEST
+                    response = {
+                        "VMware": {
+                            "error": str(serializer.errors)
+                        }
+                    }
+                    Log.actionLog("User data incorrect: "+str(response), user)
+            else:
+                httpStatus = status.HTTP_403_FORBIDDEN
+        except Exception as e:
+            Lock("task", locals(), locals()["moId"]).release()
+            data, httpStatus, headers = CustomController.exceptionHandler(e)
+            return Response(data, status=httpStatus, headers=headers)
+
+        return Response(response, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })

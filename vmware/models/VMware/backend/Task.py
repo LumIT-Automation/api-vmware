@@ -1,4 +1,4 @@
-from pyVmomi import vim
+from pyVmomi import vim, vmodl
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
@@ -12,6 +12,7 @@ class Task(VmwareHandler):
         self.assetId = int(assetId)
         self.moId = moId
         self.oTask = self.__oTaskLoad()
+        Log.log(self.oTask.info, '_')
 
 
 
@@ -29,7 +30,9 @@ class Task(VmwareHandler):
 
     def oSetDescription(self, description: str = "") -> None:
         try:
-            self.oTask.SetTaskDescription(description)
+            oldDesc = self.oTask.info.description
+            newDesc = vmodl.LocalizableMessage(key=oldDesc.key+'-concerto', message=description + oldDesc.message)
+            self.oTask.SetTaskDescription(newDesc)
 
         except Exception as e:
             raise e
@@ -44,6 +47,7 @@ class Task(VmwareHandler):
         try:
             taskManager = self.getSubContent('taskManager')
             for task in taskManager.recentTask:
+                Log.log(task, '_')
                 if task.info.key == self.moId:
                     return task
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})
