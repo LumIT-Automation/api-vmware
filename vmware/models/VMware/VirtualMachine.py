@@ -102,8 +102,10 @@ class VirtualMachine(Backend):
                 modifySpec.numCPUs = data["numCpu"]
             if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
                 modifySpec.numCoresPerSocket = data["numCoresPerSocket"]
-            if  "memoryMB" in data and data["memoryMB"]:
+            if "memoryMB" in data and data["memoryMB"]:
                 modifySpec.memoryMB = data["memoryMB"]
+            if "notes" in data and data["notes"]:
+                modifySpec.annotation = data["notes"]
 
             if "diskLabel" in data and data["diskLabel"]:
                 diskDevice = self.getVMDisk(data["diskLabel"])
@@ -182,6 +184,7 @@ class VirtualMachine(Backend):
                 "numCoresPerSocket": config.hardware.numCoresPerSocket,
                 "memoryMB": config.hardware.memoryMB,
                 "template": config.template,
+                "notes": config.annotation,
 
                 "networkDevices": vmNets,
                 "diskDevices": vmDisks

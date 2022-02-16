@@ -21,6 +21,7 @@ class VMwareVirtualMachineSerializer(serializers.Serializer):
     numCoresPerSocket = serializers.IntegerField(required=False)
     memoryMB = serializers.IntegerField(required=True)
     template = serializers.BooleanField(required=False)
+    notes = serializers.CharField(max_length=2048, required=False)
 
     networkDevices = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
     diskDevices = VMwareVirtualMachineDisksSerializer(many=True, required=False, allow_null=True)
@@ -34,5 +35,6 @@ class VMwareVirtualMachineModifySerializer(serializers.Serializer):
         numCpu = serializers.IntegerField(required=False)
         numCoresPerSocket = serializers.IntegerField(required=False)
         memoryMB = serializers.IntegerField(required=False)
+        notes = serializers.CharField(max_length=2048, required=False)
 
     data = VMwareVirtualMachineModifyInnerSerializer(required=True)
