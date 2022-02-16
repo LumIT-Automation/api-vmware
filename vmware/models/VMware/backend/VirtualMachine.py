@@ -52,8 +52,10 @@ class VirtualMachine(VmwareHandler):
         try:
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualEthernetCard):
+                    Log.log(dev, '_')
                     net = dict({
-                        "label": dev.deviceInfo.label
+                        "label": dev.deviceInfo.label,
+                        "deviceType": VirtualMachine.getEthernetDeviceType(dev)
                     })
                     if hasattr(dev, 'backing'):
                         try:
@@ -63,15 +65,18 @@ class VirtualMachine(VmwareHandler):
                                 })
                             elif hasattr(dev.backing, 'port') and hasattr(dev.backing.port, 'portgroupKey'): # distributed port group.
                                 net.update({
-                                    "network": str(dev.backing.port.portgroupKey).strip("'").split(':')[1]
+                                    "network": str(dev.backing.port.portgroupKey)
                                 })
                         except Exception:
                             pass
+
                     nets.append(net)
 
             return nets
         except Exception as e:
             raise e
+
+
 
 
 
@@ -147,6 +152,53 @@ class VirtualMachine(VmwareHandler):
 
 
 
+    def buildNetworkSpec(self, networkDevicesData):
+        from vmware.models.VMware.Network import Network
+        specsList = list()
+        devNum = 0 # Counter for the current (pre-deploy) network devices in the virtual machine template.
+
+        """
+        networkDevicesData example: [
+            {
+                "networkMoId": "network-1213",
+                "label": "Network adapter 1",
+                "deviceType": "vmxnet3"
+            }
+        ],
+        """
+        for devData in networkDevicesData:
+            dev = None
+            operations = list()
+            netMoId = ''
+            # Find the right device, or create a new one.
+            if "label" in devData and devData["label"]:
+                dev = self.getVMNic(devData["label"]) # This one raise for devic not found.
+            else:
+                # If a network label was not passed, get the first network device of the template and increment the counter.
+                nicLabel = self.listVMNetworkInfo()[devNum]["label"]
+                dev = self.getVMNic(nicLabel)
+                devNum += 1
+
+            if "networkMoId" in devData and devData["networkMoId"]:
+                netMoId = devData["networkMoId"]
+
+            # It's not possible to change the network device type. If it's not of the right type, remove and re-add it.
+            if "deviceType" in devData and devData["deviceType"]:
+                if devData["deviceType"] != VirtualMachine.getEthernetDeviceType(dev):
+                    operations.append('remove')
+                    operations.append('add')
+                else:
+                    operations.append('edit')
+
+            if operations:
+                for op in operations:
+                    specsList.append( self.buildNicSpec(dev, Network(self.assetId, netMoId).oNetwork, op) )
+
+        Log.log(specsList, '_')
+        return specsList
+
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
@@ -157,6 +209,29 @@ class VirtualMachine(VmwareHandler):
             return VmwareHandler(assetId).getObjects(vimType=vim.VirtualMachine)
         except Exception as e:
             raise e
+
+
+
+    @staticmethod
+    def getEthernetDeviceType(dev):
+        if isinstance(dev, vim.vm.device.VirtualVmxnet3Vrdma):
+            return 'vmrma'
+        elif isinstance(dev, vim.vm.device.VirtualVmxnet3):
+            return 'vmxnet3'
+        elif isinstance(dev, vim.vm.device.VirtualE1000e):
+            return 'e1000e'
+        elif isinstance(dev, vim.vm.device.VirtualSriovEthernetCard):
+            return 'sr-iov'
+        elif isinstance(dev, vim.vm.device.VirtualE1000):
+            return 'e1000'
+        elif isinstance(dev, vim.vm.device.VirtualVmxnet2):
+            return 'vmxnet2'
+        elif isinstance(dev, vim.vm.device.VirtualVmxnet):
+            return 'vmxnet'
+        elif isinstance(dev, vim.vm.device.VirtualPCNet32):
+            return 'pcnet32'
+        else:
+            return None
 
 
 

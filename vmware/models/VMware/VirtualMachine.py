@@ -61,12 +61,15 @@ class VirtualMachine(Backend):
                         cloneSpec.config = vim.vm.ConfigSpec()
 
                         # Get the first network card and plug it in the wanted network.
-                        if "networkId" in data and data["networkId"]:
-                            nicLabel = self.listVMNetworkInfo()[0]["label"]
-                            nicDevice = self.getVMNic(nicLabel)
-                            net = Network(self.assetId, data["networkId"])
-                            nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
-                            relocateSpec.deviceChange.append(nicSpec)
+                        if "networkDevices" in data and data["networkDevices"]:
+                            nicsSpec = self.buildNetworkSpec(data["networkDevices"])
+                            relocateSpec.deviceChange = nicsSpec
+                        #if "networkId" in data and data["networkId"]:
+                        #    nicLabel = self.listVMNetworkInfo()[0]["label"]
+                        #    nicDevice = self.getVMNic(nicLabel)
+                        #    net = Network(self.assetId, data["networkId"])
+                        #    nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
+                        #    relocateSpec.deviceChange.append(nicSpec)
 
                         cloneSpec.location = relocateSpec
 
@@ -144,7 +147,7 @@ class VirtualMachine(Backend):
         try:
             for l in self.listVMNetworkInfo():
                 self.networkDevices.append(
-                    VirtualMachineNetwork(self.assetId, l["network"], l["label"])
+                    VirtualMachineNetwork(self.assetId, l["network"], l["label"], l["deviceType"])
                 )
         except Exception as e:
             raise e

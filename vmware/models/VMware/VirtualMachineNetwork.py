@@ -4,12 +4,13 @@ from vmware.models.VMware.Network import Network
 class VirtualMachineNetwork:
     # Virtual machine network adapter / attached network.
 
-    def __init__(self, assetId: int, networkMoId: str, adapterLabel: str, *args, **kwargs):
+    def __init__(self, assetId: int, networkMoId: str, adapterLabel: str, deviceType: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId = assetId
         self.network: Network = Network(assetId, networkMoId)
         self.adapter = adapterLabel
+        self.deviceType = deviceType
 
 
 
@@ -21,7 +22,8 @@ class VirtualMachineNetwork:
         try:
             return {
                 "networkMoId": self.network.moId,
-                "label": self.adapter
+                "label": self.adapter,
+                "deviceType": self.deviceType
             }
         except Exception as e:
             raise e
