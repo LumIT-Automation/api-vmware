@@ -65,14 +65,6 @@ class VirtualMachine(Backend):
                         if "networkDevices" in data and data["networkDevices"]:
                             nicsSpec = self.buildNetworkSpec(data["networkDevices"])
                             cloneSpec.config.deviceChange = nicsSpec
-                        #if "networkId" in data and data["networkId"]:
-                        #    nicLabel = self.listVMNetworkInfo()[0]["label"]
-                        #    nicDevice = self.getVMNic(nicLabel)
-                        #    net = Network(self.assetId, data["networkId"])
-                        #    nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
-                        #    relocateSpec.deviceChange.append(nicSpec)
-
-
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
@@ -80,7 +72,6 @@ class VirtualMachine(Backend):
                             customSpec = customSpecManager.oCustomSpec(data["guestSpec"])
                             cloneSpec.customization = customSpec.spec
 
-                        Log.log(cloneSpec, '_')
                         # Deploy
                         task = self.oVirtualMachine.Clone(folder=vmFolder.oVMFolder, name=data["vmName"], spec=cloneSpec)
                         taskId = task._GetMoId()
