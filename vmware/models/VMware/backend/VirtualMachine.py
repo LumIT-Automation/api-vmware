@@ -140,14 +140,16 @@ class VirtualMachine(VmwareHandler):
                     nicSpec.device.connectable.allowGuestControl = True
                     nicSpec.device.connectable.connected = False
                 nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
+                nicSpec.device.deviceInfo.label = data["deviceLabel"]
                 nicSpec.device.backing.deviceName = data["network"].oNetwork.name
                 nicSpec.device.backing.network = data["network"].oNetwork
             elif data["operation"] == 'add':
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
-                nicSpec.device = vim.vm.device.VirtualE1000e()
+                nicSpec.device = VirtualMachine.getEthernetDeviceInstance(data["deviceType"])
                 nicSpec.device.key = 4113
                 nicSpec.device.deviceInfo = vim.Description()
                 nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
+                nicSpec.device.deviceInfo.label = data["deviceLabel"]
                 nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
                 nicSpec.device.connectable.startConnected = True
                 nicSpec.device.connectable.allowGuestControl = True
@@ -219,9 +221,10 @@ class VirtualMachine(VmwareHandler):
                             tDevsInfo.remove(nicInfo)
                             networkDevicesData.remove(devData)
                             break
-                    if not allDevsSpecsData[-1]["deviceLabel"] == devData["label"]:
-                        # A passed network card must have a match. Otherwise, leave blank the label in networkDevicesData.
-                        raise CustomException(status=400, payload={"VMware": "buildNetworkSpec: Can't find the network card: \""+str(nicLabel)+"\"."})
+                    # A passed (label) network card must have a match. If not, raise an exception.
+                    # To ask for new nic leave blank the label field in networkDevicesData
+                    if not allDevsSpecsData or allDevsSpecsData[-1]["deviceLabel"] != devData["label"]:
+                        raise CustomException(status=400, payload={"VMware": "buildNetworkSpec: Can't find the network card: \""+str(devData["label"])+"\"."})
 
             # Check the length of the lists.
             # If len(devData) == len(tDevsInfo) -> all nics matches, go forward.
@@ -242,7 +245,6 @@ class VirtualMachine(VmwareHandler):
                             "network": Network(self.assetId, devData["networkMoId"])
                         })
                         tDevsInfo.remove(nicInfo)
-                        networkDevicesData.remove(devData)
                     # Otherwise a new nic will be added.
                     else:
                         allDevsSpecsData.append({
@@ -252,7 +254,6 @@ class VirtualMachine(VmwareHandler):
                             "deviceType": devData["deviceType"],
                             "network": Network(self.assetId, devData["networkMoId"])
                         })
-                        networkDevicesData.remove(devData)
             # If there are still some unassigned network cards in the template but the passed nics are all assigned,
             # this mean that the remaining nics should be removed from the template.
             else:
@@ -266,9 +267,8 @@ class VirtualMachine(VmwareHandler):
 
             # Build all the specs cycling through the allDevsSpecsData list.
             for data in allDevsSpecsData:
-                specsList.append( self.buildNicSpec(data) )
+                specsList.append(self.buildNicSpec(data))
 
-            Log.log(specsList, 'SSSSSSSSSSSSSSSSSSSSSSSSSSs')
             return specsList
         except Exception as e:
             raise e

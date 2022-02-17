@@ -61,8 +61,8 @@ class VirtualMachine(Backend):
                         cloneSpec.powerOn = data["powerOn"]
                         cloneSpec.config = vim.vm.ConfigSpec()
 
-                        # Get the first network card and plug it in the wanted network.
-                        if "networkDevices" in data and data["networkDevices"]:
+                        # Network cards.
+                        if "networkDevices" in data:
                             nicsSpec = self.buildNetworkSpec(data["networkDevices"])
                             cloneSpec.config.deviceChange = nicsSpec
 
@@ -114,11 +114,19 @@ class VirtualMachine(Backend):
 
             if diskSpec:
                 modifySpec.deviceChange.append(diskSpec)
-                task = self.oVirtualMachine.ReconfigVM_Task(spec=modifySpec)
-                taskId = task._GetMoId()
-                return dict({
-                    "task": taskId
-                })
+
+            # Network cards.
+            Log.log(data, '_')
+            if "networkDevices" in data:
+                nicsSpec = self.buildNetworkSpec(data["networkDevices"])
+                Log.log(nicsSpec, '_')
+                modifySpec.deviceChange = nicsSpec
+
+            task = self.oVirtualMachine.ReconfigVM_Task(spec=modifySpec)
+            taskId = task._GetMoId()
+            return dict({
+                "task": taskId
+            })
 
         except Exception as e:
             raise e

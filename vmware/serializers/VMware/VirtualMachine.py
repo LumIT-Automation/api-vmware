@@ -10,7 +10,7 @@ class VMwareVirtualMachineSerializer(serializers.Serializer):
     class VMwareVirtualMachineNetworkDevicesSerializer(serializers.Serializer):
         networkMoId = serializers.CharField(max_length=255, required=False)
         label = serializers.CharField(max_length=255, required=True)
-        deviceType = serializers.CharField(max_length=64, required=False, allow_blank=True)
+        deviceType = serializers.CharField(max_length=64, required=True)
 
     assetId = serializers.IntegerField(required=True)
     moId = serializers.CharField(max_length=255, required=False)
@@ -31,11 +31,17 @@ class VMwareVirtualMachineSerializer(serializers.Serializer):
 
 class VMwareVirtualMachineModifySerializer(serializers.Serializer):
     class VMwareVirtualMachineModifyInnerSerializer(serializers.Serializer):
+        class VMwareVirtualMachineNetworkDevicesSerializer(serializers.Serializer):
+            networkMoId = serializers.CharField(max_length=255, required=False)
+            label = serializers.CharField(max_length=255, required=False, allow_blank=True)
+            deviceType = serializers.CharField(max_length=64, required=False, allow_blank=True)
+
         diskLabel = serializers.CharField(max_length=63, required=False)
         diskSizeMB = serializers.IntegerField(required=False)
         numCpu = serializers.IntegerField(required=False)
         numCoresPerSocket = serializers.IntegerField(required=False)
         memoryMB = serializers.IntegerField(required=False)
         notes = serializers.CharField(max_length=2048, required=False, allow_blank=True)
+        networkDevices = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
 
     data = VMwareVirtualMachineModifyInnerSerializer(required=True)
