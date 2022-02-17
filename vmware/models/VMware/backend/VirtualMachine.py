@@ -52,7 +52,6 @@ class VirtualMachine(VmwareHandler):
         try:
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualEthernetCard):
-                    Log.log(dev, '_')
                     net = dict({
                         "label": dev.deviceInfo.label,
                         "deviceType": VirtualMachine.getEthernetDeviceType(dev)
@@ -96,7 +95,7 @@ class VirtualMachine(VmwareHandler):
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualEthernetCard) and dev.deviceInfo.label == nicLabel:
                     return dev
-            raise CustomException(status=400, payload={"VMware": "Can't find the network card "+str(nicLabel)+"."})
+            raise CustomException(status=400, payload={"VMware": "Can't find the network card: \""+str(nicLabel)+"\"."})
         except Exception as e:
             raise e
 
@@ -124,27 +123,39 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildNicSpec(self, nicDevice: object, oNetwork: object, operation: str = 'edit'):
+    def buildNicSpec(self, data: dict) -> object:
         try:
             nicSpec = vim.vm.device.VirtualDeviceSpec()
-            nicSpec.device = nicDevice
-            nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
-            nicSpec.device.connectable.startConnected = True
-            nicSpec.device.connectable.allowGuestControl = True
-            nicSpec.device.connectable.connected = False
 
-            if operation == 'edit':
+            if data["operation"] == "edit":
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
-            elif operation == 'add':
+                nicSpec.device = data["device"]
+                nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+                nicSpec.device.connectable.startConnected = True
+                nicSpec.device.connectable.allowGuestControl = True
+                nicSpec.device.connectable.connected = False
+                nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
+                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
+                nicSpec.device.backing.network = data["network"].oNetwork
+            elif data["operation"] == 'add':
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
-            elif operation == 'remove':
+                nicSpec.device = vim.vm.device.VirtualE1000e()
+                nicSpec.device.key = 4113
+                nicSpec.device.deviceInfo = vim.Description()
+                nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
+                nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+                nicSpec.device.connectable.startConnected = True
+                nicSpec.device.connectable.allowGuestControl = True
+                nicSpec.device.connectable.connected = False
+                if not nicSpec.device.backing:
+                    nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
+                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
+                nicSpec.device.backing.network = data["network"].oNetwork
+            elif data["operation"] == 'remove':
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
+                nicSpec.device = data["device"]
             else:
                 raise CustomException(status=400, payload={"VMware": "buildNicSpec: not an operation."})
-
-            nicSpec.device.deviceInfo.summary = oNetwork.name
-            nicSpec.device.backing.deviceName = oNetwork.name
-            nicSpec.device.backing.network = oNetwork
 
             return nicSpec
         except Exception as e:
@@ -152,13 +163,15 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildNetworkSpec(self, networkDevicesData):
+    def buildNetworkSpec(self, networkDevicesData: list) -> list:
         from vmware.models.VMware.Network import Network
         specsList = list()
-        devNum = 0 # Counter for the current (pre-deploy) network devices in the virtual machine template.
+        tDevsInfo = self.listVMNetworkInfo() # The network info of the template.
+        allDevsSpecsData = list() # The data/devices needed to build the nic specs.
 
         """
-        networkDevicesData example: [
+        networkDevicesData (passed via POST) example: 
+        [
             {
                 "networkMoId": "network-1213",
                 "label": "Network adapter 1",
@@ -166,36 +179,73 @@ class VirtualMachine(VmwareHandler):
             }
         ],
         """
-        for devData in networkDevicesData:
-            dev = None
-            operations = list()
-            netMoId = ''
-            # Find the right device, or create a new one.
-            if "label" in devData and devData["label"]:
-                dev = self.getVMNic(devData["label"]) # This one raise for devic not found.
+
+        try:
+            for devData in networkDevicesData:
+                # Find the right device, or get the first one found.
+                if "label" in devData and devData["label"]:
+                    for nicInfo in tDevsInfo:
+                        if nicInfo["label"] == devData["label"]:
+                            allDevsSpecsData.append({
+                                "operation":  "edit",
+                                "device": self.getVMNic(nicInfo["label"]),
+                                "deviceType": devData["deviceType"],
+                                "network": Network(self.assetId, devData["networkMoId"])
+                            })
+                            # If there is a match, subtract the element from both the lists.
+                            tDevsInfo.remove(nicInfo)
+                            networkDevicesData.remove(devData)
+                            break
+                    if not allDevsSpecsData[-1]["device"].deviceInfo.label == devData["label"]:
+                        # A passed network card must have a match. Otherwise, leave blank the label in networkDevicesData.
+                        raise CustomException(status=400, payload={"VMware": "buildNetworkSpec: Can't find the network card: \""+str(nicLabel)+"\"."})
+
+            # Check the length of the lists.
+            # If len(devData) == len(tDevsInfo) -> all nics matches, go forward.
+            # If len(devData) > len(tDevsInfo) -> some cards are missing in the template. Add them.
+            # if len(devData) < len(tDevsInfo) -> some card in the template are not needed. Remove them.
+
+            # Check if there are still some passed network cards to assign to the new virtual machine.
+            if networkDevicesData:
+                for devData in networkDevicesData:
+                    # If there are still some unassigned network cards in the template pick the first one.
+                    if tDevsInfo:
+                        nicInfo = tDevsInfo[0]
+                        allDevsSpecsData.append({
+                            "operation": "edit",
+                            "device": self.getVMNic(nicInfo["label"]),
+                            "deviceType": devData["deviceType"],
+                            "network": Network(self.assetId, devData["networkMoId"])
+                        })
+                        tDevsInfo.remove(nicInfo)
+                        networkDevicesData.remove(devData)
+                    # Otherwise a new nic will be added.
+                    else:
+                        allDevsSpecsData.append({
+                            "operation": "add",
+                            "device": None,
+                            "deviceType": devData["deviceType"],
+                            "network": Network(self.assetId, devData["networkMoId"])
+                        })
+                        networkDevicesData.remove(devData)
+            # If there are still some unassigned network cards in the template but the passed nics are all assigned,
+            # this mean that the remaining nics should be removed from the template.
             else:
-                # If a network label was not passed, get the first network device of the template and increment the counter.
-                nicLabel = self.listVMNetworkInfo()[devNum]["label"]
-                dev = self.getVMNic(nicLabel)
-                devNum += 1
+                if tDevsInfo:
+                    for nicInfo in tDevsInfo:
+                        allDevsSpecsData.append({
+                            "operation": "remove",
+                            "device": self.getVMNic(nicInfo["label"])
+                        })
+                        tDevsInfo.remove(nicInfo)
 
-            if "networkMoId" in devData and devData["networkMoId"]:
-                netMoId = devData["networkMoId"]
+            # Build all the specs cycling through the allDevsSpecsData list.
+            for data in allDevsSpecsData:
+                specsList.append( self.buildNicSpec(data) )
 
-            # It's not possible to change the network device type. If it's not of the right type, remove and re-add it.
-            if "deviceType" in devData and devData["deviceType"]:
-                if devData["deviceType"] != VirtualMachine.getEthernetDeviceType(dev):
-                    operations.append('remove')
-                    operations.append('add')
-                else:
-                    operations.append('edit')
-
-            if operations:
-                for op in operations:
-                    specsList.append( self.buildNicSpec(dev, Network(self.assetId, netMoId).oNetwork, op) )
-
-        Log.log(specsList, '_')
-        return specsList
+            return specsList
+        except Exception as e:
+            raise e
 
 
 

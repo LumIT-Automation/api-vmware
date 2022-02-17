@@ -57,13 +57,14 @@ class VirtualMachine(Backend):
 
                         # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
                         cloneSpec = vim.vm.CloneSpec()
+                        cloneSpec.location = relocateSpec
                         cloneSpec.powerOn = data["powerOn"]
                         cloneSpec.config = vim.vm.ConfigSpec()
 
                         # Get the first network card and plug it in the wanted network.
                         if "networkDevices" in data and data["networkDevices"]:
                             nicsSpec = self.buildNetworkSpec(data["networkDevices"])
-                            relocateSpec.deviceChange = nicsSpec
+                            cloneSpec.config.deviceChange = nicsSpec
                         #if "networkId" in data and data["networkId"]:
                         #    nicLabel = self.listVMNetworkInfo()[0]["label"]
                         #    nicDevice = self.getVMNic(nicLabel)
@@ -71,7 +72,7 @@ class VirtualMachine(Backend):
                         #    nicSpec = self.buildNicSpec(nicDevice=nicDevice, oNetwork=net.oNetwork, operation='edit')
                         #    relocateSpec.deviceChange.append(nicSpec)
 
-                        cloneSpec.location = relocateSpec
+
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
@@ -79,6 +80,7 @@ class VirtualMachine(Backend):
                             customSpec = customSpecManager.oCustomSpec(data["guestSpec"])
                             cloneSpec.customization = customSpec.spec
 
+                        Log.log(cloneSpec, '_')
                         # Deploy
                         task = self.oVirtualMachine.Clone(folder=vmFolder.oVMFolder, name=data["vmName"], spec=cloneSpec)
                         taskId = task._GetMoId()
