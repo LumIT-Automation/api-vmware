@@ -90,8 +90,9 @@ class VirtualMachine(Backend):
 
 
     def modify(self, data: dict) -> dict:
-        diskDevice = None
         diskSpec = None
+        nicsSpec = None
+        spec = None
         modifySpec = vim.vm.ConfigSpec()
         try:
             if "numCpu" in data and data["numCpu"]:
@@ -103,24 +104,19 @@ class VirtualMachine(Backend):
             if "notes" in data and data["notes"]:
                 modifySpec.annotation = data["notes"]
 
-            if "diskLabel" in data and data["diskLabel"]:
-                diskDevice = self.getVMDisk(data["diskLabel"])
-            else:
-                # Get the first virtual disk.
-                diskLabel = self.listVMDiskInfo()[0]["label"]
-                diskDevice = self.getVMDisk(diskLabel)
-            if diskDevice and "diskSizeMB" in data and data["diskSizeMB"]:
-                diskSpec = self.buildDiskSpec(diskDevice, data["diskSizeMB"])
-
-            if diskSpec:
-                modifySpec.deviceChange.append(diskSpec)
-
-            # Network cards.
-            Log.log(data, '_')
+            if "diskDevices" in data:
+                disksSpec = self.buildStorageSpec(data["diskDevices"])
             if "networkDevices" in data:
                 nicsSpec = self.buildNetworkSpec(data["networkDevices"])
-                Log.log(nicsSpec, '_')
-                modifySpec.deviceChange = nicsSpec
+
+            if disksSpec:
+                specs = disksSpec
+                for s in nicsSpec:
+                    specs.append(s)
+            else:
+                specs = nicsSpec
+
+            modifySpec.deviceChange = spec
 
             task = self.oVirtualMachine.ReconfigVM_Task(spec=modifySpec)
             taskId = task._GetMoId()
@@ -137,7 +133,7 @@ class VirtualMachine(Backend):
         try:
             for l in self.listVMDiskInfo():
                 self.diskDevices.append(
-                    VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["size"])
+                    VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["size"], l["deviceType"])
                 )
         except Exception as e:
             raise e

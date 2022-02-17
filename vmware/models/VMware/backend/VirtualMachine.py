@@ -34,11 +34,17 @@ class VirtualMachine(VmwareHandler):
         try:
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualDisk):
+                    Log.log(dev, '_')
                     if hasattr(dev, 'backing') and hasattr(dev.backing, 'datastore'):
+                        if dev.backing.thinProvisioned:
+                            devType = 'thin'
+                        else:
+                            devType = 'thick'
                         devs.append({
                             "datastore": str(dev.backing.datastore).strip("'").split(':')[1],
                             "label": dev.deviceInfo.label,
-                            "size": str(dev.capacityInKB / 1024)+' MB'
+                            "size": str(dev.capacityInKB / 1024)+' MB',
+                            "deviceType": devType
                         })
             return devs
         except Exception as e:
@@ -77,8 +83,6 @@ class VirtualMachine(VmwareHandler):
 
 
 
-
-
     def getVMDisk(self, diskLabel):
         try:
             for dev in self.oDevices():
@@ -101,23 +105,142 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildDiskSpec(self, diskDevice: object, sizeMB: int, operation: str = 'edit'):
+    def buildDiskSpec(self, data: dict) -> object:
         try:
             diskSpec = vim.vm.device.VirtualDeviceSpec()
-            diskSpec.device = diskDevice
-            diskSpec.device.capacityInKB = int(sizeMB) * 1024
-            diskSpec.device.capacityInBytes = int(sizeMB) * 1024 * 1024
-
-            if operation == 'edit':
+            if data["operation"] == "edit":
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
-            elif operation == 'add':
-                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
-            elif operation == 'remove':
-                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
+                if VirtualMachine.getEthernetDeviceType(data["device"]) == data["deviceType"]:
+                    diskSpec.device = data["device"]
+                    diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
+                    diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
+            elif data["operation"] == 'add':
+                    diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+                    diskSpec.device = vim.vm.device.VirtualDisk()
+                    diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
+                    diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
+                    diskSpec.device.backing = vim.vm.device.VirtualDevice.BackingInfo()
+            elif data["operation"] == 'remove':
+                    diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
+                    diskSpec.device = data["device"]
             else:
                 raise CustomException(status=400, payload={"VMware": "buildDiskSpec: not an operation."})
 
             return diskSpec
+        except Exception as e:
+            raise e
+
+
+
+    def buildStorageSpec(self, devicesData: dict) -> list:
+        from vmware.models.VMware.Datastore import Datastore
+        specsList = list()
+        tDevsInfo = self.listVMDiskInfo() # The storage info of the template.
+        allDevsSpecsData = list() # The data/devices needed to build the disks specs.
+
+        """
+        diskDevices (passed via POST) example:
+        [
+            {
+                "datastoreMoId": "datastore-2341",
+                "Label": "Hard disk 1",
+                "sizeMB": 1024,
+                "deviceType": "thin"
+            },
+        [
+        """
+
+        try:
+            for devData in devicesData:
+                # Find the right device, or get the first one found.
+                if "label" in devData and devData["label"]:
+                    for devInfo in tDevsInfo:
+                        if devInfo["label"] == devData["label"]:
+                            if devInfo["deviceType"] == devData["deviceType"]:
+                                allDevsSpecsData.append({
+                                    "operation": "edit",
+                                    "device": self.getVMDisk(devInfo["label"]),
+                                    "deviceLabel": devInfo["label"],
+                                    "deviceType": devData["deviceType"],
+                                    "sizeMB": devData["sizeMB"],
+                                    "datastore": Datastore(self.assetId, devData["datastoreMoId"])
+                                })
+                            else:
+                                # If the wanted device is different from the one in the template it's not possible
+                                # to change it, so remove it and add a new one.
+                                allDevsSpecsData.extend([
+                                    {
+                                        "operation": "remove",
+                                        "device": self.getVMDisk(devInfo["label"]),
+                                    },
+                                    {
+                                        "operation": "add",
+                                        "device": None,
+                                        "deviceLabel": devInfo["label"],
+                                        "deviceType": devData["deviceType"],
+                                        "sizeMB": devData["sizeMB"],
+                                        "datastore": Datastore(self.assetId, devData["datastoreMoId"])
+                                    }
+                                ])
+
+                            # If there is a match, subtract the element from both the lists.
+                            tDevsInfo.remove(devInfo)
+                            devicesData.remove(devData)
+                            break
+                    # A passed (label) device must have a match. If not, raise an exception.
+                    # To ask for new device leave blank the label field in diskDevicesData
+                    if not allDevsSpecsData or allDevsSpecsData[-1]["deviceLabel"] != devData["label"]:
+                        raise CustomException(status=400, payload={
+                            "VMware": "buildStorageSpec: Can't find the disk: \"" + str(devData["label"]) + "\"."})
+
+            # Check the length of the lists.
+            # If len(devData) == len(tDevsInfo) -> all disks matches, go forward.
+            # If len(devData) > len(tDevsInfo) -> some disks are missing in the template. Add them.
+            # if len(devData) < len(tDevsInfo) -> some disks in the template are not needed. Remove them.
+
+            # Check if there are still some passed devices to assign to the new virtual machine.
+            if devicesData:
+                for devData in devicesData:
+                    # If there are still some unassigned devices in the template pick the first one.
+                    if tDevsInfo:
+                        devInfo = tDevsInfo[0]
+                        allDevsSpecsData.append({
+                            "operation": "edit",
+                            "device": self.getVMDisk(devInfo["label"]),
+                            "deviceLabel": devInfo["label"],
+                            "deviceType": devData["deviceType"],
+                            "sizeMB": devData["sizeMB"],
+                            "datastore": Datastore(self.assetId, devData["datastoreMoId"])
+                        })
+                        tDevsInfo.remove(devInfo)
+                    # Otherwise a new nic will be added.
+                    else:
+                        allDevsSpecsData.append({
+                            "operation": "add",
+                            "device": None,
+                            "deviceLabel": "",
+                            "deviceType": devData["deviceType"],
+                            "sizeMB": devData["sizeMB"],
+                            "datastore": Datastore(self.assetId, devData["datastoreMoId"])
+                        })
+            # If there are still some unassigned devices in the template but the passed devs are all assigned,
+            # this mean that the remaining devices should be removed from the template.
+            else:
+                if tDevsInfo:
+                    for devInfo in tDevsInfo:
+                        allDevsSpecsData.append({
+                            "operation": "remove",
+                            "device": self.getVMDisk(devInfo["label"])
+                        })
+                        tDevsInfo.remove(devInfo)
+
+            # Build all the specs cycling through the allDevsSpecsData list.
+            for data in allDevsSpecsData:
+                specsList.append(self.buildDiskSpec(data))
+
+            Log.log(specsList, 'SSSSSSSSSSSSSSSSs')
+
+            return specsList
         except Exception as e:
             raise e
 
@@ -131,6 +254,7 @@ class VirtualMachine(VmwareHandler):
                 if VirtualMachine.getEthernetDeviceType(data["device"]) == data["deviceType"]:
                     nicSpec.device = data["device"]
                 else:
+                    # Fixme: no more needed (but check it)
                     nicSpec.device = VirtualMachine.getEthernetDeviceInstance(data["deviceType"])
                     nicSpec.device.key = 4115
                     nicSpec.device.deviceInfo = vim.Description()
@@ -169,11 +293,11 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildNetworkSpec(self, networkDevicesData: list) -> list:
+    def buildNetworkSpec(self, devicesData: list) -> list:
         from vmware.models.VMware.Network import Network
         specsList = list()
         tDevsInfo = self.listVMNetworkInfo() # The network info of the template.
-        allDevsSpecsData = list() # The data/devices needed to build the nic specs.
+        allDevsSpecsData = list() # The data/devices needed to build the nics specs.
 
         """
         networkDevicesData (passed via POST) example: 
@@ -187,42 +311,42 @@ class VirtualMachine(VmwareHandler):
         """
 
         try:
-            for devData in networkDevicesData:
+            for devData in devicesData:
                 # Find the right device, or get the first one found.
                 if "label" in devData and devData["label"]:
-                    for nicInfo in tDevsInfo:
-                        if nicInfo["label"] == devData["label"]:
-                            if nicInfo["deviceType"] == devData["deviceType"]:
+                    for devInfo in tDevsInfo:
+                        if devInfo["label"] == devData["label"]:
+                            if devInfo["deviceType"] == devData["deviceType"]:
                                 allDevsSpecsData.append({
                                     "operation":  "edit",
-                                    "device": self.getVMNic(nicInfo["label"]),
-                                    "deviceLabel": nicInfo["label"],
+                                    "device": self.getVMNic(devInfo["label"]),
+                                    "deviceLabel": devInfo["label"],
                                     "deviceType": devData["deviceType"],
                                     "network": Network(self.assetId, devData["networkMoId"])
                                 })
                             else:
-                                # If the wanted nic is an adapter different from the one in the template it's not possible
+                                # If the wanted device is different from the one in the template it's not possible
                                 # to change it, so remove it and add a new one.
                                 allDevsSpecsData.extend([
                                     {
                                         "operation": "remove",
-                                        "device": self.getVMNic(nicInfo["label"]),
+                                        "device": self.getVMNic(devInfo["label"]),
                                     },
                                     {
                                         "operation": "add",
                                         "device": None,
-                                        "deviceLabel": nicInfo["label"],
+                                        "deviceLabel": devInfo["label"],
                                         "deviceType": devData["deviceType"],
                                         "network": Network(self.assetId, devData["networkMoId"])
                                     }
                                 ])
 
                             # If there is a match, subtract the element from both the lists.
-                            tDevsInfo.remove(nicInfo)
-                            networkDevicesData.remove(devData)
+                            tDevsInfo.remove(devInfo)
+                            devicesData.remove(devData)
                             break
-                    # A passed (label) network card must have a match. If not, raise an exception.
-                    # To ask for new nic leave blank the label field in networkDevicesData
+                    # A passed (label) device must have a match. If not, raise an exception.
+                    # To ask for new device leave blank the label field in networkDevicesData
                     if not allDevsSpecsData or allDevsSpecsData[-1]["deviceLabel"] != devData["label"]:
                         raise CustomException(status=400, payload={"VMware": "buildNetworkSpec: Can't find the network card: \""+str(devData["label"])+"\"."})
 
@@ -231,20 +355,20 @@ class VirtualMachine(VmwareHandler):
             # If len(devData) > len(tDevsInfo) -> some cards are missing in the template. Add them.
             # if len(devData) < len(tDevsInfo) -> some card in the template are not needed. Remove them.
 
-            # Check if there are still some passed network cards to assign to the new virtual machine.
-            if networkDevicesData:
-                for devData in networkDevicesData:
-                    # If there are still some unassigned network cards in the template pick the first one.
+            # Check if there are still some passed devices to assign to the new virtual machine.
+            if devicesData:
+                for devData in devicesData:
+                    # If there are still some unassigned devices in the template pick the first one.
                     if tDevsInfo:
-                        nicInfo = tDevsInfo[0]
+                        devInfo = tDevsInfo[0]
                         allDevsSpecsData.append({
                             "operation": "edit",
-                            "device": self.getVMNic(nicInfo["label"]),
-                            "deviceLabel": nicInfo["label"],
+                            "device": self.getVMNic(devInfo["label"]),
+                            "deviceLabel": devInfo["label"],
                             "deviceType": devData["deviceType"],
                             "network": Network(self.assetId, devData["networkMoId"])
                         })
-                        tDevsInfo.remove(nicInfo)
+                        tDevsInfo.remove(devInfo)
                     # Otherwise a new nic will be added.
                     else:
                         allDevsSpecsData.append({
@@ -254,16 +378,16 @@ class VirtualMachine(VmwareHandler):
                             "deviceType": devData["deviceType"],
                             "network": Network(self.assetId, devData["networkMoId"])
                         })
-            # If there are still some unassigned network cards in the template but the passed nics are all assigned,
-            # this mean that the remaining nics should be removed from the template.
+            # If there are still some unassigned devices in the template but the passed devs are all assigned,
+            # this mean that the remaining devices should be removed from the template.
             else:
                 if tDevsInfo:
-                    for nicInfo in tDevsInfo:
+                    for devInfo in tDevsInfo:
                         allDevsSpecsData.append({
                             "operation": "remove",
-                            "device": self.getVMNic(nicInfo["label"])
+                            "device": self.getVMNic(devInfo["label"])
                         })
-                        tDevsInfo.remove(nicInfo)
+                        tDevsInfo.remove(devInfo)
 
             # Build all the specs cycling through the allDevsSpecsData list.
             for data in allDevsSpecsData:
