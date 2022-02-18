@@ -316,41 +316,32 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildNetworkSpec(self, devicesData: list) -> list:
+    # This one build the spec data structure for the devices present in the template.
+    def buildTemplateNetDevicesSpecs(self, templDevData: list) -> list:
         from vmware.models.VMware.Network import Network
-        specsList = list()
-        tDevsInfo = self.listVMNetworkInfo() # The network info of the template.
-        allDevsSpecsData = list() # The data/devices needed to build the nics specs.
-
-        """
-        devicesData (passed via POST) example: 
-        [
-            {
-                "networkMoId": "network-1213",
-                "label": "Network adapter 1",
-                "deviceType": "vmxnet3"
-            }
-        ],
-        """
+        templDevsInfo = self.listVMNetworkInfo()  # The network info of the template.
+        devsSpecsData = list() # Intermediate data structure.
+        specsList = list() # Real spec data obtained from  self.buildNicSpec.
 
         try:
-            for devData in devicesData:
-                # Find the right device, or get the first one found.
+            for devData in templDevData:
+                # Use label to find the right device.
                 if "label" in devData and devData["label"]:
-                    for devInfo in tDevsInfo:
+                    found = False
+                    for devInfo in templDevsInfo:
                         if devInfo["label"] == devData["label"]:
-                            if devInfo["deviceType"] == devData["deviceType"]:
-                                allDevsSpecsData.append({
-                                    "operation":  "edit",
+                            found = True
+                            if devInfo["deviceType"] == devData["deviceType"]: # Both the label and deviceType matches: device found ok.
+                                devsSpecsData.append({
+                                    "operation": "edit",
                                     "device": self.getVMNic(devInfo["label"]),
-                                    "deviceLabel": devInfo["label"],
+                                    "deviceLabel": devData["label"],
                                     "deviceType": devData["deviceType"],
                                     "network": Network(self.assetId, devData["networkMoId"])
                                 })
                             else:
-                                # If the wanted device is different from the one in the template it's not possible
-                                # to change it, so remove it and add a new one.
-                                allDevsSpecsData.extend([
+                                # The label matches but the device type is wrong. Cannot change it, so remove it and add a new one.
+                                devsSpecsData.extend([
                                     {
                                         "operation": "remove",
                                         "device": self.getVMNic(devInfo["label"]),
@@ -358,64 +349,85 @@ class VirtualMachine(VmwareHandler):
                                     {
                                         "operation": "add",
                                         "device": None,
-                                        "deviceLabel": devInfo["label"],
+                                        "deviceLabel": devData["label"],
                                         "deviceType": devData["deviceType"],
                                         "network": Network(self.assetId, devData["networkMoId"])
                                     }
                                 ])
 
                             # If there is a match, subtract the element from both the lists.
-                            tDevsInfo.remove(devInfo)
-                            devicesData.remove(devData)
+                            templDevsInfo.remove(devInfo)
                             break
-                    # A passed (label) device must have a match. If not, raise an exception.
-                    # To ask for new device leave blank the label field in networkDevicesData
-                    if not allDevsSpecsData or allDevsSpecsData[-1]["deviceLabel"] != devData["label"]:
-                        raise CustomException(status=400, payload={"VMware": "buildNetworkSpec: Can't find the network card: \""+str(devData["label"])+"\"."})
 
-            # Check the length of the lists.
-            # If len(devData) == len(tDevsInfo) -> all nics matches, go forward.
-            # If len(devData) > len(tDevsInfo) -> some cards are missing in the template. Add them.
-            # if len(devData) < len(tDevsInfo) -> some card in the template are not needed. Remove them.
+                    # Device not found: error in input data.
+                    if not found:
+                        raise CustomException(status=400, payload={"VMware": "buildTemplateNetDevicesSpecs: Can't find the network card: \"" + str(devData["label"]) + "\"."})
 
-            # Check if there are still some passed devices to assign to the new virtual machine.
-            if devicesData:
-                for devData in devicesData:
-                    # If there are still some unassigned devices in the template pick the first one.
-                    if tDevsInfo:
-                        devInfo = tDevsInfo[0]
-                        allDevsSpecsData.append({
-                            "operation": "edit",
-                            "device": self.getVMNic(devInfo["label"]),
-                            "deviceLabel": devInfo["label"],
-                            "deviceType": devData["deviceType"],
-                            "network": Network(self.assetId, devData["networkMoId"])
-                        })
-                        tDevsInfo.remove(devInfo)
-                    # Otherwise a new nic will be added.
-                    else:
-                        allDevsSpecsData.append({
-                            "operation": "add",
-                            "device": None,
-                            "deviceLabel": "",
-                            "deviceType": devData["deviceType"],
-                            "network": Network(self.assetId, devData["networkMoId"])
-                        })
-            # If there are still some unassigned devices in the template but the passed devs are all assigned,
-            # this mean that the remaining devices should be removed from the template.
-            else:
-                if tDevsInfo:
-                    for devInfo in tDevsInfo:
-                        allDevsSpecsData.append({
+                # If there are some template devices without match in the input data, they should be removed.
+                if templDevsInfo:
+                    for devInfo in templDevsInfo:
+                        devsSpecsData.append({
                             "operation": "remove",
                             "device": self.getVMNic(devInfo["label"])
                         })
-                        tDevsInfo.remove(devInfo)
 
-            # Build all the specs cycling through the allDevsSpecsData list.
-            for data in allDevsSpecsData:
+            for data in devsSpecsData:
                 specsList.append(self.buildNicSpec(data))
 
+            return specsList
+        except Exception as e:
+            raise e
+
+
+
+    # This one build the spec data structure for the devices not present in the template.
+    def buildNewNetDevicesSpecs(self, newDevData: list) -> list:
+        from vmware.models.VMware.Network import Network
+        devsSpecsData = list() # Intermediate data structure.
+        specsList = list() # Real spec data obtained from  self.buildNicSpec.
+
+        try:
+            # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
+            for devData in newDevData:
+                devsSpecsData.append({
+                    "operation": "add",
+                    "device": None,
+                    "deviceLabel": devData["label"],
+                    "deviceType": devData["deviceType"],
+                    "network": Network(self.assetId, devData["networkMoId"])
+                })
+
+            for data in devsSpecsData:
+                specsList.append(self.buildNicSpec(data))
+
+            return specsList
+        except Exception as e:
+            raise e
+
+
+
+    def buildNetworkSpec(self, devicesData: dict) -> list:
+        specsList = list()
+        """
+        devicesData (passed via POST) example:
+        {
+            "templateDefault": [
+                {
+                    "networkMoId": "network-1213",
+                    "label": "Network adapter 1",
+                    "deviceType": "vmxnet3"
+                }
+            ],
+            "new": [
+                ...
+            ]
+        }
+        """
+        try:
+            if "templateDefault" in devicesData:
+                specsList.append(self.buildTemplateNetDevicesSpecs(devicesData["templateDefault"]))
+            if "new" in devicesData:
+                specsList.append(self.buildNewNetDevicesSpecs(devicesData["templateDefault"]))
             return specsList
         except Exception as e:
             raise e

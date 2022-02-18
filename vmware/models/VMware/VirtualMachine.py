@@ -75,7 +75,7 @@ class VirtualMachine(Backend):
                         else:
                             if nicsSpec:
                                 devsSpecs = nicsSpec
-
+                        Log.log(devsSpecs, '_')
                         cloneSpec.config.deviceChange = devsSpecs
 
                         # Apply the guest OS customization specifications.
