@@ -425,9 +425,9 @@ class VirtualMachine(VmwareHandler):
         """
         try:
             if "templateDefault" in devicesData:
-                specsList.append(self.buildTemplateNetDevicesSpecs(devicesData["templateDefault"]))
+                specsList.extend(self.buildTemplateNetDevicesSpecs(devicesData["templateDefault"]))
             if "new" in devicesData:
-                specsList.append(self.buildNewNetDevicesSpecs(devicesData["templateDefault"]))
+                specsList.extend(self.buildNewNetDevicesSpecs(devicesData["templateDefault"]))
             return specsList
         except Exception as e:
             raise e
