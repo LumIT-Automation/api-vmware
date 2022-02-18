@@ -322,6 +322,7 @@ class VirtualMachine(VmwareHandler):
         templDevsInfo = self.listVMNetworkInfo()  # The network info of the template.
         devsSpecsData = list() # Intermediate data structure.
         specsList = list() # Real spec data obtained from  self.buildNicSpec.
+        Log.log(templDevData, 'TTTTTTTTTTTTTTTTTTTTTTT')
 
         try:
             for devData in templDevData:
@@ -385,6 +386,7 @@ class VirtualMachine(VmwareHandler):
         from vmware.models.VMware.Network import Network
         devsSpecsData = list() # Intermediate data structure.
         specsList = list() # Real spec data obtained from  self.buildNicSpec.
+        Log.log(newDevData, 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN')
 
         try:
             # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
@@ -427,7 +429,7 @@ class VirtualMachine(VmwareHandler):
             if "templateDefault" in devicesData:
                 specsList.extend(self.buildTemplateNetDevicesSpecs(devicesData["templateDefault"]))
             if "new" in devicesData:
-                specsList.extend(self.buildNewNetDevicesSpecs(devicesData["templateDefault"]))
+                specsList.extend(self.buildNewNetDevicesSpecs(devicesData["new"]))
             return specsList
         except Exception as e:
             raise e
