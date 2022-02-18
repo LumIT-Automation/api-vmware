@@ -69,7 +69,6 @@ class VirtualMachine(Backend):
                                 devsSpecs.extend(nicsSpec)
                             else:
                                 devsSpecs = nicsSpec
-
                         if devsSpecs:
                             cloneSpec.config.deviceChange = devsSpecs
 
@@ -112,19 +111,15 @@ class VirtualMachine(Backend):
                 modifySpec.annotation = data["notes"]
 
             if "diskDevices" in data:
-                disksSpec = self.buildStorageSpec(data["diskDevices"])
+                devsSpecs = self.buildStorageSpec(data["diskDevices"])
             if "networkDevices" in data:
                 nicsSpec = self.buildNetworkSpec(data["networkDevices"])
-
-            if disksSpec:
-                devsSpecs = disksSpec
-                for s in nicsSpec:
-                    devsSpecs.append(s)
-            else:
-                if nicsSpec:
+                if devsSpecs:
+                    devsSpecs.extend(nicsSpec)
+                else:
                     devsSpecs = nicsSpec
-
-            modifySpec.deviceChange = devsSpecs
+            if devsSpecs:
+                modifySpec.deviceChange = devsSpecs
 
             task = self.oVirtualMachine.ReconfigVM_Task(spec=modifySpec)
             taskId = task._GetMoId()

@@ -363,13 +363,13 @@ class VirtualMachine(VmwareHandler):
                     if not found:
                         raise CustomException(status=400, payload={"VMware": "buildTemplateNetDevicesSpecs: Can't find the network card: \"" + str(devData["label"]) + "\"."})
 
-                # If there are some template devices without match in the input data, they should be removed.
-                if templDevsInfo:
-                    for devInfo in templDevsInfo:
-                        devsSpecsData.append({
-                            "operation": "remove",
-                            "device": self.getVMNic(devInfo["label"])
-                        })
+            # If there are some template devices without match in the input data, they should be removed.
+            if templDevsInfo:
+                for devInfo in templDevsInfo:
+                    devsSpecsData.append({
+                        "operation": "remove",
+                        "device": self.getVMNic(devInfo["label"])
+                    })
 
             for data in devsSpecsData:
                 specsList.append(self.buildNicSpec(data))
