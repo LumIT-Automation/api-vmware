@@ -1,5 +1,5 @@
 from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as Backend
-
+from vmware.helpers.Log import Log
 
 
 # In VMware, the CustomizationSpecManager is the (unique) Managed Object that can administer the virtual machines customization specifications.
@@ -19,15 +19,11 @@ class CustomSpecManager(Backend):
     @staticmethod
     def info(assetId, specName) -> dict:
         o = {
-            "ip": "",
-            "netMask": "",
-            "gw": [],
-            "dns1": "",
-            "dns2": "",
-            "hostName": "",
-            "domainName": "",
-            "timeZone": "",
-        }
+                "network": [],
+                "hostName": "",
+                "domainName": "",
+                "timeZone": ""
+            }
         dns = list()
 
         try:
@@ -46,19 +42,26 @@ class CustomSpecManager(Backend):
                     if hasattr(spec.spec.globalIPSettings, "dnsServerList"):
                         dns = spec.spec.globalIPSettings.dnsServerList
 
-                if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap and hasattr(spec.spec.nicSettingMap[0], "adapter"):
-                    if hasattr(spec.spec.nicSettingMap[0].adapter, "ip") and hasattr(spec.spec.nicSettingMap[0].adapter.ip, "ipAddress"):
-                        o["ip"] = spec.spec.nicSettingMap[0].adapter.ip.ipAddress
-                    if hasattr(spec.spec.nicSettingMap[0].adapter, "subnetMask"):
-                        o["netMask"] = spec.spec.nicSettingMap[0].adapter.subnetMask
-                    if hasattr(spec.spec.nicSettingMap[0].adapter, "gateway"):
-                        o["gw"] = spec.spec.nicSettingMap[0].adapter.gateway
-                    if hasattr(spec.spec.nicSettingMap[0].adapter, "dnsServerList"):
-                        dns = spec.spec.nicSettingMap[0].adapter.dnsServerList  # Overwrite global settings.
-            if dns:
-                o["dns1"] = dns[0]
-                if 1 < len(dns):
-                    o["dns2"] = dns[1]
+                if dns:
+                    o["dns1"] = dns[0]
+                    if 1 < len(dns):
+                        o["dns2"] = dns[1]
+
+                if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap:
+                    for nicSet in spec.spec.nicSettingMap:
+                        if hasattr(nicSet, "adapter"):
+                            nic = dict()
+                            if hasattr(nicSet.adapter, "ip") and hasattr(nicSet.adapter.ip, "ipAddress"):
+                                nic["ip"] = nicSet.adapter.ip.ipAddress
+                            if hasattr(nicSet.adapter, "subnetMask"):
+                                nic["netMask"] = nicSet.adapter.subnetMask
+                            if hasattr(nicSet.adapter, "gateway"):
+                                nic["gw"] = nicSet.adapter.gateway
+                            # DNS settings for a single network card is available in the data structure but not from the vCenter interface.
+                            #if hasattr(nicSet.adapter, "dnsServerList"):
+                            #    nic["dns"] = nicSet.adapter.dnsServerList  # Overwrite global settings.
+                            if nic:
+                                o["network"].append(nic)
 
             return o
 

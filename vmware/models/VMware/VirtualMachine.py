@@ -1,7 +1,7 @@
 from typing import List
 from pyVmomi import vim
 
-from vmware.models.VMware.VirtualMachineNetwork import VirtualMachineNetwork
+from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 
@@ -25,7 +25,7 @@ class VirtualMachine(Backend):
         self.memoryMB: int
         self.template: bool
 
-        self.networkDevices: List[VirtualMachineNetwork] = []
+        self.networkDevices: List[VmNetworkAdapter] = []
         self.diskDevices: List[VirtualMachineDatastore] = []
 
 
@@ -45,6 +45,10 @@ class VirtualMachine(Backend):
             if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
                 if self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
                     if "networkId" not in data or self.__isNetworkValid(data["clusterId"], data["networkId"]): # Allow to deploy a VM without touch the network card.
+                        disksSpec = None
+                        nicsSpec = None
+                        devsSpecs = None
+                        cloneSpec = vim.vm.CloneSpec() # virtual machine specifications.
 
                         cluster = Cluster(self.assetId, data["clusterId"])
                         datastore = Datastore(self.assetId, data["datastoreId"])
@@ -55,16 +59,24 @@ class VirtualMachine(Backend):
                         relocateSpec.datastore = datastore.oDatastore
                         relocateSpec.pool = cluster.oCluster.resourcePool # The resource pool associated to this cluster.
 
-                        # VirtualMachineCloneSpec(vim.vm.CloneSpec): virtual machine specifications.
-                        cloneSpec = vim.vm.CloneSpec()
                         cloneSpec.location = relocateSpec
                         cloneSpec.powerOn = data["powerOn"]
                         cloneSpec.config = vim.vm.ConfigSpec()
 
-                        # Network cards.
+                        if "diskDevices" in data:
+                            disksSpec = self.buildStorageSpec(data["diskDevices"])
                         if "networkDevices" in data:
                             nicsSpec = self.buildNetworkSpec(data["networkDevices"])
-                            cloneSpec.config.deviceChange = nicsSpec
+
+                        if disksSpec:
+                            devsSpecs = disksSpec
+                            for s in nicsSpec:
+                                devsSpecs.append(s)
+                        else:
+                            if nicsSpec:
+                                devsSpecs = nicsSpec
+
+                        cloneSpec.config.deviceChange = devsSpecs
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
@@ -90,9 +102,9 @@ class VirtualMachine(Backend):
 
 
     def modify(self, data: dict) -> dict:
-        diskSpec = None
+        disksSpec = None
         nicsSpec = None
-        spec = None
+        devsSpecs = None
         modifySpec = vim.vm.ConfigSpec()
         try:
             if "numCpu" in data and data["numCpu"]:
@@ -110,13 +122,14 @@ class VirtualMachine(Backend):
                 nicsSpec = self.buildNetworkSpec(data["networkDevices"])
 
             if disksSpec:
-                specs = disksSpec
+                devsSpecs = disksSpec
                 for s in nicsSpec:
-                    specs.append(s)
+                    devsSpecs.append(s)
             else:
-                specs = nicsSpec
+                if nicsSpec:
+                    devsSpecs = nicsSpec
 
-            modifySpec.deviceChange = spec
+            modifySpec.deviceChange = devsSpecs
 
             task = self.oVirtualMachine.ReconfigVM_Task(spec=modifySpec)
             taskId = task._GetMoId()
@@ -144,7 +157,7 @@ class VirtualMachine(Backend):
         try:
             for l in self.listVMNetworkInfo():
                 self.networkDevices.append(
-                    VirtualMachineNetwork(self.assetId, l["network"], l["label"], l["deviceType"])
+                    VmNetworkAdapter(self.assetId, l["network"], l["label"], l["deviceType"])
                 )
         except Exception as e:
             raise e

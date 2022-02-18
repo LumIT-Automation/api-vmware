@@ -34,7 +34,6 @@ class VirtualMachine(VmwareHandler):
         try:
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualDisk):
-                    Log.log(dev, '_')
                     if hasattr(dev, 'backing') and hasattr(dev.backing, 'datastore'):
                         if dev.backing.thinProvisioned:
                             devType = 'thin'
@@ -110,16 +109,44 @@ class VirtualMachine(VmwareHandler):
             diskSpec = vim.vm.device.VirtualDeviceSpec()
             if data["operation"] == "edit":
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
-                if VirtualMachine.getEthernetDeviceType(data["device"]) == data["deviceType"]:
-                    diskSpec.device = data["device"]
-                    diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
-                    diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
+                diskSpec.device = data["device"]
+                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
+                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
+                if data["deviceType"] == 'thin':
+                    diskSpec.device.backing.thinProvisioned = True
             elif data["operation"] == 'add':
+                    # Get the controller device.
+                    controller = None
+                    for dev in self.oDevices():
+                        if isinstance(dev, vim.vm.device.VirtualSCSIController):
+                            controller = dev
+                    if not controller:
+                        raise CustomException(status=400, payload={"VMware": "add disk operation: controller not found!"})
+
+                    # Set the disk unit number.
+                    unitNumber = 0
+                    for dev in self.oDevices():
+                        if hasattr(dev.backing, 'fileName'):
+                            if int(dev.unitNumber) + 1 > unitNumber:
+                                unitNumber = int(dev.unitNumber) + 1
+                            if unitNumber == 7: # unit number 7 is reserved for scsi controller.
+                                unitNumber += 1
+                            if unitNumber >= 16:
+                                raise CustomException(status=400, payload={"VMware": "add disk operation: too many virtual disks!"})
+
+                    diskSpec.fileOperation = "create"
                     diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
                     diskSpec.device = vim.vm.device.VirtualDisk()
+                    diskSpec.device.controllerKey = controller.key
+                    diskSpec.device.deviceInfo = vim.Description()
+                    diskSpec.device.backing = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
+                    diskSpec.device.backing.diskMode = 'persistent'
+                    diskSpec.device.backing.datastore = data["datastore"].oDatastore
+                    diskSpec.device.unitNumber = unitNumber
+                    if data["deviceType"] == 'thin':
+                        diskSpec.device.backing.thinProvisioned = True
                     diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
                     diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
-                    diskSpec.device.backing = vim.vm.device.VirtualDevice.BackingInfo()
             elif data["operation"] == 'remove':
                     diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
                     diskSpec.device = data["device"]
@@ -238,8 +265,6 @@ class VirtualMachine(VmwareHandler):
             for data in allDevsSpecsData:
                 specsList.append(self.buildDiskSpec(data))
 
-            Log.log(specsList, 'SSSSSSSSSSSSSSSSs')
-
             return specsList
         except Exception as e:
             raise e
@@ -256,7 +281,6 @@ class VirtualMachine(VmwareHandler):
                 else:
                     # Fixme: no more needed (but check it)
                     nicSpec.device = VirtualMachine.getEthernetDeviceInstance(data["deviceType"])
-                    nicSpec.device.key = 4115
                     nicSpec.device.deviceInfo = vim.Description()
                     nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
                     nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
@@ -270,7 +294,6 @@ class VirtualMachine(VmwareHandler):
             elif data["operation"] == 'add':
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
                 nicSpec.device = VirtualMachine.getEthernetDeviceInstance(data["deviceType"])
-                nicSpec.device.key = 4113
                 nicSpec.device.deviceInfo = vim.Description()
                 nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
                 nicSpec.device.deviceInfo.label = data["deviceLabel"]
@@ -300,7 +323,7 @@ class VirtualMachine(VmwareHandler):
         allDevsSpecsData = list() # The data/devices needed to build the nics specs.
 
         """
-        networkDevicesData (passed via POST) example: 
+        devicesData (passed via POST) example: 
         [
             {
                 "networkMoId": "network-1213",

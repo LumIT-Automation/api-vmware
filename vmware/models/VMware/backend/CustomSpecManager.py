@@ -70,26 +70,32 @@ class CustomSpecManager(VmwareHandler):
     @staticmethod
     def replaceSpecObjectAttr(spec, data: dict):
         if spec.info.type == "Linux":
-            if data["ip"]:
-                newIp = vim.vm.customization.FixedIp()
-                newIp.ipAddress = data["ip"]
-                spec.spec.nicSettingMap[0].adapter.ip = newIp
-
-            if data["netMask"]:
-                spec.spec.nicSettingMap[0].adapter.subnetMask = data["netMask"]
-
-            if data["gw"]:
-                spec.spec.nicSettingMap[0].adapter.gateway = data["gw"]
+            if data["network"]:
+                n = 0
+                for netSet in data["network"]:
+                    if netSet["ip"]:
+                        if not hasattr(spec.spec, 'nicSettingMap'):
+                            spec.spec.nicSettingMap = []
+                        if len(spec.spec.nicSettingMap) <= n:
+                            spec.spec.nicSettingMap.append(vim.vm.customization.AdapterMapping())
+                        if not hasattr(spec.spec.nicSettingMap[n], 'adapter') or not spec.spec.nicSettingMap[n].adapter:
+                            spec.spec.nicSettingMap[n].adapter = vim.vm.customization.IPSettings()
+                        if not hasattr(spec.spec.nicSettingMap[n].adapter, 'ip') or not isinstance(spec.spec.nicSettingMap[n].adapter, vim.vm.customization.FixedIp):
+                            spec.spec.nicSettingMap[n].adapter.ip = vim.vm.customization.FixedIp()
+                        spec.spec.nicSettingMap[n].adapter.ip.ipAddress = netSet["ip"]
+                    if netSet["netMask"]:
+                        spec.spec.nicSettingMap[n].adapter.subnetMask = netSet["netMask"]
+                    if netSet["gw"]:
+                        spec.spec.nicSettingMap[n].adapter.gateway = netSet["gw"]
+                    # spec.spec.nicSettingMap[n].adapter.dnsServerList = dnsList
+                    n += 1
 
             dns = []
             if data["dns1"]:
                 dns.append(data["dns1"])
-
             if data["dns2"]:
                 dns.append(data["dns2"])
-
             if dns:
-                spec.spec.nicSettingMap[0].adapter.dnsServerList = dns
                 spec.spec.globalIPSettings.dnsServerList = dns
 
             if data["hostName"]:
@@ -105,6 +111,7 @@ class CustomSpecManager(VmwareHandler):
                 spec.spec.identity.timeZone = data["timeZone"]
 
         return spec
+
 
 
     ####################################################################################################################

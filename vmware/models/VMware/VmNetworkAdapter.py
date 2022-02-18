@@ -1,9 +1,7 @@
 from vmware.models.VMware.Network import Network
 
 
-class VirtualMachineNetwork:
-    # Virtual machine network adapter / attached network.
-
+class VmNetworkAdapter:
     def __init__(self, assetId: int, networkMoId: str, adapterLabel: str, deviceType: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
