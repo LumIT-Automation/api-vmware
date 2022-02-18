@@ -279,7 +279,6 @@ class VirtualMachine(VmwareHandler):
                 if VirtualMachine.getEthernetDeviceType(data["device"]) == data["deviceType"]:
                     nicSpec.device = data["device"]
                 else:
-                    # Fixme: no more needed (but check it)
                     nicSpec.device = VirtualMachine.getEthernetDeviceInstance(data["deviceType"])
                     nicSpec.device.deviceInfo = vim.Description()
                     nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
@@ -304,6 +303,7 @@ class VirtualMachine(VmwareHandler):
                 nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
                 nicSpec.device.backing.deviceName = data["network"].oNetwork.name
                 nicSpec.device.backing.network = data["network"].oNetwork
+
             elif data["operation"] == 'remove':
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
                 nicSpec.device = data["device"]
@@ -322,7 +322,6 @@ class VirtualMachine(VmwareHandler):
         templDevsInfo = self.listVMNetworkInfo()  # The network info of the template.
         devsSpecsData = list() # Intermediate data structure.
         specsList = list() # Real spec data obtained from  self.buildNicSpec.
-        Log.log(templDevData, 'TTTTTTTTTTTTTTTTTTTTTTT')
 
         try:
             for devData in templDevData:
@@ -386,7 +385,6 @@ class VirtualMachine(VmwareHandler):
         from vmware.models.VMware.Network import Network
         devsSpecsData = list() # Intermediate data structure.
         specsList = list() # Real spec data obtained from  self.buildNicSpec.
-        Log.log(newDevData, 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN')
 
         try:
             # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
