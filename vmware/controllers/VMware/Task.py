@@ -18,7 +18,6 @@ class VMwareTaskController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, moId: str) -> Response:
         data = dict()
-        itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,12 +29,11 @@ class VMwareTaskController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    t = Task(assetId, moId)
-                    itemData["data"] = t.info()
+                    itemData = Task(assetId, moId).info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
-                        data["data"] = itemData["data"]
+                        data["data"] = serializer.validated_data
+                        data["data"] = itemData
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -85,8 +83,7 @@ class VMwareTaskController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    t = Task(assetId, moId)
-                    t.cancel()
+                    Task(assetId, moId).cancel()
                     httpStatus = status.HTTP_200_OK
                     lock.release()
                 else:
@@ -117,18 +114,15 @@ class VMwareTaskController(CustomController):
                 Log.actionLog("User data: "+str(request.data), user)
 
 
-                #serializer = Serializer(data=request.data, partial=True)
-                #if serializer.is_valid():
-                if True:
-                    #data = serializer.validated_data["data"]
-                    data = request.data
+                serializer = Serializer(data=request.data["data"], partial=True)
+                if serializer.is_valid():
+                    data = serializer.validated_data
                     lock = Lock("task", locals(), moId)
                     if lock.isUnlocked():
                         lock.lock()
 
                         t = Task(assetId, moId)
-                        Log.log(data["data"], '_')
-                        t. setDescription(data["data"]["message"])
+                        t. setDescription(data["message"])
                         httpStatus = status.HTTP_200_OK
                         lock.release()
                     else:

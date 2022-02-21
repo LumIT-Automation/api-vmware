@@ -81,9 +81,9 @@ class VMwareVirtualMachineController(CustomController):
                 Log.actionLog("Virtual machine modification", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = ModSerializer(data=request.data, partial=True)
+                serializer = ModSerializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
+                    data = serializer.validated_data
                     lock = Lock("virtualmachine", locals(), moId)
                     if lock.isUnlocked():
                         lock.lock()
