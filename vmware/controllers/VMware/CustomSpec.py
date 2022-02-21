@@ -120,7 +120,7 @@ class VMwareCustomSpecController(CustomController):
                     if lock.isUnlocked():
                         lock.lock()
 
-                        CustomSpec.modify(assetId, specName, data)
+                        CustomSpec(assetId, specName).modify(data)
                         httpStatus = status.HTTP_200_OK
                         lock.release()
                     else:

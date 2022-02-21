@@ -37,44 +37,58 @@ class CustomSpecManager(VmwareHandler):
 
 
 
-    def cloneoCustomSpec(self, srcSpecName: str, newSpecName: str) -> None:
+    def cloneCustomSpec(self, srcSpecName: str, newSpecName: str) -> None:
         try:
             if self.oCustomSpecManager.DoesCustomizationSpecExist(srcSpecName):
                 self.oCustomSpecManager.DuplicateCustomizationSpec(name=srcSpecName, newName=newSpecName)
-
         except Exception as e:
             raise e
 
 
 
-    def editoCustomSpec(self, specName: str, data: dict) -> None:
+    def deleteCustomSpec(self, name: str) -> None:
+        try:
+            if self.oCustomSpecManager.DoesCustomizationSpecExist(name):
+                self.oCustomSpecManager.DeleteCustomizationSpec(name)
+        except Exception as e:
+            raise e
+
+
+
+    def editCustomSpec(self, specName: str, data: dict) -> None:
         try:
             if self.oCustomSpecManager.DoesCustomizationSpecExist(specName):
                 spec = self.oCustomSpec(specName)
-                specEdited = CustomSpecManager.replaceSpecObjectAttr(spec, data)
+                specEdited = CustomSpecManager.__replaceSpecObjectAttr(spec, data)
+
                 self.oCustomSpecManager.OverwriteCustomizationSpec(specEdited)
-
         except Exception as e:
             raise e
 
 
 
-    def deleteCustomSpec(self, specName) -> None:
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __oCustomSpecManagerLoad(self):
         try:
-            if self.oCustomSpecManager.DoesCustomizationSpecExist(specName):
-                self.oCustomSpecManager.DeleteCustomizationSpec(specName)
-
-        except Exception as e:
-            raise e
+            return self.getCustomizationSpecManager()
+        except Exception:
+            raise CustomException(status=400, payload={"VMware": "cannot load resource."})
 
 
 
-    # Edit attributes of a VMware customization specification.
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
     @staticmethod
-    def replaceSpecObjectAttr(spec, data: dict):
+    def __replaceSpecObjectAttr(spec, data: dict):
+        n = 0
+
         if spec.info.type == "Linux":
-            if data["network"]:
-                n = 0
+            if "network" in data and data["network"]:
                 for netSet in data["network"]:
                     if netSet["ip"]:
                         if not hasattr(spec.spec, 'nicSettingMap'):
@@ -83,7 +97,8 @@ class CustomSpecManager(VmwareHandler):
                             spec.spec.nicSettingMap.append(vim.vm.customization.AdapterMapping())
                         if not hasattr(spec.spec.nicSettingMap[n], 'adapter') or not spec.spec.nicSettingMap[n].adapter:
                             spec.spec.nicSettingMap[n].adapter = vim.vm.customization.IPSettings()
-                        if not hasattr(spec.spec.nicSettingMap[n].adapter, 'ip') or not isinstance(spec.spec.nicSettingMap[n].adapter, vim.vm.customization.FixedIp):
+                        if not hasattr(spec.spec.nicSettingMap[n].adapter, 'ip') or not isinstance(
+                                spec.spec.nicSettingMap[n].adapter, vim.vm.customization.FixedIp):
                             spec.spec.nicSettingMap[n].adapter.ip = vim.vm.customization.FixedIp()
                         spec.spec.nicSettingMap[n].adapter.ip.ipAddress = netSet["ip"]
                     if netSet["netMask"]:
@@ -108,21 +123,9 @@ class CustomSpecManager(VmwareHandler):
 
             if data["domainName"]:
                 spec.spec.identity.domain = data["domainName"]
-                spec.spec.globalIPSettings.dnsSuffixList = [ data["domainName"] ]
+                spec.spec.globalIPSettings.dnsSuffixList = [data["domainName"]]
 
             if data["timeZone"]:
                 spec.spec.identity.timeZone = data["timeZone"]
 
         return spec
-
-
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __oCustomSpecManagerLoad(self):
-        try:
-            return self.getCustomizationSpecManager()
-        except Exception:
-            raise CustomException(status=400, payload={"VMware": "cannot load resource."})

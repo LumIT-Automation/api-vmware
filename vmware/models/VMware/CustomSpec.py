@@ -2,12 +2,12 @@ from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as 
 from vmware.helpers.Log import Log
 
 
-
 class CustomSpec(Backend):
-    def __init__(self, assetId: int, *args, **kwargs):
+    def __init__(self, assetId: int, name: str = "", *args, **kwargs):
         super().__init__(assetId, *args, **kwargs)
 
-        self.assetId = int(assetId)
+        self.assetId: int = int(assetId)
+        self.name: str = name
 
 
 
@@ -68,37 +68,33 @@ class CustomSpec(Backend):
 
 
 
-    @staticmethod
-    def clone(assetId, sourceSpec: str, newSpec: str) -> None:
+
+
+
+
+
+
+
+
+    def modify(self, data: dict) -> None:
         try:
-            specManager = CustomSpec(assetId)
-            specManager.cloneoCustomSpec(sourceSpec, newSpec)
+            self.editCustomSpec(self.name, data)
         except Exception as e:
             raise e
 
 
 
-    @staticmethod
-    def delete(assetId, specName) -> None:
+    def clone(self, newSpec: str) -> None:
         try:
-            specManager = CustomSpec(assetId)
-            specManager.deleteCustomSpec(specName)
+            self.cloneCustomSpec(self.name, newSpec)
         except Exception as e:
             raise e
 
 
 
-    @staticmethod
-    def modify(assetId, specName: str, data: dict) -> None:
+    def delete(self) -> None:
         try:
-            specManager = CustomSpec(assetId)
-            specManager.editoCustomSpec(specName, data)
-
-            specManager = CustomSpec(assetId)
-            if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
-                spec = specManager.oCustomSpecManager.GetCustomizationSpec(specName)
-                specEdited = CustomSpec.replaceSpecObjectAttr(spec, data)
-                specManager.oCustomSpecManager.OverwriteCustomizationSpec(specEdited)
+            self.deleteCustomSpec(self.name)
         except Exception as e:
             raise e
 
