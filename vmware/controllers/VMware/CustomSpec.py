@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.CustomSpecManager import CustomSpecManager
+from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecSerializer as Serializer
@@ -30,7 +30,7 @@ class VMwareCustomSpecController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = CustomSpecManager.info(assetId, specName)
+                    itemData["data"] = CustomSpec.info(assetId, specName)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
@@ -83,7 +83,7 @@ class VMwareCustomSpecController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    CustomSpecManager.delete(assetId, specName)
+                    CustomSpec.delete(assetId, specName)
                     httpStatus = status.HTTP_200_OK
                     lock.release()
                 else:
@@ -120,7 +120,7 @@ class VMwareCustomSpecController(CustomController):
                     if lock.isUnlocked():
                         lock.lock()
 
-                        CustomSpecManager.modify(assetId, specName, data)
+                        CustomSpec.modify(assetId, specName, data)
                         httpStatus = status.HTTP_200_OK
                         lock.release()
                     else:

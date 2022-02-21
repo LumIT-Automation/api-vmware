@@ -3,7 +3,7 @@ from vmware.helpers.Log import Log
 
 
 # In VMware, the CustomizationSpecManager is the (unique) Managed Object that can administer the virtual machines customization specifications.
-class CustomSpecManager(Backend):
+class CustomSpec(Backend):
     def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
@@ -27,7 +27,7 @@ class CustomSpecManager(Backend):
         dns = list()
 
         try:
-            specManager = CustomSpecManager(assetId)
+            specManager = CustomSpec(assetId)
             spec = specManager.oCustomSpec(specName)
             if hasattr(spec, "spec"):
                 if hasattr(spec.spec, "identity"):
@@ -73,7 +73,7 @@ class CustomSpecManager(Backend):
     @staticmethod
     def clone(assetId, sourceSpec: str, newSpec: str) -> bool:
         try:
-            specManager = CustomSpecManager(assetId)
+            specManager = CustomSpec(assetId)
             specManager.cloneoCustomSpec(sourceSpec, newSpec)
 
         except Exception as e:
@@ -84,7 +84,7 @@ class CustomSpecManager(Backend):
     @staticmethod
     def delete(assetId, specName) -> None:
         try:
-            specManager = CustomSpecManager(assetId)
+            specManager = CustomSpec(assetId)
             specManager.deleteCustomSpec(specName)
 
         except Exception as e:
@@ -96,13 +96,13 @@ class CustomSpecManager(Backend):
     @staticmethod
     def modify(assetId, specName: str, data: dict) -> None:
         try:
-            specManager = CustomSpecManager(assetId)
+            specManager = CustomSpec(assetId)
             specManager.editoCustomSpec(specName, data)
 
-            specManager = CustomSpecManager(assetId)
+            specManager = CustomSpec(assetId)
             if specManager.oCustomSpecManager.DoesCustomizationSpecExist(specName):
                 spec = specManager.oCustomSpecManager.GetCustomizationSpec(specName)
-                specEdited = CustomSpecManager.replaceSpecObjectAttr(spec, data)
+                specEdited = CustomSpec.replaceSpecObjectAttr(spec, data)
                 specManager.oCustomSpecManager.OverwriteCustomizationSpec(specEdited)
 
         except Exception as e:
@@ -115,7 +115,7 @@ class CustomSpecManager(Backend):
     def list(assetId) -> dict:
         customSpecs = []
         try:
-            specManager = CustomSpecManager(assetId)
+            specManager = CustomSpec(assetId)
             specs = specManager.oCustomSpecs()
             for s in specs:
                 customSpecs.append(s.name)

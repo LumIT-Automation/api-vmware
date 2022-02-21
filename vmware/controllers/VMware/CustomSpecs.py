@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.CustomSpecManager import CustomSpecManager
+from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.VMware.CustomSpecs import VMwareCustomizationSpecsSerializer as Serializer, VMwareCustomizationSpecCloneSerializer as CloneSerializer
@@ -30,7 +30,7 @@ class VMwareCustomSpecsController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = CustomSpecManager.list(assetId)
+                    itemData["data"] = CustomSpec.list(assetId)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
@@ -86,7 +86,7 @@ class VMwareCustomSpecsController(CustomController):
                     lock = Lock("custom_specs", locals(), data["data"]["sourceSpec"])
                     if lock.isUnlocked():
                         lock.lock()
-                        CustomSpecManager.clone(assetId, serializer.validated_data["data"]["sourceSpec"], serializer.validated_data["data"]["newSpec"])
+                        CustomSpec.clone(assetId, serializer.validated_data["data"]["sourceSpec"], serializer.validated_data["data"]["newSpec"])
 
                         httpStatus = status.HTTP_201_CREATED
                         lock.release()

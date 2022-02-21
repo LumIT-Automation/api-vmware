@@ -35,11 +35,10 @@ class VirtualMachine(Backend):
     ####################################################################################################################
 
     def deploy(self, data: dict) -> dict:
-        from vmware.models.VMware.Network import Network
         from vmware.models.VMware.Cluster import Cluster
         from vmware.models.VMware.Datastore import Datastore
         from vmware.models.VMware.VMFolder import VMFolder
-        from vmware.models.VMware.CustomSpecManager import CustomSpecManager
+        from vmware.models.VMware.CustomSpec import CustomSpec
         try:
             # Perform some preliminary checks.
             if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
@@ -74,7 +73,7 @@ class VirtualMachine(Backend):
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
-                            customSpecManager = CustomSpecManager(self.assetId)
+                            customSpecManager = CustomSpec(self.assetId)
                             customSpec = customSpecManager.oCustomSpec(data["guestSpec"])
                             cloneSpec.customization = customSpec.spec
 
