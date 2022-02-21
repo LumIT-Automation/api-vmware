@@ -3,7 +3,7 @@ from rest_framework import serializers
 class VMwareCustomizationSpecsSerializer(serializers.Serializer):
     class VMwareCustomizationSpecsInnerSerializer(serializers.Serializer):
         items = serializers.ListField(
-            child = serializers.CharField(max_length=255, required=False)
+            child=serializers.CharField(max_length=255, required=False)
         )
 
     data = VMwareCustomizationSpecsInnerSerializer(required=True)

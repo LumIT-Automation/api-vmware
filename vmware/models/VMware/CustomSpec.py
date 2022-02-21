@@ -2,29 +2,28 @@ from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as 
 from vmware.helpers.Log import Log
 
 
-# In VMware, the CustomizationSpecManager is the (unique) Managed Object that can administer the virtual machines customization specifications.
+
 class CustomSpec(Backend):
-    def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+    def __init__(self, assetId: int, *args, **kwargs):
+        super().__init__(assetId, *args, **kwargs)
 
         self.assetId = int(assetId)
-        self.moId = moId
 
 
 
     ####################################################################################################################
-    # Public static methods
+    # Public methods
     ####################################################################################################################
 
     @staticmethod
     def info(assetId, specName) -> dict:
+        dns = list()
         o = {
                 "network": [],
                 "hostName": "",
                 "domainName": "",
                 "timeZone": ""
             }
-        dns = list()
 
         try:
             specManager = CustomSpec(assetId)
@@ -64,18 +63,16 @@ class CustomSpec(Backend):
                                 o["network"].append(nic)
 
             return o
-
         except Exception as e:
             raise e
 
 
 
     @staticmethod
-    def clone(assetId, sourceSpec: str, newSpec: str) -> bool:
+    def clone(assetId, sourceSpec: str, newSpec: str) -> None:
         try:
             specManager = CustomSpec(assetId)
             specManager.cloneoCustomSpec(sourceSpec, newSpec)
-
         except Exception as e:
             raise e
 
@@ -86,13 +83,11 @@ class CustomSpec(Backend):
         try:
             specManager = CustomSpec(assetId)
             specManager.deleteCustomSpec(specName)
-
         except Exception as e:
             raise e
 
 
 
-    # Edit a spec.
     @staticmethod
     def modify(assetId, specName: str, data: dict) -> None:
         try:
@@ -104,29 +99,23 @@ class CustomSpec(Backend):
                 spec = specManager.oCustomSpecManager.GetCustomizationSpec(specName)
                 specEdited = CustomSpec.replaceSpecObjectAttr(spec, data)
                 specManager.oCustomSpecManager.OverwriteCustomizationSpec(specEdited)
-
         except Exception as e:
             raise e
 
 
 
-    # PlainvVirtual machines customization specifications list.
+    ####################################################################################################################
+    # Public static methods
+    ####################################################################################################################
+
     @staticmethod
-    def list(assetId) -> dict:
+    def list(assetId: int) -> list:
         customSpecs = []
+
         try:
-            specManager = CustomSpec(assetId)
-            specs = specManager.oCustomSpecs()
-            for s in specs:
+            for s in Backend(assetId).oCustomSpecs():
                 customSpecs.append(s.name)
 
-            return dict({
-                "items": customSpecs
-            })
-
+            return customSpecs
         except Exception as e:
             raise e
-
-
-
-

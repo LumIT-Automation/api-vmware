@@ -4,13 +4,16 @@ from vmware.helpers.Exception import CustomException
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 from vmware.helpers.Log import Log
 
+
 class CustomSpecManager(VmwareHandler):
-    def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+    # In VMware, the CustomizationSpecManager is the (unique) Managed Object
+    # that can administer the virtual machines customization specifications.
+
+    def __init__(self, assetId: int, *args, **kwargs):
+        super().__init__(assetId, *args, **kwargs)
 
         self.assetId = int(assetId)
         self.oCustomSpecManager = self.__oCustomSpecManagerLoad()
-        self.moId = self.oCustomSpecManager._GetMoId()
 
 
 
