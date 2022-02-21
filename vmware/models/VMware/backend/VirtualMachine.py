@@ -45,7 +45,7 @@ class VirtualMachine(VmwareHandler):
                         devs.append({
                             "datastore": str(dev.backing.datastore).strip("'").split(':')[1],
                             "label": dev.deviceInfo.label,
-                            "size": str(dev.capacityInKB / 1024)+' MB',
+                            "sizeMB": (dev.capacityInKB / 1024),
                             "deviceType": devType
                         })
             return devs
@@ -116,6 +116,8 @@ class VirtualMachine(VmwareHandler):
                 diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
                 diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
                 diskSpec.device.backing.datastore = data["datastore"].oDatastore
+                if data["filePath"]:
+                    diskSpec.device.backing.fileName = '[' + str(data["filePath"]) + ']'
                 if data["deviceType"] == 'thin':
                     diskSpec.device.backing.thinProvisioned = True
                 elif data["deviceType"] == 'thick lazy zeroed':
@@ -155,6 +157,8 @@ class VirtualMachine(VmwareHandler):
                 diskSpec.device.backing = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
                 diskSpec.device.backing.diskMode = 'persistent'
                 diskSpec.device.backing.datastore = data["datastore"].oDatastore
+                if data["filePath"]:
+                    diskSpec.device.backing.fileName = '[' + str(data["filePath"]) + ']'
                 diskSpec.device.unitNumber = unitNumber
                 if data["deviceType"] == 'thin':
                     diskSpec.device.backing.thinProvisioned = True
@@ -178,7 +182,6 @@ class VirtualMachine(VmwareHandler):
 
 
 
-
     def buildNicSpec(self, data: dict) -> object:
         try:
             nicSpec = vim.vm.device.VirtualDeviceSpec()
@@ -195,7 +198,8 @@ class VirtualMachine(VmwareHandler):
                     nicSpec.device.connectable.allowGuestControl = True
                     nicSpec.device.connectable.connected = False
                 nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
-                nicSpec.device.deviceInfo.label = data["deviceLabel"]
+                if "deviceLabel" in data:
+                    nicSpec.device.deviceInfo.label = data["deviceLabel"]
                 nicSpec.device.backing.deviceName = data["network"].oNetwork.name
                 nicSpec.device.backing.network = data["network"].oNetwork
             elif data["operation"] == 'add':
@@ -203,7 +207,8 @@ class VirtualMachine(VmwareHandler):
                 nicSpec.device = VirtualMachine.getEthernetDeviceInstance(data["deviceType"])
                 nicSpec.device.deviceInfo = vim.Description()
                 nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
-                nicSpec.device.deviceInfo.label = data["deviceLabel"]
+                if "deviceLabel" in data:
+                    nicSpec.device.deviceInfo.label = data["deviceLabel"]
                 nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
                 nicSpec.device.connectable.startConnected = True
                 nicSpec.device.connectable.allowGuestControl = True
@@ -327,7 +332,7 @@ class VirtualMachine(VmwareHandler):
 
 
     # This one build the spec data structure for the devices present in the template.
-    def buildExistentDiskDevicesSpecs(self, templDevData: list) -> list:
+    def buildExistentDiskDevicesSpecs(self, templDevData: list, vmDatastoreMoId: str) -> list:
         from vmware.models.VMware.Datastore import Datastore
         templDevsInfo = self.listVMDiskInfo()  # The disk info of the template.
         devsSpecsData = list() # Intermediate data structure.
@@ -337,18 +342,26 @@ class VirtualMachine(VmwareHandler):
             for devData in templDevData:
                 # Use label to find the right device.
                 if "label" in devData and devData["label"]:
+                    Log.log(self.getVMDisk(devData["label"]), '_')
                     found = False
                     for devInfo in templDevsInfo:
                         if devInfo["label"] == devData["label"]:
                             found = True
+                            dsStore = Datastore(self.assetId, devData["datastoreMoId"])
+                            # If the disk is not in the default datastore of the VM, the datastore name is needed also.
+                            filePath = ""
+                            if devData["datastoreMoId"] != vmDatastoreMoId:
+                                filePath = dsStore.info()["name"]
                             devsSpecsData.append({
                                 "operation": "edit",
                                 "device": self.getVMDisk(devInfo["label"]),
                                 "deviceLabel": devData["label"],
                                 "deviceType": devData["deviceType"],
                                 "sizeMB": devData["sizeMB"],
-                                "datastore": Datastore(self.assetId, devData["datastoreMoId"])
+                                "datastore": dsStore,
+                                "filePath": filePath
                             })
+
                             # If there is a match, subtract the element from both the lists.
                             templDevsInfo.remove(devInfo)
                             break
@@ -374,7 +387,7 @@ class VirtualMachine(VmwareHandler):
 
 
     # This one build the spec data structure for the devices not present in the template.
-    def buildNewDiskDevicesSpecs(self, newDevData: list) -> list:
+    def buildNewDiskDevicesSpecs(self, newDevData: list, vmDatastoreMoId: str) -> list:
         from vmware.models.VMware.Datastore import Datastore
         devsSpecsData = list() # Intermediate data structure.
         specsList = list() # Real spec data obtained from  self.buildNicSpec.
@@ -382,13 +395,19 @@ class VirtualMachine(VmwareHandler):
         try:
             # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
             for devData in newDevData:
+                dsStore = Datastore(self.assetId, devData["datastoreMoId"])
+                # If the disk is not in the default datastore of the VM, the datastore name is needed also.
+                filePath = ""
+                if devData["datastoreMoId"] != vmDatastoreMoId:
+                    filePath = dsStore.info()["name"]
                 devsSpecsData.append({
                     "operation": "add",
                     "device": None,
                     "deviceLabel": devData["label"],
                     "deviceType": devData["deviceType"],
                     "sizeMB": devData["sizeMB"],
-                    "datastore": Datastore(self.assetId, devData["datastoreMoId"])
+                    "datastore": dsStore,
+                    "filePath": filePath
                 })
 
             for data in devsSpecsData:
@@ -432,7 +451,7 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildStorageSpec(self, devicesData: dict) -> list:
+    def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: str) -> list:
         specsList = list()
         """
         devicesData (passed via POST) example:
@@ -456,9 +475,10 @@ class VirtualMachine(VmwareHandler):
         """
         try:
             if "existent" in devicesData:
-                specsList.extend(self.buildExistentDiskDevicesSpecs(devicesData["existent"]))
+                specsList.extend(self.buildExistentDiskDevicesSpecs(devicesData["existent"], vmDatastoreMoId))
             if "new" in devicesData:
-                specsList.extend(self.buildNewDiskDevicesSpecs(devicesData["new"]))
+                specsList.extend(self.buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
+
             return specsList
         except Exception as e:
             raise e

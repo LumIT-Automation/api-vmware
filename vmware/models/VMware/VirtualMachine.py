@@ -1,8 +1,10 @@
+import re
 from typing import List
 from pyVmomi import vim
 
 from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
+from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
@@ -41,15 +43,15 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.CustomSpec import CustomSpec
         try:
             # Perform some preliminary checks.
-            if self.__isClusterValid(data["datacenterId"], data["clusterId"]):
-                if self.__isDatastoreValid(data["clusterId"], data["datastoreId"]):
-                    if "networkId" not in data or self.__isNetworkValid(data["clusterId"], data["networkId"]): # Allow to deploy a VM without touch the network card.
+            if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
+                if self.__isDatastoreValid(data["clusterMoId"], data["datastoreMoId"]):
+                    if "networkId" not in data or self.__isNetworkValid(data["clusterMoId"], data["networkMoId"]): # Allow to deploy a VM without touch the network card.
                         devsSpecs = None
                         cloneSpec = vim.vm.CloneSpec() # virtual machine specifications.
 
-                        cluster = Cluster(self.assetId, data["clusterId"])
-                        datastore = Datastore(self.assetId, data["datastoreId"])
-                        vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderId"])
+                        cluster = Cluster(self.assetId, data["clusterMoId"])
+                        datastore = Datastore(self.assetId, data["datastoreMoId"])
+                        vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
 
                         # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
                         relocateSpec = vim.vm.RelocateSpec()
@@ -61,7 +63,7 @@ class VirtualMachine(Backend):
                         cloneSpec.config = vim.vm.ConfigSpec()
 
                         if "diskDevices" in data:
-                            devsSpecs = self.buildStorageSpec(data["diskDevices"])
+                            devsSpecs = self.buildStorageSpec(data["diskDevices"], data["datastoreMoId"])
                         if "networkDevices" in data:
                             nicsSpec = self.buildNetworkSpec(data["networkDevices"])
                             if devsSpecs:
@@ -108,8 +110,9 @@ class VirtualMachine(Backend):
             if "notes" in data and data["notes"]:
                 modifySpec.annotation = data["notes"]
 
+            vmDatastoreMoId = self.info(related=False)["defaultDatastoreMoId"]
             if "diskDevices" in data:
-                devsSpecs = self.buildStorageSpec(data["diskDevices"])
+                devsSpecs = self.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
             if "networkDevices" in data:
                 nicsSpec = self.buildNetworkSpec(data["networkDevices"])
                 if devsSpecs:
@@ -134,7 +137,7 @@ class VirtualMachine(Backend):
         try:
             for l in self.listVMDiskInfo():
                 self.diskDevices.append(
-                    VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["size"], l["deviceType"])
+                    VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["sizeMB"], l["deviceType"])
                 )
         except Exception as e:
             raise e
@@ -158,6 +161,9 @@ class VirtualMachine(Backend):
 
         try:
             config = self.oVirtualMachine.config
+            vmCfgFile = config.files.vmPathName
+            defaultDatastoreName = re.findall('\[(.*)\]', vmCfgFile)[0] # The datastore where the vmx file is.
+            defaultDatastoreMoId = Datastore.getDatastoreMoIdByName(self.assetId, defaultDatastoreName)
 
             if related:
                 # Get virtual disks info.
@@ -178,6 +184,7 @@ class VirtualMachine(Backend):
                 "assetId": self.assetId,
                 "moId": self.moId,
                 "name": config.name,
+                "defaultDatastoreMoId": defaultDatastoreMoId,
                 "guestName": config.guestFullName,
                 "version": config.version,
                 "uuid": config.uuid,

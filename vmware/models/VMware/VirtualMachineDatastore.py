@@ -4,7 +4,7 @@ from vmware.models.VMware.Datastore import Datastore
 class VirtualMachineDatastore:
     # Virtual machine disk / attached datastore.
 
-    def __init__(self, assetId: int, datastoreMoId: str, diskLabel: str, diskSize: str, deviceType: str, *args, **kwargs):
+    def __init__(self, assetId: int, datastoreMoId: str, diskLabel: str, diskSize: float, deviceType: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId = assetId
@@ -24,7 +24,7 @@ class VirtualMachineDatastore:
             return {
                 "datastoreMoId": self.datastore.moId,
                 "disk": self.label,
-                "size": self.size,
+                "sizeMB": self.size,
                 "deviceType": self.deviceType
             }
         except Exception as e:
