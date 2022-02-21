@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.VMFolder import VMFolder
+from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
 from vmware.models.Permission.Permission import Permission
 
 from vmware.controllers.CustomController import CustomController
@@ -34,7 +34,7 @@ class VMwareVMFoldersController(CustomController):
                         if "tree" in rList:
                             formatTree = True
 
-                    data["data"] = VMFolder.list(assetId, formatTree)
+                    data["data"] = VirtualMachineFolder.list(assetId, formatTree)
                     data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK

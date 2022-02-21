@@ -5,7 +5,7 @@ from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 from vmware.helpers.Log import Log
 
 
-class VMFolder(VmwareHandler):
+class VirtualMachineFolder(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 

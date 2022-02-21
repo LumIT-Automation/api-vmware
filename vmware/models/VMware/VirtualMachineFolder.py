@@ -1,7 +1,7 @@
 from typing import List
 from pyVmomi import vim
 
-from vmware.models.VMware.backend.VMFolder import VMFolder as Backend
+from vmware.models.VMware.backend.VirtualMachineFolder import VirtualMachineFolder as Backend
 from vmware.models.VMware.Datacenter import Datacenter
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 
@@ -9,7 +9,7 @@ from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
-class VMFolder(Backend):
+class VirtualMachineFolder(Backend):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
@@ -17,7 +17,7 @@ class VMFolder(Backend):
         self.moId = moId
         self.name = self.oVMFolder.name
 
-        self.folders: List[VMFolder] = []
+        self.folders: List[VirtualMachineFolder] = []
         self.virtualmachines: List[VirtualMachine] = []
 
 
@@ -32,7 +32,7 @@ class VMFolder(Backend):
                 objData = VmwareHelper.vmwareObjToDict(o)
                 if isinstance(o, vim.Folder):
                     self.folders.append(
-                        VMFolder(self.assetId, objData["moId"])
+                        VirtualMachineFolder(self.assetId, objData["moId"])
                     )
 
                 if loadVms:
@@ -53,13 +53,13 @@ class VMFolder(Backend):
             self.loadContents(loadVms)
             for f in self.folders:
                 folders.append(
-                    VMFolder.__cleanup("", f.info(loadVms))
+                    VirtualMachineFolder.__cleanup("", f.info(loadVms))
                 )
 
             if loadVms:
                 for v in self.virtualmachines:
                     vms.append(
-                        VMFolder.__cleanup("info.vm", v.info(False))
+                        VirtualMachineFolder.__cleanup("info.vm", v.info(False))
                     )
 
             out = {
@@ -114,7 +114,7 @@ class VMFolder(Backend):
         try:
             datacenters = Datacenter.oDatacenters(assetId)
             for dc in datacenters:
-                rootFolder = VMFolder(assetId, dc.vmFolder._GetMoId())
+                rootFolder = VirtualMachineFolder(assetId, dc.vmFolder._GetMoId())
 
                 subTree = rootFolder.info(False) # recursive by composition.
                 treeList.append(subTree)
@@ -141,7 +141,7 @@ class VMFolder(Backend):
                             "folders": {}
                         }
                     }
-                    treeList.append(VMFolder.__folderTree(parentFolder, tree))
+                    treeList.append(VirtualMachineFolder.__folderTree(parentFolder, tree))
 
             return treeList
 
@@ -155,7 +155,7 @@ class VMFolder(Backend):
         folders = list()
 
         if formatTree:
-            folders = VMFolder.folderTree(assetId)
+            folders = VirtualMachineFolder.folderTree(assetId)
         else:
             try:
                 for f in Backend.oVMFolders(assetId):
@@ -186,7 +186,7 @@ class VMFolder(Backend):
                         }
                     }
                     tree[folderObj._GetMoId()]["folders"].update(subTree)
-                    VMFolder.__folderTree(child, subTree)
+                    VirtualMachineFolder.__folderTree(child, subTree)
 
         return tree
 

@@ -15,8 +15,15 @@ class CustomSpec(Backend):
     # Public methods
     ####################################################################################################################
 
-    @staticmethod
-    def info(assetId, specName) -> dict:
+    def raw(self) -> object:
+        try:
+            return self.oCustomSpec(self.name)
+        except Exception as e:
+            raise e
+
+
+
+    def info(self) -> dict:
         dns = list()
         o = {
                 "network": [],
@@ -26,8 +33,8 @@ class CustomSpec(Backend):
             }
 
         try:
-            specManager = CustomSpec(assetId)
-            spec = specManager.oCustomSpec(specName)
+            spec = self.raw()
+
             if hasattr(spec, "spec"):
                 if hasattr(spec.spec, "identity"):
                     if hasattr(spec.spec.identity, "hostName") and hasattr(spec.spec.identity.hostName, "name"):
@@ -58,21 +65,13 @@ class CustomSpec(Backend):
                                 nic["gw"] = nicSet.adapter.gateway
                             # DNS settings for a single network card is available in the data structure but not from the vCenter interface.
                             #if hasattr(nicSet.adapter, "dnsServerList"):
-                            #    nic["dns"] = nicSet.adapter.dnsServerList  # Overwrite global settings.
+                            #    nic["dns"] = nicSet.adapter.dnsServerList # overwrite global settings.
                             if nic:
                                 o["network"].append(nic)
 
             return o
         except Exception as e:
             raise e
-
-
-
-
-
-
-
-
 
 
 

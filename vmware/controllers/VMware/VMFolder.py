@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.VMFolder import VMFolder
+from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
 from vmware.models.Permission.Permission import Permission
 
 from vmware.controllers.CustomController import CustomController
@@ -27,7 +27,7 @@ class VMwareVMFolderController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    data["data"] = VMFolder(assetId, moId).info()
+                    data["data"] = VirtualMachineFolder(assetId, moId).info()
                     data["href"] = request.get_full_path()
 
                     # Check the response's ETag validity (against client request).
@@ -76,7 +76,7 @@ class VMwareVMFolderParentListController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    data["data"] = VMFolder(assetId, moId).parentList()
+                    data["data"] = VirtualMachineFolder(assetId, moId).parentList()
                     data["href"] = request.get_full_path()
 
                     # Check the response's ETag validity (against client request).

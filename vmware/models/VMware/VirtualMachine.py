@@ -37,7 +37,7 @@ class VirtualMachine(Backend):
     def deploy(self, data: dict) -> dict:
         from vmware.models.VMware.Cluster import Cluster
         from vmware.models.VMware.Datastore import Datastore
-        from vmware.models.VMware.VMFolder import VMFolder
+        from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
         from vmware.models.VMware.CustomSpec import CustomSpec
         try:
             # Perform some preliminary checks.
@@ -49,7 +49,7 @@ class VirtualMachine(Backend):
 
                         cluster = Cluster(self.assetId, data["clusterId"])
                         datastore = Datastore(self.assetId, data["datastoreId"])
-                        vmFolder = VMFolder(self.assetId, data["vmFolderId"])
+                        vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderId"])
 
                         # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
                         relocateSpec = vim.vm.RelocateSpec()
@@ -73,9 +73,8 @@ class VirtualMachine(Backend):
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
-                            cs = CustomSpec(self.assetId)
-                            customSpec = cs.oCustomSpec(data["guestSpec"])
-                            cloneSpec.customization = customSpec.spec
+                            cs = CustomSpec(self.assetId, data["guestSpec"]).raw()
+                            cloneSpec.customization = cs.spec
 
                         # Deploy
                         task = self.oVirtualMachine.Clone(folder=vmFolder.oVMFolder, name=data["vmName"], spec=cloneSpec)

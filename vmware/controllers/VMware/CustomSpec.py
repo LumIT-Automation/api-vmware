@@ -30,7 +30,7 @@ class VMwareCustomSpecController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = CustomSpec.info(assetId, specName)
+                    itemData["data"] = CustomSpec(assetId, specName).info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data["data"]
