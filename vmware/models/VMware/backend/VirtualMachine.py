@@ -34,7 +34,6 @@ class VirtualMachine(VmwareHandler):
         try:
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualDisk):
-                    Log.log(dev, 'DDDDDDDDDDDDDDDDDDDDDD')
                     if hasattr(dev, 'backing') and hasattr(dev.backing, 'datastore'):
                         if dev.backing.thinProvisioned:
                             devType = 'thin'
@@ -229,7 +228,7 @@ class VirtualMachine(VmwareHandler):
 
 
     # This one build the spec data structure for the devices present in the template.
-    def buildTemplateNetDevicesSpecs(self, templDevData: list) -> list:
+    def buildExistentNetDevicesSpecs(self, templDevData: list) -> list:
         from vmware.models.VMware.Network import Network
         templDevsInfo = self.listVMNetworkInfo()  # The network info of the template.
         devsSpecsData = list() # Intermediate data structure.
@@ -282,7 +281,7 @@ class VirtualMachine(VmwareHandler):
 
                     # Device not found: error in input data.
                     if not found:
-                        raise CustomException(status=400, payload={"VMware": "buildTemplateNetDevicesSpecs: Can't find the network card: \"" + str(devData["label"]) + "\"."})
+                        raise CustomException(status=400, payload={"VMware": "buildExistentNetDevicesSpecs: Can't find the network card: \"" + str(devData["label"]) + "\"."})
 
             # If there are some template devices without match in the input data, they should be removed.
             if templDevsInfo:
@@ -328,7 +327,7 @@ class VirtualMachine(VmwareHandler):
 
 
     # This one build the spec data structure for the devices present in the template.
-    def buildTemplateDiskDevicesSpecs(self, templDevData: list) -> list:
+    def buildExistentDiskDevicesSpecs(self, templDevData: list) -> list:
         from vmware.models.VMware.Datastore import Datastore
         templDevsInfo = self.listVMDiskInfo()  # The disk info of the template.
         devsSpecsData = list() # Intermediate data structure.
@@ -356,7 +355,7 @@ class VirtualMachine(VmwareHandler):
 
                     # Device not found: error in input data.
                     if not found:
-                        raise CustomException(status=400, payload={"VMware": "buildTemplateNetDevicesSpecs: Can't find the disk: \"" + str(devData["label"]) + "\"."})
+                        raise CustomException(status=400, payload={"VMware": "buildExistentDiskDevicesSpecs: Can't find the disk: \"" + str(devData["label"]) + "\"."})
 
             # If there are some template devices without match in the input data, they should be removed.
             if templDevsInfo:
@@ -406,7 +405,7 @@ class VirtualMachine(VmwareHandler):
         """
         devicesData (passed via POST) example:
         {
-            "templateDefault": [
+            "existent": [
                 {
                     "networkMoId": "network-1213",
                     "label": "Network adapter 1",
@@ -423,8 +422,8 @@ class VirtualMachine(VmwareHandler):
         "new" are the supplementary nics added to the new vm. 
         """
         try:
-            if "templateDefault" in devicesData:
-                specsList.extend(self.buildTemplateNetDevicesSpecs(devicesData["templateDefault"]))
+            if "existent" in devicesData:
+                specsList.extend(self.buildExistentNetDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
                 specsList.extend(self.buildNewNetDevicesSpecs(devicesData["new"]))
             return specsList
@@ -438,7 +437,7 @@ class VirtualMachine(VmwareHandler):
         """
         devicesData (passed via POST) example:
         {
-            "templateDefault": [
+            "existent": [
                 {
                     "datastoreMoId": "datastore-2341",
                     "label": "Hard disk 1",
@@ -456,8 +455,8 @@ class VirtualMachine(VmwareHandler):
         "new" are the supplementary disks added to the new vm. 
         """
         try:
-            if "templateDefault" in devicesData:
-                specsList.extend(self.buildTemplateDiskDevicesSpecs(devicesData["templateDefault"]))
+            if "existent" in devicesData:
+                specsList.extend(self.buildExistentDiskDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
                 specsList.extend(self.buildNewDiskDevicesSpecs(devicesData["new"]))
             return specsList

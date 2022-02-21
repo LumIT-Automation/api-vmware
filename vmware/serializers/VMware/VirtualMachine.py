@@ -38,7 +38,7 @@ class VMwareVirtualMachineModifySerializer(serializers.Serializer):
                 label = serializers.CharField(max_length=255, required=False, allow_blank=True)
                 deviceType = serializers.CharField(max_length=64, required=False, allow_blank=True)
 
-            templateDefault = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
+            existent = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
             new = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
 
         class VMwareVirtualMachineDiskDeviceTypeSerializer(serializers.Serializer):
@@ -48,7 +48,7 @@ class VMwareVirtualMachineModifySerializer(serializers.Serializer):
                 sizeMB = serializers.IntegerField(required=True)
                 deviceType = serializers.CharField(max_length=64, required=False, allow_blank=True)
 
-            templateDefault = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
+            existent = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
             new = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
 
 

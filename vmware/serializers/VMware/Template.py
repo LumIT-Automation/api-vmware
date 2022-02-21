@@ -9,7 +9,7 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
                 label = serializers.CharField(max_length=255, required=False, allow_blank=True)
                 deviceType = serializers.CharField(max_length=64, required=False, allow_blank=True)
 
-            templateDefault = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
+            existent = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
             new = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
 
         class VMwareVirtualMachineDiskDevicesSerializer(serializers.Serializer):
