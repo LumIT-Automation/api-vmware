@@ -41,17 +41,22 @@ class VMwareVirtualMachineModifySerializer(serializers.Serializer):
             templateDefault = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
             new = VMwareVirtualMachineNetworkDevicesSerializer(many=True, required=False, allow_null=True)
 
-        class VMwareVirtualMachineDiskDevicesSerializer(serializers.Serializer):
-            datastoreMoId = serializers.CharField(max_length=255, required=False)
-            label = serializers.CharField(max_length=255, required=False, allow_blank=True)
-            sizeMB = serializers.IntegerField(required=True)
-            deviceType = serializers.CharField(max_length=64, required=False, allow_blank=True)
+        class VMwareVirtualMachineDiskDeviceTypeSerializer(serializers.Serializer):
+            class VMwareVirtualMachineDiskDevicesSerializer(serializers.Serializer):
+                datastoreMoId = serializers.CharField(max_length=255, required=False)
+                label = serializers.CharField(max_length=255, required=False, allow_blank=True)
+                sizeMB = serializers.IntegerField(required=True)
+                deviceType = serializers.CharField(max_length=64, required=False, allow_blank=True)
+
+            templateDefault = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
+            new = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
+
 
         numCpu = serializers.IntegerField(required=False)
         numCoresPerSocket = serializers.IntegerField(required=False)
         memoryMB = serializers.IntegerField(required=False)
         notes = serializers.CharField(max_length=2048, required=False, allow_blank=True)
         networkDevices = VMwareVirtualMachineNetworkDeviceTypeSerializer(required=False, allow_null=True)
-        diskDevices = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
+        diskDevices = VMwareVirtualMachineDiskDeviceTypeSerializer(required=False, allow_null=True)
 
     data = VMwareVirtualMachineModifyInnerSerializer(required=True)
