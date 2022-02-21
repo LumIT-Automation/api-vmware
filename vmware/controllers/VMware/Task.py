@@ -60,7 +60,9 @@ class VMwareTaskController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("task", locals(), locals()["moId"]).release()
+            if "moId" in locals():
+                Lock("task", locals(), locals()["moId"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
@@ -92,7 +94,9 @@ class VMwareTaskController(CustomController):
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("task", locals(), locals()["moId"]).release()
+            if "moId" in locals():
+                Lock("task", locals(), locals()["moId"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
@@ -140,7 +144,9 @@ class VMwareTaskController(CustomController):
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("task", locals(), locals()["moId"]).release()
+            if "moId" in locals():
+                Lock("task", locals(), locals()["moId"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

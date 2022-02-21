@@ -104,7 +104,9 @@ class VMwareCustomSpecsController(CustomController):
                 httpStatus = status.HTTP_403_FORBIDDEN
 
         except Exception as e:
-            Lock("custom_specs", locals(), locals()["serializer"].data["data"]["sourceSpec"]).release()
+            if "serializer" in locals():
+                Lock("custom_specs", locals(), locals()["serializer"].data["data"]["sourceSpec"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

@@ -48,7 +48,9 @@ class VMwareVMFolderController(CustomController):
                 httpStatus = status.HTTP_403_FORBIDDEN
 
         except Exception as e:
-            Lock("vmFolder", locals(), locals()["moId"]).release()
+            if "moId" in locals():
+                Lock("vmFolder", locals(), locals()["moId"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
@@ -95,7 +97,9 @@ class VMwareVMFolderParentListController(CustomController):
                 httpStatus = status.HTTP_403_FORBIDDEN
 
         except Exception as e:
-            Lock("vmFolder", locals(), locals()["moId"]).release()
+            if "moId" in locals():
+                Lock("vmFolder", locals(), locals()["moId"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

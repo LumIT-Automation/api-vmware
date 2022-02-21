@@ -58,7 +58,9 @@ class VMwareCustomSpecController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("custom_spec", locals(), locals()["specName"]).release()
+            if "specName" in locals():
+                Lock("custom_spec", locals(), locals()["specName"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
@@ -89,7 +91,9 @@ class VMwareCustomSpecController(CustomController):
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("custom_spec", locals(), locals()["specName"]).release()
+            if "specName" in locals():
+                Lock("custom_spec", locals(), locals()["specName"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
@@ -132,7 +136,9 @@ class VMwareCustomSpecController(CustomController):
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("custom_spec", locals(), locals()["specName"]).release()
+            if "specName" in locals():
+                Lock("custom_spec", locals(), locals()["specName"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

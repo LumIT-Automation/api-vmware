@@ -58,7 +58,9 @@ class VMwareClusterController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("cluster", locals(), locals()["moId"]).release()
+            if "moId" in locals():
+                Lock("cluster", locals(), locals()["moId"]).release()
+
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
