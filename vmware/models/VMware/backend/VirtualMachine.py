@@ -303,6 +303,9 @@ class VirtualMachine(VmwareHandler):
                 nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
                 nicSpec.device.backing.deviceName = data["network"].oNetwork.name
                 nicSpec.device.backing.network = data["network"].oNetwork
+                if "additionalData" in data:
+                    nicSpec.device.controllerKey = data["additionalData"]["controllerKey"]
+                    nicSpec.device.unitNumber = data["additionalData"]["unitNumber"]
 
             elif data["operation"] == 'remove':
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
@@ -341,17 +344,26 @@ class VirtualMachine(VmwareHandler):
                                 })
                             else:
                                 # The label matches but the device type is wrong. Cannot change it, so remove it and add a new one.
+                                oldDev = self.getVMNic(devInfo["label"])
+                                # Put the re-added nic in the same pci slot to avoid changing the nics order.
+                                devAdditionalData = dict({
+                                    "controllerKey": "",
+                                    "unitNumber": ""
+                                })
+                                devAdditionalData["controllerKey"] = oldDev.controllerKey
+                                devAdditionalData["unitNumber"] = oldDev.unitNumber
                                 devsSpecsData.extend([
                                     {
                                         "operation": "remove",
-                                        "device": self.getVMNic(devInfo["label"]),
+                                        "device": oldDev
                                     },
                                     {
                                         "operation": "add",
                                         "device": None,
                                         "deviceLabel": devData["label"],
                                         "deviceType": devData["deviceType"],
-                                        "network": Network(self.assetId, devData["networkMoId"])
+                                        "network": Network(self.assetId, devData["networkMoId"]),
+                                        "devAdditionalData": devAdditionalData
                                     }
                                 ])
 
