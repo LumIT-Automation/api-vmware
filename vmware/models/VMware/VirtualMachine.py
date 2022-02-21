@@ -73,8 +73,8 @@ class VirtualMachine(Backend):
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
-                            customSpecManager = CustomSpec(self.assetId)
-                            customSpec = customSpecManager.oCustomSpec(data["guestSpec"])
+                            cs = CustomSpec(self.assetId)
+                            customSpec = cs.oCustomSpec(data["guestSpec"])
                             cloneSpec.customization = customSpec.spec
 
                         # Deploy
@@ -188,8 +188,12 @@ class VirtualMachine(Backend):
                 "template": config.template,
                 "notes": config.annotation,
 
-                "networkDevices": vmNets,
-                "diskDevices": vmDisks
+                "networkDevices": {
+                    "existent": vmNets
+                },
+                "diskDevices": {
+                    "existent": vmDisks
+                }
             }
         except Exception as e:
             raise e
