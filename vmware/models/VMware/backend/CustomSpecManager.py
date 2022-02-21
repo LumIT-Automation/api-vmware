@@ -123,6 +123,6 @@ class CustomSpecManager(VmwareHandler):
 
     def __oCustomSpecManagerLoad(self):
         try:
-            return self.getSubContent('customizationSpecManager')
+            return self.getCustomizationSpecManager()
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})

@@ -60,12 +60,23 @@ class VmwareHandler:
 
 
 
-    def getSubContent(self, prop: str) -> object:
+    def getCustomizationSpecManager(self) -> object:
         try:
             if not VmwareHandler.content:
                 self.__fetchContent()
 
-            return getattr(VmwareHandler.content, prop)
+            return getattr(VmwareHandler.content, "customizationSpecManager")
+        except Exception as e:
+            raise e
+
+
+
+    def getTaskManager(self) -> object:
+        try:
+            if not VmwareHandler.content:
+                self.__fetchContent()
+
+            return getattr(VmwareHandler.content, "taskManager")
         except Exception as e:
             raise e
 

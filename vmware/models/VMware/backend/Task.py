@@ -44,7 +44,7 @@ class Task(VmwareHandler):
 
     def __oTaskLoad(self):
         try:
-            taskManager = self.getSubContent('taskManager')
+            taskManager = self.getTaskManager()
             for task in taskManager.recentTask:
                 if task.info.key == self.moId:
                     return task
