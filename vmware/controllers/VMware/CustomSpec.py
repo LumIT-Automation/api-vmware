@@ -18,7 +18,6 @@ class VMwareCustomSpecController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int, specName: str) -> Response:
         data = dict()
-        itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
@@ -30,10 +29,10 @@ class VMwareCustomSpecController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = CustomSpec(assetId, specName).info()
+                    itemData = CustomSpec(assetId, specName).info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
-                        data["data"] = serializer.validated_data["data"]
+                        data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -83,7 +82,7 @@ class VMwareCustomSpecController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    CustomSpec.delete(assetId, specName)
+                    CustomSpec(assetId, specName).delete()
                     httpStatus = status.HTTP_200_OK
                     lock.release()
                 else:
@@ -100,6 +99,7 @@ class VMwareCustomSpecController(CustomController):
         return Response(None, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
+
 
 
     @staticmethod

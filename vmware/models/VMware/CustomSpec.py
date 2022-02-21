@@ -1,6 +1,14 @@
+from typing import List, Dict
+
 from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as Backend
 from vmware.helpers.Log import Log
 
+
+NetInfo = {
+    "ip": "",
+    "netMask": "",
+    "gw": []
+}
 
 class CustomSpec(Backend):
     def __init__(self, assetId: int, name: str = "", *args, **kwargs):
@@ -8,6 +16,12 @@ class CustomSpec(Backend):
 
         self.assetId: int = int(assetId)
         self.name: str = name
+        self.dns1: str = ""
+        self.dns2: str = ""
+        self.hostName: str = ""
+        self.domainName: str = ""
+        self.timeZone: str = ""
+        self.network: List[NetInfo] = []
 
 
 
@@ -15,25 +29,19 @@ class CustomSpec(Backend):
     # Public methods
     ####################################################################################################################
 
-    def raw(self) -> object:
-        try:
-            return self.oCustomSpec(self.name)
-        except Exception as e:
-            raise e
-
-
-
     def info(self) -> dict:
         dns = list()
         o = {
-                "network": [],
-                "hostName": "",
-                "domainName": "",
-                "timeZone": ""
-            }
+            "assetId": self.assetId,
+            "name": self.name,
+            "network": [],
+            "hostName": "",
+            "domainName": "",
+            "timeZone": ""
+        }
 
         try:
-            spec = self.raw()
+            spec = self.oCustomSpec(self.name)
 
             if hasattr(spec, "spec"):
                 if hasattr(spec.spec, "identity"):
@@ -56,13 +64,15 @@ class CustomSpec(Backend):
                 if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap:
                     for nicSet in spec.spec.nicSettingMap:
                         if hasattr(nicSet, "adapter"):
-                            nic = dict()
+                            nic = {"gw": list()}
+
                             if hasattr(nicSet.adapter, "ip") and hasattr(nicSet.adapter.ip, "ipAddress"):
                                 nic["ip"] = nicSet.adapter.ip.ipAddress
                             if hasattr(nicSet.adapter, "subnetMask"):
-                                nic["netMask"] = nicSet.adapter.subnetMask
+                                nic["netMask"] = nicSet.adapter.subnetMask or ""
                             if hasattr(nicSet.adapter, "gateway"):
-                                nic["gw"] = nicSet.adapter.gateway
+                                for el in nicSet.adapter.gateway:
+                                    nic["gw"].append(el)
                             # DNS settings for a single network card is available in the data structure but not from the vCenter interface.
                             #if hasattr(nicSet.adapter, "dnsServerList"):
                             #    nic["dns"] = nicSet.adapter.dnsServerList # overwrite global settings.
@@ -105,11 +115,13 @@ class CustomSpec(Backend):
 
     @staticmethod
     def list(assetId: int) -> list:
-        customSpecs = []
+        customSpecs = list()
 
         try:
             for s in Backend(assetId).oCustomSpecs():
-                customSpecs.append(s.name)
+                customSpecs.append(
+                    CustomSpec(assetId, s.name).info()
+                )
 
             return customSpecs
         except Exception as e:

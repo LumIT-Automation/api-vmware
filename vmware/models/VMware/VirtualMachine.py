@@ -73,7 +73,7 @@ class VirtualMachine(Backend):
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
-                            cs = CustomSpec(self.assetId, data["guestSpec"]).raw()
+                            cs = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
                             cloneSpec.customization = cs.spec
 
                         # Deploy

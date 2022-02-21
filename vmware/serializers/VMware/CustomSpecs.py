@@ -1,12 +1,10 @@
 from rest_framework import serializers
 
-class VMwareCustomizationSpecsSerializer(serializers.Serializer):
-    class VMwareCustomizationSpecsInnerSerializer(serializers.Serializer):
-        items = serializers.ListField(
-            child=serializers.CharField(max_length=255, required=False)
-        )
+from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecSerializer
 
-    data = VMwareCustomizationSpecsInnerSerializer(required=True)
+
+class VMwareCustomizationSpecsSerializer(serializers.Serializer):
+    items = VMwareCustomizationSpecSerializer(many=True)
 
 
 
@@ -16,4 +14,3 @@ class VMwareCustomizationSpecCloneSerializer(serializers.Serializer):
         newSpec = serializers.CharField(max_length=255, required=False)
 
     data = VMwareCustomizationSpecCloneInnerSerializer(required=True)
-
