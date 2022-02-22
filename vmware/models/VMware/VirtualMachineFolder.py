@@ -126,25 +126,22 @@ class VirtualMachineFolder(Backend):
 
 
     @staticmethod
-    def folderTreeQuick(assetId) -> list:
+    def folderTreeQuick(assetId: int) -> list:
         treeList = list()
-
         try:
             datacenters = Datacenter.oDatacenters(assetId)
-
             for dc in datacenters:
                 if isinstance(dc, vim.Datacenter):
                     parentFolder = dc.vmFolder
                     tree = {
-                        parentFolder._GetMoId(): {
-                            "name": dc.name,
-                            "folders": {}
-                        }
+                        "assetId": assetId,
+                        "moId": parentFolder._GetMoId(),
+                        "name": dc.name,
+                        "folders": []
                     }
-                    treeList.append(VirtualMachineFolder.__folderTree(parentFolder, tree))
+                    treeList.append(VirtualMachineFolder.__folderTree(assetId, parentFolder, tree))
 
             return treeList
-
         except Exception as e:
             raise e
 
@@ -173,21 +170,21 @@ class VirtualMachineFolder(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def __folderTree(folderObj, tree: {}):
+    def __folderTree(assetId: int, folderObj, tree: {}):
         if isinstance(folderObj, vim.Folder):
+            if not "folders" in tree:
+                tree["folders"] = []
             children = folderObj.childEntity
             for child in children:
                 if isinstance(child, vim.Folder):
-                    # _GetMoId() == obj._moId == Managed object Id.
                     subTree = {
-                        child._GetMoId(): {
-                            "name": child.name,
-                            "folders": {}
-                        }
+                        "assetId": assetId,
+                        "moId": child._GetMoId(),
+                        "name": child.name,
+                        "folders": []
                     }
-                    tree[folderObj._GetMoId()]["folders"].update(subTree)
-                    VirtualMachineFolder.__folderTree(child, subTree)
-
+                    tree["folders"].append(subTree)
+                    VirtualMachineFolder.__folderTree(assetId, child, subTree)
         return tree
 
 
