@@ -107,6 +107,7 @@ class VirtualMachine(VmwareHandler):
 
 
 
+
     def buildDiskSpec(self, data: dict) -> object:
         try:
             diskSpec = vim.vm.device.VirtualDeviceSpec()
@@ -115,17 +116,9 @@ class VirtualMachine(VmwareHandler):
                 diskSpec.device = data["device"]
                 diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
                 diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
-                diskSpec.device.backing.datastore = data["datastore"].oDatastore
-                if data["filePath"]:
-                    diskSpec.device.backing.fileName = '[' + str(data["filePath"]) + ']'
-                if data["deviceType"] == 'thin':
-                    diskSpec.device.backing.thinProvisioned = True
-                elif data["deviceType"] == 'thick lazy zeroed':
-                    diskSpec.device.backing.thinProvisioned = False
-                    diskSpec.device.backing.eagerlyScrub = False
-                elif data["deviceType"] == 'thick eager zeroed':
-                    diskSpec.device.backing.thinProvisioned = False
-                    diskSpec.device.backing.eagerlyScrub = True
+
+                backingSpec = diskSpec.device.backing
+                diskSpec.device.backing = self._buildDiskBackingSpec(spec=backingSpec, oDatastore=data["datastore"].oDatastore, deviceType=data["deviceType"], filePath=data["filePath"])
 
             elif data["operation"] == 'add':
                 # Get the controller device.
@@ -150,32 +143,23 @@ class VirtualMachine(VmwareHandler):
                 diskSpec.fileOperation = "create"
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
                 diskSpec.device = vim.vm.device.VirtualDisk()
+                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
+                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
                 diskSpec.device.controllerKey = controller.key
+                diskSpec.device.unitNumber = unitNumber
                 diskSpec.device.deviceInfo = vim.Description()
                 if "deviceLabel" in data:
                     diskSpec.device.deviceInfo.label = data["deviceLabel"]
-                diskSpec.device.backing = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
-                diskSpec.device.backing.diskMode = 'persistent'
-                diskSpec.device.backing.datastore = data["datastore"].oDatastore
-                if data["filePath"]:
-                    diskSpec.device.backing.fileName = '[' + str(data["filePath"]) + ']'
-                diskSpec.device.unitNumber = unitNumber
-                if data["deviceType"] == 'thin':
-                    diskSpec.device.backing.thinProvisioned = True
-                elif data["deviceType"] == 'thick lazy zeroed':
-                    diskSpec.device.backing.thinProvisioned = False
-                    diskSpec.device.backing.eagerlyScrub = False
-                elif data["deviceType"] == 'thick eager zeroed':
-                    diskSpec.device.backing.thinProvisioned = False
-                    diskSpec.device.backing.eagerlyScrub = True
-                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
-                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
+
+                diskSpec.device.backing = self._buildDiskBackingSpec(spec=None, oDatastore=data["datastore"].oDatastore, deviceType=data["deviceType"], filePath=data["filePath"])
+
             elif data["operation"] == 'remove':
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
                 diskSpec.device = data["device"]
             else:
                 raise CustomException(status=400, payload={"VMware": "buildDiskSpec: not an operation."})
 
+            Log.log(diskSpec, 'DDDDDDDDDDDDDDDDDDDDDDDD')
             return diskSpec
         except Exception as e:
             raise e
@@ -609,7 +593,6 @@ class VirtualMachine(VmwareHandler):
             if devsSpecs:
                 configSpec.deviceChange = devsSpecs
 
-            Log.log(configSpec, 'CCCCCCCCCCCCCCCCCCC')
             return configSpec
         except Exception as e:
             raise e
@@ -625,3 +608,28 @@ class VirtualMachine(VmwareHandler):
             return self.getObjects(vimType=vim.VirtualMachine, moId=self.moId)[0]
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})
+
+
+
+    def _buildDiskBackingSpec(self, spec: object, oDatastore: object, deviceType: str, filePath: str):
+        try:
+            if not spec:
+                spec = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
+                spec.diskMode = 'persistent'
+
+            spec.datastore = oDatastore
+            if deviceType == 'thin':
+                spec.thinProvisioned = True
+            elif deviceType == 'thick lazy zeroed':
+                spec.thinProvisioned = False
+                spec.eagerlyScrub = False
+            elif deviceType == 'thick eager zeroed':
+                spec.thinProvisioned = False
+                spec.eagerlyScrub = True
+
+            if filePath:
+                spec.fileName = '[' + str(filePath) + ']'
+
+            return spec
+        except Exception as e:
+            raise e
