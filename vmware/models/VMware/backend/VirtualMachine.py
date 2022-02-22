@@ -118,7 +118,12 @@ class VirtualMachine(VmwareHandler):
                 diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
 
                 backingSpec = diskSpec.device.backing
-                diskSpec.device.backing = self._buildDiskBackingSpec(spec=backingSpec, oDatastore=data["datastore"].oDatastore, deviceType=data["deviceType"], filePath=data["filePath"])
+                diskSpec.device.backing = self._buildDiskBackingSpec(
+                    spec=backingSpec,
+                    oDatastore=data["datastore"].oDatastore,
+                    deviceType=data["deviceType"],
+                    filePath=data["filePath"]
+                )
 
             elif data["operation"] == 'add':
                 # Get the controller device.
@@ -151,7 +156,12 @@ class VirtualMachine(VmwareHandler):
                 if "deviceLabel" in data:
                     diskSpec.device.deviceInfo.label = data["deviceLabel"]
 
-                diskSpec.device.backing = self._buildDiskBackingSpec(spec=None, oDatastore=data["datastore"].oDatastore, deviceType=data["deviceType"], filePath=data["filePath"])
+                diskSpec.device.backing = self._buildDiskBackingSpec(
+                    spec=None,
+                    oDatastore=data["datastore"].oDatastore,
+                    deviceType=data["deviceType"],
+                    filePath=data["filePath"]
+                )
 
             elif data["operation"] == 'remove':
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
@@ -159,7 +169,6 @@ class VirtualMachine(VmwareHandler):
             else:
                 raise CustomException(status=400, payload={"VMware": "buildDiskSpec: not an operation."})
 
-            Log.log(diskSpec, 'DDDDDDDDDDDDDDDDDDDDDDDD')
             return diskSpec
         except Exception as e:
             raise e
