@@ -46,37 +46,32 @@ class VirtualMachine(Backend):
             if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
                 if self.__isDatastoreValid(data["clusterMoId"], data["datastoreMoId"]):
                     if "networkId" not in data or self.__isNetworkValid(data["clusterMoId"], data["networkMoId"]): # Allow to deploy a VM without touch the network card.
-                        devsSpecs = None
-                        cloneSpec = vim.vm.CloneSpec() # virtual machine specifications.
 
                         cluster = Cluster(self.assetId, data["clusterMoId"])
+                        data.pop("clusterMoId")
                         datastore = Datastore(self.assetId, data["datastoreMoId"])
                         vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
+                        data.pop("vmFolderMoId")
 
-                        # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
-                        relocateSpec = vim.vm.RelocateSpec()
-                        relocateSpec.datastore = datastore.oDatastore
-                        relocateSpec.pool = cluster.oCluster.resourcePool # The resource pool associated to this cluster.
-
-                        cloneSpec.location = relocateSpec
-                        cloneSpec.powerOn = data["powerOn"]
-                        cloneSpec.config = vim.vm.ConfigSpec()
-
+                        devsSpecs = None
                         if "diskDevices" in data:
                             devsSpecs = self.buildStorageSpec(data["diskDevices"], data["datastoreMoId"])
+                            data.pop("diskDevices")
+                            data.pop("datastoreMoId")
                         if "networkDevices" in data:
                             nicsSpec = self.buildNetworkSpec(data["networkDevices"])
+                            data.pop("networkDevices")
                             if devsSpecs:
                                 devsSpecs.extend(nicsSpec)
                             else:
                                 devsSpecs = nicsSpec
-                        if devsSpecs:
-                            cloneSpec.config.deviceChange = devsSpecs
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
-                            cs = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
-                            cloneSpec.customization = cs.spec
+                            oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
+                            data.pop("guestSpec")
+
+                        cloneSpec = self._buildVMCloneSpecs(oDatastore=datastore.oDatastore, oCluster=cluster.oCluster, data=data, devsSpecs=devsSpecs, oCustomSpec=oCustomSpec)
 
                         # Deploy
                         return dict({
@@ -94,36 +89,26 @@ class VirtualMachine(Backend):
 
 
     def modify(self, data: dict) -> dict:
-        disksSpec = None
         nicsSpec = None
         devsSpecs = None
-        modifySpec = vim.vm.ConfigSpec()
-        try:
-            if "numCpu" in data and data["numCpu"]:
-                modifySpec.numCPUs = data["numCpu"]
-            if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
-                modifySpec.numCoresPerSocket = data["numCoresPerSocket"]
-            if "memoryMB" in data and data["memoryMB"]:
-                modifySpec.memoryMB = data["memoryMB"]
-            if "notes" in data and data["notes"]:
-                modifySpec.annotation = data["notes"]
 
+        try:
             vmDatastoreMoId = self.info(related=False)["defaultDatastoreMoId"]
             if "diskDevices" in data:
                 devsSpecs = self.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
+                data.pop("diskDevices")
             if "networkDevices" in data:
                 nicsSpec = self.buildNetworkSpec(data["networkDevices"])
+                data.pop("networkDevices")
                 if devsSpecs:
                     devsSpecs.extend(nicsSpec)
                 else:
                     devsSpecs = nicsSpec
-            if devsSpecs:
-                modifySpec.deviceChange = devsSpecs
 
-            task = self.oVirtualMachine.ReconfigVM_Task(spec=modifySpec)
-            taskId = task._GetMoId()
+            modifySpec = self._buildVMConfigSpecs(data, devsSpecs)
+
             return dict({
-                "task": taskId
+                "task": self._reconfig(configSpec=modifySpec)
             })
 
         except Exception as e:

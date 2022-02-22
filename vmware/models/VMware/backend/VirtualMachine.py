@@ -332,7 +332,7 @@ class VirtualMachine(VmwareHandler):
 
 
     # This one build the spec data structure for the devices present in the template.
-    def buildExistentDiskDevicesSpecs(self, templDevData: list, vmDatastoreMoId: str) -> list:
+    def buildExistentDiskDevicesSpecs(self, templDevData: list) -> list:
         from vmware.models.VMware.Datastore import Datastore
         templDevsInfo = self.listVMDiskInfo()  # The disk info of the template.
         devsSpecsData = list() # Intermediate data structure.
@@ -342,23 +342,23 @@ class VirtualMachine(VmwareHandler):
             for devData in templDevData:
                 # Use label to find the right device.
                 if "label" in devData and devData["label"]:
-                    Log.log(self.getVMDisk(devData["label"]), '_')
                     found = False
                     for devInfo in templDevsInfo:
                         if devInfo["label"] == devData["label"]:
                             found = True
-                            dsStore = Datastore(self.assetId, devData["datastoreMoId"])
-                            # If the disk is not in the default datastore of the VM, the datastore name is needed also.
+                            device = self.getVMDisk(devInfo["label"])
+                            datastore = Datastore(self.assetId, devData["datastoreMoId"])
                             filePath = ""
-                            if devData["datastoreMoId"] != vmDatastoreMoId:
-                                filePath = dsStore.info()["name"]
+                            # If the disk is moving in another datastore, the datastore name in the filePath is also needed.
+                            if devData["datastoreMoId"] != device.backing.datastore._GetMoId():
+                                filePath = datastore.info()["name"]
                             devsSpecsData.append({
                                 "operation": "edit",
                                 "device": self.getVMDisk(devInfo["label"]),
                                 "deviceLabel": devData["label"],
                                 "deviceType": devData["deviceType"],
                                 "sizeMB": devData["sizeMB"],
-                                "datastore": dsStore,
+                                "datastore": datastore,
                                 "filePath": filePath
                             })
 
@@ -396,7 +396,7 @@ class VirtualMachine(VmwareHandler):
             # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
             for devData in newDevData:
                 dsStore = Datastore(self.assetId, devData["datastoreMoId"])
-                # If the disk is not in the default datastore of the VM, the datastore name is needed also.
+                # If the disk is not in the default datastore of the VM, the datastore name in the filePath is also needed.
                 filePath = ""
                 if devData["datastoreMoId"] != vmDatastoreMoId:
                     filePath = dsStore.info()["name"]
@@ -475,7 +475,7 @@ class VirtualMachine(VmwareHandler):
         """
         try:
             if "existent" in devicesData:
-                specsList.extend(self.buildExistentDiskDevicesSpecs(devicesData["existent"], vmDatastoreMoId))
+                specsList.extend(self.buildExistentDiskDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
                 specsList.extend(self.buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
 
@@ -549,10 +549,68 @@ class VirtualMachine(VmwareHandler):
     ####################################################################################################################
 
     def _clone(self, oVMFolder: object, vmName: str, cloneSpec: object) -> str:
-        from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
         try:
             task = self.oVirtualMachine.Clone(folder=oVMFolder, name=vmName, spec=cloneSpec)
             return task._GetMoId()
+        except Exception as e:
+            raise e
+
+
+
+    def _reconfig(self, configSpec: object) -> str:
+        try:
+            task = self.oVirtualMachine.ReconfigVM_Task(spec=configSpec)
+            return task._GetMoId()
+        except Exception as e:
+            raise e
+
+
+
+    def _buildVMCloneSpecs(self, oDatastore: object, oCluster: object, data: dict, devsSpecs: object = None, oCustomSpec: object = None):
+        try:
+            cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
+
+            # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
+            relocateSpec = vim.vm.RelocateSpec()
+            relocateSpec.datastore = oDatastore
+            relocateSpec.pool = oCluster.resourcePool  # The resource pool associated to this cluster.
+
+            cloneSpec.location = relocateSpec
+            if "powerOn" in data:
+                cloneSpec.powerOn = data["powerOn"]
+                data.pop("powerOn")
+
+            cloneSpec.config = self._buildVMConfigSpecs(data, devsSpecs)
+
+            # Apply the guest OS customization specifications.
+            if oCustomSpec:
+                cloneSpec.customization = oCustomSpec.spec
+
+            return cloneSpec
+
+        except Exception as e:
+            raise e
+
+
+
+    def _buildVMConfigSpecs(self, data: dict, devsSpecs: object = None):
+        try:
+            configSpec = vim.vm.ConfigSpec()
+
+            if "numCpu" in data and data["numCpu"]:
+                configSpec.numCPUs = data["numCpu"]
+            if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
+                configSpec.numCoresPerSocket = data["numCoresPerSocket"]
+            if "memoryMB" in data and data["memoryMB"]:
+                configSpec.memoryMB = data["memoryMB"]
+            if "notes" in data and data["notes"]:
+                configSpec.annotation = data["notes"]
+
+            if devsSpecs:
+                configSpec.deviceChange = devsSpecs
+
+            Log.log(configSpec, 'CCCCCCCCCCCCCCCCCCC')
+            return configSpec
         except Exception as e:
             raise e
 
