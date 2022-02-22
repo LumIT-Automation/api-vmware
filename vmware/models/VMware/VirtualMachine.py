@@ -156,12 +156,10 @@ class VirtualMachine(Backend):
     def info(self, related: bool = True) -> dict:
         vmDisks = list()
         vmNets = list()
+        defaultDatastoreMoId = ""
 
         try:
             config = self.oVirtualMachine.config
-            vmCfgFile = config.files.vmPathName
-            defaultDatastoreName = re.findall('\[(.*)\]', vmCfgFile)[0] # The datastore where the vmx file is.
-            defaultDatastoreMoId = Datastore.getDatastoreMoIdByName(self.assetId, defaultDatastoreName)
 
             if related:
                 # Get virtual disks info.
@@ -170,6 +168,10 @@ class VirtualMachine(Backend):
                     vmDisks.append(
                         disk.info()
                     )
+
+                # Get the datastore where the vmx file is contained.
+                defaultDatastoreName = re.findall('\[(.*)\]', config.files.vmPathName)[0]
+                defaultDatastoreMoId = Datastore.getDatastoreMoIdByName(self.assetId, defaultDatastoreName)
 
                 # Get network devices info.
                 self.loadVMNetworks()
@@ -290,10 +292,14 @@ class VirtualMachine(Backend):
         # Remove some related objects' information, if not loaded.
         try:
             if oType == "list":
-                if not o["networkDevices"]:
+                if not o["networkDevices"] or not o["networkDevices"]["existent"]:
                     del (o["networkDevices"])
-                if not o["diskDevices"]:
+
+                if not o["diskDevices"] or not o["diskDevices"]["existent"]:
                     del (o["diskDevices"])
+
+                if not o["defaultDatastoreMoId"]:
+                    del (o["defaultDatastoreMoId"])
         except Exception:
             pass
 

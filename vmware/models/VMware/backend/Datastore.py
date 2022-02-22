@@ -62,12 +62,8 @@ class Datastore(VmwareHandler):
 
 
 
-    ####################################################################################################################
-    # Protected static methods
-    ####################################################################################################################
-
     @staticmethod
-    def _getDatastoreMoIdByName(assetId: int, datastoreName: str):
+    def getDatastoreMoIdByName(assetId: int, datastoreName: str):
         try:
             dsList = Datastore.oDatastores(assetId)
             for ds in dsList:
