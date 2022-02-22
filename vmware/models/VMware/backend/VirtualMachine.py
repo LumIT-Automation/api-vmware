@@ -545,6 +545,20 @@ class VirtualMachine(VmwareHandler):
 
 
     ####################################################################################################################
+    # Protected methods
+    ####################################################################################################################
+
+    def _clone(self, oVMFolder: object, vmName: str, cloneSpec: object) -> str:
+        from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
+        try:
+            task = self.oVirtualMachine.Clone(folder=oVMFolder, name=vmName, spec=cloneSpec)
+            return task._GetMoId()
+        except Exception as e:
+            raise e
+
+
+
+    ####################################################################################################################
     # Private methods
     ####################################################################################################################
 

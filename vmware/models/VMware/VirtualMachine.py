@@ -79,10 +79,8 @@ class VirtualMachine(Backend):
                             cloneSpec.customization = cs.spec
 
                         # Deploy
-                        task = self.oVirtualMachine.Clone(folder=vmFolder.oVMFolder, name=data["vmName"], spec=cloneSpec)
-                        taskId = task._GetMoId()
                         return dict({
-                            "task": taskId
+                            "task": self._clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
                         })
 
         except Exception as e:
