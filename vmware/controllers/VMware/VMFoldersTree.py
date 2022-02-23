@@ -11,23 +11,28 @@ from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareVMFoldersController(CustomController):
+class VMwareVMFoldersTreeController(CustomController):
     @staticmethod
     def get(request: Request, assetId: int) -> Response:
         data = dict()
         itemData = dict()
+        folderMoIdList = None
         etagCondition = {"responseEtag": ""}
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="folders_get", assetId=assetId) or user["authDisabled"]:
-                Log.actionLog("VMFolders get", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="folders_tree_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("VMFolders tree get", user)
 
                 lock = Lock("vmFolders", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
-                    data["data"] = VirtualMachineFolder.list(assetId)
+                    # If asked for, get the tree format.
+                    if "folder" in request.GET:
+                        folderMoIdList = request.GET.getlist('folder')
+
+                    data["data"] = VirtualMachineFolder.foldersTree(assetId, folderMoIdList)
                     data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK

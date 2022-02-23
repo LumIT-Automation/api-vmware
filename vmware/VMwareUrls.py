@@ -6,7 +6,7 @@ from .controllers.VMware import Clusters, Cluster
 from .controllers.VMware import HostSystems, HostSystem
 from .controllers.VMware import Datastores, Datastore
 from .controllers.VMware import Networks,Network
-from .controllers.VMware import VMFolders, VMFolder
+from .controllers.VMware import VMFolders, VMFolder, VMFoldersTree
 from .controllers.VMware import VirtualMachines, VirtualMachine
 from .controllers.VMware import Templates, Template
 from .controllers.VMware import Task
@@ -55,7 +55,7 @@ urlpatterns = [
 
     # VMFolder.
     path('<int:assetId>/vmFolders/', VMFolders.VMwareVMFoldersController.as_view(), name='vmware-vmFolders'),
-    # path('<int:assetId>/vmFolders/tree/', VMFolders.VMwareVMFoldersTreeController.as_view(), name='vmware-vmFolders-tree'),
+    path('<int:assetId>/vmFolders/tree/', VMFoldersTree.VMwareVMFoldersTreeController.as_view(), name='vmware-vmFolders-tree'),
     path('<int:assetId>/vmFolder/<str:moId>/', VMFolder.VMwareVMFolderController.as_view(), name='vmware-vmFolder'),
     path('<int:assetId>/vmFolder/<str:moId>/parentList/', VMFolder.VMwareVMFolderParentListController.as_view(), name='vmware-vmFolder-parentlist'),
 

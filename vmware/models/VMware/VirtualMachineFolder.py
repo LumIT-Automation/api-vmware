@@ -102,7 +102,7 @@ class VirtualMachineFolder(Backend):
 
     # Composition version
     @staticmethod
-    def folderTreeC(assetId) -> list:
+    def folderTreeComp(assetId) -> list:
         treeList = list()
         try:
             datacenters = Datacenter.oDatacenters(assetId)
@@ -120,30 +120,37 @@ class VirtualMachineFolder(Backend):
 
     # Quick version
     @staticmethod
-    def folderTree(assetId: int, folderMoId: str = "") -> list:
+    def foldersTree(assetId: int, folderMoIdList: list = None) -> list:
+        folderMoIdList = [] if folderMoIdList is None else folderMoIdList
         treeList = list()
         try:
-            if not folderMoId: # get the whole tree of all datacenters.
+            if not folderMoIdList:
                 datacenters = Datacenter.oDatacenters(assetId)
                 for dc in datacenters:
-                    if isinstance(dc, vim.Datacenter):
-                        parentFolder = dc.vmFolder
-                        tree = {
-                            "assetId": assetId,
-                            "moId": parentFolder._GetMoId(),
-                            "name": dc.name,
-                            "folders": []
-                        }
-                        treeList.append(VirtualMachineFolder.__folderTree(assetId, parentFolder, tree))
-            else: # get the subtree of the passed folder.
-                parentFolder = VirtualMachineFolder(assetId, folderMoId).oVMFolder
-                tree = {
-                    "assetId": assetId,
-                    "moId": parentFolder._GetMoId(),
-                    "name": parentFolder.name,
-                    "folders": []
-                }
-                treeList.append(VirtualMachineFolder.__folderTree(assetId, parentFolder, tree))
+                    folderMoIdList.append(dc.vmFolder._GetMoId())
+
+            for folderMoId in folderMoIdList:
+                treeList.extend(VirtualMachineFolder.folderTree(assetId, folderMoId))
+
+            return treeList
+        except Exception as e:
+            raise e
+
+
+
+    # Quick version
+    @staticmethod
+    def folderTree(assetId: int, folderMoId: str) -> list:
+        treeList = list()
+        try:
+            parentFolder = VirtualMachineFolder(assetId, folderMoId).oVMFolder
+            tree = {
+                "assetId": assetId,
+                "moId": parentFolder._GetMoId(),
+                "name": parentFolder.name,
+                "folders": []
+            }
+            treeList.append(VirtualMachineFolder.__folderTree(assetId, parentFolder, tree))
 
             return treeList
         except Exception as e:
@@ -174,11 +181,11 @@ class VirtualMachineFolder(Backend):
     ####################################################################################################################
 
     @staticmethod
-    def __folderTree(assetId: int, folderObj, tree: {}):
-        if isinstance(folderObj, vim.Folder):
+    def __folderTree(assetId: int, oVMFolder: object, tree: dict):
+        if isinstance(oVMFolder, vim.Folder):
             if not "folders" in tree:
                 tree["folders"] = []
-            children = folderObj.childEntity
+            children = oVMFolder.childEntity
             for child in children:
                 if isinstance(child, vim.Folder):
                     subTree = {

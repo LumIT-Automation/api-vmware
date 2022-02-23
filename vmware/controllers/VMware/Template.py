@@ -76,7 +76,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
     # @todo: move away.
     @staticmethod
     def post(request: Request, assetId: int, moId: str) -> Response:
-        response = None
+        response = dict()
         user = CustomController.loggedUser(request)
 
         try:
@@ -92,7 +92,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
                         lock.lock()
 
                         template = VirtualMachineTemplate(assetId, moId)
-                        response = template.deploy(serializer.validated_data)
+                        response["task"] = template.deploy(serializer.validated_data)
                         httpStatus = status.HTTP_202_ACCEPTED
                         lock.release()
                         Log.actionLog("Deploy task moId: "+response["task"], user)

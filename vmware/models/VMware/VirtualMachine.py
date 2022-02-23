@@ -36,7 +36,7 @@ class VirtualMachine(Backend):
     # Public methods
     ####################################################################################################################
 
-    def deploy(self, data: dict) -> dict:
+    def deploy(self, data: dict) -> str:
         from vmware.models.VMware.Cluster import Cluster
         from vmware.models.VMware.Datastore import Datastore
         from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
@@ -69,16 +69,14 @@ class VirtualMachine(Backend):
                         cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, oCluster=cluster.oCluster, data=data, devsSpecs=devsSpecs, oCustomSpec=oCustomSpec)
 
                         # Deploy
-                        return dict({
-                            "task": self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
-                        })
+                        return self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
 
         except Exception as e:
             raise e
 
 
 
-    def modify(self, data: dict) -> dict:
+    def modify(self, data: dict) -> str:
         nicsSpec = None
         devsSpecs = None
 
@@ -97,9 +95,7 @@ class VirtualMachine(Backend):
 
             modifySpec = self.buildVMConfigSpecs(data, devsSpecs)
 
-            return dict({
-                "task": self.reconfig(configSpec=modifySpec)
-            })
+            return self.reconfig(configSpec=modifySpec)
 
         except Exception as e:
             raise e
