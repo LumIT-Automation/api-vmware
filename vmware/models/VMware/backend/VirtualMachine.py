@@ -478,6 +478,72 @@ class VirtualMachine(VmwareHandler):
 
 
 
+    def buildVMCloneSpecs(self, oDatastore: object, oCluster: object, data: dict, devsSpecs: object = None, oCustomSpec: object = None):
+        try:
+            cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
+
+            # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
+            relocateSpec = vim.vm.RelocateSpec()
+            relocateSpec.datastore = oDatastore
+            relocateSpec.pool = oCluster.resourcePool  # The resource pool associated to this cluster.
+
+            cloneSpec.location = relocateSpec
+            if "powerOn" in data:
+                cloneSpec.powerOn = data["powerOn"]
+                data.pop("powerOn")
+
+            cloneSpec.config = self.buildVMConfigSpecs(data, devsSpecs)
+
+            # Apply the guest OS customization specifications.
+            if oCustomSpec:
+                cloneSpec.customization = oCustomSpec.spec
+
+            return cloneSpec
+
+        except Exception as e:
+            raise e
+
+
+
+    def buildVMConfigSpecs(self, data: dict, devsSpecs: object = None):
+        try:
+            configSpec = vim.vm.ConfigSpec()
+
+            if "numCpu" in data and data["numCpu"]:
+                configSpec.numCPUs = data["numCpu"]
+            if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
+                configSpec.numCoresPerSocket = data["numCoresPerSocket"]
+            if "memoryMB" in data and data["memoryMB"]:
+                configSpec.memoryMB = data["memoryMB"]
+            if "notes" in data and data["notes"]:
+                configSpec.annotation = data["notes"]
+
+            if devsSpecs:
+                configSpec.deviceChange = devsSpecs
+
+            return configSpec
+        except Exception as e:
+            raise e
+
+
+
+    def clone(self, oVMFolder: object, vmName: str, cloneSpec: object) -> str:
+        try:
+            task = self.oVirtualMachine.Clone(folder=oVMFolder, name=vmName, spec=cloneSpec)
+            return task._GetMoId()
+        except Exception as e:
+            raise e
+
+
+
+    def reconfig(self, configSpec: object) -> str:
+        try:
+            task = self.oVirtualMachine.ReconfigVM_Task(spec=configSpec)
+            return task._GetMoId()
+        except Exception as e:
+            raise e
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
@@ -534,77 +600,6 @@ class VirtualMachine(VmwareHandler):
             return vim.vm.device.VirtualPCNet32()
         else:
             return None
-
-
-
-    ####################################################################################################################
-    # Protected methods
-    ####################################################################################################################
-
-    def _clone(self, oVMFolder: object, vmName: str, cloneSpec: object) -> str:
-        try:
-            task = self.oVirtualMachine.Clone(folder=oVMFolder, name=vmName, spec=cloneSpec)
-            return task._GetMoId()
-        except Exception as e:
-            raise e
-
-
-
-    def _reconfig(self, configSpec: object) -> str:
-        try:
-            task = self.oVirtualMachine.ReconfigVM_Task(spec=configSpec)
-            return task._GetMoId()
-        except Exception as e:
-            raise e
-
-
-
-    def _buildVMCloneSpecs(self, oDatastore: object, oCluster: object, data: dict, devsSpecs: object = None, oCustomSpec: object = None):
-        try:
-            cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
-
-            # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
-            relocateSpec = vim.vm.RelocateSpec()
-            relocateSpec.datastore = oDatastore
-            relocateSpec.pool = oCluster.resourcePool  # The resource pool associated to this cluster.
-
-            cloneSpec.location = relocateSpec
-            if "powerOn" in data:
-                cloneSpec.powerOn = data["powerOn"]
-                data.pop("powerOn")
-
-            cloneSpec.config = self._buildVMConfigSpecs(data, devsSpecs)
-
-            # Apply the guest OS customization specifications.
-            if oCustomSpec:
-                cloneSpec.customization = oCustomSpec.spec
-
-            return cloneSpec
-
-        except Exception as e:
-            raise e
-
-
-
-    def _buildVMConfigSpecs(self, data: dict, devsSpecs: object = None):
-        try:
-            configSpec = vim.vm.ConfigSpec()
-
-            if "numCpu" in data and data["numCpu"]:
-                configSpec.numCPUs = data["numCpu"]
-            if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
-                configSpec.numCoresPerSocket = data["numCoresPerSocket"]
-            if "memoryMB" in data and data["memoryMB"]:
-                configSpec.memoryMB = data["memoryMB"]
-            if "notes" in data and data["notes"]:
-                configSpec.annotation = data["notes"]
-
-            if devsSpecs:
-                configSpec.deviceChange = devsSpecs
-
-            return configSpec
-        except Exception as e:
-            raise e
 
 
 

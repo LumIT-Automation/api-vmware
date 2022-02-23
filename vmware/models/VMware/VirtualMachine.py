@@ -41,50 +41,40 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.Datastore import Datastore
         from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
         from vmware.models.VMware.CustomSpec import CustomSpec
+
+        devsSpecs = None
+        oCustomSpec = None
         try:
             # Perform some preliminary checks.
             if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
-                if self.__isDatastoreValid(data["clusterMoId"], data["datastoreMoId"]):
-                    if "networkId" not in data or self.__isNetworkValid(data["clusterMoId"], data["networkMoId"]): # Allow to deploy a VM without touch the network card.
-
-                        cluster = Cluster(self.assetId, data["clusterMoId"])
-                        data.pop("clusterMoId")
+                cluster = Cluster(self.assetId, data["clusterMoId"])
+                if self.__isDatastoreValid(cluster, data["datastoreMoId"]):
+                    if "networkId" not in data or self.__isNetworkValid(cluster, data["networkMoId"]): # Allow to deploy a VM without touch the network card.
                         datastore = Datastore(self.assetId, data["datastoreMoId"])
                         vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
-                        data.pop("vmFolderMoId")
 
-                        devsSpecs = None
                         if "diskDevices" in data:
                             devsSpecs = self.buildStorageSpec(data["diskDevices"], data["datastoreMoId"])
-                            data.pop("diskDevices")
-                            data.pop("datastoreMoId")
                         if "networkDevices" in data:
-                            nicsSpec = self.buildNetworkSpec(data["networkDevices"])
-                            data.pop("networkDevices")
+                            nicsSpecs = self.buildNetworkSpec(data["networkDevices"])
                             if devsSpecs:
-                                devsSpecs.extend(nicsSpec)
+                                devsSpecs.extend(nicsSpecs)
                             else:
-                                devsSpecs = nicsSpec
+                                devsSpecs = nicsSpecs
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
                             oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
-                            data.pop("guestSpec")
 
-                        cloneSpec = self._buildVMCloneSpecs(oDatastore=datastore.oDatastore, oCluster=cluster.oCluster, data=data, devsSpecs=devsSpecs, oCustomSpec=oCustomSpec)
+                        cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, oCluster=cluster.oCluster, data=data, devsSpecs=devsSpecs, oCustomSpec=oCustomSpec)
 
                         # Deploy
                         return dict({
-                            "task": self._clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
+                            "task": self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
                         })
 
         except Exception as e:
             raise e
-
-
-
-    def clone(self, data: dict) -> dict: # alias.
-        return self.deploy(data)
 
 
 
@@ -105,10 +95,10 @@ class VirtualMachine(Backend):
                 else:
                     devsSpecs = nicsSpec
 
-            modifySpec = self._buildVMConfigSpecs(data, devsSpecs)
+            modifySpec = self.buildVMConfigSpecs(data, devsSpecs)
 
             return dict({
-                "task": self._reconfig(configSpec=modifySpec)
+                "task": self.reconfig(configSpec=modifySpec)
             })
 
         except Exception as e:
@@ -215,11 +205,8 @@ class VirtualMachine(Backend):
 
 
 
-    def __isDatastoreValid(self, clusterMoId: str, datastoreMoId: str) -> bool:
-        from vmware.models.VMware.Cluster import Cluster
-
+    def __isDatastoreValid(self, cluster: object, datastoreMoId: str) -> bool:
         try:
-            cluster = Cluster(self.assetId, clusterMoId)
             cluster.loadDatastores()
             for datastore in cluster.datastores:
                 if datastoreMoId == datastore.moId:
@@ -231,11 +218,8 @@ class VirtualMachine(Backend):
 
 
 
-    def __isNetworkValid(self, clusterMoId: str, networkMoId: str) -> bool:
-        from vmware.models.VMware.Cluster import Cluster
-
+    def __isNetworkValid(self, cluster: object, networkMoId: str) -> bool:
         try:
-            cluster = Cluster(self.assetId, clusterMoId)
             cluster.loadNetworks()
             for network in cluster.networks:
                 if networkMoId == network.moId:
