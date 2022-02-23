@@ -80,21 +80,13 @@ class VirtualMachineFolder(Backend):
 
     # Plain list of the parent folders.
     def parentList(self) -> list:
-        moId = self.moId
-        folder = None
+        folder = self.oVMFolder
         parentList = list()
-
         try:
-            allFolders = Backend.oVMFolders(self.assetId)
-
             while True:
-                for f in allFolders:
-                    if f._GetMoId() == moId:
-                        folder = f.parent
-                        moId = f.parent._GetMoId()
-                        parentList.insert(0, moId)
-                        break
-
+                folder = folder.parent
+                moId = folder._GetMoId()
+                parentList.insert(0, moId)
                 if not isinstance(folder, vim.Folder):
                     break
 
