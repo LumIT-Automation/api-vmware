@@ -66,17 +66,18 @@ INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VAL
 (21, 'network_get', 'object-network', NULL),
 (22, 'folder_get', 'object-folder', NULL),
 (23, 'folders_get', 'object-folder', NULL),
-(24, 'virtualmachines_get', 'asset', NULL),
-(25, 'virtualmachine_get', 'asset', NULL),
-(26, 'templates_get', 'asset', NULL),
-(27, 'template_get', 'asset', NULL),
-(28, 'template_post', 'asset', NULL),
-(29, 'custom_specs_get', 'asset', NULL),
-(30, 'custom_specs_post', 'asset', NULL),
-(31, 'custom_spec_get', 'asset', NULL),
-(32, 'custom_spec_delete', 'asset', NULL),
-(33, 'custom_spec_patch', 'asset', NULL),
-(34, 'historyComplete_get', 'global', NULL);
+(24, 'folders_tree_get', 'object-folder', NULL),
+(25, 'virtualmachines_get', 'asset', NULL),
+(26, 'virtualmachine_get', 'asset', NULL),
+(27, 'templates_get', 'asset', NULL),
+(28, 'template_get', 'asset', NULL),
+(29, 'template_post', 'asset', NULL),
+(30, 'custom_specs_get', 'asset', NULL),
+(31, 'custom_specs_post', 'asset', NULL),
+(32, 'custom_spec_get', 'asset', NULL),
+(33, 'custom_spec_delete', 'asset', NULL),
+(34, 'custom_spec_patch', 'asset', NULL),
+(35, 'historyComplete_get', 'global', NULL);
 
 
 --
@@ -128,6 +129,7 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (1, 32),
 (1, 33),
 (1, 34),
+(1, 35),
 (2, 3),
 (2, 12),
 (2, 13),
@@ -151,6 +153,7 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (2, 31),
 (2, 32),
 (2, 33),
+(2, 34),
 (3, 3),
 (3, 19),
 (3, 21),
@@ -165,7 +168,8 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (3, 30),
 (3, 31),
 (3, 32),
-(3, 33);
+(3, 33),
+(3, 34);
 
 --
 --
@@ -185,7 +189,8 @@ INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VA
 
 INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`) VALUES
 (1, 1, 1, 1),
-(3, 2, 2, 2),
+(2, 2, 2, 2),
+(3, 2, 2, 4),
 (4, 2, 3, 3),
 (5, 3, 3, 4);
 

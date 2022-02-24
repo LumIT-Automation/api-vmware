@@ -19,11 +19,14 @@ class VMwareNetworksController(CustomController):
     def get(request: Request, assetId: int) -> Response:
         data = dict()
         itemData = dict()
+        allowedData = {
+            "items": []
+        }
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="networks_get", assetId=assetId) or user["authDisabled"]:
+            if True:
                 Log.actionLog("Networks list", user)
 
                 lock = Lock("networks", locals())
@@ -31,7 +34,12 @@ class VMwareNetworksController(CustomController):
                     lock.lock()
 
                     itemData["items"] = Network.list(assetId)
-                    serializer = Serializer(data=itemData)
+                    # Filter networks' list basing on permissions. # Fixme: reduce the number of queries.
+                    for n in itemData["items"]:
+                        if Permission.hasUserPermission(groups=user["groups"], action="networks_get", assetId=assetId, moId=str(n["moId"])) or user["authDisabled"]:
+                            allowedData["items"].append(n)
+
+                    serializer = Serializer(data=allowedData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
