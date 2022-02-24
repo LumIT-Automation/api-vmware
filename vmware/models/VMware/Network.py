@@ -92,6 +92,7 @@ class Network(Backend):
                     Network.__cleanup("list", network.info(related))
                 )
 
+            Log.log(networks, '_')
             return networks
         except Exception as e:
             raise e

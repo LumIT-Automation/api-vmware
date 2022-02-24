@@ -12,7 +12,7 @@ class Privilege:
 
     #   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     #   `privilege` varchar(64) NOT NULL UNIQUE KEY,
-    #   `privilege_type` enum('object','asset','global') NOT NULL DEFAULT 'object',
+    #   `privilege_type` enum('object-folder','object-network','object-datastore','asset','global') NOT NULL DEFAULT 'asset',
     #   `description` varchar(255) DEFAULT NULL
 
 

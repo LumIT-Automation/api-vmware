@@ -121,7 +121,7 @@ CREATE TABLE `vmware_object` (
 CREATE TABLE `privilege` (
   `id` int(11) NOT NULL,
   `privilege` varchar(64) NOT NULL,
-  `privilege_type` enum('object','asset','global') NOT NULL DEFAULT 'object',
+  `privilege_type` enum('object-folder', 'object-network', 'object-datastore', 'asset','global') NOT NULL DEFAULT 'asset',
   `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

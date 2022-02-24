@@ -61,7 +61,7 @@ class VMObject:
             oName = "any"
         else:
             if objectType == 'folder':
-                vCentervmObjects = vCenterVMFolder.list(assetId)["items"]
+                vCentervmObjects = vCenterVMFolder.list(assetId)
                 for v in vCentervmObjects:
                     if v["moId"] == moId and v["name"] == objectName:
                         oId = v["moId"]
@@ -69,7 +69,7 @@ class VMObject:
                         break
 
             elif objectType == 'network':
-                vCentervmObjects = vCenterNetwork.list(assetId)["items"]
+                vCentervmObjects = vCenterNetwork.list(assetId)
                 for n in vCentervmObjects:
                     if n["moId"] == moId and n["name"] == objectName:
                         oId = n["moId"]
@@ -77,7 +77,7 @@ class VMObject:
                         break
 
             elif objectType == 'datastore':
-                vCentervmObjects = vCenterDatastore.list(assetId)["items"]
+                vCentervmObjects = vCenterDatastore.list(assetId)
                 for d in vCentervmObjects:
                     if d["moId"] == moId and d["name"] == objectName:
                         oId = d["moId"]
