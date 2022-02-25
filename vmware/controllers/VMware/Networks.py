@@ -22,11 +22,16 @@ class VMwareNetworksController(CustomController):
         allowedData = {
             "items": []
         }
+        allowedObjectsMoId = []
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
-            allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="networks_get", assetId=assetId)
+            if user["authDisabled"]:
+                allowedObjectsMoId = ["any"]
+            else:
+                allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="networks_get", assetId=assetId)
+
             if allowedObjectsMoId:
                 Log.actionLog("Networks list", user)
                 lock = Lock("networks", locals())

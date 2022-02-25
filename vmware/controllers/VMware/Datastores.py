@@ -22,12 +22,16 @@ class VMwareDatastoresController(CustomController):
         allowedData = {
             "items": []
         }
+        allowedObjectsMoId = []
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
-            # Fixme: add or user["authDisabled"]:
-            allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="datastores_get", assetId=assetId)
+            if user["authDisabled"]:
+                allowedObjectsMoId = ["any"]
+            else:
+                allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="datastores_get", assetId=assetId)
+
             if allowedObjectsMoId:
                 Log.actionLog("datastores list", user)
 

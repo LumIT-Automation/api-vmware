@@ -16,19 +16,41 @@ class VMwareVMFoldersController(CustomController):
     def get(request: Request, assetId: int) -> Response:
         data = dict()
         itemData = dict()
-        etagCondition = {"responseEtag": ""}
+        allowedData = {
+            "items": []
+        }
+        allowedObjectsMoId = []
         user = CustomController.loggedUser(request)
+        etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="folders_get", assetId=assetId) or user["authDisabled"]:
+            if user["authDisabled"]:
+                allowedObjectsMoId = ["any"]
+            else:
+                allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="folders_get", assetId=assetId)
+
+            if allowedObjectsMoId:
                 Log.actionLog("VMFolders get", user)
 
                 lock = Lock("vmFolders", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
-                    data["data"] = VirtualMachineFolder.list(assetId)
-                    data["href"] = request.get_full_path()
+                    # Filter datastores' list basing on permissions.
+                    itemData["items"] = VirtualMachineFolder.list(assetId)
+                    if "any" in allowedObjectsMoId:
+                        allowedData = itemData
+                    else:
+                        for n in itemData["items"]:
+                            if n["moId"] in allowedObjectsMoId:
+                                allowedData["items"].append(n)
+
+                    #serializer = Serializer(data=allowedData)
+                    #if serializer.is_valid():
+                    #    data["data"] = serializer.validated_data
+                    if True:
+                        data["data"] = allowedData
+                        data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK
                     lock.release()

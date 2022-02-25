@@ -88,6 +88,9 @@ class Permission:
 
 
 
+    # List all the objects on which the user has a privilege.
+    # Use this with list actions of privilege_type = 'object-%'
+    # (for privilege_type = 'global' or 'asset' hasUserPermission is the right choice).
     @staticmethod
     def listAllowedObjects(groups: list, action: str, assetId: int = 0) -> list:
         # Superadmin's group.
@@ -96,7 +99,7 @@ class Permission:
                 return ["any"]
 
         try:
-            return Repository.listAllowedObjectsByTypeAndPrivilege(groups=groups, action=action, assetId=assetId)
+            return Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId)
         except Exception as e:
             raise e
 

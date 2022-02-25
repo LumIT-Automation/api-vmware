@@ -131,7 +131,7 @@ class Permission:
 
 
     @staticmethod
-    def listAllowedObjectsByTypeAndPrivilege(groups: list, action: str, assetId: int = 0) -> list:
+    def listAllowedObjectsByPrivilege(groups: list, action: str, assetId: int = 0) -> list:
         if action and groups:
             args = groups.copy()
             groupWhere = ""
@@ -164,13 +164,13 @@ class Permission:
                         assetWhere +
                         "AND "
                         "(vmware_object.moId = 'any' OR "
-                            "IF( "
-                                "SUBSTRING_INDEX(privilege.privilege_type, '-', -1) = 'network', "
-                                "((SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'network') || (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'dvportgroup')), "
-                                "(SUBSTRING_INDEX(vmware_object.moId, '-', 1) = SUBSTRING_INDEX(privilege.privilege_type, '-', -1)) "
-                            ") "
+                        "CASE SUBSTRING_INDEX(privilege.privilege_type, '-', -1) "
+                            "WHEN 'network' THEN ((SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'network') || (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'dvportgroup')) "
+                            "WHEN 'datastore' THEN (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'datastore') "
+                            "WHEN 'folder' THEN (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'group') "
+                        "END "
                         ") " 
-                         "AND privilege.privilege = %s "
+                        "AND privilege.privilege = %s "
                 )
 
                 c.execute(query, args)
