@@ -19,19 +19,32 @@ class VMwareDatastoresController(CustomController):
     def get(request: Request, assetId: int) -> Response:
         data = dict()
         itemData = dict()
+        allowedData = {
+            "items": []
+        }
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="datastores_get", assetId=assetId) or user["authDisabled"]:
+            # Fixme: add or user["authDisabled"]:
+            allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="datastores_get", assetId=assetId)
+            if allowedObjectsMoId:
                 Log.actionLog("datastores list", user)
 
                 lock = Lock("datastores", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
+                    # Filter datastores' list basing on permissions.
                     itemData["items"] = Datastore.list(assetId)
-                    serializer = Serializer(data=itemData)
+                    if "any" in allowedObjectsMoId:
+                        allowedData = itemData
+                    else:
+                        for n in itemData["items"]:
+                            if n["moId"] in allowedObjectsMoId:
+                                allowedData["items"].append(n)
+
+                    serializer = Serializer(data=allowedData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
