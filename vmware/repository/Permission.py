@@ -131,7 +131,7 @@ class Permission:
 
 
     @staticmethod
-    def listAllowedObjectsByTypeAndPrivilege(groups: list, action: str, objectType: str, assetId: int = 0) -> list:
+    def listAllowedObjectsByTypeAndPrivilege(groups: list, action: str, assetId: int = 0) -> list:
         if action and groups:
             args = groups.copy()
             groupWhere = ""
@@ -152,22 +152,26 @@ class Permission:
                     args.append(assetId)
                     assetWhere = "AND vmware_object.id_asset = %s "
 
-                if objectType:
-                    objectWhere = "AND ( vmware_object.moId = 'any' OR (  SUBSTRING_INDEX(vmware_object.moId, '-', 1) = '"+objectType+"' )) "
-
                 args.append(action)
 
                 query = ("SELECT vmware_object.moId "
                         "FROM identity_group "
-                         "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
-                         "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
-                         "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                         "LEFT JOIN vmware_object ON vmware_object.id = group_role_object.id_object " 
-                         "WHERE (" + groupWhere[:-4] + ") " +
-                         assetWhere +
-                         objectWhere +
+                        "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                        "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
+                        "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
+                        "LEFT JOIN vmware_object ON vmware_object.id = group_role_object.id_object " 
+                        "WHERE (" + groupWhere[:-4] + ") " +
+                        assetWhere +
+                        "AND "
+                        "(vmware_object.moId = 'any' OR "
+                            "IF( "
+                                "SUBSTRING_INDEX(privilege.privilege_type, '-', -1) = 'network', "
+                                "((SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'network') || (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'dvportgroup')), "
+                                "(SUBSTRING_INDEX(vmware_object.moId, '-', 1) = SUBSTRING_INDEX(privilege.privilege_type, '-', -1)) "
+                            ") "
+                        ") " 
                          "AND privilege.privilege = %s "
-                         )
+                )
 
                 c.execute(query, args)
                 return DBHelper.columnAsList(c)
@@ -175,8 +179,6 @@ class Permission:
                 raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
-
-        return False
 
 
 

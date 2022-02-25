@@ -89,14 +89,14 @@ class Permission:
 
 
     @staticmethod
-    def listAllowedObjects(groups: list, action: str, objectType: str, assetId: int = 0) -> list:
+    def listAllowedObjects(groups: list, action: str, assetId: int = 0) -> list:
         # Superadmin's group.
         for gr in groups:
             if gr.lower() == "automation.local":
                 return ["any"]
 
         try:
-            return Repository.listAllowedObjectsByTypeAndPrivilege(groups=groups, action=action, objectType=objectType, assetId=assetId)
+            return Repository.listAllowedObjectsByTypeAndPrivilege(groups=groups, action=action, assetId=assetId)
         except Exception as e:
             raise e
 

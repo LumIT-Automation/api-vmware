@@ -26,7 +26,7 @@ class VMwareNetworksController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="networks_get", objectType="network", assetId=assetId)
+            allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="networks_get", assetId=assetId)
             if allowedObjectsMoId:
                 Log.actionLog("Networks list", user)
                 lock = Lock("networks", locals())
