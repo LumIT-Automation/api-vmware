@@ -5,6 +5,8 @@ from rest_framework import status
 from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
 from vmware.models.Permission.Permission import Permission
 
+from vmware.serializers.VMware.VirtualMachineFolder import VMwareVirtualMachineFolderSerializer as Serializer
+
 from vmware.controllers.CustomController import CustomController
 
 from vmware.helpers.Conditional import Conditional
@@ -27,8 +29,11 @@ class VMwareVMFolderController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    data["data"] = VirtualMachineFolder(assetId, moId).info()
-                    data["href"] = request.get_full_path()
+                    itemData = VirtualMachineFolder(assetId, moId).info()
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data
+                        data["href"] = request.get_full_path()
 
                     # Check the response's ETag validity (against client request).
                     conditional = Conditional(request)

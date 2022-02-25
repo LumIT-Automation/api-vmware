@@ -5,8 +5,11 @@ from rest_framework import status
 from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
 from vmware.models.Permission.Permission import Permission
 
+from vmware.serializers.VMware.VirtualMachineFolders import VMwareVirtualMachinesFolderSerializer as Serializer
+
 from vmware.controllers.CustomController import CustomController
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
@@ -45,14 +48,25 @@ class VMwareVMFoldersController(CustomController):
                             if n["moId"] in allowedObjectsMoId:
                                 allowedData["items"].append(n)
 
-                    #serializer = Serializer(data=allowedData)
-                    #if serializer.is_valid():
-                    #    data["data"] = serializer.validated_data
-                    if True:
-                        data["data"] = allowedData
+                    serializer = Serializer(data=allowedData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()
 
-                    httpStatus = status.HTTP_200_OK
+                        # Check the response's ETag validity (against client request).
+                        conditional = Conditional(request)
+                        etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                        if etagCondition["state"] == "fresh":
+                            data = None
+                            httpStatus = status.HTTP_304_NOT_MODIFIED
+                        else:
+                            httpStatus = status.HTTP_200_OK
+                    else:
+                        httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                        data = {
+                            "VMware": "Upstream data mismatch."
+                        }
+                        Log.log("Upstream data incorrect: "+str(serializer.errors))
                     lock.release()
                 else:
                     data = None

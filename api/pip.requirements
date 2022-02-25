@@ -3,6 +3,7 @@ Django~=3.2
 django-redis==5.0.0
 djangorestframework~=3.12.4
 djangorestframework-simplejwt~=4.6.0
+djangorestframework-recursive~=0.1.2
 func-timeout~=4.3.5
 mysqlclient~=2.0.3
 PyJWT~=2.0.1
