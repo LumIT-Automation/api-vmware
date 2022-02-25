@@ -131,6 +131,56 @@ class Permission:
 
 
     @staticmethod
+    def listAllowedObjectsByTypeAndPrivilege(groups: list, action: str, objectType: str, assetId: int = 0) -> list:
+        if action and groups:
+            args = groups.copy()
+            groupWhere = ""
+            assetWhere = ""
+            objectWhere = ""
+
+            c = connection.cursor()
+
+            try:
+                # Build the first half of the where condition of the query.
+                # Obtain: WHERE (identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || ....)
+
+                for g in groups:
+                    groupWhere += 'identity_group.identity_group_identifier = %s || '
+
+                # Put all the args of the query in a list.
+                if assetId:
+                    args.append(assetId)
+                    assetWhere = "AND vmware_object.id_asset = %s "
+
+                if objectType:
+                    objectWhere = "AND ( vmware_object.moId = 'any' OR (  SUBSTRING_INDEX(vmware_object.moId, '-', 1) = '"+objectType+"' )) "
+
+                args.append(action)
+
+                query = ("SELECT vmware_object.moId "
+                        "FROM identity_group "
+                         "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                         "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
+                         "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
+                         "LEFT JOIN vmware_object ON vmware_object.id = group_role_object.id_object " 
+                         "WHERE (" + groupWhere[:-4] + ") " +
+                         assetWhere +
+                         objectWhere +
+                         "AND privilege.privilege = %s "
+                         )
+
+                c.execute(query, args)
+                return DBHelper.columnAsList(c)
+            except Exception as e:
+                raise CustomException(status=400, payload={"database": e.__str__()})
+            finally:
+                c.close()
+
+        return False
+
+
+
+    @staticmethod
     def list() -> List[dict]:
         c = connection.cursor()
 

@@ -26,18 +26,21 @@ class VMwareNetworksController(CustomController):
         etagCondition = {"responseEtag": ""}
 
         try:
-            if True:
+            allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="networks_get", objectType="network", assetId=assetId)
+            if allowedObjectsMoId:
                 Log.actionLog("Networks list", user)
-
                 lock = Lock("networks", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
+                    # Filter networks' list basing on permissions.
                     itemData["items"] = Network.list(assetId)
-                    # Filter networks' list basing on permissions. # Fixme: reduce the number of queries.
-                    for n in itemData["items"]:
-                        if Permission.hasUserPermission(groups=user["groups"], action="networks_get", assetId=assetId, moId=str(n["moId"])) or user["authDisabled"]:
-                            allowedData["items"].append(n)
+                    if "any" in allowedObjectsMoId:
+                        allowedData = itemData
+                    else:
+                        for n in itemData["items"]:
+                            if n["moId"] in allowedObjectsMoId:
+                                allowedData["items"].append(n)
 
                     serializer = Serializer(data=allowedData)
                     if serializer.is_valid():

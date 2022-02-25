@@ -16,3 +16,14 @@ class Database:
                 r.append(dict(zip(columns, row)))
 
         return r
+
+
+
+    @staticmethod
+    def columnAsList(cursor) -> list:
+        # Returns all rows from a cursor as a dict.
+        r = []
+        for row in cursor.fetchall():
+            r.append(row[0])
+
+        return r
