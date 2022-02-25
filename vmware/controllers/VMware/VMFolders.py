@@ -39,7 +39,7 @@ class VMwareVMFoldersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    # Filter datastores' list basing on permissions.
+                    # Filter folders' list basing on permissions.
                     itemData["items"] = VirtualMachineFolder.list(assetId)
                     if "any" in allowedObjectsMoId:
                         allowedData = itemData
