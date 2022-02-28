@@ -158,6 +158,19 @@ class VirtualMachineFolder(Backend):
 
 
 
+    # Get all the "moId" element of a folder tree and put them in a list (order doesn't matter).
+    @staticmethod
+    def treeToList(treeElements: list, moIdList: list = None) -> list:
+        moIdList = [] if moIdList is None else moIdList
+        for el in treeElements:
+            moIdList.append(el["moId"])
+            if el["folders"]:
+                VirtualMachineFolder.treeToList(el["folders"], moIdList)
+
+        return moIdList
+
+
+
     @staticmethod
     def list(assetId, formatTree: bool = False, folderMoId: str = "") -> list:
         folders = list()

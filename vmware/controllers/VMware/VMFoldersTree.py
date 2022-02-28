@@ -39,13 +39,13 @@ class VMwareVMFoldersTreeController(CustomController):
                     lock.lock()
 
                     # If "folder" params are passed -> answer with the subtrees of the requested folders.
-                    # If not "folder" param -> answer with the full tree.
+                    # If not "folder" param (empty folderMoIdList) -> answer with the full tree.
                     if "folder" in request.GET:
                         folderMoIdList = request.GET.getlist('folder')
 
                     # Filter folders' tree basing on permissions.
                     # "any" in allowedObjectsMoId:
-                    #   - full tree without "folder" params.
+                    #   - full tree without "folder" params (empty folderMoIdList).
                     #   - subtree with "folder" params (using folderMoIdList populated by the request).
                     # Not 'any" in allowedObjectsMoId:
                     #   - full tree request: make a subtree response with the folders in allowedObjectsMoId.
@@ -58,9 +58,24 @@ class VMwareVMFoldersTreeController(CustomController):
                                 if moId not in allowedObjectsMoId:
                                     folderMoIdList.remove(moId)
 
-                    # TODO: Use parentList to drop the tree in overlap.
-
                     itemData["items"] = VirtualMachineFolder.foldersTree(assetId, folderMoIdList)
+                    # The result is the whole tree or a list of subtrees.
+                    # In the second case, the possible overlapping data should be removed:
+                    # if a parent folders is also child of another subtree, it means that there is a subtree of another subtree: drop it.
+                    if folderMoIdList:
+                        treeLists = dict()
+                        for tree in itemData["items"]:
+                            treeLists[ tree["moId"] ] = VirtualMachineFolder.treeToList(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
+
+                        for parent in treeLists.keys():
+                            for subTree in treeLists.values():
+                                if parent in subTree: # The moId of a parent folder was found in another subtree.
+                                    for item in itemData["items"]:
+                                        if item["moId"] == parent: # Get the index of the element and remove it.
+                                            index = itemData["items"].index(item)
+                                            itemData["items"].pop(index)
+
+
                     #serializer = Serializer(data=allowedData)
                     #if serializer.is_valid():
                     #    data["data"] = serializer.validated_data
