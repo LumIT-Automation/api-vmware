@@ -106,8 +106,10 @@ class Permission:
             privilegeType = Privilege.getType(action)
             if privilegeType == 'object-folder': # for folder consider also the parentList.
                 for objMoId in objectMoIdList:
-                    Log.log(objMoId, 'MMMMMMMMMMMMMMMMMMM')
-                    # @TODO: add subfolders here.
+                    subTree = VirtualMachineFolder.folderTree(assetId=assetId, folderMoId=objMoId)[0]["folders"]
+                    subFoldersMoIdList = []
+                    VirtualMachineFolder.treeToList(subTree, moIdList=subFoldersMoIdList)
+                    objectMoIdList.extend(subFoldersMoIdList)
 
             return objectMoIdList
         except Exception as e:
