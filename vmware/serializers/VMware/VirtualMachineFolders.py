@@ -5,5 +5,5 @@ from vmware.serializers.VMware.VirtualMachineFolder import VMwareVirtualMachineF
 
 class VMwareVirtualMachinesFolderSerializer(serializers.Serializer):
 
-    items = VMwareVirtualMachineFolderSerializer(many=True,required=True)
+    items = VMwareVirtualMachineFolderSerializer(many=True, required=True)
 

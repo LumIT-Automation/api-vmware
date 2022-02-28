@@ -5,6 +5,8 @@ from rest_framework import status
 from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
 from vmware.models.Permission.Permission import Permission
 
+from vmware.serializers.VMware.VirtualMachineFolders import VMwareVirtualMachinesFolderSerializer as Serializer
+
 from vmware.controllers.CustomController import CustomController
 
 from vmware.helpers.Conditional import Conditional
@@ -17,9 +19,6 @@ class VMwareVMFoldersTreeController(CustomController):
     def get(request: Request, assetId: int) -> Response:
         data = dict()
         itemData = dict()
-        allowedData = {
-            "items": []
-        }
         allowedObjectsMoId = []
         folderMoIdList = []
         user = CustomController.loggedUser(request)
@@ -59,29 +58,26 @@ class VMwareVMFoldersTreeController(CustomController):
                                     folderMoIdList.remove(moId)
 
                     itemData["items"] = VirtualMachineFolder.foldersTree(assetId, folderMoIdList)
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data
+                        data["href"] = request.get_full_path()
+
                     # The result is the whole tree or a list of subtrees.
                     # In the second case, the possible overlapping data should be removed:
                     # if a parent folders is also child of another subtree, it means that there is a subtree of another subtree: drop it.
                     if folderMoIdList:
                         treeLists = dict()
-                        for tree in itemData["items"]:
-                            treeLists[ tree["moId"] ] = VirtualMachineFolder.treeToList(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
+                        for tree in data["data"]["items"]:
+                            treeLists[tree["moId"]] = VirtualMachineFolder.treeToList(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
 
                         for parent in treeLists.keys():
                             for subTree in treeLists.values():
                                 if parent in subTree: # The moId of a parent folder was found in another subtree.
-                                    for item in itemData["items"]:
+                                    for item in data["data"]["items"]:
                                         if item["moId"] == parent: # Get the index of the element and remove it.
-                                            index = itemData["items"].index(item)
-                                            itemData["items"].pop(index)
-
-
-                    #serializer = Serializer(data=allowedData)
-                    #if serializer.is_valid():
-                    #    data["data"] = serializer.validated_data
-                    if True:
-                        data["data"] = itemData
-                        data["href"] = request.get_full_path()
+                                            index = data["data"]["items"].index(item)
+                                            data["data"]["items"].pop(index)
 
                         # Check the response's ETag validity (against client request).
                         conditional = Conditional(request)
