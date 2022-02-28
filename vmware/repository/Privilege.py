@@ -32,3 +32,17 @@ class Privilege:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
+
+
+
+    @staticmethod
+    def getPrivType(privilege: str) -> str:
+        c = connection.cursor()
+
+        try:
+            c.execute("SELECT privilege_type FROM privilege WHERE privilege = %s", [privilege])
+            return DBHelper.columnAsList(c)[0]
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()

@@ -1,5 +1,7 @@
 from vmware.models.Permission.Role import Role
 from vmware.models.Permission.VMObject import VMObject
+from vmware.models.Permission.Privilege import Privilege
+from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
 
 from vmware.helpers.Log import Log
 
@@ -93,13 +95,21 @@ class Permission:
     # (for privilege_type = 'global' or 'asset' hasUserPermission is the right choice).
     @staticmethod
     def listAllowedObjects(groups: list, action: str, assetId: int = 0) -> list:
+        objectList = []
         # Superadmin's group.
         for gr in groups:
             if gr.lower() == "automation.local":
                 return ["any"]
 
         try:
-            return Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId)
+            objectMoIdList = Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId)
+            privilegeType = Privilege.getType(action)
+            if privilegeType == 'object-folder': # for folder consider also the parentList.
+                for objMoId in objectMoIdList:
+                    Log.log(objMoId, 'MMMMMMMMMMMMMMMMMMM')
+                    # @TODO: add subfolders here.
+
+            return objectMoIdList
         except Exception as e:
             raise e
 

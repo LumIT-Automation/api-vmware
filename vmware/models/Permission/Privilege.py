@@ -19,6 +19,15 @@ class Privilege:
     ####################################################################################################################
 
     @staticmethod
+    def getType(privilege: str) -> str:
+        try:
+            return Repository.getPrivType(privilege)
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
     def list() -> List[dict]:
         try:
             return Repository.list()
