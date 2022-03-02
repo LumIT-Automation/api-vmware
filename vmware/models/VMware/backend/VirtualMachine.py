@@ -126,32 +126,13 @@ class VirtualMachine(VmwareHandler):
                 )
 
             elif data["operation"] == 'add':
-                # Get the controller device.
-                controller = None
-                for dev in self.oDevices():
-                    if isinstance(dev, vim.vm.device.VirtualSCSIController):
-                        controller = dev
-                if not controller:
-                    raise CustomException(status=400, payload={"VMware": "add disk operation: controller not found!"})
-
-                # Set the disk unit number.
-                unitNumber = 0
-                for dev in self.oDevices():
-                    if hasattr(dev.backing, 'fileName'):
-                        if int(dev.unitNumber) + 1 > unitNumber:
-                            unitNumber = int(dev.unitNumber) + 1
-                        if unitNumber == 7: # unit number 7 is reserved for scsi controller.
-                            unitNumber += 1
-                        if unitNumber >= 16:
-                            raise CustomException(status=400, payload={"VMware": "add disk operation: too many virtual disks!"})
-
                 diskSpec.fileOperation = "create"
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
                 diskSpec.device = vim.vm.device.VirtualDisk()
                 diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
                 diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
-                diskSpec.device.controllerKey = controller.key
-                diskSpec.device.unitNumber = unitNumber
+                diskSpec.device.controllerKey = data["controllerKey"]
+                diskSpec.device.unitNumber = data["newDiskNumber"]
                 diskSpec.device.deviceInfo = vim.Description()
                 if "deviceLabel" in data:
                     diskSpec.device.deviceInfo.label = data["deviceLabel"]
@@ -237,8 +218,8 @@ class VirtualMachine(VmwareHandler):
                 # Use label to find the right device.
                 if "label" in devData and devData["label"]:
                     found = False
-                    # Make a copy of the list to safely remove items from the same list that we are looping.
-                    for devInfo in list(templDevsInfo):
+                    # Reverse the iterator to safely remove items from the same list that we are looping.
+                    for devInfo in reversed(templDevsInfo):
                         if devInfo["label"] == devData["label"]:
                             found = True
                             if devInfo["deviceType"] == devData["deviceType"]: # Both the label and deviceType matches: device found ok.
@@ -337,8 +318,8 @@ class VirtualMachine(VmwareHandler):
                 # Use label to find the right device.
                 if "label" in devData and devData["label"]:
                     found = False
-                    # Make a copy of the list to safely remove items from the same list that we are looping.
-                    for devInfo in list(templDevsInfo):
+                    # Reverse the iterator to safely remove items from the same list that we are looping.
+                    for devInfo in reversed(templDevsInfo):
                         if devInfo["label"] == devData["label"]:
                             found = True
                             device = self.getVMDisk(devInfo["label"])
@@ -389,12 +370,15 @@ class VirtualMachine(VmwareHandler):
 
         try:
             # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
+            diskNumber = 0
             for devData in newDevData:
                 dsStore = Datastore(self.assetId, devData["datastoreMoId"])
                 # If the disk is not in the default datastore of the VM, the datastore name in the filePath is also needed.
                 filePath = ""
                 if devData["datastoreMoId"] != vmDatastoreMoId:
                     filePath = dsStore.info()["name"]
+                controllerKey = self.__getControllerKey()
+                diskNumber = self.__setDiskSlotNumber(diskNumber)
                 devsSpecsData.append({
                     "operation": "add",
                     "device": None,
@@ -402,7 +386,9 @@ class VirtualMachine(VmwareHandler):
                     "deviceType": devData["deviceType"],
                     "sizeMB": devData["sizeMB"],
                     "datastore": dsStore,
-                    "filePath": filePath
+                    "filePath": filePath,
+                    "newDiskNumber": diskNumber,
+                    "controllerKey": controllerKey
                 })
 
             for data in devsSpecsData:
@@ -411,6 +397,8 @@ class VirtualMachine(VmwareHandler):
             return specsList
         except Exception as e:
             raise e
+
+
 
 
 
@@ -637,5 +625,41 @@ class VirtualMachine(VmwareHandler):
                 spec.fileName = '[' + str(filePath) + ']'
 
             return spec
+        except Exception as e:
+            raise e
+
+
+
+    def __getControllerKey(self) -> str:
+        try:
+            # Get the first controller device.
+            controller = None
+            for dev in self.oDevices():
+                if isinstance(dev, vim.vm.device.VirtualSCSIController):
+                    controller = dev
+                    break
+            if not controller:
+                raise CustomException(status=400, payload={"VMware": "add disk operation: controller not found!"})
+
+            return controller.key
+        except Exception as e:
+            raise e
+
+
+
+    def __setDiskSlotNumber(self, unitNumber: int = 0) -> list:
+        try:
+            if unitNumber:  # Avoid using the same unit number when adding more than one disk.
+                unitNumber += 1
+            for dev in self.oDevices():
+                if hasattr(dev.backing, 'fileName'):
+                    if int(dev.unitNumber) + 1 > unitNumber:
+                        unitNumber = int(dev.unitNumber) + 1
+            if unitNumber == 7:  # unit number 7 is reserved for scsi controller.
+                unitNumber += 1
+            if unitNumber >= 16:
+                raise CustomException(status=400, payload={"VMware": "add disk operation: too many virtual disks!"})
+
+            return unitNumber
         except Exception as e:
             raise e

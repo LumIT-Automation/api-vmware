@@ -30,7 +30,6 @@ class VMwareVMFoldersTreeController(CustomController):
             else:
                 allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="folders_tree_get", assetId=assetId)
 
-            Log.log(allowedObjectsMoId, 'AAAAAAAAAAAAAAAAAAAAAA')
             if allowedObjectsMoId:
                 Log.actionLog("VMFolders tree get", user)
 
@@ -54,8 +53,8 @@ class VMwareVMFoldersTreeController(CustomController):
                         if not folderMoIdList:
                             folderMoIdList = allowedObjectsMoId
                         else:
-                            # Make a copy of the list to safely remove items from the same list that we are looping.
-                            for moId in list(folderMoIdList):
+                            # Reverse the iterator to safely remove items from the same list that we are looping.
+                            for moId in reversed(folderMoIdList):
                                 if moId not in allowedObjectsMoId:
                                     folderMoIdList.remove(moId)
                     itemData["items"] = VirtualMachineFolder.foldersTree(assetId, folderMoIdList)
