@@ -54,9 +54,8 @@ class VMwareVMFoldersTreeController(CustomController):
                         if not folderMoIdList:
                             folderMoIdList = allowedObjectsMoId
                         else:
-                            # Copy the list to safely subtract elements from the same list that we are looping.
-                            folderMoIdListLoop = folderMoIdList.copy()
-                            for moId in folderMoIdListLoop:
+                            # Make a copy of the list to safely remove items from the same list that we are looping.
+                            for moId in list(folderMoIdList):
                                 if moId not in allowedObjectsMoId:
                                     folderMoIdList.remove(moId)
                     itemData["items"] = VirtualMachineFolder.foldersTree(assetId, folderMoIdList)

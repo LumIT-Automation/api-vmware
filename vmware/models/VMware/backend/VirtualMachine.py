@@ -237,7 +237,8 @@ class VirtualMachine(VmwareHandler):
                 # Use label to find the right device.
                 if "label" in devData and devData["label"]:
                     found = False
-                    for devInfo in templDevsInfo:
+                    # Make a copy of the list to safely remove items from the same list that we are looping.
+                    for devInfo in list(templDevsInfo):
                         if devInfo["label"] == devData["label"]:
                             found = True
                             if devInfo["deviceType"] == devData["deviceType"]: # Both the label and deviceType matches: device found ok.
@@ -273,7 +274,7 @@ class VirtualMachine(VmwareHandler):
                                     }
                                 ])
 
-                            # If there is a match, subtract the element from both the lists.
+                            # If there is a match, remove the element from the list.
                             templDevsInfo.remove(devInfo)
                             break
 
@@ -336,7 +337,8 @@ class VirtualMachine(VmwareHandler):
                 # Use label to find the right device.
                 if "label" in devData and devData["label"]:
                     found = False
-                    for devInfo in templDevsInfo:
+                    # Make a copy of the list to safely remove items from the same list that we are looping.
+                    for devInfo in list(templDevsInfo):
                         if devInfo["label"] == devData["label"]:
                             found = True
                             device = self.getVMDisk(devInfo["label"])
@@ -355,7 +357,7 @@ class VirtualMachine(VmwareHandler):
                                 "filePath": filePath
                             })
 
-                            # If there is a match, subtract the element from both the lists.
+                            # If there is a match, remove the element from the list.
                             templDevsInfo.remove(devInfo)
                             break
 
