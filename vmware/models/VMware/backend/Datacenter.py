@@ -20,7 +20,25 @@ class Datacenter(VmwareHandler):
 
     def oClusters(self) -> list:
         try:
-            return self.oDatacenter.hostFolder.childEntity
+            children = []
+            for child in self.oDatacenter.hostFolder.childEntity:
+                if isinstance(child, vim.ClusterComputeResource):
+                    children.append(child)
+            return children
+        except Exception as e:
+            raise e
+
+
+
+    def oHosts(self) -> list:
+        try:
+            children = []
+            for child in self.oDatacenter.hostFolder.childEntity:
+                if isinstance(child, vim.HostSystem):
+                    children.append(child)
+                elif isinstance(child, vim.ClusterComputeResource):
+                    children.extend(child.host)
+            return children
         except Exception as e:
             raise e
 

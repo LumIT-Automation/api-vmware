@@ -38,37 +38,49 @@ class VirtualMachine(Backend):
 
     def deploy(self, data: dict) -> str:
         from vmware.models.VMware.Cluster import Cluster
+        from vmware.models.VMware.HostSystem import HostSystem
         from vmware.models.VMware.Datastore import Datastore
         from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
         from vmware.models.VMware.CustomSpec import CustomSpec
 
         devsSpecs = None
         oCustomSpec = None
+        computeResource = None
+        host = None
         try:
             # Perform some preliminary checks.
             if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
                 cluster = Cluster(self.assetId, data["clusterMoId"])
-                if self.__isDatastoreValid(cluster, data["datastoreMoId"]):
-                    if "networkId" not in data or self.__isNetworkValid(cluster, data["networkMoId"]): # Allow to deploy a VM without touch the network card.
-                        datastore = Datastore(self.assetId, data["datastoreMoId"])
-                        vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
 
-                        if "diskDevices" in data:
-                            devsSpecs = self.buildStorageSpec(data["diskDevices"], data["datastoreMoId"])
-                        if "networkDevices" in data:
-                            nicsSpecs = self.buildNetworkSpec(data["networkDevices"])
-                            if devsSpecs:
-                                devsSpecs.extend(nicsSpecs)
-                            else:
-                                devsSpecs = nicsSpecs
+            if "hostMoId" in data and self.__isHostValid(data["datacenterMoId"], data["hostMoId"]):
+                    host = HostSystem(self.assetId, data["hostMoId"])
+                    computeResource = host
+            else:
+                computeResource = cluster # Use computeResource to check datastore and network.
+
+            if self.__isDatastoreValid(computeResource, data["datastoreMoId"]):
+                if "networkId" not in data or self.__isNetworkValid(computeResource, data["networkMoId"]):  # Allow to deploy a VM without touch the network card.
+                    datastore = Datastore(self.assetId, data["datastoreMoId"])
+                    vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
+
+                    if "diskDevices" in data:
+                        devsSpecs = self.buildStorageSpec(data["diskDevices"], data["datastoreMoId"])
+                    if "networkDevices" in data:
+                        nicsSpecs = self.buildNetworkSpec(data["networkDevices"])
+                        if devsSpecs:
+                            devsSpecs.extend(nicsSpecs)
+                        else:
+                            devsSpecs = nicsSpecs
 
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
                             oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
 
-                        cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, oCluster=cluster.oCluster, data=data, devsSpecs=devsSpecs, oCustomSpec=oCustomSpec)
-
                         # Deploy
+                        if host:
+                            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, oCluster=cluster.oCluster, oHost=host.oHostSystem, data=data, oCustomSpec=oCustomSpec)
+                        else:
+                            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, oCluster=cluster.oCluster, data=data, oCustomSpec=oCustomSpec)
                         return self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
 
         except Exception as e:
@@ -201,10 +213,31 @@ class VirtualMachine(Backend):
 
 
 
-    def __isDatastoreValid(self, cluster: object, datastoreMoId: str) -> bool:
+    def __isHostValid(self, datacenterMoId: str, hostMoId: str) -> bool:
+        from vmware.models.VMware.Datacenter import Datacenter
+
         try:
-            cluster.loadDatastores()
-            for datastore in cluster.datastores:
+            datacenter = Datacenter(self.assetId, datacenterMoId)
+        except Exception:
+            raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+
+        try:
+            datacenter.loadHosts()
+            for host in datacenter.hosts:
+                if hostMoId == host.moId:
+                    return True
+
+            raise CustomException(status=400, payload={"VMware": "host not found in this datacenter."})
+        except Exception as e:
+            raise e
+
+
+
+    # computeResource can be a cluster or a single host.
+    def __isDatastoreValid(self, computeResource: object, datastoreMoId: str) -> bool:
+        try:
+            computeResource.loadDatastores()
+            for datastore in computeResource.datastores:
                 if datastoreMoId == datastore.moId:
                     return True
 
@@ -214,10 +247,11 @@ class VirtualMachine(Backend):
 
 
 
-    def __isNetworkValid(self, cluster: object, networkMoId: str) -> bool:
+    # computeResource can be a cluster or a single host.
+    def __isNetworkValid(self, computeResource: object, networkMoId: str) -> bool:
         try:
-            cluster.loadNetworks()
-            for network in cluster.networks:
+            computeResource.loadNetworks()
+            for network in computeResource.networks:
                 if networkMoId == network.moId:
                     return True
 

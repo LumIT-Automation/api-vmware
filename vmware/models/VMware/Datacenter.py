@@ -1,9 +1,11 @@
 from typing import List
 
 from vmware.models.VMware.Cluster import Cluster
+from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.backend.Datacenter import Datacenter as Backend
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 
 class Datacenter(Backend):
@@ -15,6 +17,7 @@ class Datacenter(Backend):
         self.name = name
 
         self.clusters: List[Cluster] = []
+        self.hosts: List[HostSystem] = []
 
 
 
@@ -29,6 +32,19 @@ class Datacenter(Backend):
 
                 self.clusters.append(
                     Cluster(self.assetId, cl["moId"])
+                )
+        except Exception as e:
+            raise e
+
+
+
+    def loadHosts(self) -> None:
+        try:
+            for h in self.oHosts():
+                host = VmwareHelper.vmwareObjToDict(h)
+
+                self.hosts.append(
+                    HostSystem(self.assetId, host["moId"])
                 )
         except Exception as e:
             raise e

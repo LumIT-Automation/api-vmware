@@ -468,7 +468,7 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildVMCloneSpecs(self, oDatastore: object, oCluster: object, data: dict, devsSpecs: object = None, oCustomSpec: object = None):
+    def buildVMCloneSpecs(self, oDatastore: object, data: dict, oCluster: object = None, oHost: object = None, devsSpecs: object = None, oCustomSpec: object = None):
         try:
             cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
 
@@ -476,6 +476,8 @@ class VirtualMachine(VmwareHandler):
             relocateSpec = vim.vm.RelocateSpec()
             relocateSpec.datastore = oDatastore
             relocateSpec.pool = oCluster.resourcePool  # The resource pool associated to this cluster.
+            if oHost:
+                relocateSpec.host = oHost
 
             cloneSpec.location = relocateSpec
             if "powerOn" in data:
