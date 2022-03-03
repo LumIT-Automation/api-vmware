@@ -104,7 +104,7 @@ class Permission:
         try:
             objectMoIdList = Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId)
             privilegeType = Privilege.getType(action)
-            if privilegeType == 'object-folder': # for folder consider also the parentList.
+            if privilegeType == 'object-folder': # for folder permissions allow also for the subFolders.
                 for objMoId in objectMoIdList:
                     subTree = VirtualMachineFolder.folderTree(assetId=assetId, folderMoId=objMoId)[0]["folders"]
                     subFoldersMoIdList = []

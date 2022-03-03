@@ -172,6 +172,27 @@ class VirtualMachineFolder(Backend):
 
 
     @staticmethod
+    def purgeOverlapTrees(treesList: list) -> list:
+        try:
+            treesDict = dict()
+            for tree in treesList:
+                treesDict[tree["moId"]] = VirtualMachineFolder.treeToList(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
+
+            for parent in treesDict.keys():
+                for subTree in treesDict.values():
+                    if parent in subTree: # The moId of a parent folder was found in another subtree.
+                        for item in treesList:
+                            if item["moId"] == parent: # Get the index of the element and remove it.
+                                index = treesList.index(item)
+                                treesList.pop(index)
+
+            return treesList
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
     def list(assetId, formatTree: bool = False, folderMoId: str = "") -> list:
         folders = list()
 
