@@ -158,16 +158,16 @@ class VirtualMachineFolder(Backend):
 
 
 
-    # Get all the "moId" element of a folder tree and put them in a list (order doesn't matter).
+    # Recursive. Get all the "moId" element of a folder tree and put them in a list (order doesn't matter).
     @staticmethod
-    def treeToList(treeElements: list, moIdList: list = None) -> list:
-        moIdList = [] if moIdList is None else moIdList
+    def treeToSet(treeElements: list, moIdSet: set = None) -> list:
+        moIdSet = set() if moIdSet is None else moIdSet
         for el in treeElements:
-            moIdList.append(el["moId"])
+            moIdSet.add(el["moId"])
             if el["folders"]:
-                VirtualMachineFolder.treeToList(el["folders"], moIdList)
+                VirtualMachineFolder.treeToSet(el["folders"], moIdSet)
 
-        return moIdList
+        return moIdSet
 
 
 
@@ -176,7 +176,7 @@ class VirtualMachineFolder(Backend):
         try:
             treesDict = dict()
             for tree in treesList:
-                treesDict[tree["moId"]] = VirtualMachineFolder.treeToList(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
+                treesDict[tree["moId"]] = VirtualMachineFolder.treeToSet(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
 
             for parent in treesDict.keys():
                 for subTree in treesDict.values():

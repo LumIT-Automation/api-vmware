@@ -90,28 +90,28 @@ class Permission:
 
 
 
-    # Get all the moId of the objects on which the user has a privilege. Use set to dedupe.
+    # Get all the moId of the objects on which the user has a privilege. Use sets to dedupe.
     # Use this with actions of privilege_type = 'object-%'
     # (for privilege_type = 'global' or 'asset' hasUserPermission is the right choice).
     @staticmethod
     def allowedObjectsSet(groups: list, action: str, assetId: int = 0) -> set:
-        objectList = []
+        objectSet = set()
         # Superadmin's group.
         for gr in groups:
             if gr.lower() == "automation.local":
                 return {"any"}
 
         try:
-            objectMoIdList = Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId)
+            objectMoIdSet = set(Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId))
             privilegeType = Privilege.getType(action)
-            if privilegeType == 'object-folder': # for folder permissions allow also for the subFolders.
-                for objMoId in objectMoIdList:
+            if privilegeType == 'object-folder': # for folder permissions allow the access for the subFolders also.
+                subItems = set()
+                for objMoId in objectMoIdSet:
                     subTree = VirtualMachineFolder.folderTree(assetId=assetId, folderMoId=objMoId)[0]["folders"]
-                    subFoldersMoIdList = []
-                    VirtualMachineFolder.treeToList(subTree, moIdList=subFoldersMoIdList)
-                    objectMoIdList.extend(subFoldersMoIdList)
+                    subItems.update(VirtualMachineFolder.treeToSet(subTree, moIdSet=None))
+                objectMoIdSet.update(subItems)
 
-            return set(objectMoIdList)
+            return objectMoIdSet
         except Exception as e:
             raise e
 
