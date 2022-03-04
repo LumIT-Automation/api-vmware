@@ -17,7 +17,7 @@ class Datacenter(Backend):
         self.name = name
 
         self.clusters: List[Cluster] = []
-        self.hosts: List[HostSystem] = []
+        self.hosts: List[HostSystem] = [] # standalone hosts.
 
 
 

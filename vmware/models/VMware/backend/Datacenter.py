@@ -36,8 +36,6 @@ class Datacenter(VmwareHandler):
             for child in self.oDatacenter.hostFolder.childEntity:
                 if isinstance(child, vim.HostSystem):
                     children.append(child)
-                elif isinstance(child, vim.ClusterComputeResource):
-                    children.extend(child.host)
             return children
         except Exception as e:
             raise e

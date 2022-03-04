@@ -52,7 +52,7 @@ class VirtualMachine(Backend):
             if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
                 cluster = Cluster(self.assetId, data["clusterMoId"])
 
-            if "hostMoId" in data and self.__isHostValid(data["datacenterMoId"], data["hostMoId"]):
+            if "hostMoId" in data and self.__isHostValid(data["clusterMoId"], data["hostMoId"]):
                     host = HostSystem(self.assetId, data["hostMoId"])
                     computeResource = host
             else:
@@ -213,17 +213,16 @@ class VirtualMachine(Backend):
 
 
 
-    def __isHostValid(self, datacenterMoId: str, hostMoId: str) -> bool:
-        from vmware.models.VMware.Datacenter import Datacenter
-
+    def __isHostValid(self, clusterMoId: str, hostMoId: str) -> bool:
+        from vmware.models.VMware.Cluster import Cluster
         try:
-            datacenter = Datacenter(self.assetId, datacenterMoId)
+            cluster = Cluster(self.assetId, clusterMoId)
         except Exception:
-            raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+            raise CustomException(status=400, payload={"VMware": "invalid cluster."})
 
         try:
-            datacenter.loadHosts()
-            for host in datacenter.hosts:
+            cluster.loadHosts()
+            for host in cluster.hosts:
                 if hostMoId == host.moId:
                     return True
 
