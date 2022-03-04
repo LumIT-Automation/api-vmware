@@ -90,16 +90,16 @@ class Permission:
 
 
 
-    # List all the objects on which the user has a privilege.
-    # Use this with list actions of privilege_type = 'object-%'
+    # Get all the moId of the objects on which the user has a privilege. Use set to dedupe.
+    # Use this with actions of privilege_type = 'object-%'
     # (for privilege_type = 'global' or 'asset' hasUserPermission is the right choice).
     @staticmethod
-    def listAllowedObjects(groups: list, action: str, assetId: int = 0) -> list:
+    def allowedObjectsSet(groups: list, action: str, assetId: int = 0) -> set:
         objectList = []
         # Superadmin's group.
         for gr in groups:
             if gr.lower() == "automation.local":
-                return ["any"]
+                return {"any"}
 
         try:
             objectMoIdList = Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId)
@@ -111,7 +111,7 @@ class Permission:
                     VirtualMachineFolder.treeToList(subTree, moIdList=subFoldersMoIdList)
                     objectMoIdList.extend(subFoldersMoIdList)
 
-            return objectMoIdList
+            return set(objectMoIdList)
         except Exception as e:
             raise e
 

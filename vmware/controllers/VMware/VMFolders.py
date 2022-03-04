@@ -22,15 +22,15 @@ class VMwareVMFoldersController(CustomController):
         allowedData = {
             "items": []
         }
-        allowedObjectsMoId = []
+        allowedObjectsMoId = set()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
             if user["authDisabled"]:
-                allowedObjectsMoId = ["any"]
+                allowedObjectsMoId = {"any"}
             else:
-                allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="folders_get", assetId=assetId)
+                allowedObjectsMoId = Permission.allowedObjectsSet(groups=user["groups"], action="folders_get", assetId=assetId)
 
             if allowedObjectsMoId:
                 Log.actionLog("VMFolders get", user)

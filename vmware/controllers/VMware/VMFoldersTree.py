@@ -19,16 +19,16 @@ class VMwareVMFoldersTreeController(CustomController):
     def get(request: Request, assetId: int) -> Response:
         data = dict()
         itemData = dict()
-        allowedObjectsMoId = []
+        allowedObjectsMoId = set()
         folderMoIdList = []
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
 
         try:
             if user["authDisabled"]:
-                allowedObjectsMoId = ["any"]
+                allowedObjectsMoId = {"any"}
             else:
-                allowedObjectsMoId = Permission.listAllowedObjects(groups=user["groups"], action="folders_tree_get", assetId=assetId)
+                allowedObjectsMoId = Permission.allowedObjectsSet(groups=user["groups"], action="folders_tree_get", assetId=assetId)
 
             if allowedObjectsMoId:
                 Log.actionLog("VMFolders tree get", user)
