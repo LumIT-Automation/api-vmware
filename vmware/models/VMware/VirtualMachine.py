@@ -45,21 +45,41 @@ class VirtualMachine(Backend):
 
         devsSpecs = None
         oCustomSpec = None
-        computeResource = None
         host = None
+        cluster = None
+        oHost = None
+        deployComputeResource = None
         try:
             # Perform some preliminary checks.
-            if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
-                cluster = Cluster(self.assetId, data["clusterMoId"])
-
-            if "hostMoId" in data and self.__isHostValid(data["clusterMoId"], data["hostMoId"]):
+            # - "clusterMoId" and not "hostMoId" -> deploy in cluster, vmware choose the host.
+            # - "clusterMoId" and "hostMoId" -> deploy in specific host of the cluster.
+            # - not "clusterMoId" and "hostMoId" -> deploy in standalone host (not in a host of a cluster)
+            if "clusterMoId" in data and "hostMoId" in data:
+                if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
+                    cluster = Cluster(self.assetId, data["clusterMoId"])
+                    if self.__isHostValid(data["clusterMoId"], data["hostMoId"]): # preferred host in cluster.
+                        host = HostSystem(self.assetId, data["hostMoId"])
+                        deployComputeResource = cluster.oCluster.resourcePool
+                        oHost = host.oHostSystem
+                        computeResource = host
+            elif "clusterMoId" in data and "hostMoId" not in data:
+                if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
+                    cluster = Cluster(self.assetId, data["clusterMoId"])
+                    deployComputeResource = cluster.oCluster.resourcePool
+                    oHost = None
+                    computeResource = cluster
+            elif "clusterMoId" not in data and "hostMoId" in data:
+                if self.__isStandaloneHostValid(data["datacenterMoId"], data["hostMoId"]):  # preferred host in cluster.
                     host = HostSystem(self.assetId, data["hostMoId"])
+                    deployComputeResource = host.oHostSystem.parent.resourcePool
+                    oHost = host.oHostSystem
                     computeResource = host
             else:
-                computeResource = cluster # Use computeResource to check datastore and network.
+                raise CustomException(status=400, payload={"VMware": "missing both cluster and host params."})
 
+            # Check datastore/network connection with cluster/single host.
             if self.__isDatastoreValid(computeResource, data["datastoreMoId"]):
-                if "networkId" not in data or self.__isNetworkValid(computeResource, data["networkMoId"]):  # Allow to deploy a VM without touch the network card.
+                if "networkId" not in data or self.__isNetworkValid(computeResource, data["networkMoId"]):  # Allow to deploy a VM without touching the network card.
                     datastore = Datastore(self.assetId, data["datastoreMoId"])
                     vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
 
@@ -77,10 +97,8 @@ class VirtualMachine(Backend):
                             oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
 
                         # Deploy
-                        if host:
-                            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, oCluster=cluster.oCluster, oHost=host.oHostSystem, data=data, oCustomSpec=oCustomSpec)
-                        else:
-                            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, oCluster=cluster.oCluster, data=data, oCustomSpec=oCustomSpec)
+                        cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, resource=deployComputeResource, oHost=oHost, data=data, oCustomSpec=oCustomSpec)
+
                         return self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
 
         except Exception as e:
@@ -195,7 +213,6 @@ class VirtualMachine(Backend):
 
     def __isClusterValid(self, datacenterMoId: str, clusterMoId: str) -> bool:
         from vmware.models.VMware.Datacenter import Datacenter
-
         try:
             datacenter = Datacenter(self.assetId, datacenterMoId)
         except Exception:
@@ -223,6 +240,26 @@ class VirtualMachine(Backend):
         try:
             cluster.loadHosts()
             for host in cluster.hosts:
+                if hostMoId == host.moId:
+                    return True
+
+            raise CustomException(status=400, payload={"VMware": "host not found in this cluster."})
+        except Exception as e:
+            raise e
+
+
+
+    def __isStandaloneHostValid(self, datacenterMoId: str, hostMoId: str) -> bool:
+        from vmware.models.VMware.Datacenter import Datacenter
+
+        try:
+            datacenter = Datacenter(self.assetId, datacenterMoId)
+        except Exception:
+            raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+
+        try:
+            datacenter.loadHosts()
+            for host in datacenter.hosts:
                 if hostMoId == host.moId:
                     return True
 

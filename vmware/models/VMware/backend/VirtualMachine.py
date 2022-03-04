@@ -468,14 +468,14 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildVMCloneSpecs(self, oDatastore: object, data: dict, oCluster: object = None, oHost: object = None, devsSpecs: object = None, oCustomSpec: object = None):
+    def buildVMCloneSpecs(self, oDatastore: object, data: dict, resource: object = None, oHost: object = None, devsSpecs: object = None, oCustomSpec: object = None):
         try:
             cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
 
             # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
             relocateSpec = vim.vm.RelocateSpec()
             relocateSpec.datastore = oDatastore
-            relocateSpec.pool = oCluster.resourcePool  # The resource pool associated to this cluster.
+            relocateSpec.pool = resource # The resource pool associated to this cluster.
             if oHost:
                 relocateSpec.host = oHost
 
