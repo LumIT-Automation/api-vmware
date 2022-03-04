@@ -95,14 +95,14 @@ class Permission:
     # (for privilege_type = 'global' or 'asset' hasUserPermission is the right choice).
     @staticmethod
     def allowedObjectsSet(groups: list, action: str, assetId: int = 0) -> set:
-        objectSet = set()
+        objectMoIdSet = set()
         # Superadmin's group.
         for gr in groups:
             if gr.lower() == "automation.local":
                 return {"any"}
 
         try:
-            objectMoIdSet = set(Repository.listAllowedObjectsByPrivilege(groups=groups, action=action, assetId=assetId))
+            objectMoIdSet = Repository.allowedObjectsByPrivilegeSet(groups=groups, action=action, assetId=assetId)
             privilegeType = Privilege.getType(action)
             if privilegeType == 'object-folder': # for folder permissions allow the access for the subFolders also.
                 subItems = set()

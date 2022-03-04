@@ -131,7 +131,7 @@ class Permission:
 
 
     @staticmethod
-    def listAllowedObjectsByPrivilege(groups: list, action: str, assetId: int = 0) -> list:
+    def allowedObjectsByPrivilegeSet(groups: list, action: str, assetId: int = 0) -> set:
         if action and groups:
             args = groups.copy()
             groupWhere = ""
@@ -174,7 +174,7 @@ class Permission:
                 )
 
                 c.execute(query, args)
-                return DBHelper.columnAsList(c)
+                return DBHelper.columnAsSet(c)
             except Exception as e:
                 raise CustomException(status=400, payload={"database": e.__str__()})
             finally:

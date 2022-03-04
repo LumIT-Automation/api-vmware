@@ -27,3 +27,13 @@ class Database:
             r.append(row[0])
 
         return r
+
+
+    @staticmethod
+    def columnAsSet(cursor) -> set:
+        # Returns all rows from a cursor as a dict.
+        r = set()
+        for row in cursor.fetchall():
+            r.add(row[0])
+
+        return r

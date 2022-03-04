@@ -180,7 +180,10 @@ INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VA
 (1, 'any', 1, 'any', 'All the objects of this vCenter'),
 (2, 'group-v2477', 1, 'rrivarie', ''),
 (3, 'datastore-2341', 1, 'NFS_Datastore', ''),
-(4, 'network-1213', 1, 'LumitLab_18', '');
+(4, 'network-1213', 1, 'LumitLab_18', ''),
+(5, 'group-v1082', 1, 'Varie', ''),
+(6, 'group-v2478', 1, 'rrivarie', '');
+
 
 
 --
@@ -192,7 +195,9 @@ INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`) VALUE
 (2, 2, 2, 2),
 (3, 2, 2, 4),
 (4, 2, 3, 3),
-(5, 3, 3, 4);
+(5, 2, 3, 4),
+(6, 2, 3, 5),
+(7, 3, 3, 6);
 
 
 
