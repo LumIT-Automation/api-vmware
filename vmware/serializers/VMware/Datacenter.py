@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from vmware.serializers.VMware.Cluster import VMwareClusterSerializer
+from vmware.serializers.VMware.HostSystem import VMwareHostSystemSerializer
 
 
 class VMwareDatacenterSerializer(serializers.Serializer):
@@ -9,3 +10,4 @@ class VMwareDatacenterSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, required=False)
 
     clusters = VMwareClusterSerializer(many=True, required=False, allow_null=True)
+    standalone_hosts = VMwareHostSystemSerializer(many=True, required=False, allow_null=True)

@@ -2,6 +2,7 @@ from pyVmomi import vim
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+from vmware.helpers.Log import Log
 
 
 class Datacenter(VmwareHandler):
@@ -34,8 +35,8 @@ class Datacenter(VmwareHandler):
         try:
             children = []
             for child in self.oDatacenter.hostFolder.childEntity:
-                if isinstance(child, vim.HostSystem):
-                    children.append(child)
+                if isinstance(child, vim.ComputeResource) and not isinstance(child, vim.ClusterComputeResource):
+                    children.append(child.host[0])
             return children
         except Exception as e:
             raise e

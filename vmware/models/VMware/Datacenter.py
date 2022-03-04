@@ -38,11 +38,11 @@ class Datacenter(Backend):
 
 
 
+    # Standalone hosts.
     def loadHosts(self) -> None:
         try:
             for h in self.oHosts():
                 host = VmwareHelper.vmwareObjToDict(h)
-
                 self.hosts.append(
                     HostSystem(self.assetId, host["moId"])
                 )
@@ -53,21 +53,27 @@ class Datacenter(Backend):
 
     def info(self, related: bool = True):
         lc = list()
+        lh = list()
 
         try:
             if related:
                 self.loadClusters()
+                self.loadHosts()
                 for cluster in self.clusters:
                     lc.append(
                         Datacenter.__cleanup("info", cluster.info(False))
+                    )
+                for host in self.hosts:
+                    lh.append(
+                        Datacenter.__cleanup("info", host.info(loadDatastores=False,loadNetworks=False))
                     )
 
             return {
                 "assetId": self.assetId,
                 "moId": self.moId,
                 "name": self.oDatacenter.name,
-
-                "clusters": lc
+                "clusters": lc,
+                "standalone_hosts": lh
             }
         except Exception as e:
             raise e
