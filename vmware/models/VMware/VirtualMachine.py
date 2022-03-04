@@ -47,8 +47,7 @@ class VirtualMachine(Backend):
         oCustomSpec = None
         host = None
         cluster = None
-        oHost = None
-        deployComputeResource = None
+        checkNetworkStorageAttached = None
         try:
             # Perform some preliminary checks.
             # - "clusterMoId" and not "hostMoId" -> deploy in cluster, vmware choose the host.
@@ -59,27 +58,21 @@ class VirtualMachine(Backend):
                     cluster = Cluster(self.assetId, data["clusterMoId"])
                     if self.__isHostValid(data["clusterMoId"], data["hostMoId"]): # preferred host in cluster.
                         host = HostSystem(self.assetId, data["hostMoId"])
-                        deployComputeResource = cluster.oCluster.resourcePool
-                        oHost = host.oHostSystem
-                        computeResource = host
+                        checkNetworkStorageAttached = host # preferred host choosed: check that datastore and network are attached to it.
             elif "clusterMoId" in data and "hostMoId" not in data:
                 if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
                     cluster = Cluster(self.assetId, data["clusterMoId"])
-                    deployComputeResource = cluster.oCluster.resourcePool
-                    oHost = None
-                    computeResource = cluster
+                    checkNetworkStorageAttached = cluster # check that datastore and network are attached to the cluster.
             elif "clusterMoId" not in data and "hostMoId" in data:
-                if self.__isStandaloneHostValid(data["datacenterMoId"], data["hostMoId"]):  # preferred host in cluster.
+                if self.__isStandaloneHostValid(data["datacenterMoId"], data["hostMoId"]):  # standalone host.
                     host = HostSystem(self.assetId, data["hostMoId"])
-                    deployComputeResource = host.oHostSystem.parent.resourcePool
-                    oHost = host.oHostSystem
-                    computeResource = host
+                    checkNetworkStorageAttached = host # standalone host: check that datastore and network are attached to it.
             else:
                 raise CustomException(status=400, payload={"VMware": "missing both cluster and host params."})
 
             # Check datastore/network connection with cluster/single host.
-            if self.__isDatastoreValid(computeResource, data["datastoreMoId"]):
-                if "networkId" not in data or self.__isNetworkValid(computeResource, data["networkMoId"]):  # Allow to deploy a VM without touching the network card.
+            if self.__isDatastoreValid(checkNetworkStorageAttached, data["datastoreMoId"]):
+                if "networkId" not in data or self.__isNetworkValid(checkNetworkStorageAttached, data["networkMoId"]):  # Allow to deploy a VM without touching the network card.
                     datastore = Datastore(self.assetId, data["datastoreMoId"])
                     vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
 
@@ -97,7 +90,7 @@ class VirtualMachine(Backend):
                             oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
 
                         # Deploy
-                        cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, resource=deployComputeResource, oHost=oHost, data=data, oCustomSpec=oCustomSpec)
+                        cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
                         return self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
 

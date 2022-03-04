@@ -468,16 +468,22 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildVMCloneSpecs(self, oDatastore: object, data: dict, resource: object = None, oHost: object = None, devsSpecs: object = None, oCustomSpec: object = None):
+    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None):
         try:
             cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
 
             # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
             relocateSpec = vim.vm.RelocateSpec()
             relocateSpec.datastore = oDatastore
-            relocateSpec.pool = resource # The resource pool associated to this cluster.
-            if oHost:
-                relocateSpec.host = oHost
+            if cluster:
+                relocateSpec.pool = cluster.oCluster.resourcePool # The resource pool associated to this cluster.
+                if host:
+                    relocateSpec.host = host.oHostSystem
+            elif host:
+                relocateSpec.pool = host.oHostSystem.parent.resourcePool # Standalone host resource pool.
+                relocateSpec.host = host.oHostSystem
+            else:
+                raise CustomException(status=400, payload={"VMware": "missing both cluster and host params."})
 
             cloneSpec.location = relocateSpec
             if "powerOn" in data:
