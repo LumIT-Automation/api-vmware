@@ -2,26 +2,16 @@ from typing import List
 
 from dataclasses import dataclass
 
-from vmware.repository.Stage2.Target import Target as Repository
-
-
-@dataclass
-class DataConnection:
-    address: str
-    port: int
-    api_type: str
-    key: str
-    username: str
-    password: str
+from vmware.repository.Stage2.BoostrapKey import BootstrapKey as Repository
 
 
 
-class Target:
-    def __init__(self, targetId: int, *args, **kwargs):
+class BootstrapKey:
+    def __init__(self, keyId: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id = int(targetId)
-        self.connectionData: DataConnection = None
+        self.id = int(keyId)
+        self.priv_key: str = None
 
         self.__load()
 
