@@ -159,10 +159,22 @@ CREATE TABLE `stage2_target` (
   `address` varchar(64) NOT NULL,
   `port` int(11) DEFAULT NULL,
   `api_type` varchar(64) NOT NULL DEFAULT '',
-  `key` varchar(8192) NOT NULL DEFAULT '',
+  `id_bootstrap_key` INT DEFAULT NULL,
   `username` varchar(64) NOT NULL DEFAULT '',
   `password` varchar(64) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `stage2_bootstrap_key`
+--
+
+CREATE TABLE `stage2_bootstrap_key` (
+  `id` int(11) NOT NULL,
+  `key` varchar(8192) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- --------------------------------------------------------
 
@@ -254,6 +266,12 @@ ALTER TABLE `stage2_target`
   ADD UNIQUE KEY `address` (`address`);
 
 --
+-- Indici per le tabelle `stage2_bootstrap_key`
+--
+ALTER TABLE `stage2_bootstrap_key`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indici per le tabelle `stage2_group_pubkey`
 --
 ALTER TABLE `stage2_group_pubkey`
@@ -318,6 +336,12 @@ ALTER TABLE `stage2_target`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT per la tabella `stage2_bootstrap_key`
+--
+ALTER TABLE `stage2_bootstrap_key`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT per la tabella `stage2_group_pubkey`
 --
 ALTER TABLE `stage2_group_pubkey`
@@ -349,6 +373,13 @@ ALTER TABLE `role_privilege`
   ADD CONSTRAINT `rp_privilege` FOREIGN KEY (`id_privilege`) REFERENCES `privilege` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `rp_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
+
+--
+-- Limiti per la tabella `stage2_target`
+--
+ALTER TABLE `stage2_target`
+  ADD CONSTRAINT `bk_key` FOREIGN KEY (`id_bootstrap_key`) REFERENCES `stage2_bootstrap_key` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
