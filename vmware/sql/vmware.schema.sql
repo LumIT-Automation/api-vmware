@@ -148,6 +148,35 @@ CREATE TABLE `role_privilege` (
   `id_privilege` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `stage2_target`
+--
+
+CREATE TABLE `stage2_target` (
+  `id` int(11) NOT NULL,
+  `address` varchar(64) NOT NULL,
+  `port` int(11) DEFAULT NULL,
+  `api_type` varchar(64) NOT NULL DEFAULT '',
+  `key` varchar(8192) NOT NULL DEFAULT '',
+  `username` varchar(64) NOT NULL DEFAULT '',
+  `password` varchar(64) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `stage2_keygroups`
+--
+
+CREATE TABLE `stage2_group_pubkey` (
+  `id` int(11) NOT NULL,
+  `group` varchar(64) NOT NULL,
+  `pubkey` varchar(2048) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 --
 -- Indici per le tabelle scaricate
 --
@@ -218,6 +247,19 @@ ALTER TABLE `role_privilege`
   ADD KEY `rp_privilege` (`id_privilege`);
 
 --
+-- Indici per le tabelle `stage2_target`
+--
+ALTER TABLE `stage2_target`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `address` (`address`);
+
+--
+-- Indici per le tabelle `stage2_group_pubkey`
+--
+ALTER TABLE `stage2_group_pubkey`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT per le tabelle scaricate
 --
 
@@ -268,6 +310,19 @@ ALTER TABLE `role`
 --
 ALTER TABLE `vmware_object`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `stage2_target`
+--
+ALTER TABLE `stage2_target`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `stage2_group_pubkey`
+--
+ALTER TABLE `stage2_group_pubkey`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 
 --
 -- Limiti per le tabelle scaricate
