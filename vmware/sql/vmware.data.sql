@@ -22,22 +22,6 @@ SET time_zone = "+00:00";
 --
 
 --
--- Dump dei dati per la tabella `asset`
---
-
-INSERT INTO `asset` (`id`, `address`, `port`, `fqdn`, `baseurl`, `tlsverify`, `datacenter`, `environment`, `position`, `api_type`, `api_additional_data`, `username`, `password`) VALUES
-(1, '192.168.12.8', NULL, 'vcsa.lumitlab.local', 'https://vcsa.lumitlab.local/', 0, 'Milano', 'Development', 'RACK 1', 'vmware', '', 'administrator@vsphere.local', 'Password01!!');
-
---
--- Dump dei dati per la tabella `identity_group`
---
-
-INSERT INTO `identity_group` (`id`, `name`, `identity_group_identifier`) VALUES
-(1, 'groupAdmin', 'cn=groupadmin,cn=users,dc=lab,dc=local'),
-(2, 'groupStaff', 'cn=groupstaff,cn=users,dc=lab,dc=local'),
-(3, 'groupReadOnly', 'cn=groupreadonly,cn=users,dc=lab,dc=local');
-
---
 -- Dump dei dati per la tabella `privilege`
 --
 
@@ -170,35 +154,6 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (3, 32),
 (3, 33),
 (3, 34);
-
---
---
--- Dump dei dati per la tabella `vmware_object`
---
-
-INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES
-(1, 'any', 1, 'any', 'All the objects of this vCenter'),
-(2, 'group-v2477', 1, 'rrivarie', ''),
-(3, 'datastore-2341', 1, 'NFS_Datastore', ''),
-(4, 'network-1213', 1, 'LumitLab_18', ''),
-(5, 'group-v1082', 1, 'Varie', ''),
-(6, 'group-v2478', 1, 'rrivarie', '');
-
-
-
---
--- Dump dei dati per la tabella `group_role_object`
---
-
-INSERT INTO `group_role_object` (`id`, `id_group`, `id_role`, `id_object`) VALUES
-(1, 1, 1, 1),
-(2, 2, 2, 2),
-(3, 2, 2, 4),
-(4, 2, 3, 3),
-(5, 2, 3, 4),
-(6, 2, 3, 5),
-(7, 3, 3, 6);
-
 
 
 COMMIT;
