@@ -7,7 +7,7 @@ from vmware.repository.Stage2.Target import Target as Repository
 
 @dataclass
 class DataConnection:
-    address: str
+    ip: str
     port: int
     api_type: str
     key: str

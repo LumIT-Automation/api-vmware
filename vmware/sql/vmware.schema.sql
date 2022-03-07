@@ -156,7 +156,7 @@ CREATE TABLE `role_privilege` (
 
 CREATE TABLE `stage2_target` (
   `id` int(11) NOT NULL,
-  `address` varchar(64) NOT NULL,
+  `ip` varchar(64) NOT NULL,
   `port` int(11) DEFAULT NULL,
   `api_type` varchar(64) NOT NULL DEFAULT '',
   `id_bootstrap_key` INT DEFAULT NULL,
@@ -263,7 +263,7 @@ ALTER TABLE `role_privilege`
 --
 ALTER TABLE `stage2_target`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `address` (`address`);
+  ADD UNIQUE KEY `ip` (`ip`);
 
 --
 -- Indici per le tabelle `stage2_bootstrap_key`

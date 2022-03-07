@@ -18,8 +18,26 @@ class BootstrapKey:
 
 
     ####################################################################################################################
-    # Public methods
+    # Public static methods
     ####################################################################################################################
+
+    @staticmethod
+    def get(keyId: int) -> dict:
+        c = connection.cursor()
+
+        try:
+            c.execute("SELECT * FROM stage2_bootstrap_key "
+                      "WHERE id = %s ", [
+                        keyId
+                    ])
+
+            return DBHelper.asDict(c)[0]
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
 
     @staticmethod
     def modify(keyId: int, data: dict) -> None:
@@ -68,10 +86,6 @@ class BootstrapKey:
             raise CustomException(status=404, payload={"database": "Non existent endpoint"})
 
 
-
-    ####################################################################################################################
-    # Public static methods
-    ####################################################################################################################
 
     @staticmethod
     def list() -> List[dict]:

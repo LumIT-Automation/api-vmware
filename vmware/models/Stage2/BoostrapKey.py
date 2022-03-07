@@ -3,7 +3,7 @@ from typing import List
 from dataclasses import dataclass
 
 from vmware.repository.Stage2.BoostrapKey import BootstrapKey as Repository
-
+from vmware.helpers.Log import Log
 
 
 class BootstrapKey:
@@ -11,7 +11,7 @@ class BootstrapKey:
         super().__init__(*args, **kwargs)
 
         self.id = int(keyId)
-        self.priv_key: str = None
+        self.priv_key: str = ""
 
         self.__load()
 
@@ -71,5 +71,5 @@ class BootstrapKey:
             # Set attributes.
             for k, v in info.items():
                 setattr(self, k, v)
-        except Exception:
-            pass
+        except Exception as e:
+            raise e

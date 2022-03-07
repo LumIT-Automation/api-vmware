@@ -13,21 +13,17 @@ class Target:
 
     # Table: stage2_target
     #   `id` int(11) NOT NULL,
-    #   `address` varchar(
+    #   `ip` varchar(64) NOT NULL,
     #   `port` int(11) DEFAULT NULL,
     #   `api_type` varchar(64) NOT NULL DEFAULT '',
     #   `id_bootstrap_key` int(11) DEFAULT NULL,
     #   `username` varchar(64) NOT NULL DEFAULT '',
     #   `password` varchar(64) NOT NULL DEFAULT ''
 
-    # Table: stage2_bootstrap_key
-    #   `id` int(11) NOT NULL,
-    #   `key` varchar(8192) NOT NULL DEFAULT '',
-
 
 
     ####################################################################################################################
-    # Public methods
+    # Public static methods
     ####################################################################################################################
 
     @staticmethod
@@ -37,7 +33,6 @@ class Target:
 
         try:
             c.execute("SELECT * FROM stage2_target "
-                      "LEFT JOIN stage2_bootstrap_key ON stage2_bootstrap_key.id = stage2_target.id_bootstrap_key"
                       "WHERE stage2_target.id = %s ", [
                         targetId
                     ])
@@ -102,16 +97,12 @@ class Target:
 
 
 
-    ####################################################################################################################
-    # Public static methods
-    ####################################################################################################################
-
     @staticmethod
     def list() -> List[dict]:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT id, address, port, api_type FROM stage2_target")
+            c.execute("SELECT id, ip, port, api_type FROM stage2_target")
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})

@@ -1,5 +1,6 @@
 
 import paramiko
+import io
 
 from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
@@ -10,7 +11,7 @@ class SshSupplicant:
     def __init__(self, dataConnection: dict, silent: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for key in [ "ip", "port", "additional_data", "private_key_file", "username", "password" ]:
+        for key in [ "ip", "port", "priv_key", "username", "password" ]:
             if key not in dataConnection:
                 raise ValueError('Missing key in dataConnection dictionary.')
 
@@ -19,8 +20,13 @@ class SshSupplicant:
             self.port = dataConnection["port"]
         else:
             self.port = 22
-        self.additionalData = dataConnection["additional_data"]
-        self.privateKey = dataConnection["private_key_file"]
+
+        if dataConnection["priv_key"]:
+            keyStringIO = io.StringIO(dataConnection["priv_key"])
+            self.privateKey = paramiko.RSAKey.from_private_key(keyStringIO)
+        else:
+            self.privateKey = None
+
         self.username = dataConnection["username"]
         self.password = dataConnection["password"]
 
@@ -45,7 +51,7 @@ class SshSupplicant:
             Log.actionLog("Try paramiko ssh command: " + str(cmd))
             if self.privateKey:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " ssh key auth.")
-                ssh.connect(hostname=self.ipAddr, port=self.port, key_filename=self.privateKey, timeout=10)
+                ssh.connect(hostname=self.ipAddr, port=self.port, pkey=self.privateKey, timeout=10)
             elif self.username and self.password:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=10)
