@@ -15,6 +15,9 @@ class BootstrapKey:
 
         self.__load()
 
+        # To POST an ssh private key, grab the output of the command:
+        # cat id_rsa | sed -e 's/$/\\n/g' | tr -d '\n'
+
 
 
     ####################################################################################################################
