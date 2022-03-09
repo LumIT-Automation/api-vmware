@@ -28,8 +28,6 @@ class SshSupplicant:
             self.privateKey = None
 
         self.username = dataConnection["username"]
-        if not self.username:
-            self.username = 'root'
         self.password = dataConnection["password"]
 
         self.silent = silent
@@ -58,7 +56,7 @@ class SshSupplicant:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=10)
             else:
-                raise CustomException(status=503, payload={"Catalyst": "Failed to execute the ssh command on the asset."})
+                raise CustomException(status=503, payload={"Ssh": "Failed to execute the ssh command on the asset."})
 
             stdIn, stdOut, stdErr = ssh.exec_command(cmd)
             exitStatus = stdOut.channel.recv_exit_status()
@@ -77,7 +75,7 @@ class SshSupplicant:
                 Log.actionLog("Paramiko stdout: silenced by caller.")
 
             if exitStatus != 0:
-                raise CustomException(status=500, payload={"Catalyst": "Command exit status: " + str(exitStatus)})
+                raise CustomException(status=500, payload={"Ssh": "Command exit status: " + str(exitStatus)})
 
             return stdOutData
 

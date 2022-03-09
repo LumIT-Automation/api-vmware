@@ -2,7 +2,7 @@ from django.urls import path
 
 from .controllers import Root
 from .controllers.Stage2 import Targets, Target
-from .controllers.Stage2 import CommandReboot
+from .controllers.Stage2 import SshReboot
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 
 
@@ -18,6 +18,6 @@ urlpatterns = [
     path('target/<int:targetId>/', Target.Stage2TargetController.as_view(), name='stage2-target'),
 
     # Virtual machine command: reboot
-    path('commands/reboot/<int:targetId>/', CommandReboot.Stage2CommandRebootController.as_view(), name='stage2-cmd-reboot'),
+    path('commands/reboot/<int:targetId>/', SshReboot.Stage2SshRebootController.as_view(), name='stage2-ssh-reboot'),
 
 ]

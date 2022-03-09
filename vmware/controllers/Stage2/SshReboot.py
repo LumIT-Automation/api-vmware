@@ -2,15 +2,15 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.CommandReboot import CommandReboot
+from vmware.models.Stage2.SshReboot import SshReboot
 from vmware.models.Permission.Permission import Permission
-from vmware.serializers.Stage2.Reboot import Stage2CommandRebootSerializer as Serializer
+from vmware.serializers.Stage2.SshReboot import Stage2SshRebootSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
 
 
-class Stage2CommandRebootController(CustomController):
+class Stage2SshRebootController(CustomController):
     @staticmethod
     def put(request: Request, targetId: int) -> Response:
         response = None
@@ -25,7 +25,7 @@ class Stage2CommandRebootController(CustomController):
                 if serializer.is_valid():
                     data = serializer.validated_data["data"]
 
-                    target = CommandReboot(targetId)
+                    target = SshReboot(targetId)
                     response = target.exec(data)
 
                     httpStatus = status.HTTP_200_OK
