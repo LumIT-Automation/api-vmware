@@ -10,7 +10,7 @@ class DataConnection:
     ip: str
     port: int
     api_type: str
-    key: str
+    keyId: int
     username: str
     password: str
 

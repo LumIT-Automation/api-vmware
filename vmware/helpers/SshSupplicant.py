@@ -28,6 +28,8 @@ class SshSupplicant:
             self.privateKey = None
 
         self.username = dataConnection["username"]
+        if not self.username:
+            self.username = 'root'
         self.password = dataConnection["password"]
 
         self.silent = silent
@@ -51,7 +53,7 @@ class SshSupplicant:
             Log.actionLog("Try paramiko ssh command: " + str(cmd))
             if self.privateKey:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " ssh key auth.")
-                ssh.connect(hostname=self.ipAddr, port=self.port, pkey=self.privateKey, timeout=10)
+                ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, pkey=self.privateKey, timeout=10)
             elif self.username and self.password:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=10)

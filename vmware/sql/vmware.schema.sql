@@ -172,7 +172,8 @@ CREATE TABLE `stage2_target` (
 
 CREATE TABLE `stage2_bootstrap_key` (
   `id` int(11) NOT NULL,
-  `priv_key` varchar(8192) NOT NULL DEFAULT ''
+  `priv_key` varchar(8192) NOT NULL DEFAULT '',
+  `comment` varchar(1024) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

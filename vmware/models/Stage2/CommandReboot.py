@@ -21,14 +21,24 @@ class CommandReboot:
         try:
             target = Target(self.targetId)
             connectionData = target.connectionData
+            privKeyStr = ""
 
+            # Use the key id from the POST payload if passed, get the default private key id from the target otherwise.
             if "priv_key_id" in data and data["priv_key_id"]:
-                privKey = BootstrapKey(keyId=data["priv_key_id"])
-                connectionData["priv_key"] = privKey.priv_key
-                Log.log(connectionData, 'KKKKKKKKKKKKKKKK')
+                privKeyStr = data["priv_key_id"]
+            else:
+                privKeyStr = connectionData["id_bootstrap_key"]
+            privKey = BootstrapKey(privKeyStr)
+            connectionData["priv_key"] = privKey.priv_key
 
+            # Use the username from the POST payload if passed, get the default username id from the target otherwise.
+            if "username" in data and data["username"]:
+                connectionData["username"] = data["username"]
+
+            Log.log(data, '_')
+            Log.log(connectionData, '_')
             ssh = SshSupplicant(connectionData, silent=silent)
-            out = ssh.command("/bin/echo \"Ribbutto\" > /tmp/ciccio.txt")
+            out = ssh.command("/bin/echo \"Puongiorno\"")
 
         except Exception as e:
             raise e

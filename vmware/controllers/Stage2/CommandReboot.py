@@ -26,7 +26,7 @@ class Stage2CommandRebootController(CustomController):
                     data = serializer.validated_data["data"]
 
                     target = CommandReboot(targetId)
-                    target.exec(data)
+                    response = target.exec(data)
 
                     httpStatus = status.HTTP_200_OK
                 else:

@@ -14,6 +14,7 @@ class BootstrapKey:
     # Table: stage2_target
     #   `id` int(11) NOT NULL,
     #   `priv_key` varchar(8192) NOT NULL DEFAULT '',
+    #   `comment` varchar(1024) NOT NULL DEFAULT ''
 
 
 
@@ -92,7 +93,7 @@ class BootstrapKey:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT id FROM stage2_bootstrap_key")
+            c.execute("SELECT id, comment FROM stage2_bootstrap_key")
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
