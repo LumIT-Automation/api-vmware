@@ -11,24 +11,27 @@ class SshSupplicant:
     def __init__(self, dataConnection: dict, silent: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for key in [ "ip", "port", "priv_key", "username", "password" ]:
+        for key in ["ip", "username"]:
             if key not in dataConnection:
                 raise ValueError('Missing key in dataConnection dictionary.')
 
         self.ipAddr = dataConnection["ip"]
-        if dataConnection["port"]:
+        if "port" in dataConnection and dataConnection["port"]:
             self.port = dataConnection["port"]
         else:
             self.port = 22
+        self.username = dataConnection["username"]
 
-        if dataConnection["priv_key"]:
+        if "priv_key" in dataConnection and dataConnection["priv_key"]:
             keyStringIO = io.StringIO(dataConnection["priv_key"])
             self.privateKey = paramiko.RSAKey.from_private_key(keyStringIO)
         else:
             self.privateKey = None
 
-        self.username = dataConnection["username"]
-        self.password = dataConnection["password"]
+        if "password" in dataConnection and dataConnection["password"]:
+            self.password = dataConnection["password"]
+        else:
+            self.password = ""
 
         self.silent = silent
 

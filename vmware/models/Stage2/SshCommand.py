@@ -21,12 +21,14 @@ class SshCommand:
             target = Target(self.targetId)
             connectionData = target.connectionData
 
-            privKeyStr = connectionData["id_bootstrap_key"]
-            privKey = BootstrapKey(privKeyStr)
-            connectionData["priv_key"] = privKey.priv_key
+            if "id_bootstrap_key" in connectionData and connectionData["id_bootstrap_key"]:
+                privKeyStr = connectionData["id_bootstrap_key"]
+                privKey = BootstrapKey(privKeyStr)
+                connectionData["priv_key"] = privKey.priv_key
 
+            sudoCommand='[ `id -u` -eq 0 ] || SUDO="sudo";$SUDO '+self.command
             ssh = SshSupplicant(connectionData, silent=silent)
-            out = ssh.command(self.command)
+            out = ssh.command(sudoCommand)
 
         except Exception as e:
             raise e
