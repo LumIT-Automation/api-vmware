@@ -15,20 +15,25 @@ class SshCommand:
     # Public methods
     ####################################################################################################################
 
-    def exec(self, data: dict,  silent: bool = False) -> dict:
+    def exec(self, data: dict, silent: bool = False) -> dict:
         out = ""
         try:
             target = Target(self.targetId)
             connectionData = target.connectionData
+            Log.log(connectionData, '_')
 
             if "id_bootstrap_key" in connectionData and connectionData["id_bootstrap_key"]:
                 privKeyStr = connectionData["id_bootstrap_key"]
                 privKey = BootstrapKey(privKeyStr)
                 connectionData["priv_key"] = privKey.priv_key
 
-            sudoCommand='[ `id -u` -eq 0 ] || SUDO="sudo";$SUDO '+self.command
+            if "sudo" in data and data["sudo"]:
+                command = '[ `id -u` -eq 0 ] || sudo -i;'+self.command
+            else:
+                command = self.command
+
             ssh = SshSupplicant(connectionData, silent=silent)
-            out = ssh.command(sudoCommand)
+            out = ssh.command(command)
 
         except Exception as e:
             raise e

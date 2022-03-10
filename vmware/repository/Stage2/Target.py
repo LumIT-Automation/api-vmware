@@ -102,7 +102,7 @@ class Target:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT id, ip, port, api_type FROM stage2_target")
+            c.execute("SELECT id, ip, port, api_type, id_bootstrap_key FROM stage2_target")
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})

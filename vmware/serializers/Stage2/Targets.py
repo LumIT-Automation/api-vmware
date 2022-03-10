@@ -8,7 +8,7 @@ class Stage2TargetsSerializer(serializers.Serializer):
             ip = serializers.CharField(max_length=64, required=True) # @todo: only valid data.
             port = serializers.CharField(max_length=64, required=True) # @todo: only valid data.
             api_type = serializers.CharField(max_length=64, required=True, allow_blank=True)
-
+            id_bootstrap_key = serializers.IntegerField(required=False, allow_null=True)
         items = Stage2TargetsItems(many=True)
 
     data = Stage2TargetsInnerSerializer(required=True)

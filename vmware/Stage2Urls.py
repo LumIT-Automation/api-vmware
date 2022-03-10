@@ -2,7 +2,7 @@ from django.urls import path
 
 from .controllers import Root
 from .controllers.Stage2 import Targets, Target
-from .controllers.Stage2 import SshReboot
+from .controllers.Stage2 import SshReboot, SshResizePartitions
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 
 
@@ -19,5 +19,5 @@ urlpatterns = [
 
     # Virtual machine command: reboot
     path('commands/reboot/<int:targetId>/', SshReboot.Stage2SshRebootController.as_view(), name='stage2-ssh-reboot'),
-
+    path('commands/resize-partition/<int:targetId>/', SshResizePartitions.Stage2SshResizePartitionController.as_view(), name='stage2-ssh-resize-partition'),
 ]

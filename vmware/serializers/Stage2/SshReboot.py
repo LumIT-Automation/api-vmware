@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 
-class Stage2SshRebootSerializer(serializers.Serializer):
-    class Stage2SshRebootInnerSerializer(serializers.Serializer):
-        username = serializers.CharField(max_length=64, required=False, allow_blank=True)
+class Stage2SshCommandSerializer(serializers.Serializer):
+    class Stage2SshCommandInnerSerializer(serializers.Serializer):
+        sudo = serializers.BooleanField(required=False)
 
-    data = Stage2SshRebootInnerSerializer(required=True)
+    data = Stage2SshCommandInnerSerializer(required=True)
