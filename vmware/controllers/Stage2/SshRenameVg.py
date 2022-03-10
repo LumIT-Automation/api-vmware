@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.SshResizePartition import SshResizePartition
+from vmware.models.Stage2.SshRenameVg import SshRenameVg
 from vmware.models.Permission.Permission import Permission
 from vmware.serializers.Stage2.SshCommand import Stage2SshCommandSerializer as Serializer
 
@@ -10,7 +10,7 @@ from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
 
 
-class Stage2SshResizePartitionController(CustomController):
+class Stage2SshRenameVgController(CustomController):
     @staticmethod
     def put(request: Request, targetId: int) -> Response:
         response = None
@@ -25,7 +25,7 @@ class Stage2SshResizePartitionController(CustomController):
                 if serializer.is_valid():
                     data = serializer.validated_data["data"]
 
-                    target = SshResizePartition(targetId)
+                    target = SshRenameVg(targetId)
                     response = target.exec(data)
 
                     httpStatus = status.HTTP_200_OK
