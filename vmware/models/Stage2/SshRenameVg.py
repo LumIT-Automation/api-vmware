@@ -1,5 +1,6 @@
 
 from vmware.models.Stage2.SshCommand import SshCommand
+from vmware.helpers.Log import Log
 
 
 class SshRenameVg(SshCommand):
@@ -21,14 +22,15 @@ class SshRenameVg(SshCommand):
         debUpdateInitrd = '[ -x /sbin/update-initramfs ] && if ! update-initramfs -u; then exit 19; fi;'
 
         rhGetRootDefaultLv = 'defaultRoot=$(grep " / " /etc/fstab | cut -f1 -d" ");' # Full path lv for root mount point (/dev/mapper/...-root
-        rhGetRootLv = 'lvRoot=$(for lv in $A;do if grep " / " /etc/fstab | grep -q $lv;then echo $lv;fi;done);' # lv name for root mount point
-        rhUpdateGrubCfg = '[ -w /boot/grub2/grub.cfg ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" -e "s#${defaultRoot}#/dev/${vgName}/${lvRoot}g" /boot/grub2/grub.cfg;'
+        rhGetRootLv = 'lvRoot=$(for lv in $lVs;do if grep " / " /etc/fstab | grep -q $lv;then echo $lv;fi;done);' # lv name for root mount point
+        rhUpdateGrubCfg = '[ -w /boot/grub2/grub.cfg ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" -e "s#${defaultRoot}#/dev/${vgName}/${lvRoot}#g" /boot/grub2/grub.cfg;'
         rhUpdateGrubDefault = '[ -w /etc/default/grub ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" /etc/default/grub;'
-        rhUpdateGrubEnv = '[ -w /boot/grub2/grubenv ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" -e "s#${defaultRoot}#/dev/${vgName}/${lvRoot}g /boot/grub2/grubenv;'
+        rhUpdateGrubEnv = '[ -w /boot/grub2/grubenv ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" -e "s#${defaultRoot}#/dev/${vgName}/${lvRoot}#g" /boot/grub2/grubenv;'
 
         reboot = 'reboot'
 
-        self.command = getDefaultVg + getVg + getSwapDevs + swapOff + vgRename + vgChange + updateFstab #+ getLvs + \
-        #    refreshLvs + debUpdateGrubCfg + rhGetRootDefaultLv + rhGetRootLv + rhUpdateGrubCfg + rhUpdateGrubEnv + \
-        #    rhUpdateGrubDefault + debUpdateInitrdCfg + debUpdateInitrd + reboot
+        self.command = getDefaultVg + getVg + getSwapDevs + swapOff + vgRename + vgChange + updateFstab + getLvs + \
+            refreshLvs + debUpdateGrubCfg + rhGetRootDefaultLv + rhGetRootLv + rhUpdateGrubCfg + rhUpdateGrubEnv + \
+            rhUpdateGrubDefault + debUpdateInitrdCfg # + debUpdateInitrd #+ reboot
+        Log.log(len(self.command), ' RRRRRRRRRRRRRR')
 
