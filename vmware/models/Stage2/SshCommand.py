@@ -32,6 +32,7 @@ class SshCommand:
             else:
                 command = self.command
 
+            Log.log('Trying ssh command: ' + str(self.command))
             ssh = SshSupplicant(connectionData, silent=silent)
             out = ssh.command(command)
 

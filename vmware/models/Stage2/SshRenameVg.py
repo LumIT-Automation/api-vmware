@@ -7,30 +7,101 @@ class SshRenameVg(SshCommand):
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 
-        getDefaultVg = 'defaultVg=$(vgs -o vg_name | tr -d " " | tail -n +2);'
-        getVg = 'vgName="vg_`hostname -s`";'
-        getSwapDevs = 'swapDevs=$(grep " swap " /etc/fstab | cut -d" " -f1);'
-        swapOff = 'for dev in $swapDevs; do swapoff $dev; done;'
-        vgRename = 'if ! vgrename $defaultVg $vgName; then exit 13; fi;'
-        vgChange = 'vgchange -ay || exit 15;'
-        updateFstab = 'sed -i -e "s#/${defaultVg}#/${vgName}#g" /etc/fstab;'
-        getLvs = 'lVs=$(lvs -o lv_name | tr -d " " | tail -n +2);'
-        refreshLvs = 'for lv in $lVs; do if ! lvchange /dev/${vgName}/$lv --refresh; then exit 17; fi; done;'
+        self.command = """
+            # Get default vg name.
+            defVg=$(vgs --noheadings -o vg_name | tr -d " ")
+            echo "defVg: $defVg"
+            # Wanted vg name.
+            vg="vg_`hostname -s`"
+            echo "vg: $vg"
+            # Get all lv names.
+            lVs=$(lvs --noheadings -o lv_name | tr -d " ")
+            # Get default lv mapper path of the root lv.
+            defRootLvPath=$(grep " / " /etc/fstab | cut -f1 -d" ")
+            echo "defRootLvPath: $defRootLvPath"
+            # Pick the lv name of the root lv.
+            lvRoot=$(for lv in $lVs;do 
+                if grep " / " /etc/fstab | grep -q $lv; then 
+                    echo $lv
+                fi
+            done)
+            
+            # Swap devices in fstab. Hash: lv[lvname] = /dev/mapper/...
+            declare -A swapDevs
+            defSwapLvsPath=$(grep " swap " /etc/fstab | cut -d" " -f1)
+            # Map lv path to lv names.
+            for lv in $lVs;do
+                lvPath=$(grep " swap " /etc/fstab | grep "\-${lv}" | cut -f1 -d " ")
+                if [ -n "$lvPath" ]; then
+                    swapDevs[${lv}]=$lvPath
+                fi
+            done
+            # Stop swaps.
+            for dev in $defSwapLvsPath; do 
+                swapoff $dev
+            done
+            
+            # Other devices in fstab. Hash: lv[lvname] = /dev/mapper/...
+            declare -A otherDevs
+            defOtherLvsPath=$(grep -v ' / | swap' /etc/fstab | grep -E 'ext4|ext3|xfs|brtfs' | grep -E "/dev/mapper|/dev/${defVg}" | cut -d" " -f1)
+            # Map lv path to lv names, exclude root and swaps.         
+            for lv in $lVs;do
+                lvPath=$(grep -Ev ' / | swap' /etc/fstab | grep -E 'ext4|ext3|xfs|brtfs' | grep "\-${lv}" | cut -f1 -d " ")
+                if [ -n "$lvPath" ]; then
+                    otherDevs[${lv}]=$lvPath
+                fi
+            done
+                     
+            # Rename volume group
+            if ! vgrename $defVg $vg; then 
+                exit 13
+            fi
+            # Reactivate vg and lvs.
+            vgchange -ay || exit 15
+            for lv in $lVs; do 
+                if ! lvchange /dev/${vg}/$lv --refresh; then 
+                    exit 17
+                fi
+            done
+            
+            # Vg renamed: can get the new lv mapper path of the root lv.
+            rootMap=$(lvs --noheadings -o lv_path -S lv_name=$lvRoot | tr -d " ")
+            echo "rootMap: $rootMap"
 
-        debUpdateGrubCfg = '[ -w /boot/grub/grub.cfg ] && sed -i -e "s#/${defaultVg}#/${vgName}#" /boot/grub/grub.cfg;'
-        debUpdateInitrdCfg = '[ -w /etc/initramfs-tools/conf.d/resume ] && sed -i -e "s#/${defaultVg}#/${vgName}#" /etc/initramfs-tools/conf.d/resume;'
-        debUpdateInitrd = '[ -x /sbin/update-initramfs ] && if ! update-initramfs -u; then exit 19; fi;'
-
-        rhGetRootDefaultLv = 'defaultRoot=$(grep " / " /etc/fstab | cut -f1 -d" ");' # Full path lv for root mount point (/dev/mapper/...-root
-        rhGetRootLv = 'lvRoot=$(for lv in $lVs;do if grep " / " /etc/fstab | grep -q $lv;then echo $lv;fi;done);' # lv name for root mount point
-        rhUpdateGrubCfg = '[ -w /boot/grub2/grub.cfg ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" -e "s#${defaultRoot}#/dev/${vgName}/${lvRoot}#g" /boot/grub2/grub.cfg;'
-        rhUpdateGrubDefault = '[ -w /etc/default/grub ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" /etc/default/grub;'
-        rhUpdateGrubEnv = '[ -w /boot/grub2/grubenv ] && sed -i -e "s#=${defaultVg}/#=${vgName}/#g" -e "s#${defaultRoot}#/dev/${vgName}/${lvRoot}#g" /boot/grub2/grubenv;'
-
-        reboot = 'reboot'
-
-        self.command = getDefaultVg + getVg + getSwapDevs + swapOff + vgRename + vgChange + updateFstab + getLvs + \
-            refreshLvs + debUpdateGrubCfg + rhGetRootDefaultLv + rhGetRootLv + rhUpdateGrubCfg + rhUpdateGrubEnv + \
-            rhUpdateGrubDefault + debUpdateInitrdCfg # + debUpdateInitrd #+ reboot
-        Log.log(len(self.command), ' RRRRRRRRRRRRRR')
+            # Adjust fstab.
+            sed -i -e "s#${defRootLvPath}#${rootMap}#g" /etc/fstab # If mapper path was used.
+            if [ -n $swapDevs ]; then
+                for lv in "${!swapDevs[@]}"; do
+                    sed -i -e "s#${swapDevs[$lv]}#/dev/${vg}/${lv}#g" /etc/fstab
+                done
+            fi
+            if [ -n $otherDevs ]; then
+                for lv in "${!otherDevs[@]}"; do
+                    sed -i -e "s#${otherDevs[$lv]}#/dev/${vg}/${lv}#g" /etc/fstab
+                done
+            fi
+            sed -i -e "s#/${defVg}#/${vg}#g" /etc/fstab # If /dev/vgname/lvname was used.
+            
+            # Adjust grub.cfg, grubenv, default-grub. 
+            for grubFile in /boot/grub/grub.cfg /boot/grub2/grub.cfg /boot/grub/grubenv /boot/grub2/grubenv /etc/default/grub; do 
+                if [ -w $grubFile ]; then
+                    sed -i -e "s#${defRootLvPath}#${rootMap}#g" $grubFile
+                    sed -i -e "s#/${defVg}#/${vg}#" -e "s#${defVg}/#${vg}/#" $grubFile
+                fi
+            done
+                
+            # initramfs (adjust swap).
+            if [ -w /etc/initramfs-tools/conf.d/resume ]; then
+                for lv in "${!swapDevs[@]}"; do
+                    sed -i -e "s#${swapDevs[$lv]}#/dev/${vg}/${lv}#g" /etc/initramfs-tools/conf.d/resume
+                done
+                sed -i -e "s#/${defVg}#/${vg}#" /etc/initramfs-tools/conf.d/resume
+            fi
+            if [ -x /sbin/update-initramfs ]; then
+                if ! update-initramfs -u; then 
+                    exit 19
+                fi
+            fi
+            
+        """
 
