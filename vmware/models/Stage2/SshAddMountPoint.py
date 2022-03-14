@@ -28,11 +28,17 @@ class SshAddMountPoint(SshCommand):
         """
 
         self.command = """
-            echo "lvcreate -n $lv -L ${size}G $vg"
-            lvcreate -n $lv -L ${size}G $vg
-            echo "mkfs.${fs} /dev/${vg}/${lv}"
-            mkfs.${fs} /dev/${vg}/${lv}
-            mkdir -p $folder
+            if ! lvcreate -n $lv -L ${size}G $vg; then
+                echo "can't create lv $lv"
+                exit 11
+            fi
+            
+            if ! mkfs.${fs} /dev/${vg}/${lv}; then
+                echo "can't formtat /dev/${vg}/${lv}"
+                exit 13
+            fi
+            
+            mkdir -p $folder || exit 15
 
             if ! grep -q "/dev/${vg}/${lv}" /etc/fstab; then       
                 echo -e "/dev/${vg}/${lv}\t${folder}\t$fs\tdefaults\t0\t2" >> /etc/fstab

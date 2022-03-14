@@ -83,10 +83,10 @@ class SshRenameVg(SshCommand):
             sed -i -e "s#/${defVg}#/${vg}#g" /etc/fstab # If /dev/vgname/lvname was used.
             
             # Adjust grub.cfg, grubenv, default-grub. 
-            for grubFile in /boot/grub/grub.cfg /boot/grub2/grub.cfg /boot/grub/grubenv /boot/grub2/grubenv /etc/default/grub; do 
+            for grubFile in /boot/grub/grub.cfg /boot/grub2/grub.cfg /boot/grub/grubenv /boot/grub2/grubenv /etc/default/grub /etc/sysconfig/grub; do 
                 if [ -w $grubFile ]; then
                     sed -i -e "s#${defRootLvPath}#${rootMap}#g" $grubFile
-                    sed -i -e "s#/${defVg}#/${vg}#" -e "s#${defVg}/#${vg}/#" $grubFile
+                    sed -i -e "s#/${defVg}#/${vg}#g" -e "s#${defVg}/#${vg}/#g" $grubFile
                 fi
             done
                 
