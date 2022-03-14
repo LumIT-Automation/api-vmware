@@ -17,7 +17,7 @@ class Stage2SshResizePartitionController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="reboot_put") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="resize_partition_put") or user["authDisabled"]:
                 Log.actionLog("Second stage system reboot", user)
                 Log.actionLog("User data: "+str(request.data), user)
 

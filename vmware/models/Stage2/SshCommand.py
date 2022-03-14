@@ -9,13 +9,17 @@ class SshCommand:
         super().__init__(*args, **kwargs)
 
         self.targetId = int(targetId)
+        self.shellVars = ""
         self.command = '/bin/echo'
+
+
 
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
 
-    def exec(self, data: dict, silent: bool = False) -> dict:
+    def exec(self, data: dict = None, silent: bool = False) -> dict:
+        data = {} if data is None else data
         out = ""
         try:
             target = Target(self.targetId)
@@ -32,7 +36,13 @@ class SshCommand:
             else:
                 command = self.command
 
-            Log.log('Trying ssh command: ' + str(self.command))
+            # Pass the value of the variables to the shell script.
+            # Example: scriptVar={httpPutVar}. The value of {httpPutVar} ends in $scriptVar.
+            if self.shellVars and "shellVars" in data:
+                self.shellVars = self.shellVars.format(**data["shellVars"]) # Variables substitution.
+                command = self.shellVars + command
+
+            Log.log('Trying ssh command: ' + str(command))
             ssh = SshSupplicant(connectionData, silent=silent)
             out = ssh.command(command)
 

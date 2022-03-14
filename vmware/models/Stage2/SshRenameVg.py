@@ -102,6 +102,9 @@ class SshRenameVg(SshCommand):
                     exit 19
                 fi
             fi
+            if [ -x /sbin/dracut ]; then
+                dracut --force
+            fi
             
         """
 
