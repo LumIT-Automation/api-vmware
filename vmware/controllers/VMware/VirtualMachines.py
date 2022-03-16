@@ -33,8 +33,7 @@ class VMwareVirtualMachinesController(CustomController):
 
                     # Listing all virtual machines can be very slow.
                     if "quick" in request.GET:
-                        if "true" in request.GET.getlist('quick'):
-                            quick = True
+                        quick = True
 
                     if quick:
                         itemData["items"] = VirtualMachine.listQuick(assetId)
