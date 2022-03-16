@@ -21,6 +21,7 @@ class VMwareVirtualMachinesController(CustomController):
         itemData = dict()
         user = CustomController.loggedUser(request)
         etagCondition = {"responseEtag": ""}
+        quick = False
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="virtualmachines_get", assetId=assetId) or user["authDisabled"]:
@@ -30,8 +31,16 @@ class VMwareVirtualMachinesController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["items"] = VirtualMachine.list(assetId)
-                    serializer = Serializer(data=itemData)
+                    # Listing all virtual machines can be very slow.
+                    if "quick" in request.GET:
+                        if "true" in request.GET.getlist('quick'):
+                            quick = True
+
+                    if quick:
+                        itemData["items"] = VirtualMachine.listQuick(assetId)
+                    else:
+                        itemData["items"] = VirtualMachine.list(assetId)
+                    serializer = Serializer(data=itemData, partial=True)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
                         data["href"] = request.get_full_path()

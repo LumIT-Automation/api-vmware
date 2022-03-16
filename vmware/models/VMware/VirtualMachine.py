@@ -311,6 +311,21 @@ class VirtualMachine(Backend):
 
 
 
+    @staticmethod
+    def listQuick(assetId: int, related: bool = False) -> List[dict]:
+        virtualmachines = list()
+
+        try:
+            for o in Backend.oVirtualMachines(assetId):
+                virtualmachines.append(VmwareHelper.vmwareObjToDict(o)
+            )
+
+            return virtualmachines
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Protected static methods
     ####################################################################################################################

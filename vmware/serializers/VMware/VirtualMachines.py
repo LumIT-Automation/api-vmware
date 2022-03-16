@@ -5,3 +5,4 @@ from vmware.serializers.VMware.VirtualMachine import VMwareVirtualMachineSeriali
 
 class VMwareVirtualMachinesSerializer(serializers.Serializer):
     items = VMwareVirtualMachineSerializer(many=True)
+
