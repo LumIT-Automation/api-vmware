@@ -26,6 +26,7 @@ class VirtualMachine(Backend):
         self.numCoresPerSocket: int
         self.memoryMB: int
         self.template: bool
+        self.notes: str = ""
 
         self.networkDevices: List[VmNetworkAdapter] = []
         self.diskDevices: List[VirtualMachineDatastore] = []
@@ -100,7 +101,6 @@ class VirtualMachine(Backend):
 
 
     def modify(self, data: dict) -> str:
-        nicsSpec = None
         devsSpecs = None
 
         try:
@@ -312,7 +312,7 @@ class VirtualMachine(Backend):
 
 
     @staticmethod
-    def listQuick(assetId: int, related: bool = False) -> List[dict]:
+    def listQuick(assetId: int) -> List[dict]:
         virtualmachines = list()
 
         try:
