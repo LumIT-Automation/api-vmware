@@ -2,7 +2,7 @@ from django.urls import path
 
 from .controllers import Root
 from .controllers.Stage2 import Targets, Target
-from .controllers.Stage2 import SshReboot, SshResizePartitions, SshRenameVg, SshAddMountPoint
+from .controllers.Stage2 import SshReboot, SshResizePartitions, SshRenameVg, SshAddMountPoint, LvsGrow
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 
 
@@ -22,4 +22,5 @@ urlpatterns = [
     path('commands/rename-vg/<int:targetId>/', SshRenameVg.Stage2SshRenameVgController.as_view(), name='stage2-ssh-resize-partition'),
     path('commands/reboot/<int:targetId>/', SshReboot.Stage2SshRebootController.as_view(), name='stage2-ssh-reboot'),
     path('commands/add-mount-point/<int:targetId>/', SshAddMountPoint.Stage2SshAddMountPointController.as_view(), name='stage2-ssh-add-mount-point'),
+    path('commands/lvs-grow/<int:targetId>/', LvsGrow.Stage2LvsGrowController.as_view(), name='stage2-lvs-grow'),
 ]

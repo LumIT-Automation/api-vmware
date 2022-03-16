@@ -1,3 +1,4 @@
+import re
 
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
@@ -39,7 +40,8 @@ class SshCommand:
             # Pass the value of the variables to the shell script.
             # Example: scriptVar={httpPutVar}. The value of {httpPutVar} ends in $scriptVar.
             if self.shellVars and "shellVars" in data:
-                self.shellVars = self.shellVars.format(**data["shellVars"]) # Variables substitution.
+                dataShellVars = self.cleanupShellParams(data["shellVars"])
+                self.shellVars = self.shellVars.format(**dataShellVars) # Variables substitution.
                 command = self.shellVars + command
 
             Log.log('Trying ssh command: ' + str(command))
@@ -55,3 +57,20 @@ class SshCommand:
             }
         })
 
+
+
+    def cleanupShellParams(self, shellVars: dict):
+        try:
+            def cleanString(inputString: str):
+                return re.sub(r'[^a-z0-9A-Z_/-]+', '', inputString, 0)
+
+            for key, value in shellVars.items():
+                Log.log(str(key) + " " + str(value), '_')
+                if isinstance(value, str):
+                    shellVars[key] = cleanString(value)
+                elif isinstance(value, int):
+                    pass
+
+            return shellVars
+        except Exception as e:
+            raise e
