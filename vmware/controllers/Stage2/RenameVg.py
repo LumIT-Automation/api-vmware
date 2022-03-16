@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.SshAddMountPoint import SshAddMountPoint
+from vmware.models.Stage2.RenameVg import RenameVg
 from vmware.models.Permission.Permission import Permission
 from vmware.serializers.Stage2.SshCommand import Stage2SshCommandSerializer as Serializer
 
@@ -10,25 +10,23 @@ from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
 
 
-class Stage2SshAddMountPointController(CustomController):
+class Stage2RenameVgController(CustomController):
     @staticmethod
     def put(request: Request, targetId: int) -> Response:
         response = None
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="add_mount_point_put") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="rename_vg_put") or user["authDisabled"]:
                 Log.actionLog("Second stage system reboot", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                if True:
-                #serializer = Serializer(data=request.data, partial=True)
-                #if serializer.is_valid():
-                #    data = serializer.validated_data["data"]
-                    data = request.data
+                serializer = Serializer(data=request.data, partial=True)
+                if serializer.is_valid():
+                    data = serializer.validated_data["data"]
 
-                    target = SshAddMountPoint(targetId)
-                    response = target.exec(data["data"])
+                    target = RenameVg(targetId)
+                    response = target.exec(data)
 
                     httpStatus = status.HTTP_200_OK
                 else:

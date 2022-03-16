@@ -4,6 +4,7 @@ from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.helpers.SshSupplicant import SshSupplicant
 from vmware.helpers.Log import Log
+from vmware.helpers.Exception import CustomException
 
 class SshCommand:
     def __init__(self, targetId: int, *args, **kwargs):
@@ -70,6 +71,8 @@ class SshCommand:
                     shellVars[key] = cleanString(value)
                 elif isinstance(value, int):
                     pass
+                else:
+                    raise CustomException(status=400, payload={"Ssh": "Forbidden data type in shellVars"})
 
             return shellVars
         except Exception as e:

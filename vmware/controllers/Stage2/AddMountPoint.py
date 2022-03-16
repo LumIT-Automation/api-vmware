@@ -2,32 +2,30 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.SshReboot import SshReboot
+from vmware.models.Stage2.AddMountPoint import AddMountPoint
 from vmware.models.Permission.Permission import Permission
-from vmware.serializers.Stage2.SshCommand import Stage2SshCommandSerializer as Serializer
+from vmware.serializers.Stage2.AddMountPoint import Stage2AddMountPointSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
 
 
-class Stage2SshRebootController(CustomController):
+class Stage2AddMountPointController(CustomController):
     @staticmethod
     def put(request: Request, targetId: int) -> Response:
         response = None
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="reboot_put") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="add_mount_point_put") or user["authDisabled"]:
                 Log.actionLog("Second stage system reboot", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = Serializer(data=request.data, partial=True)
+                serializer = Serializer(data=request.data)
                 if serializer.is_valid():
                     data = serializer.validated_data["data"]
-
-                    target = SshReboot(targetId)
+                    target = AddMountPoint(targetId)
                     response = target.exec(data)
-
                     httpStatus = status.HTTP_200_OK
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST

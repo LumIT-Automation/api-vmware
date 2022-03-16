@@ -4,7 +4,7 @@ from rest_framework import status
 
 from vmware.models.Stage2.LvsGrow import LvsGrow
 from vmware.models.Permission.Permission import Permission
-from vmware.serializers.Stage2.SshCommand import Stage2SshCommandSerializer as Serializer
+from vmware.serializers.Stage2.LvsGrow import Stage2LvsGrowSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
@@ -21,14 +21,11 @@ class Stage2LvsGrowController(CustomController):
                 Log.actionLog("Second stage, grow lvs", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                if True:
-                #serializer = Serializer(data=request.data, partial=True)
-                #if serializer.is_valid():
-                #    data = serializer.validated_data["data"]
-                    data = request.data
+                serializer = Serializer(data=request.data)
+                if serializer.is_valid():
+                    data = serializer.validated_data["data"]
                     target = LvsGrow(targetId)
-                    response = target.exec(data["data"])
-
+                    response = target.exec(data)
                     httpStatus = status.HTTP_200_OK
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST

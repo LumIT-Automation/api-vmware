@@ -3,7 +3,7 @@ from vmware.models.Stage2.SshCommand import SshCommand
 from vmware.helpers.Log import Log
 
 
-class SshAddMountPoint(SshCommand):
+class AddMountPoint(SshCommand):
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 
@@ -86,12 +86,13 @@ class SshAddMountPoint(SshCommand):
                 mount $mountDev $mountDir || exit 121
                 tmpMount=$mountDir
             }
-                    
+            echo "lvcreate -n $lv -L ${size}G $vg"
             if ! lvcreate -n $lv -L ${size}G $vg; then
                 echo "can't create lv $lv"
                 exit 11
             fi
             
+            echo "mkfs.${fs} /dev/${vg}/${lv}"
             if ! mkfs.${fs} /dev/${vg}/${lv}; then
                 echo "can't format /dev/${vg}/${lv}"
                 exit 13

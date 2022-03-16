@@ -2,7 +2,7 @@ from django.urls import path
 
 from .controllers import Root
 from .controllers.Stage2 import Targets, Target
-from .controllers.Stage2 import SshReboot, SshResizePartitions, SshRenameVg, SshAddMountPoint, LvsGrow
+from .controllers.Stage2 import Reboot, ResizePartitions, RenameVg, AddMountPoint, LvsGrow
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 
 
@@ -18,9 +18,9 @@ urlpatterns = [
     path('target/<int:targetId>/', Target.Stage2TargetController.as_view(), name='stage2-target'),
 
     # Virtual machine commands
-    path('commands/resize-partition/<int:targetId>/', SshResizePartitions.Stage2SshResizePartitionController.as_view(), name='stage2-ssh-resize-partition'),
-    path('commands/rename-vg/<int:targetId>/', SshRenameVg.Stage2SshRenameVgController.as_view(), name='stage2-ssh-resize-partition'),
-    path('commands/reboot/<int:targetId>/', SshReboot.Stage2SshRebootController.as_view(), name='stage2-ssh-reboot'),
-    path('commands/add-mount-point/<int:targetId>/', SshAddMountPoint.Stage2SshAddMountPointController.as_view(), name='stage2-ssh-add-mount-point'),
+    path('commands/resize-partition/<int:targetId>/', ResizePartitions.Stage2ResizePartitionController.as_view(), name='stage2-ssh-resize-partition'),
+    path('commands/rename-vg/<int:targetId>/', RenameVg.Stage2RenameVgController.as_view(), name='stage2-ssh-resize-partition'),
+    path('commands/reboot/<int:targetId>/', Reboot.Stage2RebootController.as_view(), name='stage2-ssh-reboot'),
+    path('commands/add-mount-point/<int:targetId>/', AddMountPoint.Stage2AddMountPointController.as_view(), name='stage2-ssh-add-mount-point'),
     path('commands/lvs-grow/<int:targetId>/', LvsGrow.Stage2LvsGrowController.as_view(), name='stage2-lvs-grow'),
 ]
