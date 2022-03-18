@@ -8,14 +8,14 @@ from vmware.helpers.Log import Log
 
 
 class VmwareHandler:
-    content = None # share content amongst all instances: do not re-fetch it during a "session".
-    managedObjectCache = dict()
+    contents = dict() # share content amongst all instances: do not re-fetch it during a "session".
+    managedObjectCaches = dict()
 
-    def __init__(self, assetId: int, moId: str = "", *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.assetId = int(assetId)
-        self.moId = moId # VMware Managed Object Id.
+        # self.assetId = int(assetId)
+        # self.moId = moId # VMware Managed Object Id.
 
 
 
@@ -25,30 +25,30 @@ class VmwareHandler:
 
     # Get VMware objects of type vimType.
     # vimTypes: vim.VirtualMachine, vim.Folder, vim.Datacenter, vim.VirtualApp, vim.ComputeResource, vim.Network, vim.Datastore.
-    def getObjects(self, vimType: str, moId: str = "") -> List[Any]:
+    def getObjects(self, assetId: int, vimType: str, moId: str = "") -> List[Any]:
         obj = []
 
         try:
-            if not VmwareHandler.content:
-                self.__fetchContent()
+            if not assetId in VmwareHandler.contents:
+                self.__fetchContent(assetId)
 
-            if VmwareHandler.content:
+            if VmwareHandler.contents[assetId]:
                 if moId:
                     # Return one moId (need an exact search here).
-                    if moId in VmwareHandler.managedObjectCache:
+                    if moId in VmwareHandler.managedObjectCaches[assetId]:
                         # Search within the class "cache", first.
-                        obj.append(VmwareHandler.managedObjectCache[moId])
+                        obj.append(VmwareHandler.managedObjectCaches[assetId][moId])
                     else:
-                        c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
+                        c = VmwareHandler.contents[assetId].viewManager.CreateContainerView(VmwareHandler.contents[assetId].rootFolder, [vimType], True)
                         for managedObject_ref in c.view:
                             if managedObject_ref._GetMoId() == moId:
                                 obj.append(managedObject_ref)
 
-                                VmwareHandler.managedObjectCache[moId] = managedObject_ref # put in "cache".
+                                VmwareHandler.managedObjectCaches[assetId][moId] = managedObject_ref # put in "cache".
                                 break
                 else:
                     # Return complete list.
-                    c = self.content.viewManager.CreateContainerView(self.content.rootFolder, [vimType], True)
+                    c = VmwareHandler.contents[assetId].viewManager.CreateContainerView(VmwareHandler.contents[assetId].rootFolder, [vimType], True)
                     for managedObject_ref in c.view:
                         obj.append(managedObject_ref)
             else:
@@ -60,23 +60,23 @@ class VmwareHandler:
 
 
 
-    def getCustomizationSpecManager(self) -> object:
+    def getCustomizationSpecManager(self, assetId) -> object:
         try:
-            if not VmwareHandler.content:
-                self.__fetchContent()
+            if not assetId in VmwareHandler.contents:
+                self.__fetchContent(assetId)
 
-            return getattr(VmwareHandler.content, "customizationSpecManager")
+            return getattr(VmwareHandler.contents[assetId], "customizationSpecManager")
         except Exception as e:
             raise e
 
 
 
-    def getTaskManager(self) -> object:
+    def getTaskManager(self, assetId) -> object:
         try:
-            if not VmwareHandler.content:
-                self.__fetchContent()
+            if not assetId in VmwareHandler.contents:
+                self.__fetchContent(assetId)
 
-            return getattr(VmwareHandler.content, "taskManager")
+            return getattr(VmwareHandler.contents[assetId], "taskManager")
         except Exception as e:
             raise e
 
@@ -86,12 +86,14 @@ class VmwareHandler:
     # Private methods
     ####################################################################################################################
 
-    def __fetchContent(self) -> None:
+    def __fetchContent(self, assetId) -> None:
         try:
-            supplicant = VmwareSupplicant(Asset(self.assetId).connectionData)
+            supplicant = VmwareSupplicant(Asset(assetId).connectionData)
             connection = supplicant.connect()
 
             Log.actionLog("Fetch VMware content.")
-            VmwareHandler.content = connection.RetrieveContent()
+            VmwareHandler.contents[assetId] = connection.RetrieveContent()
+            if not assetId in VmwareHandler.managedObjectCaches:
+                VmwareHandler.managedObjectCaches[assetId] = dict()
         except Exception as e:
             raise e

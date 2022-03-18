@@ -7,7 +7,7 @@ from vmware.helpers.Log import Log
 
 class HostSystem(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
@@ -55,7 +55,7 @@ class HostSystem(VmwareHandler):
         oHostSystemList = list()
 
         try:
-            hList = VmwareHandler(assetId).getObjects(vimType=vim.HostSystem)
+            hList = VmwareHandler().getObjects(assetId=assetId, vimType=vim.HostSystem)
             for hs in hList:
                 if not hasattr(hs, 'host'): # standalone host.
                     oHostSystemList.append(hs)
@@ -74,6 +74,6 @@ class HostSystem(VmwareHandler):
 
     def __oHostSystemLoad(self):
         try:
-            return self.getObjects(vimType=vim.HostSystem, moId=self.moId)[0]
+            return self.getObjects(assetId=self.assetId, vimType=vim.HostSystem, moId=self.moId)[0]
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})

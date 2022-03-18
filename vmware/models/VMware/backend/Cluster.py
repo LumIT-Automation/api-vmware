@@ -7,7 +7,7 @@ from vmware.helpers.Log import Log
 
 class Cluster(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
@@ -50,7 +50,7 @@ class Cluster(VmwareHandler):
     @staticmethod
     def oClusters(assetId) -> list:
         try:
-            return VmwareHandler(assetId).getObjects(vimType=vim.ClusterComputeResource)
+            return VmwareHandler().getObjects(assetId=assetId, vimType=vim.ClusterComputeResource)
         except Exception as e:
             raise e
 
@@ -62,6 +62,6 @@ class Cluster(VmwareHandler):
 
     def __oClusterLoad(self):
         try:
-            return self.getObjects(vimType=vim.ClusterComputeResource, moId=self.moId)[0]
+            return self.getObjects(assetId=self.assetId, vimType=vim.ClusterComputeResource, moId=self.moId)[0]
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})

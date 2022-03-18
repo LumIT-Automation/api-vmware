@@ -7,7 +7,7 @@ from vmware.helpers.Log import Log
 
 class VirtualMachineFolder(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
@@ -36,7 +36,7 @@ class VirtualMachineFolder(VmwareHandler):
         oVMFoldersList = list()
 
         try:
-            vmFoldersList = VmwareHandler(assetId).getObjects(vimType=vim.Folder)
+            vmFoldersList = VmwareHandler().getObjects(assetId=assetId, vimType=vim.Folder)
             for f in vmFoldersList:
                 if f.childType == ['Folder', 'VirtualMachine', 'VirtualApp']:
                     oVMFoldersList.append(f)
@@ -53,6 +53,6 @@ class VirtualMachineFolder(VmwareHandler):
 
     def __oVMFolderLoad(self):
         try:
-            return self.getObjects(vimType=vim.Folder, moId=self.moId)[0]
+            return self.getObjects(assetId=self.assetId, vimType=vim.Folder, moId=self.moId)[0]
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})

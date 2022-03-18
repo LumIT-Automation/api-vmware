@@ -7,7 +7,7 @@ from vmware.helpers.Log import Log
 
 class Task(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
@@ -44,7 +44,7 @@ class Task(VmwareHandler):
 
     def __oTaskLoad(self):
         try:
-            taskManager = self.getTaskManager()
+            taskManager = self.getTaskManager(assetId=self.assetId)
             for task in taskManager.recentTask:
                 if task.info.key == self.moId:
                     return task

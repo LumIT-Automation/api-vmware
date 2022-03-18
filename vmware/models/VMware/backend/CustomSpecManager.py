@@ -10,7 +10,7 @@ class CustomSpecManager(VmwareHandler):
     # that can administer the virtual machines customization specifications.
 
     def __init__(self, assetId: int, *args, **kwargs):
-        super().__init__(assetId, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
         self.oCustomSpecManager = self.__oCustomSpecManagerLoad()
@@ -73,7 +73,7 @@ class CustomSpecManager(VmwareHandler):
 
     def __oCustomSpecManagerLoad(self):
         try:
-            return self.getCustomizationSpecManager()
+            return self.getCustomizationSpecManager(assetId=self.assetId)
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})
 

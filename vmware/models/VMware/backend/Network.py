@@ -7,7 +7,7 @@ from vmware.helpers.Log import Log
 
 class Network(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
@@ -34,7 +34,7 @@ class Network(VmwareHandler):
     @staticmethod
     def oNetworks(assetId) -> list:
         try:
-            return VmwareHandler(assetId).getObjects(vimType=vim.Network)
+            return VmwareHandler().getObjects(assetId=assetId, vimType=vim.Network)
         except Exception as e:
             raise e
 
@@ -46,6 +46,6 @@ class Network(VmwareHandler):
 
     def __oNetworkLoad(self):
         try:
-            return self.getObjects(vimType=vim.Network, moId=self.moId)[0]
+            return self.getObjects(assetId=self.assetId, vimType=vim.Network, moId=self.moId)[0]
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})

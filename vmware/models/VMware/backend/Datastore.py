@@ -6,7 +6,7 @@ from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
 class Datastore(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
-        super().__init__(assetId, moId, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.assetId = int(assetId)
         self.moId = moId
@@ -56,7 +56,7 @@ class Datastore(VmwareHandler):
     @staticmethod
     def oDatastores(assetId) -> list:
         try:
-            return VmwareHandler(assetId).getObjects(vimType=vim.Datastore)
+            return VmwareHandler().getObjects(assetId=assetId, vimType=vim.Datastore)
         except Exception as e:
             raise e
 
@@ -81,6 +81,6 @@ class Datastore(VmwareHandler):
 
     def __oDatastoreLoad(self):
         try:
-            return self.getObjects(vimType=vim.Datastore, moId=self.moId)[0]
+            return self.getObjects(assetId=self.assetId, vimType=vim.Datastore, moId=self.moId)[0]
         except Exception:
             raise CustomException(status=400, payload={"VMware": "cannot load resource."})
