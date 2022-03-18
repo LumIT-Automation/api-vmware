@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.LvsGrow import LvsGrow
+from vmware.commands.Stage2.LvsGrow import LvsGrow
 from vmware.models.Permission.Permission import Permission
 from vmware.serializers.Stage2.LvsGrow import Stage2LvsGrowSerializer as Serializer
 

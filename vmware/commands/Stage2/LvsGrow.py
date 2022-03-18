@@ -1,5 +1,5 @@
 
-from vmware.models.Stage2.SshCommand import SshCommand
+from vmware.commands.Stage2.SshCommand import SshCommand
 
 
 class LvsGrow(SshCommand):

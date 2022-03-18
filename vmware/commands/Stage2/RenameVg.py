@@ -1,6 +1,5 @@
 
-from vmware.models.Stage2.SshCommand import SshCommand
-from vmware.helpers.Log import Log
+from vmware.commands.Stage2.SshCommand import SshCommand
 
 
 class RenameVg(SshCommand):

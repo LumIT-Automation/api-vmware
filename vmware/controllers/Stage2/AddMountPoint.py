@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.AddMountPoint import AddMountPoint
+from vmware.commands.Stage2.AddMountPoint import AddMountPoint
 from vmware.models.Permission.Permission import Permission
 from vmware.serializers.Stage2.AddMountPoint import Stage2AddMountPointSerializer as Serializer
 

@@ -1,6 +1,5 @@
 
-from vmware.models.Stage2.SshCommand import SshCommand
-from vmware.helpers.Log import Log
+from vmware.commands.Stage2.SshCommand import SshCommand
 
 
 class AddMountPoint(SshCommand):
@@ -86,35 +85,52 @@ class AddMountPoint(SshCommand):
                 mount $mountDev $mountDir || exit 121
                 tmpMount=$mountDir
             }
-            echo "lvcreate -n $lv -L ${size}G $vg"
-            if ! lvcreate -n $lv -L ${size}G $vg; then
-                echo "can't create lv $lv"
+            if ! vgs -o vg_name | grep -q " ${vg}"; then
+                echo "Volume group not found."
                 exit 11
             fi
-            
-            echo "mkfs.${fs} /dev/${vg}/${lv}"
-            if ! mkfs.${fs} /dev/${vg}/${lv}; then
-                echo "can't format /dev/${vg}/${lv}"
-                exit 13
-            fi
-            
-            # The folder is already present, stop processes amd move data.
-            if [ -d "$folder" ]; then
-                folder_stop_all_processes $folder
-                tmp_mount "/dev/${vg}/${lv}"
-                clone_folder $folder $tmpMount
-                cd $folder && rm -fr * # cleanup the data in the old place.
-                cd
-                echo "umount -l "/dev/${vg}/${lv}" && rm -fr $tmpMount"
-                umount -l "/dev/${vg}/${lv}" && rm -fr $tmpMount
+            if lvs -o lv_name | grep -q " $lv "; then
+                echo "lv $lv already existent"
             else
-                mkdir -p $folder || exit 15
+                echo "lvcreate -n $lv -L ${size}G $vg"
+                if ! lvcreate -n $lv -L ${size}G $vg; then
+                    echo "can't create lv $lv"
+                    exit 13
+                fi
             fi
             
+            if lsblk -n -o FSTYPE /dev/${vg}/${lv} | grep -Eq 'ext[2-4]|xfs|btrfs'; then
+                echo "lv $lv already formatted"
+            else
+                echo "mkfs.${fs} /dev/${vg}/${lv}"
+                if ! mkfs.${fs} /dev/${vg}/${lv}; then
+                    echo "can't format /dev/${vg}/${lv}"
+                    exit 15
+                fi
+            fi
+            
+            if mount  | grep "$folder" | grep -E `lvs --noheadings -o lv_dm_path,lv_path /dev/${vg}/${lv} | sed -r -e 's/^ +//g' | tr ' ' '|'`; then
+                echo "lv $lv already mounted on $folder"
+                # TODO: check lv size here.
+            else
+                # The folder is already present (but not mounted on $lv), stop processes on it amd move the data.
+                if [ -d "$folder" ]; then
+                    folder_stop_all_processes $folder
+                    tmp_mount "/dev/${vg}/${lv}"
+                    clone_folder $folder $tmpMount
+                    cd $folder && rm -fr * # cleanup the data in the old place.
+                    cd
+                    echo "umount -l "/dev/${vg}/${lv}" && rm -fr $tmpMount"
+                    umount -l "/dev/${vg}/${lv}" && rm -fr $tmpMount
+                else
+                    mkdir -p $folder || exit 17
+                fi
+                mount /dev/${vg}/${lv} $folder
+            fi
+                      
             if ! grep -q "/dev/${vg}/${lv}" /etc/fstab; then
                 echo "echo -e \"/dev/${vg}/${lv}\t${folder}\t$fs\tdefaults\t0\t2\" >> /etc/fstab"    
                 echo -e "/dev/${vg}/${lv}\t${folder}\t$fs\tdefaults\t0\t2" >> /etc/fstab
             fi
             
-            mount -a
         """

@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.RenameVg import RenameVg
+from vmware.commands.Stage2.RenameVg import RenameVg
 from vmware.models.Permission.Permission import Permission
 from vmware.serializers.Stage2.SshCommand import Stage2SshCommandSerializer as Serializer
 
