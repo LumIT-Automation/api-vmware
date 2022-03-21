@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.commands.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.Stage2.BoostrapKeys import Stage2BootstrapKeysSerializer as BoostrapKeysSerializer

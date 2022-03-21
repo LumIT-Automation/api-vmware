@@ -1,9 +1,10 @@
 from typing import List
 
 from dataclasses import dataclass
+from vmware.models.Stage2.BoostrapKey import BootstrapKey
 
 from vmware.repository.Stage2.Target import Target as Repository
-
+from vmware.helpers.Log import Log
 
 @dataclass
 class DataConnection:
@@ -45,6 +46,20 @@ class Target:
         except Exception as e:
             raise e
 
+
+
+    def getBootstrapPubKey(self) -> str:
+        try:
+            t = Repository.get(self.id)
+            Log.log(t, '_')
+            # bootStrapKey = BootstrapKey(t["connectionData"]["id_bootstrap_key "])
+            bootStrapKey = BootstrapKey(1)
+            pubKey = bootStrapKey.getPublic()
+            Log.log(pubKey, '_')
+            return pubKey
+
+        except Exception as e:
+            raise e
 
 
     ####################################################################################################################

@@ -1,7 +1,7 @@
 import re
 
-from vmware.commands.Stage2.Target import Target
-from vmware.commands.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.Target import Target
+from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.helpers.SshSupplicant import SshSupplicant
 from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException

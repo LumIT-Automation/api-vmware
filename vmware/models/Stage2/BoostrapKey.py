@@ -1,6 +1,6 @@
 from typing import List
-
-from dataclasses import dataclass
+import io
+import paramiko
 
 from vmware.repository.Stage2.BoostrapKey import BootstrapKey as Repository
 from vmware.helpers.Log import Log
@@ -35,6 +35,16 @@ class BootstrapKey:
     def delete(self) -> None:
         try:
             Repository.delete(self.id)
+        except Exception as e:
+            raise e
+
+
+
+    def getPublic(self) -> str:
+        try:
+            keyStringIO = io.StringIO(self.priv_key)
+            privateKey = paramiko.RSAKey.from_private_key(keyStringIO)
+            return privateKey.get_base64()
         except Exception as e:
             raise e
 
