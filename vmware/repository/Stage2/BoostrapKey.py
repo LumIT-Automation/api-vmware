@@ -1,7 +1,7 @@
 from typing import List
 
 from django.utils.html import strip_tags
-from django.db import connection
+from django.db import connections
 from django.db import transaction
 
 from vmware.helpers.Exception import CustomException
@@ -10,6 +10,7 @@ from vmware.helpers.Log import Log
 
 
 class BootstrapKey:
+    db = 'stage2'
 
     # Table: stage2_target
     #   `id` int(11) NOT NULL,
@@ -24,10 +25,10 @@ class BootstrapKey:
 
     @staticmethod
     def get(keyId: int) -> dict:
-        c = connection.cursor()
+        c = connections[BootstrapKey.db].cursor()
 
         try:
-            c.execute("SELECT * FROM stage2_bootstrap_key "
+            c.execute("SELECT * FROM bootstrap_key "
                       "WHERE id = %s ", [
                         keyId
                     ])
@@ -44,7 +45,7 @@ class BootstrapKey:
     def modify(keyId: int, data: dict) -> None:
         sql = ""
         values = []
-        c = connection.cursor()
+        c = connections[BootstrapKey.db].cursor()
 
         if BootstrapKey.__exists(keyId):
             # Build SQL query according to dict fields.
@@ -55,14 +56,19 @@ class BootstrapKey:
                     sql += k+"=%s,"
                     values.append(strip_tags(v)) # no HTML allowed.
 
+            Log.log("UPDATE bootstrap_key SET priv_key = 'XXXXXXXX', comment = 'yyyyy'", '_')
+
+            import logging
+            logging.disable(logging.WARNING)  # Do not log private key.
             try:
-                c.execute("UPDATE stage2_bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(keyId),
+                c.execute("UPDATE bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(keyId),
                     values
                 )
 
             except Exception as e:
                 raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
             finally:
+                logging.disable(logging.NOTSET)  # Re-enable django logging.
                 c.close()
         else:
             raise CustomException(status=404, payload={"database": "Non existent endpoint"})
@@ -71,11 +77,11 @@ class BootstrapKey:
 
     @staticmethod
     def delete(keyId: int) -> None:
-        c = connection.cursor()
+        c = connections[BootstrapKey.db].cursor()
 
         if BootstrapKey.__exists(keyId):
             try:
-                c.execute("DELETE FROM stage2_bootstrap_key WHERE id = %s", [
+                c.execute("DELETE FROM bootstrap_key WHERE id = %s", [
                     keyId
                 ])
 
@@ -90,10 +96,10 @@ class BootstrapKey:
 
     @staticmethod
     def list() -> List[dict]:
-        c = connection.cursor()
+        c = connections[BootstrapKey.db].cursor()
 
         try:
-            c.execute("SELECT id, comment FROM stage2_bootstrap_key")
+            c.execute("SELECT id, comment FROM bootstrap_key")
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
@@ -107,7 +113,7 @@ class BootstrapKey:
         s = ""
         keys = "("
         values = []
-        c = connection.cursor()
+        c = connections[BootstrapKey.db].cursor()
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
@@ -117,17 +123,20 @@ class BootstrapKey:
 
         keys = keys[:-1]+")"
 
-        Log.log("INSERT INTO stage2_bootstrap_key "+keys+" VALUES ("+s[:-1]+")", '_')
+        Log.log("INSERT INTO bootstrap_key (`priv_key`, `comment`) VALUES ('XXXXXXXX', 'yyyyyyy')", '_')
+
+        import logging
+        logging.disable(logging.WARNING) # Do not log private key.
         try:
             with transaction.atomic():
-                c.execute("INSERT INTO stage2_bootstrap_key "+keys+" VALUES ("+s[:-1]+")",
+                c.execute("INSERT INTO bootstrap_key "+keys+" VALUES ("+s[:-1]+")",
                     values
                 )
-
                 return c.lastrowid
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
         finally:
+            logging.disable(logging.NOTSET) # Re-enable django logging.
             c.close()
 
 
@@ -138,9 +147,10 @@ class BootstrapKey:
 
     @staticmethod
     def __exists(keyId: int) -> int:
-        c = connection.cursor()
+        c = connections[BootstrapKey.db].cursor()
+
         try:
-            c.execute("SELECT COUNT(*) AS c FROM stage2_bootstrap_key WHERE id = %s", [
+            c.execute("SELECT COUNT(*) AS c FROM bootstrap_key WHERE id = %s", [
                 keyId
             ])
             o = DBHelper.asDict(c)

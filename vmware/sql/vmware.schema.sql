@@ -148,47 +148,6 @@ CREATE TABLE `role_privilege` (
   `id_privilege` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- --------------------------------------------------------
-
---
--- Struttura della tabella `stage2_target`
---
-
-CREATE TABLE `stage2_target` (
-  `id` int(11) NOT NULL,
-  `ip` varchar(64) NOT NULL,
-  `port` int(11) DEFAULT NULL,
-  `api_type` varchar(64) NOT NULL DEFAULT '',
-  `id_bootstrap_key` INT DEFAULT NULL,
-  `username` varchar(64) NOT NULL DEFAULT '',
-  `password` varchar(64) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `stage2_bootstrap_key`
---
-
-CREATE TABLE `stage2_bootstrap_key` (
-  `id` int(11) NOT NULL,
-  `priv_key` varchar(8192) NOT NULL DEFAULT '',
-  `comment` varchar(1024) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `stage2_keygroups`
---
-
-CREATE TABLE `stage2_group_pubkey` (
-  `id` int(11) NOT NULL,
-  `group` varchar(64) NOT NULL,
-  `pubkey` varchar(2048) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 --
 -- Indici per le tabelle scaricate
@@ -259,24 +218,6 @@ ALTER TABLE `role_privilege`
   ADD PRIMARY KEY (`id_role`,`id_privilege`),
   ADD KEY `rp_privilege` (`id_privilege`);
 
---
--- Indici per le tabelle `stage2_target`
---
-ALTER TABLE `stage2_target`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `ip` (`ip`);
-
---
--- Indici per le tabelle `stage2_bootstrap_key`
---
-ALTER TABLE `stage2_bootstrap_key`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indici per le tabelle `stage2_group_pubkey`
---
-ALTER TABLE `stage2_group_pubkey`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate
@@ -330,24 +271,6 @@ ALTER TABLE `role`
 ALTER TABLE `vmware_object`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT per la tabella `stage2_target`
---
-ALTER TABLE `stage2_target`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT per la tabella `stage2_bootstrap_key`
---
-ALTER TABLE `stage2_bootstrap_key`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT per la tabella `stage2_group_pubkey`
---
-ALTER TABLE `stage2_group_pubkey`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
 
 --
 -- Limiti per le tabelle scaricate
@@ -374,12 +297,6 @@ ALTER TABLE `role_privilege`
   ADD CONSTRAINT `rp_privilege` FOREIGN KEY (`id_privilege`) REFERENCES `privilege` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `rp_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
-
---
--- Limiti per la tabella `stage2_target`
---
-ALTER TABLE `stage2_target`
-  ADD CONSTRAINT `bk_key` FOREIGN KEY (`id_bootstrap_key`) REFERENCES `stage2_bootstrap_key` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

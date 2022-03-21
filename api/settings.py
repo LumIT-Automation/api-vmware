@@ -83,6 +83,14 @@ DATABASES = {
         'PASSWORD': 'password', #DATABASE_PASSWORD
         'HOST': '127.0.0.1',
         'PORT': '3306',
+    },
+    'stage2': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'stage2',
+        'USER': 'api', #DATABASE_USER
+        'PASSWORD': 'password', #DATABASE_PASSWORD
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 

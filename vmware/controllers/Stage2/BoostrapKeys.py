@@ -56,8 +56,8 @@ class Stage2BootstrapKeysController(CustomController):
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="bootstrap_key_post") or user["authDisabled"]:
-                Log.actionLog("Second stage bootstrap key addition", user)
-                Log.actionLog("User data: "+str(request.data), user)
+                Log.actionLog(" Second stage bootstrap key addition", user)
+                Log.actionLog(" User data (comment only): "+str(request.data["data"]["comment"]), user)
 
                 serializer = BoostrapKeySerializer(data=request.data)
                 if serializer.is_valid():

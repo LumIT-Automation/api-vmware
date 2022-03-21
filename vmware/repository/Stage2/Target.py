@@ -1,7 +1,7 @@
 from typing import List
 
 from django.utils.html import strip_tags
-from django.db import connection
+from django.db import connections
 from django.db import transaction
 
 from vmware.helpers.Exception import CustomException
@@ -10,6 +10,7 @@ from vmware.helpers.Log import Log
 
 
 class Target:
+    db = 'stage2'
 
     # Table: stage2_target
     #   `id` int(11) NOT NULL,
@@ -28,12 +29,13 @@ class Target:
 
     @staticmethod
     def get(targetId: int) -> dict:
-        c = connection.cursor()
+        c = connections[Target.db].cursor()
+
         o = dict()
 
         try:
-            c.execute("SELECT * FROM stage2_target "
-                      "WHERE stage2_target.id = %s ", [
+            c.execute("SELECT * FROM target "
+                      "WHERE target.id = %s ", [
                         targetId
                     ])
 
@@ -53,7 +55,7 @@ class Target:
     def modify(targetId: int, data: dict) -> None:
         sql = ""
         values = []
-        c = connection.cursor()
+        c = connections[Target.db].cursor()
 
         if Target.__exists(targetId):
             # Build SQL query according to dict fields.
@@ -65,7 +67,7 @@ class Target:
                     values.append(strip_tags(v)) # no HTML allowed.
 
             try:
-                c.execute("UPDATE stage2_target SET "+sql[:-1]+" WHERE id = "+str(targetId),
+                c.execute("UPDATE target SET "+sql[:-1]+" WHERE id = "+str(targetId),
                     values
                 )
 
@@ -80,11 +82,11 @@ class Target:
 
     @staticmethod
     def delete(targetId: int) -> None:
-        c = connection.cursor()
+        c = connections[Target.db].cursor()
 
         if Target.__exists(targetId):
             try:
-                c.execute("DELETE FROM stage2_target WHERE id = %s", [
+                c.execute("DELETE FROM target WHERE id = %s", [
                     targetId
                 ])
 
@@ -99,10 +101,10 @@ class Target:
 
     @staticmethod
     def list() -> List[dict]:
-        c = connection.cursor()
+        c = connections[Target.db].cursor()
 
         try:
-            c.execute("SELECT id, ip, port, api_type, id_bootstrap_key FROM stage2_target")
+            c.execute("SELECT id, ip, port, api_type, id_bootstrap_key FROM target")
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
@@ -116,7 +118,7 @@ class Target:
         s = ""
         keys = "("
         values = []
-        c = connection.cursor()
+        c = connections[Target.db].cursor()
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
@@ -128,7 +130,7 @@ class Target:
 
         try:
             with transaction.atomic():
-                c.execute("INSERT INTO stage2_target "+keys+" VALUES ("+s[:-1]+")",
+                c.execute("INSERT INTO target "+keys+" VALUES ("+s[:-1]+")",
                     values
                 )
 
@@ -146,9 +148,10 @@ class Target:
 
     @staticmethod
     def __exists(targetId: int) -> int:
-        c = connection.cursor()
+        c = connections[Target.db].cursor()
+
         try:
-            c.execute("SELECT COUNT(*) AS c FROM stage2_target WHERE id = %s", [
+            c.execute("SELECT COUNT(*) AS c FROM target WHERE id = %s", [
                 targetId
             ])
             o = DBHelper.asDict(c)
