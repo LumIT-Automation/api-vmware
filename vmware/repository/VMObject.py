@@ -1,5 +1,6 @@
 from django.db import connection
 from typing import Callable, List
+from django.utils.html import strip_tags
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
@@ -82,6 +83,35 @@ class VMObject:
 
 
     @staticmethod
+    def modify(id: int, data: dict) -> None:
+        sql = ""
+        values = []
+        c = connection.cursor()
+
+        if VMObject.__exists(id):
+            # %s placeholders and values for SET.
+            for k, v in data.items():
+                sql += k + "=%s,"
+                values.append(strip_tags(v)) # no HTML allowed.
+
+            # Condition for WHERE.
+            values.append(id)
+
+            try:
+                c.execute("UPDATE `vmware_object` SET "+sql[:-1]+" WHERE id = %s",
+                    values
+                )
+            except Exception as e:
+                raise CustomException(status=400, payload={"database": e.__str__()})
+            finally:
+                c.close()
+
+        else:
+            raise CustomException(status=404, payload={"database": "Vmware object not found in db."})
+
+
+
+    @staticmethod
     def add(assetId: int, moId: str, objectName: str, description: str) -> int:
         c = connection.cursor()
 
@@ -96,5 +126,27 @@ class VMObject:
             return c.lastrowid
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __exists(id: int) -> int:
+        c = connection.cursor()
+
+        try:
+            c.execute("SELECT COUNT(*) AS c FROM `vmware_object` WHERE id = %s", [
+                id
+            ])
+            o = DBHelper.asDict(c)
+
+            return int(o[0]['c'])
+        except Exception:
+            return 0
         finally:
             c.close()

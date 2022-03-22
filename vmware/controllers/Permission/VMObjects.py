@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.Permission.Permission import Permission
 from vmware.models.Permission.VMObject import VMObject
 
-from vmware.serializers.Permission.VMObject import PermissionVMObjectsSerializer as Serializer
+from vmware.serializers.Permission.VMObjects import PermissionVMObjectsSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional

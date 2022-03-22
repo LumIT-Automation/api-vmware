@@ -25,18 +25,6 @@ class VMObject:
 
 
     ####################################################################################################################
-    # Public methods
-    ####################################################################################################################
-
-    def delete(self) -> None:
-        try:
-            Repository.delete(self.id)
-        except Exception as e:
-            raise e
-
-
-
-    ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
@@ -44,6 +32,29 @@ class VMObject:
     def list() -> List[dict]:
         try:
             return Repository.list()
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    def delete(objectId: int) -> None:
+        try:
+            Repository.delete(objectId)
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    def modify(objectId: int, data: dict) -> None:
+        modifyData = dict()
+        for k, v in data.items(): # Remove ungiven fields.
+            if v:
+                modifyData[k] = v
+
+        try:
+            Repository.modify(objectId, data=modifyData)
         except Exception as e:
             raise e
 

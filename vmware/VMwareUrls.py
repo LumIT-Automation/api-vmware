@@ -25,7 +25,7 @@ urlpatterns = [
     path('permissions/', Permissions.PermissionsController.as_view(), name='permissions'),
     path('permission/<int:permissionId>/', Permission.PermissionController.as_view(), name='permission'),
     path('permissions/vmObjects/', PermissionVMObjects.PermissionVMObjectsController.as_view(), name='permissions-vmobject'),
-    path('permissions/vmObject/<int:assetId>/<str:moId>/', PermissionVMObject.PermissionVMObjectController.as_view(), name='permissions-vmobject'),
+    path('permissions/vmObject/<int:objectId>/', PermissionVMObject.PermissionVMObjectController.as_view(), name='permissions-vmobject'),
 
     path('authorizations/', Authorizations.AuthorizationsController.as_view(), name='authorizations'),
 
