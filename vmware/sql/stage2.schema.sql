@@ -29,12 +29,16 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `target` (
   `id` int(11) NOT NULL,
-  `ip` varchar(64) NOT NULL,
+  `ip` varchar(63) NOT NULL,
   `port` int(11) DEFAULT NULL,
-  `api_type` varchar(64) NOT NULL DEFAULT '',
+  `api_type` varchar(63) NOT NULL DEFAULT '',
   `id_bootstrap_key` INT DEFAULT NULL,
-  `username` varchar(64) NOT NULL DEFAULT '',
-  `password` varchar(64) NOT NULL DEFAULT ''
+  `username` varchar(63) NOT NULL DEFAULT '',
+  `password` varchar(63) NOT NULL DEFAULT '',
+  `id_asset` int(11) NOT NULL,
+  `task_moid` varchar(63) NOT NULL DEFAULT '',
+  `task_status` varchar(63) NOT NULL DEFAULT 'undefined',
+  `vm_name` varchar(127) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -84,7 +88,8 @@ CREATE TABLE `target_group` (
 --
 ALTER TABLE `target`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `ip` (`ip`);
+  ADD UNIQUE KEY `ip` (`ip`),
+  ADD UNIQUE KEY `taskId` (`id_asset`,`task_moid`);
 
 --
 -- Indici per le tabelle `bootstrap_key`
