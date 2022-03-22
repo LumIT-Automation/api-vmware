@@ -41,12 +41,15 @@ class BootstrapKey:
 
 
     def getPublic(self) -> str:
+        pubKey = ""
         try:
             keyStringIO = io.StringIO(self.priv_key)
             privateKey = paramiko.RSAKey.from_private_key(keyStringIO)
-            return privateKey.get_base64()
-        except Exception as e:
-            raise e
+            pubKey = privateKey.get_base64()
+        except Exception:
+            pass
+
+        return pubKey
 
 
 
@@ -56,8 +59,15 @@ class BootstrapKey:
 
     @staticmethod
     def list() -> List[dict]:
+        data = List[dict]
         try:
-            return Repository.list()
+            data = Repository.list()
+            Log.log(data, '_')
+            for el in data:
+                bKey = BootstrapKey(keyId=el["id"])
+                el["pub_key"] = bKey.getPublic()
+
+            return data
         except Exception as e:
             raise e
 
