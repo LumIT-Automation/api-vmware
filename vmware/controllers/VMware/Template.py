@@ -92,10 +92,10 @@ class VMwareVirtualMachineTemplateController(CustomController):
                         lock.lock()
 
                         template = VirtualMachineTemplate(assetId, moId)
-                        response["task"] = template.deploy(serializer.validated_data)
+                        response["data"] = template.deploy(serializer.validated_data)
                         httpStatus = status.HTTP_202_ACCEPTED
                         lock.release()
-                        Log.actionLog("Deploy task moId: "+response["task"], user)
+                        Log.actionLog("Deploy task moId: "+str(response["data"]), user)
                     else:
                         httpStatus = status.HTTP_423_LOCKED
                 else:

@@ -7,6 +7,9 @@ from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 
+from vmware.models.Stage2.Target import Target
+from vmware.tasks import poolVmwareAsync_task
+
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
@@ -37,7 +40,7 @@ class VirtualMachine(Backend):
     # Public methods
     ####################################################################################################################
 
-    def deploy(self, data: dict) -> str:
+    def deploy(self, data: dict) -> int:
         from vmware.models.VMware.Cluster import Cluster
         from vmware.models.VMware.HostSystem import HostSystem
         from vmware.models.VMware.Datastore import Datastore
@@ -93,7 +96,19 @@ class VirtualMachine(Backend):
                         # Deploy
                         cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
-                        return self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
+                        taskMoId = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
+                        # "ip": data["guestSpec"]["network"]["ip"],
+                        targetData = {
+                            "ip": "192.168.18.133",
+                            "port": 22,
+                            "api_type": "ssh",
+                            "id_bootstrap_key": "1",
+                            "username": "root",
+                            "task_moid": taskMoId
+                        }
+                        targetId = Target.add(targetData)
+                        poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
+                        return targetId
 
         except Exception as e:
             raise e

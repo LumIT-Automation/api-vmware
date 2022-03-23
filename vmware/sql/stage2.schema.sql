@@ -88,7 +88,7 @@ CREATE TABLE `target_final_pubkey` (
 --
 ALTER TABLE `target`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `ip` (`ip`),
+  ADD KEY `ip` (`ip`),
   ADD UNIQUE KEY `taskId` (`id_asset`,`task_moid`);
 
 --
