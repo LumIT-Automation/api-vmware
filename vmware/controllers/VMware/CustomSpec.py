@@ -106,16 +106,16 @@ class VMwareCustomSpecController(CustomController):
     def patch(request: Request, assetId: int, specName: str) -> Response:
         response = None
         user = CustomController.loggedUser(request)
+        data = dict()
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="custom_spec_patch", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Virtual machine customization specification edit", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-
-                serializer = Serializer(data=request.data, partial=True)
+                serializer = Serializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
+                    data = serializer.validated_data
                     lock = Lock("custom_spec", locals(), specName)
                     if lock.isUnlocked():
                         lock.lock()

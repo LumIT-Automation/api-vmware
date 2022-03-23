@@ -86,7 +86,6 @@ class CustomSpecManager(VmwareHandler):
     @staticmethod
     def __replaceSpecObjectAttr(spec, data: dict):
         n = 0
-
         if spec.info.type == "Linux":
             if "network" in data and data["network"]:
                 for netSet in data["network"]:
@@ -109,23 +108,23 @@ class CustomSpecManager(VmwareHandler):
                     n += 1
 
             dns = []
-            if data["dns1"]:
+            if "dns1" in data and data["dns1"]:
                 dns.append(data["dns1"])
-            if data["dns2"]:
+            if "dns2" in data and data["dns2"]:
                 dns.append(data["dns2"])
             if dns:
                 spec.spec.globalIPSettings.dnsServerList = dns
 
-            if data["hostName"]:
+            if "hostName" in data and data["hostName"]:
                 newComputerName = vim.vm.customization.FixedName()
                 newComputerName.name = data["hostName"]
                 spec.spec.identity.hostName = newComputerName
 
-            if data["domainName"]:
+            if "domainName" in data and data["domainName"]:
                 spec.spec.identity.domain = data["domainName"]
                 spec.spec.globalIPSettings.dnsSuffixList = [data["domainName"]]
 
-            if data["timeZone"]:
+            if "timeZone" in data and data["timeZone"]:
                 spec.spec.identity.timeZone = data["timeZone"]
 
         return spec

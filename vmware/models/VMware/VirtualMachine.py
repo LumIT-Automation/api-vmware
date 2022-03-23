@@ -40,7 +40,7 @@ class VirtualMachine(Backend):
     # Public methods
     ####################################################################################################################
 
-    def deploy(self, data: dict) -> int:
+    def deploy(self, data: dict) -> dict:
         from vmware.models.VMware.Cluster import Cluster
         from vmware.models.VMware.HostSystem import HostSystem
         from vmware.models.VMware.Datastore import Datastore
@@ -108,7 +108,9 @@ class VirtualMachine(Backend):
                         }
                         targetId = Target.add(targetData)
                         poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
-                        return targetId
+                        return {
+                            "targetId": targetId
+                        }
 
         except Exception as e:
             raise e
