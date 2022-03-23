@@ -12,6 +12,9 @@ class Stage2TargetsSerializer(serializers.Serializer):
             id_asset = serializers.IntegerField(required=False, allow_null=True)
             task_moid = serializers.CharField(max_length=64, required=False, allow_blank=True, allow_null=True)
             task_status = serializers.CharField(max_length=64, required=False)
+            task_progress = serializers.IntegerField(required=False, allow_null=True)
+            task_startTime = serializers.CharField(max_length=64, required=False, allow_blank=True, allow_null=True)
+            task_queueTime = serializers.CharField(max_length=64, required=False, allow_blank=True, allow_null=True)
             vm_name = serializers.CharField(max_length=128, required=False, allow_blank=True)
 
         items = Stage2TargetsItems(many=True)

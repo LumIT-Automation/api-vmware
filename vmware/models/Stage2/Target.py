@@ -23,7 +23,10 @@ class Target:
         self.connectionData: DataConnection = None
         self.id_asset: int = 0
         self.task_moid: str = ""
-        self.task_status: str = ""
+        self.task_state: str = ""
+        self.task_progress: int = 0
+        self.task_startTime: str = ""
+        self.task_queueTime: str = ""
         self.vm_name: str = ""
 
         self.__load()

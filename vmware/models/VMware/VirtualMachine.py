@@ -52,6 +52,8 @@ class VirtualMachine(Backend):
         host = None
         cluster = None
         checkNetworkStorageAttached = None
+        cSpecInfo = dict()
+        out = dict()
         try:
             # Perform some preliminary checks.
             # - "clusterMoId" and not "hostMoId" -> deploy in cluster, vmware choose the host.
@@ -92,26 +94,40 @@ class VirtualMachine(Backend):
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
                             oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
-                        cSpecInfo = CustomSpec(self.assetId, data["guestSpec"]).info()
+                            cSpecInfo = CustomSpec(self.assetId, data["guestSpec"]).info()
 
-                        # Deploy
+                        # Put all together.
                         cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
-                        taskMoId = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
+                        # Deploy
+                        out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
 
-                        targetData = {
-                            "ip": cSpecInfo["network"][0]["ip"],
-                            "port": 22,
-                            "api_type": "ssh",
-                            "id_bootstrap_key": "1",
-                            "username": "root",
-                            "task_moid": taskMoId
-                        }
-                        targetId = Target.add(targetData)
-                        poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
-                        return {
-                            "targetId": targetId
-                        }
+                        if cSpecInfo:
+                            out["targetId"] = self.poolVmwareDeployVMTask(bootStrapKeyId=1, userName="root", taskMoId=out["task_moId"], customSpecInfo=cSpecInfo)
+
+                        return out
+
+        except Exception as e:
+            raise e
+
+
+
+    def poolVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict) -> int:
+        try:
+            if "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
+                targetData = {
+                    "ip": customSpecInfo["network"][0]["ip"],
+                    "port": 22,
+                    "api_type": "ssh",
+                    "id_bootstrap_key": bootStrapKeyId,
+                    "username": userName,
+                    "id_asset": self.assetId,
+                    "task_moId": taskMoId
+                }
+
+                targetId = Target.add(targetData)
+                poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
+                return targetId
 
         except Exception as e:
             raise e

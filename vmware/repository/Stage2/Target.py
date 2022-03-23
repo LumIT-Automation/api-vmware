@@ -22,7 +22,10 @@ class Target:
     #   `password` varchar(64) NOT NULL DEFAULT ''
     #   `id_asset` int(11) NOT NULL,
     #   `task_moid` varchar(63) NOT NULL DEFAULT '',
-    #   `task_status` varchar(63) NOT NULL DEFAULT 'undefined',
+    #   `task_state` varchar(63) NOT NULL DEFAULT 'undefined',
+    #   `task_progress` int(11) DEFAULT NULL,
+    #   `task_startTime` varchar(64) NOT NULL DEFAULT '',
+    #   `task_queueTime` varchar(64) NOT NULL DEFAULT '',
     #   `vm_name` varchar(127) NOT NULL DEFAULT '';
 
 
@@ -56,7 +59,10 @@ class Target:
                 o["id"] = a["id"]
                 o["id_asset"] = a["id_asset"]
                 o["task_moid"] = a["task_moid"]
-                o["task_status"] = a["task_status"]
+                o["task_state"] = a["task_state"]
+                o["task_progress"] = a["task_progress"]
+                o["task_startTime"] = a["task_startTime"]
+                o["task_queueTime"] = a["task_queueTime"]
                 o["vm_name"] = a["vm_name"]
 
                 return o
@@ -120,7 +126,12 @@ class Target:
         c = connections[Target.db].cursor()
 
         try:
-            c.execute("SELECT id, ip, port, api_type, id_bootstrap_key, id_asset, task_moid, task_status, vm_name FROM target")
+            c.execute(
+                "SELECT "
+                "id, ip, port, api_type, id_bootstrap_key, id_asset, "
+                "task_moid, task_state,task_progress, task_startTime, task_queueTime, vm_name "
+                "FROM target"
+            )
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
