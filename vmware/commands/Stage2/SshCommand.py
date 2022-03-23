@@ -13,6 +13,7 @@ class SshCommand:
         self.targetId = int(targetId)
         self.shellVars = ""
         self.command = '/bin/echo'
+        self.alwaysSuccess = False
 
 
 
@@ -47,7 +48,7 @@ class SshCommand:
 
             Log.log('Trying ssh command: ' + str(command))
             ssh = SshSupplicant(connectionData, silent=silent)
-            out = ssh.command(command)
+            out = ssh.command(command, alwaysSuccess=self.alwaysSuccess)
 
         except Exception as e:
             raise e

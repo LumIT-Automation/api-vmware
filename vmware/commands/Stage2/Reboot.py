@@ -7,4 +7,5 @@ class Reboot(SshCommand):
         super().__init__(targetId, *args, **kwargs)
 
         self.command = 'reboot'
+        self.alwaysSuccess = True
 

@@ -92,14 +92,15 @@ class VirtualMachine(Backend):
                         # Apply the guest OS customization specifications.
                         if "guestSpec" in data and data["guestSpec"]:
                             oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
+                        cSpecInfo = CustomSpec(self.assetId, data["guestSpec"]).info()
 
                         # Deploy
                         cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
                         taskMoId = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
-                        # "ip": data["guestSpec"]["network"]["ip"],
+
                         targetData = {
-                            "ip": "192.168.18.133",
+                            "ip": cSpecInfo["network"][0]["ip"],
                             "port": 22,
                             "api_type": "ssh",
                             "id_bootstrap_key": "1",

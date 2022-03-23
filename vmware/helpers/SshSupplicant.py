@@ -41,7 +41,7 @@ class SshSupplicant:
     # Public methods
     ####################################################################################################################
 
-    def command(self, cmd) -> str:
+    def command(self, cmd, alwaysSuccess: bool = False) -> str:
         # Execute an ssh command to the remote system defined in the dataConnection parameter.
 
         # In the event of a network problem (e.g. DNS failure, refused connection, etc), paramiko will raise the applicable exception.
@@ -77,7 +77,7 @@ class SshSupplicant:
             else:
                 Log.actionLog("Paramiko stdout: silenced by caller.")
 
-            if exitStatus != 0:
+            if not alwaysSuccess and exitStatus != 0:
                 raise CustomException(status=500, payload={"Ssh": "Command exit status: " + str(exitStatus)})
 
             return stdOutData
