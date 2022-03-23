@@ -244,7 +244,8 @@ function System_systemFilesSetup()
     find $workingFolderPath -type f -exec chmod 0644 {} \;
 
     chmod +x $workingFolderPath/usr/bin/consul.sh
-	chmod +x $workingFolderPath/usr/bin/syslogng-target.sh
+    chmod +x $workingFolderPath/usr/bin/celery.sh
+    chmod +x $workingFolderPath/usr/bin/syslogng-target.sh
 }
 
 

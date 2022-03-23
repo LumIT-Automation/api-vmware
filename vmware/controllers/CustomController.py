@@ -56,8 +56,10 @@ class CustomController(APIView):
             httpStatus = e.status
             data["error"] = e.payload
         elif e.__class__.__name__ == "AuthenticationException":
-            data = None
-            httpStatus = status.HTTP_422_UNPROCESSABLE_ENTITY # SshSupplicant: paramiko auth failed on target.
+            data["error"] = {
+                "ssh": "Wrong credentials for the target."
+            }
+            httpStatus = status.HTTP_400_BAD_REQUEST # SshSupplicant: paramiko auth failed on target.
         elif e.__class__.__name__ == "ParseError":
             data = None
             httpStatus = status.HTTP_400_BAD_REQUEST # json parse.

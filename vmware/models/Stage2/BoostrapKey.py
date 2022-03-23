@@ -45,6 +45,7 @@ class BootstrapKey:
         try:
             keyStringIO = io.StringIO(self.priv_key)
             privateKey = paramiko.RSAKey.from_private_key(keyStringIO)
+            Log.log(privateKey.get_name(), '+')
             pubKey = privateKey.get_base64()
         except Exception:
             pass

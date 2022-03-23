@@ -35,8 +35,8 @@ CREATE TABLE `target` (
   `id_bootstrap_key` INT DEFAULT NULL,
   `username` varchar(63) NOT NULL DEFAULT '',
   `password` varchar(63) NOT NULL DEFAULT '',
-  `id_asset` int(11) NOT NULL,
-  `task_moid` varchar(63) NOT NULL DEFAULT '',
+  `id_asset` int(11) DEFAULT NULL,
+  `task_moid` varchar(63) DEFAULT NULL,
   `task_status` varchar(63) NOT NULL DEFAULT 'undefined',
   `vm_name` varchar(127) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -60,9 +60,9 @@ CREATE TABLE `bootstrap_key` (
 -- Struttura della tabella `group_pubkey`
 --
 
-CREATE TABLE `group_pubkey` (
+CREATE TABLE `final_pubkey` (
   `id` int(11) NOT NULL,
-  `group_pubkey` varchar(64) NOT NULL,
+  `comment` varchar(1024) NOT NULL,
   `pubkey` varchar(2048) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -73,9 +73,9 @@ CREATE TABLE `group_pubkey` (
 -- Struttura della tabella `group_pubkey`
 --
 
-CREATE TABLE `target_group` (
+CREATE TABLE `target_final_pubkey` (
   `id_target` int(11) NOT NULL,
-  `id_group` int(11) NOT NULL
+  `id_pubkey` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -100,14 +100,14 @@ ALTER TABLE `bootstrap_key`
 --
 -- Indici per le tabelle `group_pubkey`
 --
-ALTER TABLE `group_pubkey`
+ALTER TABLE `final_pubkey`
   ADD PRIMARY KEY (`id`);
 
 --
 -- Indici per le tabelle `group_pubkey`
 --
-ALTER TABLE `target_group`
-  ADD PRIMARY KEY `id_target_group` (`id_target`, `id_group`);
+ALTER TABLE `target_final_pubkey`
+  ADD PRIMARY KEY `id_final_pubkey` (`id_target`, `id_pubkey`);
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate
@@ -128,7 +128,7 @@ ALTER TABLE `bootstrap_key`
 --
 -- AUTO_INCREMENT per la tabella `group_pubkey`
 --
-ALTER TABLE `group_pubkey`
+ALTER TABLE `final_pubkey`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 
@@ -145,9 +145,9 @@ ALTER TABLE `target`
 --
 -- Limiti per la tabella `stage2_target`
 --
-ALTER TABLE `target_group`
+ALTER TABLE `target_final_pubkey`
   ADD CONSTRAINT `tg_id_target` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `tg_id_group` FOREIGN KEY (`id_group`) REFERENCES `group_pubkey` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `tg_id_pubkey` FOREIGN KEY (`id_pubkey`) REFERENCES `final_pubkey` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

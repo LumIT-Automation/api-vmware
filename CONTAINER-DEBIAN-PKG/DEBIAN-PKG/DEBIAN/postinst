@@ -49,6 +49,7 @@ if [ "$1" == "configure" ]; then
     systemctl enable syslog-ng
     systemctl enable consul
     systemctl enable redis-server
+    systemctl enable celery
     systemctl enable unattended-upgrades
 
     printf "\n* Post-install accomplished.\n"

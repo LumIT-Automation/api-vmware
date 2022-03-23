@@ -1,21 +1,19 @@
-from typing import List
+from typing import List, Dict, Union
 
-from dataclasses import dataclass
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
 
 from vmware.repository.Stage2.Target import Target as Repository
 from vmware.helpers.Log import Log
 
-@dataclass
-class DataConnection:
-    ip: str
-    port: int
-    api_type: str
-    keyId: int
-    username: str
-    password: str
 
-
+DataConnection: Dict[str, Union[str, int]] = {
+    "ip":  "",
+    "port": "",
+    "api_type": "",
+    "keyId": "",
+    "username": "",
+    "password": ""
+}
 
 class Target:
     def __init__(self, targetId: int, *args, **kwargs):
@@ -23,6 +21,10 @@ class Target:
 
         self.id = int(targetId)
         self.connectionData: DataConnection = None
+        self.id_asset: int = 0
+        self.task_moid: str = ""
+        self.task_status: str = ""
+        self.vm_name: str = ""
 
         self.__load()
 
@@ -76,10 +78,9 @@ class Target:
 
 
     @staticmethod
-    def add(data: dict) -> None:
+    def add(data: dict) -> int:
         try:
-            aId = Repository.add(data)
-
+            return Repository.add(data)
         except Exception as e:
             raise e
 
