@@ -3,6 +3,7 @@ from django.urls import path
 from .controllers import Root
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 from .controllers.Stage2 import Targets, Target
+from .controllers.Stage2 import FinalPubKeys, FinalPubKey
 from .controllers.Stage2 import Reboot, ResizePartitions, RenameVg, AddMountPoint, LvsGrow, TargetDelBootStrapKey
 
 
@@ -10,13 +11,15 @@ from .controllers.Stage2 import Reboot, ResizePartitions, RenameVg, AddMountPoin
 urlpatterns = [
     path('', Root.RootController.as_view()),
 
-    # Targets (virtualmachines to be processed)
     path('bootstrapkeys/', BoostrapKeys.Stage2BootstrapKeysController.as_view(), name='stage2-bootstrap-keys'),
     path('bootstrapkey/<int:keyId>/', BoostrapKey.Stage2BootstrapKeyController.as_view(), name='stage2-bootstrap-key'),
 
     # Targets (virtualmachines to be processed)
     path('targets/', Targets.Stage2TargetsController.as_view(), name='stage2-targets'),
     path('target/<int:targetId>/', Target.Stage2TargetController.as_view(), name='stage2-target'),
+
+    path('finalpubkeys/', FinalPubKeys.Stage2FinalPubKeysController.as_view(), name='stage2-final-pub-keys'),
+    path('finalpubkey/<int:keyId>/', FinalPubKey.Stage2FinalPubKeyController.as_view(), name='stage2-final-pub-key'),
 
     # Virtual machine commands
     path('commands/resize-partition/<int:targetId>/', ResizePartitions.Stage2ResizePartitionController.as_view(), name='stage2-ssh-resize-partition'),

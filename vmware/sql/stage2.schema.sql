@@ -65,8 +65,8 @@ CREATE TABLE `bootstrap_key` (
 
 CREATE TABLE `final_pubkey` (
   `id` int(11) NOT NULL,
-  `comment` varchar(1024) NOT NULL,
-  `pubkey` varchar(2048) NOT NULL DEFAULT ''
+  `comment` varchar(1024) NOT NULL DEFAULT '',
+  `pub_key` varchar(2048) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
