@@ -286,7 +286,7 @@ class VirtualMachine(Backend):
 
         try:
             datacenter.loadHosts()
-            for host in datacenter.hosts:
+            for host in datacenter.standalone_hosts:
                 if hostMoId == host.moId:
                     return True
 
