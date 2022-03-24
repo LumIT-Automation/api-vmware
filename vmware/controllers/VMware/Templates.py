@@ -30,7 +30,11 @@ class VMwareTemplatesController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["items"] = VirtualMachineTemplate.list(assetId)
+                    if "quick" in request.GET:
+                        itemData["items"] = VirtualMachineTemplate.listQuick(assetId)
+                    else:
+                        itemData["items"] = VirtualMachineTemplate.list(assetId)
+
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data

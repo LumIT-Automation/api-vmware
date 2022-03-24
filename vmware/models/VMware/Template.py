@@ -47,6 +47,23 @@ class VirtualMachineTemplate(VirtualMachine):
 
 
 
+    @staticmethod
+    def listQuick(assetId: int) -> List[dict]:
+        virtualmachines = list()
+
+        try:
+            for o in Backend.oVirtualMachines(assetId):
+                if o.config.template:
+                    virtualmachine = VmwareHelper.vmwareObjToDict(o)
+                    virtualmachine["assetId"] = assetId
+                    virtualmachines.append(virtualmachine)
+
+            return virtualmachines
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Private methods
     ####################################################################################################################

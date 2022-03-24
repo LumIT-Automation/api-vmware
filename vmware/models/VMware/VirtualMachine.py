@@ -351,8 +351,9 @@ class VirtualMachine(Backend):
 
         try:
             for o in Backend.oVirtualMachines(assetId):
-                virtualmachines.append(VmwareHelper.vmwareObjToDict(o)
-            )
+                virtualmachine = VmwareHelper.vmwareObjToDict(o)
+                virtualmachine["assetId"] = assetId
+                virtualmachines.append(virtualmachine)
 
             return virtualmachines
         except Exception as e:
