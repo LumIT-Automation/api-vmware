@@ -80,7 +80,7 @@ class VMObject:
                         break
 
             elif objectType == 'network':
-                vCentervmObjects = vCenterNetwork.list(assetId)
+                vCentervmObjects = vCenterNetwork.listQuick(assetId)
                 for n in vCentervmObjects:
                     if n["moId"] == moId and n["name"] == objectName:
                         oId = n["moId"]
@@ -88,7 +88,7 @@ class VMObject:
                         break
 
             elif objectType == 'datastore':
-                vCentervmObjects = vCenterDatastore.list(assetId)
+                vCentervmObjects = vCenterDatastore.listQuick(assetId)
                 for d in vCentervmObjects:
                     if d["moId"] == moId and d["name"] == objectName:
                         oId = d["moId"]

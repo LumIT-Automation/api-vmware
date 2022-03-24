@@ -1,6 +1,8 @@
 from typing import List, Dict
 
 from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as Backend
+
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -122,6 +124,23 @@ class CustomSpec(Backend):
                 customSpecs.append(
                     CustomSpec(assetId, s.name).info()
                 )
+
+            return customSpecs
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    def listQuick(assetId: int) -> List[dict]:
+        customSpecs = list()
+
+        try:
+            for o in Backend(assetId).oCustomSpecs():
+                customSpecs.append({
+                    "assetId": assetId,
+                    "name": o.name
+                })
 
             return customSpecs
         except Exception as e:

@@ -30,7 +30,11 @@ class VMwareCustomSpecsController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["items"] = CustomSpec.list(assetId)
+                    if "quick" in request.GET:
+                        itemData["items"] = CustomSpec.listQuick(assetId)
+                    else:
+                        itemData["items"] = CustomSpec.list(assetId)
+
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
