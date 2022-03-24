@@ -2,9 +2,6 @@ from typing import List, Dict
 
 from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as Backend
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
-
 
 NetInfo = {
     "ip": "",

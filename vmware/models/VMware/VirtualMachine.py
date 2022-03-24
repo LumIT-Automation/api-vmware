@@ -1,6 +1,6 @@
 import re
 from typing import List
-from pyVmomi import vim
+from dataclasses import dataclass
 
 from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
@@ -51,62 +51,109 @@ class VirtualMachine(Backend):
         oCustomSpec = None
         host = None
         cluster = None
-        checkNetworkStorageAttached = None
+        computeResource = None
         cSpecInfo = dict()
         out = dict()
+
+        @dataclass
+        class Input:
+            datacenterMoId = None
+            clusterMoId = None
+            hostMoId = None
+            datastoreMoId = []
+            networkMoId = []
+            vmFolderMoId = None
+            diskDevices = None
+            networkDevices = None
+            guestSpec = None
+            vmName = None
+
+        for v in ("datacenterMoId", "clusterMoId", "hostMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName"):
+            setattr(Input, v, data.get(v, None))
+
+        if "networkDevices" in data:
+            if "existent" in data["networkDevices"]:
+                for n in data["networkDevices"]["existent"]:
+                    if "networkMoId" in n:
+                        Input.networkMoId.append(n["networkMoId"])
+
+            if "new" in data["networkDevices"]:
+                for n in data["networkDevices"]["new"]:
+                    if "networkMoId" in n:
+                        Input.networkMoId.append(n["networkMoId"])
+
+        if "diskDevices" in data:
+            if "existent" in data["diskDevices"]:
+                for n in data["diskDevices"]["existent"]:
+                    if "datastoreMoId" in n:
+                        Input.datastoreMoId.append(n["datastoreMoId"])
+
+            if "new" in data["diskDevices"]:
+                for n in data["diskDevices"]["new"]:
+                    if "datastoreMoId" in n:
+                        Input.datastoreMoId.append(n["datastoreMoId"])
+
         try:
-            # Perform some preliminary checks.
-            # - "clusterMoId" and not "hostMoId" -> deploy in cluster, vmware choose the host.
-            # - "clusterMoId" and "hostMoId" -> deploy in specific host of the cluster.
-            # - not "clusterMoId" and "hostMoId" -> deploy in standalone host (not in a host of a cluster)
-            if "clusterMoId" in data and "hostMoId" in data:
-                if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
-                    cluster = Cluster(self.assetId, data["clusterMoId"])
-                    if self.__isHostValid(data["clusterMoId"], data["hostMoId"]): # preferred host in cluster.
-                        host = HostSystem(self.assetId, data["hostMoId"])
-                        checkNetworkStorageAttached = host # preferred host choosed: check that datastore and network are attached to it.
-            elif "clusterMoId" in data and "hostMoId" not in data:
-                if self.__isClusterValid(data["datacenterMoId"], data["clusterMoId"]):
-                    cluster = Cluster(self.assetId, data["clusterMoId"])
-                    checkNetworkStorageAttached = cluster # check that datastore and network are attached to the cluster.
-            elif "clusterMoId" not in data and "hostMoId" in data:
-                if self.__isStandaloneHostValid(data["datacenterMoId"], data["hostMoId"]):  # standalone host.
-                    host = HostSystem(self.assetId, data["hostMoId"])
-                    checkNetworkStorageAttached = host # standalone host: check that datastore and network are attached to it.
+            if Input.clusterMoId and Input.hostMoId:
+                # Deploy within a preferred host in cluster in a cluster.
+                if self.__isClusterValid(Input.datacenterMoId, Input.clusterMoId):
+                    cluster = Cluster(self.assetId, Input.clusterMoId)
+                    if self.__isHostValid(Input.clusterMoId, Input.hostMoId):
+                        host = HostSystem(self.assetId, Input.hostMoId)
+                        computeResource = host
+
+            elif Input.clusterMoId and not Input.hostMoId:
+                # Deploy within a specific host of the cluster.
+                if self.__isClusterValid(Input.datacenterMoId, Input.clusterMoId):
+                    cluster = Cluster(self.assetId, Input.clusterMoId)
+                    computeResource = cluster
+
+            elif not Input.clusterMoId and Input.hostMoId:
+                # Deploy within a standalone host (not clusterized).
+                if self.__isStandaloneHostValid(Input.datacenterMoId, Input.hostMoId):
+                    host = HostSystem(self.assetId, Input.hostMoId)
+                    computeResource = host
             else:
-                raise CustomException(status=400, payload={"VMware": "missing both cluster and host params."})
+                raise CustomException(status=400, payload={"VMware": "missing cluster and/or host parameters."})
 
-            # Check datastore/network connection with cluster/single host.
-            if self.__isDatastoreValid(checkNetworkStorageAttached, data["datastoreMoId"]):
-                if "networkId" not in data or self.__isNetworkValid(checkNetworkStorageAttached, data["networkMoId"]):  # Allow to deploy a VM without touching the network card.
-                    datastore = Datastore(self.assetId, data["datastoreMoId"])
-                    vmFolder = VirtualMachineFolder(self.assetId, data["vmFolderMoId"])
 
-                    if "diskDevices" in data:
-                        devsSpecs = self.buildStorageSpec(data["diskDevices"], data["datastoreMoId"])
-                    if "networkDevices" in data:
-                        nicsSpecs = self.buildNetworkSpec(data["networkDevices"])
+            # TEMPORARY CODE ###########################################################################################
+            Input.datastoreMoId = str(Input.datastoreMoId[0])
+            Input.networkMoId = str(Input.networkMoId[0])
+            #@todo: check against every datastore and netw.
+            # END TEMPORARY CODE #######################################################################################
+
+
+            # Check datastore/network connection for computeResource (cluster or single host).
+            if self.__isDatastoreValid(computeResource, Input.datastoreMoId):
+                if "networkId" not in data or self.__isNetworkValid(computeResource, Input.networkMoId):  # Allow to deploy a VM without touching the network card.
+                    datastore = Datastore(self.assetId, Input.datastoreMoId)
+                    vmFolder = VirtualMachineFolder(self.assetId, Input.vmFolderMoId)
+
+                    if Input.diskDevices:
+                        devsSpecs = self.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
+                    if Input.networkDevices:
+                        nicsSpecs = self.buildNetworkSpec(Input.networkDevices)
                         if devsSpecs:
                             devsSpecs.extend(nicsSpecs)
                         else:
                             devsSpecs = nicsSpecs
 
                         # Apply the guest OS customization specifications.
-                        if "guestSpec" in data and data["guestSpec"]:
-                            oCustomSpec = CustomSpec(self.assetId).oCustomSpec(data["guestSpec"])
-                            cSpecInfo = CustomSpec(self.assetId, data["guestSpec"]).info()
+                        if Input.guestSpec:
+                            oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
+                            cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
                         # Put all together.
                         cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
                         # Deploy
-                        out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=data["vmName"], cloneSpec=cloneSpec)
+                        out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=Input.vmName, cloneSpec=cloneSpec)
 
                         if cSpecInfo:
                             out["targetId"] = self.poolVmwareDeployVMTask(bootStrapKeyId=1, userName="root", taskMoId=out["task_moId"], customSpecInfo=cSpecInfo)
 
                         return out
-
         except Exception as e:
             raise e
 
@@ -128,7 +175,6 @@ class VirtualMachine(Backend):
                 targetId = Target.add(targetData)
                 poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
                 return targetId
-
         except Exception as e:
             raise e
 
@@ -153,7 +199,6 @@ class VirtualMachine(Backend):
             modifySpec = self.buildVMConfigSpecs(data, devsSpecs)
 
             return self.reconfig(configSpec=modifySpec)
-
         except Exception as e:
             raise e
 
