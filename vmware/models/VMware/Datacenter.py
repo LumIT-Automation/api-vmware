@@ -101,6 +101,22 @@ class Datacenter(Backend):
 
 
 
+    @staticmethod
+    def listQuick(assetId: int) -> List[dict]:
+        datacenters = list()
+
+        try:
+            for o in Backend.oDatacenters(assetId):
+                datacenter = VmwareHelper.vmwareObjToDict(o)
+                datacenter["assetId"] = assetId
+                datacenters.append(datacenter)
+
+            return datacenters
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Private static methods
     ####################################################################################################################

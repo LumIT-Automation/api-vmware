@@ -117,6 +117,22 @@ class Datastore(Backend):
 
 
     @staticmethod
+    def listQuick(assetId: int) -> List[dict]:
+        datastores = list()
+
+        try:
+            for o in Backend.oDatastores(assetId):
+                datastore = VmwareHelper.vmwareObjToDict(o)
+                datastore["assetId"] = assetId
+                datastores.append(datastore)
+
+            return datastores
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
     def getDatastoreMoIdByName(assetId: int, datastoreName: str):
         try:
             return Backend.getDatastoreMoIdByName(assetId, datastoreName)

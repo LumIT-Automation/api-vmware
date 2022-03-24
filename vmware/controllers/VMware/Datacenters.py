@@ -30,7 +30,11 @@ class VMwareDatacentersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["items"] = Datacenter.list(assetId)
+                    if "quick" in request.GET:
+                        itemData["items"] = Datacenter.listQuick(assetId)
+                    else:
+                        itemData["items"] = Datacenter.list(assetId)
+
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
