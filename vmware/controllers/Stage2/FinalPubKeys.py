@@ -5,8 +5,8 @@ from rest_framework import status
 from vmware.models.Stage2.FinalPubKey import FinalPubKey
 from vmware.models.Permission.Permission import Permission
 
-#from vmware.serializers.Stage2.FinalPubKeys import Stage2BootstrapKeysSerializer as BoostrapKeysSerializer
-#from vmware.serializers.Stage2.FinalePubKey import Stage2BootstrapKeySerializer as BoostrapKeySerializer
+from vmware.serializers.Stage2.FinalPubKeys import Stage2FinalPubKeysSerializer as FinalPubKeysSerializer
+from vmware.serializers.Stage2.FinalPubKey import Stage2FinalPubKeySerializer as FinalPubKeySerializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
@@ -16,7 +16,9 @@ class Stage2FinalPubKeysController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = {
+            "data": dict()
+        }
         user = CustomController.loggedUser(request)
 
         try:
@@ -24,12 +26,11 @@ class Stage2FinalPubKeysController(CustomController):
                 Log.actionLog("Second stage final public keys list", user)
 
                 itemData["data"]["items"] = FinalPubKey.list()
-                if True:
-                    data["data"] = itemData["data"]
-                #serializer = BoostrapKeysSerializer(data=itemData)
-                #if serializer.is_valid():
-                #    data["data"] = serializer.validated_data["data"]
-                #    data["href"] = request.get_full_path()
+                Log.log(itemData, '_')
+                serializer = FinalPubKeysSerializer(data=itemData)
+                if serializer.is_valid():
+                    data["data"] = serializer.validated_data
+                    data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK
                 else:
@@ -61,12 +62,9 @@ class Stage2FinalPubKeysController(CustomController):
                 Log.actionLog(" Second stage final pub key addition", user)
                 Log.actionLog(" User data (comment only): "+str(request.data["data"]["comment"]), user)
 
-                if True:
-                    data = request.data
-                #serializer = BoostrapKeySerializer(data=request.data)
-                #if serializer.is_valid():
-                    #FinalPubKey.add(serializer.validated_data["data"])
-                    FinalPubKey.add(data["data"])
+                serializer = FinalPubKeySerializer(data=request.data["data"])
+                if serializer.is_valid():
+                    FinalPubKey.add(serializer.validated_data)
                     httpStatus = status.HTTP_201_CREATED
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST

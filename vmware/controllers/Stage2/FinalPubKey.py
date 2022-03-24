@@ -4,7 +4,7 @@ from rest_framework import status
 
 from vmware.models.Stage2.FinalPubKey import FinalPubKey
 from vmware.models.Permission.Permission import Permission
-from vmware.serializers.Stage2.BoostrapKey import Stage2BootstrapKeySerializer as Serializer
+from vmware.serializers.Stage2.FinalPubKey import Stage2FinalPubKeySerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
@@ -46,13 +46,11 @@ class Stage2FinalPubKeyController(CustomController):
                 Log.actionLog("Second stage final pub key modification", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                #serializer = Serializer(data=request.data, partial=True)
-                #if serializer.is_valid():
-                #    data = serializer.validated_data["data"]
-                if True:
-                    data = request.data
+                serializer = Serializer(data=request.data["data"], partial=True)
+                if serializer.is_valid():
+                    data = serializer.validated_data
                     key = FinalPubKey(keyId)
-                    key.modify(data["data"])
+                    key.modify(data)
 
                     httpStatus = status.HTTP_200_OK
                 else:
