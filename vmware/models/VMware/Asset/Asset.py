@@ -1,22 +1,21 @@
-from typing import List
+from typing import List, Dict, Union
 
 from dataclasses import dataclass
 
 from vmware.repository.Asset import Asset as Repository
 
 
-@dataclass
-class DataConnection:
-    address: str
-    port: int
-    fqdn: str
-    baseurl: str
-    tlsverify: int
-    api_type: str
-    api_additional_data: str
-    username: str
-    password: str
-
+DataConnection: Dict[str, Union[str, int]] = {
+    "address": "",
+    "port": 443,
+    "fqdn": "",
+    "baseurl": "",
+    "tlsverify": 1,
+    "api_type": "",
+    "api_additional_data": "",
+    "username": "",
+    "password": ""
+}
 
 
 class Asset:

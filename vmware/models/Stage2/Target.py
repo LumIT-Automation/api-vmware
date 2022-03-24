@@ -56,13 +56,18 @@ class Target:
     def getBootstrapPubKey(self) -> str:
         try:
             t = Repository.get(self.id)
-            Log.log(t, '_')
-            # bootStrapKey = BootstrapKey(t["connectionData"]["id_bootstrap_key "])
-            bootStrapKey = BootstrapKey(1)
+            bootStrapKey = BootstrapKey(t["connectionData"]["id_bootstrap_key"])
             pubKey = bootStrapKey.getPublic()
-            Log.log(pubKey, '_')
             return pubKey
 
+        except Exception as e:
+            raise e
+
+
+
+    def getFinalPubKeys(self) -> str:
+        try:
+            t = Repository.get(self.id)
         except Exception as e:
             raise e
 
