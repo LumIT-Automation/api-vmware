@@ -246,12 +246,10 @@ class VirtualMachine(Backend):
             raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
 
         try:
-            datacenter.loadClusters()
-            for cluster in datacenter.clusters:
-                if clusterMoId == cluster.moId:
-                    return True
-
-            raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
+            if clusterMoId in datacenter:
+                return True
+            else:
+                raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
         except Exception as e:
             raise e
 

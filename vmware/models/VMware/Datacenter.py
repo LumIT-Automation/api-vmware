@@ -80,6 +80,15 @@ class Datacenter(Backend):
 
 
 
+    def __contains__(self, clusterMoId):
+        self.loadClusters()
+        for cluster in self.clusters:
+            if cluster.moId == clusterMoId:
+                return True
+
+        return False
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
