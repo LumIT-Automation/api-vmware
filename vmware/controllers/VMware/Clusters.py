@@ -30,7 +30,11 @@ class VMwareClustersController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["items"] = Cluster.list(assetId)
+                    if "quick" in request.GET:
+                        itemData["items"] = Cluster.listQuick(assetId)
+                    else:
+                        itemData["items"] = Cluster.list(assetId)
+
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data

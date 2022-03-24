@@ -135,6 +135,22 @@ class Cluster(Backend):
 
 
 
+    @staticmethod
+    def listQuick(assetId: int) -> List[dict]:
+        clusters = list()
+
+        try:
+            for o in Backend.oClusters(assetId):
+                cluster = VmwareHelper.vmwareObjToDict(o)
+                cluster["assetId"] = assetId
+                clusters.append(cluster)
+
+            return clusters
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Private static methods
     ####################################################################################################################

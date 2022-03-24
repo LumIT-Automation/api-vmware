@@ -118,6 +118,7 @@ class Datastore(Backend):
 
     @staticmethod
     def listQuick(assetId: int) -> List[dict]:
+        # No composition. Less information.
         datastores = list()
 
         try:

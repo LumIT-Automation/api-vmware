@@ -19,8 +19,6 @@ class Network(Backend):
         self.vlanId = vlanId
         self.type: str
 
-
-
         self.configuredHosts: List[HostSystem] = []
 
 
@@ -92,7 +90,22 @@ class Network(Backend):
                     Network.__cleanup("list", network.info(related))
                 )
 
-            Log.log(networks, '_')
+            return networks
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    def listQuick(assetId: int) -> List[dict]:
+        networks = list()
+
+        try:
+            for o in Backend.oNetworks(assetId):
+                network = VmwareHelper.vmwareObjToDict(o)
+                network["assetId"] = assetId
+                networks.append(network)
+
             return networks
         except Exception as e:
             raise e

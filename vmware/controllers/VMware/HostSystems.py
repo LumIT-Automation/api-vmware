@@ -30,7 +30,11 @@ class VMwareHostSystemsController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["items"] = HostSystem.list(assetId)
+                    if "quick" in request.GET:
+                        itemData["items"] = HostSystem.listQuick(assetId)
+                    else:
+                        itemData["items"] = HostSystem.list(assetId)
+
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data

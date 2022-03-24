@@ -136,6 +136,22 @@ class HostSystem(Backend):
 
 
 
+    @staticmethod
+    def listQuick(assetId: int) -> List[dict]:
+        hostsystems = list()
+
+        try:
+            for o in Backend.oHostSystems(assetId):
+                hostsystem = VmwareHelper.vmwareObjToDict(o)
+                hostsystem["assetId"] = assetId
+                hostsystems.append(hostsystem)
+
+            return hostsystems
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Private static methods
     ####################################################################################################################

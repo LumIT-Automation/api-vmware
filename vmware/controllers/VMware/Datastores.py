@@ -39,12 +39,12 @@ class VMwareDatastoresController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    # Filter datastores' list basing on permissions.
                     if "quick" in request.GET:
                         itemData["items"] = Datastore.listQuick(assetId)
                     else:
-                        itemData["items"] = Datastore.listQuick(assetId)
+                        itemData["items"] = Datastore.list(assetId)
 
+                    # Filter datastores' list basing on permissions.
                     if "any" in allowedObjectsMoId:
                         allowedData = itemData
                     else:

@@ -38,8 +38,12 @@ class VMwareNetworksController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
+                    if "quick" in request.GET:
+                        itemData["items"] = Network.listQuick(assetId)
+                    else:
+                        itemData["items"] = Network.list(assetId)
+
                     # Filter networks' list basing on permissions.
-                    itemData["items"] = Network.list(assetId)
                     if "any" in allowedObjectsMoId:
                         allowedData = itemData
                     else:
