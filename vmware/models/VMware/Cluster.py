@@ -114,10 +114,20 @@ class Cluster(Backend):
 
 
 
-    def __contains__(self, hostMoId):
+    def __contains__(self, objectMoId):
         self.loadHosts()
         for host in self.hosts:
-            if host.moId == hostMoId:
+            if host.moId == objectMoId:
+                return True
+
+        self.loadDatastores()
+        for datastore in self.datastores:
+            if datastore.moId == objectMoId:
+                return True
+
+        self.loadNetworks()
+        for network in self.networks:
+            if network.moId == objectMoId:
                 return True
 
         return False

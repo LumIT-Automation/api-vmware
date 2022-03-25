@@ -81,14 +81,12 @@ class Datacenter(Backend):
 
 
     def __contains__(self, objMoId):
-        # objMoId may be a cluster or a standalone host.
         self.loadClusters()
-        self.loadHosts()
-
         for cluster in self.clusters:
             if cluster.moId == objMoId:
                 return True
 
+        self.loadHosts()
         for host in self.standalone_hosts:
             if host.moId == objMoId:
                 return True

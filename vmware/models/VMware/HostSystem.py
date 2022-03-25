@@ -115,6 +115,21 @@ class HostSystem(Backend):
 
 
 
+    def __contains__(self, objectMoId):
+        self.loadNetworks(objectMoId)
+        for network in self.networks:
+            if network.moId == objectMoId:
+                return True
+
+        self.loadDatastores()
+        for datastore in self.datastores:
+            if datastore.moId == objectMoId:
+                return True
+
+        return False
+
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
