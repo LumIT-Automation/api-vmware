@@ -105,32 +105,20 @@ class VirtualMachine(Backend):
             else:
                 raise CustomException(status=400, payload={"VMware": "missing cluster and/or host parameters."})
 
+
+
+
+
+
+
+
+
             # Check datastore/network connection for computeResource (cluster or single host).
             for ds in Input.datastoreMoId:
-                self.__isDatastoreValid(computeResource, ds)
+                self.__checkDatastoreValidity(computeResource, ds)
 
             for n in Input.networkMoId:
-                self.__isNetworkValid(computeResource, n) # @todo: check if ok: # Allow to deploy a VM without touching the network card.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                self.__checkNetworkValidity(computeResource, n) # @todo: check if ok: # Allow to deploy a VM without touching the network card.
 
             if Input.diskDevices:
                 devsSpecs = self.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
@@ -316,12 +304,8 @@ class VirtualMachine(Backend):
                 raise CustomException(status=400, payload={"VMware": "invalid cluster."})
 
             try:
-                cluster.loadHosts()
-                for host in cluster.hosts:
-                    if hostMoId == host.moId:
-                        pass
-
-                raise CustomException(status=400, payload={"VMware": "host not found in this cluster."})
+                if hostMoId not in cluster:
+                    raise CustomException(status=400, payload={"VMware": "host not found in this cluster."})
             except Exception as e:
                 raise e
 
@@ -337,19 +321,15 @@ class VirtualMachine(Backend):
                 raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
 
             try:
-                datacenter.loadHosts()
-                for host in datacenter.standalone_hosts:
-                    if hostMoId == host.moId:
-                        pass
-
-                raise CustomException(status=400, payload={"VMware": "host not found in this datacenter."})
+                if hostMoId not in datacenter:
+                    raise CustomException(status=400, payload={"VMware": "host not found in this datacenter."})
             except Exception as e:
                 raise e
 
 
 
     # computeResource can be a cluster or a single host.
-    def __isDatastoreValid(self, computeResource: object, datastoreMoId: str) -> bool:
+    def __checkDatastoreValidity(self, computeResource: object, datastoreMoId: str) -> bool:
         if datastoreMoId:
             try:
                 computeResource.loadDatastores()
@@ -364,7 +344,7 @@ class VirtualMachine(Backend):
 
 
     # computeResource can be a cluster or a single host.
-    def __isNetworkValid(self, computeResource: object, networkMoId: str) -> bool:
+    def __checkNetworkValidity(self, computeResource: object, networkMoId: str) -> bool:
         if networkMoId:
             try:
                 computeResource.loadNetworks()

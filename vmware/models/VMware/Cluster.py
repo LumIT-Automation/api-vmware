@@ -114,6 +114,15 @@ class Cluster(Backend):
 
 
 
+    def __contains__(self, hostMoId):
+        self.loadHosts()
+        for host in self.hosts:
+            if host.moId == hostMoId:
+                return True
+
+        return False
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
