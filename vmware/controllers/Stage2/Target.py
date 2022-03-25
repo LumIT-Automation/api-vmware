@@ -12,6 +12,43 @@ from vmware.helpers.Log import Log
 
 class Stage2TargetController(CustomController):
     @staticmethod
+    def get(request: Request, targetId: int) -> Response:
+        data = dict()
+        user = CustomController.loggedUser(request)
+
+        try:
+            if Permission.hasUserPermission(groups=user["groups"], action="target_get") or user["authDisabled"]:
+                Log.actionLog("Second stage target info", user)
+
+                target = Target(targetId)
+                itemData = target.info()
+                serializer = Serializer(data=itemData)
+                if serializer.is_valid():
+                    data["data"] = serializer.validated_data
+                    data["href"] = request.get_full_path()
+
+                    httpStatus = status.HTTP_200_OK
+                else:
+                    httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                    data = {
+                        "Database": "Upstream data mismatch."
+                    }
+
+                    Log.log("Upstream data incorrect: " + str(serializer.errors))
+            else:
+                data = None
+                httpStatus = status.HTTP_403_FORBIDDEN
+        except Exception as e:
+            data, httpStatus, headers = CustomController.exceptionHandler(e)
+            return Response(data, status=httpStatus, headers=headers)
+
+        return Response(data, status=httpStatus, headers={
+            "Cache-Control": "no-cache"
+        })
+
+
+
+    @staticmethod
     def delete(request: Request, targetId: int) -> Response:
         user = CustomController.loggedUser(request)
 
@@ -46,9 +83,9 @@ class Stage2TargetController(CustomController):
                 Log.actionLog("Second stage target modification", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = Serializer(data=request.data, partial=True)
+                serializer = Serializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
+                    data = serializer.validated_data
 
                     target = Target(targetId)
                     target.modify(data)

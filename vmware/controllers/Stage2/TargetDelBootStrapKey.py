@@ -4,7 +4,6 @@ from rest_framework import status
 
 from vmware.commands.Stage2.TargetDelBootStrapKey import TargetDelBootstrapKey
 from vmware.models.Permission.Permission import Permission
-from vmware.serializers.Stage2.Target import Stage2TargetSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log

@@ -3,6 +3,8 @@ from typing import List, Dict, Union
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
 
 from vmware.repository.Stage2.Target import Target as Repository
+
+from vmware.helpers.Utils import GroupConcatToDict
 from vmware.helpers.Log import Log
 
 
@@ -37,6 +39,19 @@ class Target:
     # Public methods
     ####################################################################################################################
 
+    def info(self) -> dict:
+        try:
+            info = Repository.getInfo(self.id)
+            if info["final_pubkeys"]:
+                pKeys = GroupConcatToDict(["id", "comment", "pub_key"])
+                pubKeyStruct = pKeys.makeDict(info["final_pubkeys"])
+                info["final_pubkeys"] = pubKeyStruct
+            return info
+        except Exception as e:
+            raise e
+
+
+
     def modify(self, data: dict) -> None:
         try:
             Repository.modify(self.id, data)
@@ -63,13 +78,6 @@ class Target:
         except Exception as e:
             raise e
 
-
-
-    def getFinalPubKeys(self) -> str:
-        try:
-            t = Repository.get(self.id)
-        except Exception as e:
-            raise e
 
 
     ####################################################################################################################

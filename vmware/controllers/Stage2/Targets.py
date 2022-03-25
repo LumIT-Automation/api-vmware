@@ -59,9 +59,9 @@ class Stage2TargetsController(CustomController):
                 Log.actionLog("Second stage target addition", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = TargetSerializer(data=request.data)
+                serializer = TargetSerializer(data=request.data["data"])
                 if serializer.is_valid():
-                    Target.add(serializer.validated_data["data"])
+                    Target.add(serializer.validated_data)
                     httpStatus = status.HTTP_201_CREATED
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST

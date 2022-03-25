@@ -37,7 +37,6 @@ class Target:
     @staticmethod
     def get(targetId: int) -> dict:
         c = connections[Target.db].cursor()
-
         o = dict()
 
         try:
@@ -74,13 +73,53 @@ class Target:
 
 
     @staticmethod
+    def getInfo(targetId: int) -> dict:
+        c = connections[Target.db].cursor()
+
+        try:
+            c.execute(
+                "SELECT "
+                    "target.id, target.ip, target.port, "
+                    "target.api_type, target.id_bootstrap_key, target.username, "
+                    "target.id_asset, target.task_moid, target.task_state, target.task_progress, "
+                    "target.task_startTime, target.task_queueTime, "
+                    "target.vm_name, target.id, "
+                    "GROUP_CONCAT("
+                        "CONCAT(final_pubkey.id,'::',final_pubkey.comment,'::',final_pubkey.pub_key) "
+                    ")  AS final_pubkeys "
+                "FROM target "
+                "LEFT JOIN target_final_pubkey ON target_final_pubkey.id_target = target.id "
+                "LEFT JOIN final_pubkey on final_pubkey.id = target_final_pubkey.id_pubkey "
+                "WHERE target.id = %s ", [
+                    targetId
+                ])
+
+            return DBHelper.asDict(c)[0]
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    @staticmethod
     def modify(targetId: int, data: dict) -> None:
         sql = ""
         values = []
+        pubKeysIds = []
+        pubKeysPlaceholders = ""
         c = connections[Target.db].cursor()
 
         if Target.__exists(targetId):
-            # Build SQL query according to dict fields.
+            # Build the last part of the insert query.
+            if "final_pubkeys" in data:
+                if data["final_pubkeys"]:
+                    for el in data["final_pubkeys"]:
+                        pubKeysPlaceholders += "(%s, %s)," # Placeholders for the target_final_pubkey insert.
+                        pubKeysIds.extend([targetId, el["id"]]) # Arguments of the target_final_pubkey insert.
+                del data["final_pubkeys"]
+
+            # Build the update query according to dict fields.
             for k, v in data.items():
                 if v is None:
                     sql += k+"=DEFAULT,"
@@ -89,9 +128,21 @@ class Target:
                     values.append(strip_tags(v)) # no HTML allowed.
 
             try:
-                c.execute("UPDATE target SET "+sql[:-1]+" WHERE id = "+str(targetId),
-                    values
-                )
+                with transaction.atomic():
+                    c.execute(
+                        "UPDATE target SET "+sql[:-1]+" WHERE id = "+str(targetId),
+                        values
+                    )
+                    c.execute(
+                        "DELETE FROM target_final_pubkey "
+                        "WHERE `id_target` = %s ",
+                        [targetId]
+                    )
+                    c.execute(
+                        "INSERT INTO target_final_pubkey "
+                        "(`id_target`, `id_pubkey`) VALUES "+pubKeysPlaceholders[:-1],
+                        pubKeysIds
+                    )
 
             except Exception as e:
                 raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
@@ -145,7 +196,17 @@ class Target:
         s = ""
         keys = "("
         values = []
+        pubKeysIds = []
+        pubKeysPlaceholders = ""
         c = connections[Target.db].cursor()
+
+        # Build the last part of the insert query.
+        if "final_pubkeys" in data:
+            if data["final_pubkeys"]:
+                for el in data["final_pubkeys"]:
+                    pubKeysPlaceholders += "(%s, %s),"  # Placeholders for the target_final_pubkey insert.
+                    pubKeysIds.extend([0, el["id"]])   # Arguments of the target_final_pubkey insert. Zero is for the targetId which don't exists yet.
+            del data["final_pubkeys"]
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
@@ -160,8 +221,19 @@ class Target:
                 c.execute("INSERT INTO target "+keys+" VALUES ("+s[:-1]+")",
                     values
                 )
+                targetId = c.lastrowid
 
-                return c.lastrowid
+                # Replace zeroes (which have the even indexes in the list) with the created targetId.
+                for i in range(0, len(pubKeysIds), 2):
+                    pubKeysIds[i] = targetId
+
+                c.execute(
+                    "INSERT INTO target_final_pubkey "
+                    "(`id_target`, `id_pubkey`) VALUES " + pubKeysPlaceholders[:-1],
+                    pubKeysIds
+                )
+
+                return targetId
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
         finally:
