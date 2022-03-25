@@ -15,6 +15,21 @@ from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
+@dataclass
+class Input:
+    datacenterMoId = None
+    clusterMoId = None
+    hostMoId = None
+    datastoreMoId = []
+    networkMoId = []
+    vmFolderMoId = None
+    diskDevices = None
+    networkDevices = None
+    guestSpec = None
+    vmName = None
+
+
+
 class VirtualMachine(Backend):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
@@ -51,109 +66,100 @@ class VirtualMachine(Backend):
         oCustomSpec = None
         host = None
         cluster = None
-        computeResource = None
         cSpecInfo = dict()
         out = dict()
 
-        @dataclass
-        class Input:
-            datacenterMoId = None
-            clusterMoId = None
-            hostMoId = None
-            datastoreMoId = []
-            networkMoId = []
-            vmFolderMoId = None
-            diskDevices = None
-            networkDevices = None
-            guestSpec = None
-            vmName = None
-
+        # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName"):
             setattr(Input, v, data.get(v, None))
 
-        if "networkDevices" in data:
-            if "existent" in data["networkDevices"]:
-                for n in data["networkDevices"]["existent"]:
-                    if "networkMoId" in n:
-                        Input.networkMoId.append(n["networkMoId"])
-
-            if "new" in data["networkDevices"]:
-                for n in data["networkDevices"]["new"]:
-                    if "networkMoId" in n:
-                        Input.networkMoId.append(n["networkMoId"])
-
-        if "diskDevices" in data:
-            if "existent" in data["diskDevices"]:
-                for n in data["diskDevices"]["existent"]:
-                    if "datastoreMoId" in n:
-                        Input.datastoreMoId.append(n["datastoreMoId"])
-
-            if "new" in data["diskDevices"]:
-                for n in data["diskDevices"]["new"]:
-                    if "datastoreMoId" in n:
-                        Input.datastoreMoId.append(n["datastoreMoId"])
+        for v in ("networkDevices", "diskDevices"):
+            for e in ("existent", "new"):
+                try:
+                    for n in data[v][e]:
+                        if v == "networkDevices":
+                            Input.networkMoId.append(n["networkMoId"])
+                        else:
+                            Input.datastoreMoId.append(n["datastoreMoId"])
+                except Exception:
+                    pass
 
         try:
+            # Check cluster/host.
             if Input.clusterMoId and Input.hostMoId:
-                # Deploy within a preferred host in cluster in a cluster.
-                if self.__isClusterValid(Input.datacenterMoId, Input.clusterMoId):
-                    cluster = Cluster(self.assetId, Input.clusterMoId)
-                    if self.__isHostValid(Input.clusterMoId, Input.hostMoId):
-                        host = HostSystem(self.assetId, Input.hostMoId)
-                        computeResource = host
+                # Deploy within a preferred host in a cluster.
+                self.__checkClusterValidity(Input.datacenterMoId, Input.clusterMoId)
+                self.__checkHostValidity(Input.clusterMoId, Input.hostMoId)
+                computeResource = host = HostSystem(self.assetId, Input.hostMoId)
 
             elif Input.clusterMoId and not Input.hostMoId:
-                # Deploy within a specific host of the cluster.
-                if self.__isClusterValid(Input.datacenterMoId, Input.clusterMoId):
-                    cluster = Cluster(self.assetId, Input.clusterMoId)
-                    computeResource = cluster
+                # Deploy in a cluster.
+                self.__checkClusterValidity(Input.datacenterMoId, Input.clusterMoId)
+                computeResource = cluster = Cluster(self.assetId, Input.clusterMoId)
 
             elif not Input.clusterMoId and Input.hostMoId:
                 # Deploy within a standalone host (not clusterized).
-                if self.__isStandaloneHostValid(Input.datacenterMoId, Input.hostMoId):
-                    host = HostSystem(self.assetId, Input.hostMoId)
-                    computeResource = host
+                self.__checkStandaloneHostValidity(Input.datacenterMoId, Input.hostMoId)
+                computeResource = host = HostSystem(self.assetId, Input.hostMoId)
+
             else:
                 raise CustomException(status=400, payload={"VMware": "missing cluster and/or host parameters."})
 
-
-            # TEMPORARY CODE ###########################################################################################
-            Input.datastoreMoId = str(Input.datastoreMoId[0])
-            Input.networkMoId = str(Input.networkMoId[0])
-            #@todo: check against every datastore and netw.
-            # END TEMPORARY CODE #######################################################################################
-
-
             # Check datastore/network connection for computeResource (cluster or single host).
-            if self.__isDatastoreValid(computeResource, Input.datastoreMoId):
-                if "networkId" not in data or self.__isNetworkValid(computeResource, Input.networkMoId):  # Allow to deploy a VM without touching the network card.
-                    datastore = Datastore(self.assetId, Input.datastoreMoId)
-                    vmFolder = VirtualMachineFolder(self.assetId, Input.vmFolderMoId)
+            for ds in Input.datastoreMoId:
+                self.__isDatastoreValid(computeResource, ds)
 
-                    if Input.diskDevices:
-                        devsSpecs = self.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
-                    if Input.networkDevices:
-                        nicsSpecs = self.buildNetworkSpec(Input.networkDevices)
-                        if devsSpecs:
-                            devsSpecs.extend(nicsSpecs)
-                        else:
-                            devsSpecs = nicsSpecs
+            for n in Input.networkMoId:
+                self.__isNetworkValid(computeResource, n) # @todo: check if ok: # Allow to deploy a VM without touching the network card.
 
-                        # Apply the guest OS customization specifications.
-                        if Input.guestSpec:
-                            oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
-                            cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
-                        # Put all together.
-                        cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
-                        # Deploy
-                        out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=Input.vmName, cloneSpec=cloneSpec)
 
-                        if cSpecInfo:
-                            out["targetId"] = self.poolVmwareDeployVMTask(bootStrapKeyId=1, userName="root", taskMoId=out["task_moId"], customSpecInfo=cSpecInfo)
 
-                        return out
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            if Input.diskDevices:
+                devsSpecs = self.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
+
+            if Input.networkDevices:
+                nicsSpecs = self.buildNetworkSpec(Input.networkDevices)
+                if devsSpecs:
+                    devsSpecs.extend(nicsSpecs)
+                else:
+                    devsSpecs = nicsSpecs
+
+            datastore = Datastore(self.assetId, Input.datastoreMoId[0]) # todo: [0] is added for compatibility but code needs to do a for cycle ?.
+            vmFolder = VirtualMachineFolder(self.assetId, Input.vmFolderMoId)
+
+            # Apply the guest OS customization specifications.
+            if Input.guestSpec:
+                oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
+                cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
+
+            # Put all together.
+            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
+
+            # Deploy
+            out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=Input.vmName, cloneSpec=cloneSpec)
+
+            if cSpecInfo:
+                out["targetId"] = self.poolVmwareDeployVMTask(bootStrapKeyId=1, userName="root", taskMoId=out["task_moId"], customSpecInfo=cSpecInfo)
+
+            return out
         except Exception as e:
             raise e
 
@@ -283,87 +289,92 @@ class VirtualMachine(Backend):
     # Private methods
     ####################################################################################################################
 
-    def __isClusterValid(self, datacenterMoId: str, clusterMoId: str) -> bool:
+    def __checkClusterValidity(self, datacenterMoId: str, clusterMoId: str) -> None:
         from vmware.models.VMware.Datacenter import Datacenter
-        try:
-            datacenter = Datacenter(self.assetId, datacenterMoId)
-        except Exception:
-            raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
 
-        try:
-            if clusterMoId in datacenter:
-                return True
-            else:
-                raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
-        except Exception as e:
-            raise e
+        if clusterMoId:
+            try:
+                datacenter = Datacenter(self.assetId, datacenterMoId)
+            except Exception:
+                raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+
+            try:
+                if clusterMoId not in datacenter:
+                    raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
+            except Exception as e:
+                raise e
 
 
 
-    def __isHostValid(self, clusterMoId: str, hostMoId: str) -> bool:
+    def __checkHostValidity(self, clusterMoId: str, hostMoId: str) -> None:
         from vmware.models.VMware.Cluster import Cluster
-        try:
-            cluster = Cluster(self.assetId, clusterMoId)
-        except Exception:
-            raise CustomException(status=400, payload={"VMware": "invalid cluster."})
 
-        try:
-            cluster.loadHosts()
-            for host in cluster.hosts:
-                if hostMoId == host.moId:
-                    return True
+        if hostMoId:
+            try:
+                cluster = Cluster(self.assetId, clusterMoId)
+            except Exception:
+                raise CustomException(status=400, payload={"VMware": "invalid cluster."})
 
-            raise CustomException(status=400, payload={"VMware": "host not found in this cluster."})
-        except Exception as e:
-            raise e
+            try:
+                cluster.loadHosts()
+                for host in cluster.hosts:
+                    if hostMoId == host.moId:
+                        pass
+
+                raise CustomException(status=400, payload={"VMware": "host not found in this cluster."})
+            except Exception as e:
+                raise e
 
 
 
-    def __isStandaloneHostValid(self, datacenterMoId: str, hostMoId: str) -> bool:
+    def __checkStandaloneHostValidity(self, datacenterMoId: str, hostMoId: str) -> None:
         from vmware.models.VMware.Datacenter import Datacenter
 
-        try:
-            datacenter = Datacenter(self.assetId, datacenterMoId)
-        except Exception:
-            raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+        if hostMoId:
+            try:
+                datacenter = Datacenter(self.assetId, datacenterMoId)
+            except Exception:
+                raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
 
-        try:
-            datacenter.loadHosts()
-            for host in datacenter.standalone_hosts:
-                if hostMoId == host.moId:
-                    return True
+            try:
+                datacenter.loadHosts()
+                for host in datacenter.standalone_hosts:
+                    if hostMoId == host.moId:
+                        pass
 
-            raise CustomException(status=400, payload={"VMware": "host not found in this datacenter."})
-        except Exception as e:
-            raise e
+                raise CustomException(status=400, payload={"VMware": "host not found in this datacenter."})
+            except Exception as e:
+                raise e
 
 
 
     # computeResource can be a cluster or a single host.
     def __isDatastoreValid(self, computeResource: object, datastoreMoId: str) -> bool:
-        try:
-            computeResource.loadDatastores()
-            for datastore in computeResource.datastores:
-                if datastoreMoId == datastore.moId:
-                    return True
+        if datastoreMoId:
+            try:
+                computeResource.loadDatastores()
+                for datastore in computeResource.datastores:
+                    if datastoreMoId == datastore.moId:
+                        return True
 
-            raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
-        except Exception as e:
-            raise e
+                raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
+            except Exception as e:
+                raise e
 
 
 
     # computeResource can be a cluster or a single host.
     def __isNetworkValid(self, computeResource: object, networkMoId: str) -> bool:
-        try:
-            computeResource.loadNetworks()
-            for network in computeResource.networks:
-                if networkMoId == network.moId:
-                    return True
+        if networkMoId:
+            try:
+                computeResource.loadNetworks()
+                for network in computeResource.networks:
+                    if networkMoId == network.moId:
+                        return True
 
-            raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
-        except Exception as e:
-            raise e
+                raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
+            except Exception as e:
+                raise e
 
 
 

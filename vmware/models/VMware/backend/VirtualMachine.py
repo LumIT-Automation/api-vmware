@@ -363,7 +363,7 @@ class VirtualMachine(VmwareHandler):
 
 
     # This one build the spec data structure for the devices not present in the template.
-    def buildNewDiskDevicesSpecs(self, newDevData: list, vmDatastoreMoId: str) -> list:
+    def buildNewDiskDevicesSpecs(self, newDevData: list, vmDatastoreMoId: list) -> list:
         from vmware.models.VMware.Datastore import Datastore
         devsSpecsData = list() # Intermediate data structure.
         specsList = list() # Real spec data obtained from  self.buildNicSpec.
@@ -371,11 +371,13 @@ class VirtualMachine(VmwareHandler):
         try:
             # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
             diskNumber = 0
+            j = 0
+
             for devData in newDevData:
                 dsStore = Datastore(self.assetId, devData["datastoreMoId"])
                 # If the disk is not in the default datastore of the VM, the datastore name in the filePath is also needed.
                 filePath = ""
-                if devData["datastoreMoId"] != vmDatastoreMoId:
+                if devData["datastoreMoId"] != vmDatastoreMoId[j]:
                     filePath = dsStore.info()["name"]
                 controllerKey = self.__getControllerKey()
                 diskNumber = self.__setDiskSlotNumber(diskNumber)
@@ -390,6 +392,8 @@ class VirtualMachine(VmwareHandler):
                     "newDiskNumber": diskNumber,
                     "controllerKey": controllerKey
                 })
+
+                j += 1
 
             for data in devsSpecsData:
                 specsList.append(self.buildDiskSpec(data))
@@ -419,8 +423,8 @@ class VirtualMachine(VmwareHandler):
             ]
         }
         How to use it:
-        "templateDefault" are the nics in the template. To remove them, pass an empty list.
-        To leave them untouched, remove completely the "templateDefault" dict field.
+        "existent" are the nics in the template. To remove them, pass an empty list.
+        To leave them untouched, remove completely the "existent" dict field.
         "new" are the supplementary nics added to the new vm. 
         """
         try:
@@ -434,7 +438,7 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: str) -> list:
+    def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: list) -> list:
         specsList = list()
         """
         devicesData (passed via POST) example:
@@ -452,8 +456,8 @@ class VirtualMachine(VmwareHandler):
             ]
         }
         How to use it:
-        "templateDefault" are the disks in the template. To remove them, pass an empty list.
-        To leave them untouched, remove completely the "templateDefault" dict field.
+        "existent" are the disks in the template. To remove them, pass an empty list.
+        To leave them untouched, remove completely the "existent" dict field.
         "new" are the supplementary disks added to the new vm. 
         """
         try:
