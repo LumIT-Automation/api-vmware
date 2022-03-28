@@ -114,12 +114,12 @@ class VirtualMachine(Backend):
                 self.__checkNetworkValidity(computeResource, net)
 
             # Build devsSpecs.
-            specBuilder = SpecsBuilder(self.assetId, self.moId)
+            specsBuilder = SpecsBuilder(self.assetId, self.moId)
 
             if Input.diskDevices:
-                devsSpecs = specBuilder.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
+                devsSpecs = specsBuilder.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
             if Input.networkDevices:
-                nicsSpecs = specBuilder.buildNetworkSpec(Input.networkDevices)
+                nicsSpecs = specsBuilder.buildNetworkSpec(Input.networkDevices)
             specs = devsSpecs + nicsSpecs
 
 
@@ -135,7 +135,7 @@ class VirtualMachine(Backend):
                 cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
             # Put all together.
-            cloneSpec = specBuilder.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=specs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
+            cloneSpec = specsBuilder.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=specs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
             # Deploy
             out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=Input.vmName, cloneSpec=cloneSpec)
@@ -174,21 +174,21 @@ class VirtualMachine(Backend):
         devsSpecs = None
 
         try:
-            specBuilder = SpecsBuilder(self.assetId, self.moId)
+            specsBuilder = SpecsBuilder(self.assetId, self.moId)
             vmDatastoreMoId = self.info(related=False)["defaultDatastoreMoId"]
 
             if "diskDevices" in data:
-                devsSpecs = specBuilder.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
+                devsSpecs = specsBuilder.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
                 data.pop("diskDevices")
             if "networkDevices" in data:
-                nicsSpec = specBuilder.buildNetworkSpec(data["networkDevices"])
+                nicsSpec = specsBuilder.buildNetworkSpec(data["networkDevices"])
                 data.pop("networkDevices")
                 if devsSpecs:
                     devsSpecs.extend(nicsSpec)
                 else:
                     devsSpecs = nicsSpec
 
-            modifySpec = specBuilder.buildVMConfigSpecs(data, devsSpecs)
+            modifySpec = specsBuilder.buildVMConfigSpecs(data, devsSpecs)
 
             return self.reconfig(configSpec=modifySpec)
         except Exception as e:
