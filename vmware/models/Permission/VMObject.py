@@ -1,6 +1,6 @@
 from typing import List
 
-from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder as vCenterVMFolder
+from vmware.models.VMware.FolderVM import FolderVM as vCenterVMFolder
 from vmware.models.VMware.Network import Network as vCenterNetwork
 from vmware.models.VMware.Datastore import Datastore as vCenterDatastore
 

@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
+from vmware.models.VMware.FolderVM import FolderVM
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.VMware.VirtualMachineFolder import VMwareVirtualMachineFolderSerializer as Serializer
@@ -30,7 +30,7 @@ class VMwareVMFolderController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData = VirtualMachineFolder(assetId, moId).info()
+                    itemData = FolderVM(assetId, moId).info()
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
@@ -88,7 +88,7 @@ class VMwareVMFolderParentListController(CustomController):
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["data"] = VirtualMachineFolder(assetId, moId).parentList()
+                    itemData["data"] = FolderVM(assetId, moId).parentList()
                     serializer = ParentSerializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data

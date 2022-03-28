@@ -1,7 +1,7 @@
 from typing import List
 from django.db import connection
 
-from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
+from vmware.models.VMware.FolderVM import FolderVM
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
@@ -86,7 +86,7 @@ class Permission:
                 if objectMoId:
                     objectWhere = "AND ( vmware_object.moId = 'any' " # if "any" appears in the query results so far -> pass.
                     if objectType == "folder":
-                            f = VirtualMachineFolder(assetId, objectMoId)
+                            f = FolderVM(assetId, objectMoId)
                             foldersMoIdsList = f.parentList()
                             foldersMoIdsList.append(objectMoId)
                             objectWhere += "OR ("

@@ -1,7 +1,7 @@
 from vmware.models.Permission.Role import Role
 from vmware.models.Permission.VMObject import VMObject
 from vmware.models.Permission.Privilege import Privilege
-from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
+from vmware.models.VMware.FolderVM import FolderVM
 
 from vmware.helpers.Log import Log
 
@@ -107,8 +107,8 @@ class Permission:
             if privilegeType == 'object-folder': # for folder permissions allow the access for the subFolders also.
                 subItems = set()
                 for objMoId in objectMoIdSet:
-                    subTree = VirtualMachineFolder.folderTree(assetId=assetId, folderMoId=objMoId)[0]["folders"]
-                    subItems.update(VirtualMachineFolder.treeToSet(subTree, moIdSet=None))
+                    subTree = FolderVM.folderTree(assetId=assetId, folderMoId=objMoId)[0]["folders"]
+                    subItems.update(FolderVM.treeToSet(subTree, moIdSet=None))
                 objectMoIdSet.update(subItems)
 
             return objectMoIdSet

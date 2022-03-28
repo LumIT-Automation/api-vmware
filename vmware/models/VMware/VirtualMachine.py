@@ -6,6 +6,7 @@ from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
+from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachineSpecsBuilder as SpecsBuilder
 
 from vmware.models.Stage2.Target import Target
 from vmware.tasks import poolVmwareAsync_task
@@ -59,7 +60,7 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.Cluster import Cluster
         from vmware.models.VMware.HostSystem import HostSystem
         from vmware.models.VMware.Datastore import Datastore
-        from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
+        from vmware.models.VMware.FolderVM import FolderVM
         from vmware.models.VMware.CustomSpec import CustomSpec
 
         devsSpecs = list()
@@ -113,10 +114,12 @@ class VirtualMachine(Backend):
                 self.__checkNetworkValidity(computeResource, net)
 
             # Build devsSpecs.
+            specBuilder = SpecsBuilder(self.assetId, self.moId)
+
             if Input.diskDevices:
-                devsSpecs = self.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
+                devsSpecs = specBuilder.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
             if Input.networkDevices:
-                nicsSpecs = self.buildNetworkSpec(Input.networkDevices)
+                nicsSpecs = specBuilder.buildNetworkSpec(Input.networkDevices)
             specs = devsSpecs + nicsSpecs
 
 
@@ -125,7 +128,7 @@ class VirtualMachine(Backend):
 
 
             datastore = Datastore(self.assetId, Input.datastoreMoId[0]) # todo: [0] is added for compatibility but code needs to do a for cycle ?.
-            vmFolder = VirtualMachineFolder(self.assetId, Input.vmFolderMoId)
+            vmFolder = FolderVM(self.assetId, Input.vmFolderMoId)
 
             # Apply the guest OS customization specifications.
             if Input.guestSpec:
@@ -133,7 +136,7 @@ class VirtualMachine(Backend):
                 cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
             # Put all together.
-            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=specs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
+            cloneSpec = specBuilder.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=specs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
             # Deploy
             out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=Input.vmName, cloneSpec=cloneSpec)
@@ -172,19 +175,21 @@ class VirtualMachine(Backend):
         devsSpecs = None
 
         try:
+            specBuilder = SpecsBuilder(self.assetId, self.moId)
             vmDatastoreMoId = self.info(related=False)["defaultDatastoreMoId"]
+
             if "diskDevices" in data:
-                devsSpecs = self.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
+                devsSpecs = specBuilder.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
                 data.pop("diskDevices")
             if "networkDevices" in data:
-                nicsSpec = self.buildNetworkSpec(data["networkDevices"])
+                nicsSpec = specBuilder.buildNetworkSpec(data["networkDevices"])
                 data.pop("networkDevices")
                 if devsSpecs:
                     devsSpecs.extend(nicsSpec)
                 else:
                     devsSpecs = nicsSpec
 
-            modifySpec = self.buildVMConfigSpecs(data, devsSpecs)
+            modifySpec = specBuilder.buildVMConfigSpecs(data, devsSpecs)
 
             return self.reconfig(configSpec=modifySpec)
         except Exception as e:
@@ -194,7 +199,7 @@ class VirtualMachine(Backend):
 
     def loadVMDatastores(self) -> None:
         try:
-            for l in self.listVMDiskInfo():
+            for l in self.getDisksInformation():
                 self.diskDevices.append(
                     VirtualMachineDatastore(self.assetId, l["datastore"], l["label"], l["sizeMB"], l["deviceType"])
                 )
@@ -205,7 +210,7 @@ class VirtualMachine(Backend):
 
     def loadVMNetworks(self) -> None:
         try:
-            for l in self.listVMNetworkInfo():
+            for l in self.getNetworkInformation():
                 self.networkDevices.append(
                     VmNetworkAdapter(self.assetId, l["network"], l["label"], l["deviceType"])
                 )

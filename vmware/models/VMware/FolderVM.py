@@ -1,7 +1,7 @@
 from typing import List
 from pyVmomi import vim
 
-from vmware.models.VMware.backend.VirtualMachineFolder import VirtualMachineFolder as Backend
+from vmware.models.VMware.backend.FolderVM import FolderVM as Backend
 from vmware.models.VMware.Datacenter import Datacenter
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 
@@ -9,7 +9,7 @@ from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
-class VirtualMachineFolder(Backend):
+class FolderVM(Backend):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(assetId, moId, *args, **kwargs)
 
@@ -17,7 +17,7 @@ class VirtualMachineFolder(Backend):
         self.moId = moId
         self.name = self.oVMFolder.name
 
-        self.folders: List[VirtualMachineFolder] = []
+        self.folders: List[FolderVM] = []
         self.virtualmachines: List[VirtualMachine] = []
 
 
@@ -32,7 +32,7 @@ class VirtualMachineFolder(Backend):
                 objData = VmwareHelper.vmwareObjToDict(o)
                 if isinstance(o, vim.Folder):
                     self.folders.append(
-                        VirtualMachineFolder(self.assetId, objData["moId"])
+                        FolderVM(self.assetId, objData["moId"])
                     )
 
                 if loadVms:
@@ -53,13 +53,13 @@ class VirtualMachineFolder(Backend):
             self.loadContents(loadVms)
             for f in self.folders:
                 folders.append(
-                    VirtualMachineFolder.__cleanup("", f.info(loadVms))
+                    FolderVM.__cleanup("", f.info(loadVms))
                 )
 
             if loadVms:
                 for v in self.virtualmachines:
                     vms.append(
-                        VirtualMachineFolder.__cleanup("info.vm", v.info(False))
+                        FolderVM.__cleanup("info.vm", v.info(False))
                     )
 
             out = {
@@ -107,7 +107,7 @@ class VirtualMachineFolder(Backend):
         try:
             datacenters = Datacenter.oDatacenters(assetId)
             for dc in datacenters:
-                rootFolder = VirtualMachineFolder(assetId, dc.vmFolder._GetMoId())
+                rootFolder = FolderVM(assetId, dc.vmFolder._GetMoId())
 
                 subTree = rootFolder.info(False) # recursive by composition.
                 treeList.append(subTree)
@@ -130,7 +130,7 @@ class VirtualMachineFolder(Backend):
                     folderMoIdList.append(dc.vmFolder._GetMoId())
 
             for folderMoId in folderMoIdList:
-                treeList.extend(VirtualMachineFolder.folderTree(assetId, folderMoId))
+                treeList.extend(FolderVM.folderTree(assetId, folderMoId))
 
             return treeList
         except Exception as e:
@@ -143,14 +143,14 @@ class VirtualMachineFolder(Backend):
     def folderTree(assetId: int, folderMoId: str) -> list:
         treeList = list()
         try:
-            parentFolder = VirtualMachineFolder(assetId, folderMoId).oVMFolder
+            parentFolder = FolderVM(assetId, folderMoId).oVMFolder
             tree = {
                 "assetId": assetId,
                 "moId": parentFolder._GetMoId(),
                 "name": parentFolder.name,
                 "folders": []
             }
-            treeList.append(VirtualMachineFolder.__folderTree(assetId, parentFolder, tree))
+            treeList.append(FolderVM.__folderTree(assetId, parentFolder, tree))
 
             return treeList
         except Exception as e:
@@ -165,7 +165,7 @@ class VirtualMachineFolder(Backend):
         for el in treeElements:
             moIdSet.add(el["moId"])
             if el["folders"]:
-                VirtualMachineFolder.treeToSet(el["folders"], moIdSet)
+                FolderVM.treeToSet(el["folders"], moIdSet)
 
         return moIdSet
 
@@ -176,7 +176,7 @@ class VirtualMachineFolder(Backend):
         try:
             treesDict = dict()
             for tree in treesList:
-                treesDict[tree["moId"]] = VirtualMachineFolder.treeToSet(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
+                treesDict[tree["moId"]] = FolderVM.treeToSet(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
 
             for parent in treesDict.keys():
                 for subTree in treesDict.values():
@@ -197,7 +197,7 @@ class VirtualMachineFolder(Backend):
         folders = list()
 
         if formatTree:
-            folders = VirtualMachineFolder.folderTree(assetId, folderMoId)
+            folders = FolderVM.folderTree(assetId, folderMoId)
         else:
             try:
                 for f in Backend.oVMFolders(assetId):
@@ -229,7 +229,7 @@ class VirtualMachineFolder(Backend):
                         "folders": []
                     }
                     tree["folders"].append(subTree)
-                    VirtualMachineFolder.__folderTree(assetId, child, subTree)
+                    FolderVM.__folderTree(assetId, child, subTree)
         return tree
 
 

@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
+from vmware.models.VMware.FolderVM import FolderVM
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.VMware.VirtualMachineFolders import VMwareVirtualMachinesFolderSerializer as Serializer
@@ -40,7 +40,7 @@ class VMwareVMFoldersController(CustomController):
                     lock.lock()
 
                     # Filter folders' list basing on permissions.
-                    itemData["items"] = VirtualMachineFolder.list(assetId)
+                    itemData["items"] = FolderVM.list(assetId)
                     if "any" in allowedObjectsMoId:
                         allowedData = itemData
                     else:

@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
+from vmware.models.VMware.FolderVM import FolderVM
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.VMware.VirtualMachineFolders import VMwareVirtualMachinesFolderSerializer as Serializer
@@ -57,7 +57,7 @@ class VMwareVMFoldersTreeController(CustomController):
                             for moId in reversed(folderMoIdList):
                                 if moId not in allowedObjectsMoId:
                                     folderMoIdList.remove(moId)
-                    itemData["items"] = VirtualMachineFolder.foldersTree(assetId, folderMoIdList)
+                    itemData["items"] = FolderVM.foldersTree(assetId, folderMoIdList)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
@@ -67,7 +67,7 @@ class VMwareVMFoldersTreeController(CustomController):
                         # In the second case, the possible overlapping data should be removed:
                         # if a parent folders is also child of another subtree, it means that there is a subtree of another subtree: drop it.
                         if folderMoIdList:
-                            data["data"]["items"] = VirtualMachineFolder.purgeOverlapTrees(data["data"]["items"])
+                            data["data"]["items"] = FolderVM.purgeOverlapTrees(data["data"]["items"])
 
                         # Check the response's ETag validity (against client request).
                         conditional = Conditional(request)
