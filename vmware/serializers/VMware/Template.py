@@ -25,7 +25,6 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
     datacenterMoId = serializers.CharField(max_length=64, required=True)
     clusterMoId = serializers.CharField(max_length=64, required=False)
     hostMoId = serializers.CharField(max_length=64, required=False)
-    datastoreMoId = serializers.CharField(max_length=64, required=True)
     vmFolderMoId = serializers.CharField(max_length=64, required=True)
     powerOn = serializers.BooleanField(required=False)
     guestSpec = serializers.CharField(max_length=255, required=False, allow_blank=True)

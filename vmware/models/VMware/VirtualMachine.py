@@ -62,7 +62,8 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.VirtualMachineFolder import VirtualMachineFolder
         from vmware.models.VMware.CustomSpec import CustomSpec
 
-        devsSpecs = None
+        devsSpecs = list()
+        nicsSpecs = list()
         oCustomSpec = None
         host = None
         cluster = None
@@ -72,7 +73,6 @@ class VirtualMachine(Backend):
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName"):
             setattr(Input, v, data.get(v, None))
-
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
                 try:
@@ -85,7 +85,7 @@ class VirtualMachine(Backend):
                     pass
 
         try:
-            # Check target cluster/host validity.
+            # Define if target is cluster or host and check its validity.
             if Input.clusterMoId and Input.hostMoId:
                 # Deploy within a preferred host in a cluster.
                 self.__checkClusterValidity(Input.datacenterMoId, Input.clusterMoId)
@@ -112,23 +112,17 @@ class VirtualMachine(Backend):
             for net in Input.networkMoId:
                 self.__checkNetworkValidity(computeResource, net)
 
-
-
-
-
-
-
-
             # Build devsSpecs.
             if Input.diskDevices:
                 devsSpecs = self.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
-
             if Input.networkDevices:
                 nicsSpecs = self.buildNetworkSpec(Input.networkDevices)
-                if devsSpecs:
-                    devsSpecs.extend(nicsSpecs)
-                else:
-                    devsSpecs = nicsSpecs
+            specs = devsSpecs + nicsSpecs
+
+
+
+
+
 
             datastore = Datastore(self.assetId, Input.datastoreMoId[0]) # todo: [0] is added for compatibility but code needs to do a for cycle ?.
             vmFolder = VirtualMachineFolder(self.assetId, Input.vmFolderMoId)
@@ -139,7 +133,7 @@ class VirtualMachine(Backend):
                 cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
             # Put all together.
-            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=devsSpecs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
+            cloneSpec = self.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=specs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
 
             # Deploy
             out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=Input.vmName, cloneSpec=cloneSpec)
@@ -300,10 +294,6 @@ class VirtualMachine(Backend):
         if hostMoId:
             try:
                 cluster = Cluster(self.assetId, clusterMoId)
-            except Exception:
-                raise CustomException(status=400, payload={"VMware": "invalid cluster."})
-
-            try:
                 if hostMoId not in cluster:
                     raise CustomException(status=400, payload={"VMware": "host not found in this cluster."})
             except Exception as e:
