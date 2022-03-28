@@ -126,7 +126,6 @@ class VirtualMachine(Backend):
 
 
 
-
             datastore = Datastore(self.assetId, Input.datastoreMoId[0]) # todo: [0] is added for compatibility but code needs to do a for cycle ?.
             vmFolder = FolderVM(self.assetId, Input.vmFolderMoId)
 

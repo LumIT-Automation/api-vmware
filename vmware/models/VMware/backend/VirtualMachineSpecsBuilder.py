@@ -19,308 +19,9 @@ class VirtualMachineSpecsBuilder(Backend):
     # Public methods
     ####################################################################################################################
 
-    def buildDiskSpec(self, data: dict) -> object:
-        try:
-            diskSpec = vim.vm.device.VirtualDeviceSpec()
-            if data["operation"] == "edit":
-                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
-                diskSpec.device = data["device"]
-                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
-                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
-
-                backingSpec = diskSpec.device.backing
-                diskSpec.device.backing = self._buildDiskBackingSpec(
-                    spec=backingSpec,
-                    oDatastore=data["datastore"].oDatastore,
-                    deviceType=data["deviceType"],
-                    filePath=data["filePath"]
-                )
-
-            elif data["operation"] == 'add':
-                diskSpec.fileOperation = "create"
-                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
-                diskSpec.device = vim.vm.device.VirtualDisk()
-                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
-                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
-                diskSpec.device.controllerKey = data["controllerKey"]
-                diskSpec.device.unitNumber = data["newDiskNumber"]
-                diskSpec.device.deviceInfo = vim.Description()
-                if "deviceLabel" in data:
-                    diskSpec.device.deviceInfo.label = data["deviceLabel"]
-
-                diskSpec.device.backing = self._buildDiskBackingSpec(
-                    spec=None,
-                    oDatastore=data["datastore"].oDatastore,
-                    deviceType=data["deviceType"],
-                    filePath=data["filePath"]
-                )
-
-            elif data["operation"] == 'remove':
-                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
-                diskSpec.device = data["device"]
-            else:
-                raise CustomException(status=400, payload={"VMware": "buildDiskSpec: not an operation."})
-
-            return diskSpec
-        except Exception as e:
-            raise e
-
-
-
-    def buildNicSpec(self, data: dict) -> object:
-        try:
-            nicSpec = vim.vm.device.VirtualDeviceSpec()
-            if data["operation"] == "edit":
-                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
-                if VirtualMachineSpecsBuilder.getEthernetDeviceType(data["device"]) == data["deviceType"]:
-                    nicSpec.device = data["device"]
-                else:
-                    nicSpec.device = VirtualMachineSpecsBuilder.getEthernetDeviceInstance(data["deviceType"])
-                    nicSpec.device.deviceInfo = vim.Description()
-                    nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
-                    nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
-                    nicSpec.device.connectable.startConnected = True
-                    nicSpec.device.connectable.allowGuestControl = True
-                    nicSpec.device.connectable.connected = False
-                nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
-                if "deviceLabel" in data:
-                    nicSpec.device.deviceInfo.label = data["deviceLabel"]
-                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
-                nicSpec.device.backing.network = data["network"].oNetwork
-            elif data["operation"] == 'add':
-                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
-                nicSpec.device = VirtualMachineSpecsBuilder.getEthernetDeviceInstance(data["deviceType"])
-                nicSpec.device.deviceInfo = vim.Description()
-                nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
-                if "deviceLabel" in data:
-                    nicSpec.device.deviceInfo.label = data["deviceLabel"]
-                nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
-                nicSpec.device.connectable.startConnected = True
-                nicSpec.device.connectable.allowGuestControl = True
-                nicSpec.device.connectable.connected = False
-                nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
-                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
-                nicSpec.device.backing.network = data["network"].oNetwork
-                if "additionalData" in data:
-                    nicSpec.device.controllerKey = data["additionalData"]["controllerKey"]
-                    nicSpec.device.unitNumber = data["additionalData"]["unitNumber"]
-
-            elif data["operation"] == 'remove':
-                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
-                nicSpec.device = data["device"]
-            else:
-                raise CustomException(status=400, payload={"VMware": "buildNicSpec: not an operation."})
-
-            return nicSpec
-        except Exception as e:
-            raise e
-
-
-
-    # This one build the spec data structure for the devices present in the template.
-    def buildExistentNetDevicesSpecs(self, templDevData: list) -> list:
-        from vmware.models.VMware.Network import Network
-        templDevsInfo = self.getNetworkInformation()  # The network info of the template.
-        devsSpecsData = list() # Intermediate data structure.
-        specsList = list() # Real spec data obtained from  self.buildNicSpec.
-
-        try:
-            for devData in templDevData:
-                # Use label to find the right device.
-                if "label" in devData and devData["label"]:
-                    found = False
-                    # Reverse the iterator to safely remove items from the same list that we are looping.
-                    for devInfo in reversed(templDevsInfo):
-                        if devInfo["label"] == devData["label"]:
-                            found = True
-                            if devInfo["deviceType"] == devData["deviceType"]: # Both the label and deviceType matches: device found ok.
-                                devsSpecsData.append({
-                                    "operation": "edit",
-                                    "device": self.oNic(devInfo["label"]),
-                                    "deviceLabel": devData["label"],
-                                    "deviceType": devData["deviceType"],
-                                    "network": Network(self.assetId, devData["networkMoId"])
-                                })
-                            else:
-                                # The label matches but the device type is wrong. Cannot change it, so remove it and add a new one.
-                                oldDev = self.oNic(devInfo["label"])
-                                # Put the re-added nic in the same pci slot to avoid changing the nics order.
-                                devAdditionalData = dict({
-                                    "controllerKey": "",
-                                    "unitNumber": ""
-                                })
-                                devAdditionalData["controllerKey"] = oldDev.controllerKey
-                                devAdditionalData["unitNumber"] = oldDev.unitNumber
-                                devsSpecsData.extend([
-                                    {
-                                        "operation": "remove",
-                                        "device": oldDev
-                                    },
-                                    {
-                                        "operation": "add",
-                                        "device": None,
-                                        "deviceLabel": devData["label"],
-                                        "deviceType": devData["deviceType"],
-                                        "network": Network(self.assetId, devData["networkMoId"]),
-                                        "devAdditionalData": devAdditionalData
-                                    }
-                                ])
-
-                            # If there is a match, remove the element from the list.
-                            templDevsInfo.remove(devInfo)
-                            break
-
-                    # Device not found: error in input data.
-                    if not found:
-                        raise CustomException(status=400, payload={"VMware": "buildExistentNetDevicesSpecs: Can't find the network card: \"" + str(devData["label"]) + "\"."})
-
-            # If there are some template devices without match in the input data, they should be removed.
-            if templDevsInfo:
-                for devInfo in templDevsInfo:
-                    devsSpecsData.append({
-                        "operation": "remove",
-                        "device": self.oNic(devInfo["label"])
-                    })
-
-            for data in devsSpecsData:
-                specsList.append(self.buildNicSpec(data))
-
-            return specsList
-        except Exception as e:
-            raise e
-
-
-
-    # This one build the spec data structure for the devices not present in the template.
-    def buildNewNetDevicesSpecs(self, newDevData: list) -> list:
-        from vmware.models.VMware.Network import Network
-        devsSpecsData = list() # Intermediate data structure.
-        specsList = list() # Real spec data obtained from  self.buildNicSpec.
-
-        try:
-            # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
-            for devData in newDevData:
-                devsSpecsData.append({
-                    "operation": "add",
-                    "device": None,
-                    "deviceLabel": devData["label"],
-                    "deviceType": devData["deviceType"],
-                    "network": Network(self.assetId, devData["networkMoId"])
-                })
-
-            for data in devsSpecsData:
-                specsList.append(self.buildNicSpec(data))
-
-            return specsList
-        except Exception as e:
-            raise e
-
-
-
-    # This one build the spec data structure for the devices present in the template.
-    def buildExistentDiskDevicesSpecs(self, templDevData: list) -> list:
-        from vmware.models.VMware.Datastore import Datastore
-        templDevsInfo = self.getDisksInformation()  # The disk info of the template.
-        devsSpecsData = list() # Intermediate data structure.
-        specsList = list() # Real spec data obtained from  self.buildNicSpec.
-
-        try:
-            for devData in templDevData:
-                # Use label to find the right device.
-                if "label" in devData and devData["label"]:
-                    found = False
-                    # Reverse the iterator to safely remove items from the same list that we are looping.
-                    for devInfo in reversed(templDevsInfo):
-                        if devInfo["label"] == devData["label"]:
-                            found = True
-                            device = self.oDisk(devInfo["label"])
-                            datastore = Datastore(self.assetId, devData["datastoreMoId"])
-                            filePath = ""
-                            # If the disk is moving in another datastore, the datastore name in the filePath is also needed.
-                            if devData["datastoreMoId"] != device.backing.datastore._GetMoId():
-                                filePath = datastore.info()["name"]
-                            devsSpecsData.append({
-                                "operation": "edit",
-                                "device": self.oDisk(devInfo["label"]),
-                                "deviceLabel": devData["label"],
-                                "deviceType": devData["deviceType"],
-                                "sizeMB": devData["sizeMB"],
-                                "datastore": datastore,
-                                "filePath": filePath
-                            })
-
-                            # If there is a match, remove the element from the list.
-                            templDevsInfo.remove(devInfo)
-                            break
-
-                    # Device not found: error in input data.
-                    if not found:
-                        raise CustomException(status=400, payload={"VMware": "buildExistentDiskDevicesSpecs: Can't find the disk: \"" + str(devData["label"]) + "\"."})
-
-            # If there are some template devices without match in the input data, they should be removed.
-            if templDevsInfo:
-                for devInfo in templDevsInfo:
-                    devsSpecsData.append({
-                        "operation": "remove",
-                        "device": self.oDisk(devInfo["label"])
-                    })
-
-            for data in devsSpecsData:
-                specsList.append(self.buildDiskSpec(data))
-
-            return specsList
-        except Exception as e:
-            raise e
-
-
-    # This one build the spec data structure for the devices not present in the template.
-    def buildNewDiskDevicesSpecs(self, newDevData: list, vmDatastoreMoId: list) -> list:
-        from vmware.models.VMware.Datastore import Datastore
-        devsSpecsData = list() # Intermediate data structure.
-        specsList = list() # Real spec data obtained from  self.buildNicSpec.
-
-        try:
-            # Build an intermediate data structure and pass it to self.buildNicSpec to obtain the real spec data struct.
-            diskNumber = 0
-            j = 0
-
-            for devData in newDevData:
-                dsStore = Datastore(self.assetId, devData["datastoreMoId"])
-                # If the disk is not in the default datastore of the VM, the datastore name in the filePath is also needed.
-                filePath = ""
-                if devData["datastoreMoId"] != vmDatastoreMoId[j]:
-                    filePath = dsStore.info()["name"]
-                controllerKey = self.oController().key
-                diskNumber = self.__setDiskSlotNumber(diskNumber)
-                devsSpecsData.append({
-                    "operation": "add",
-                    "device": None,
-                    "deviceLabel": devData["label"],
-                    "deviceType": devData["deviceType"],
-                    "sizeMB": devData["sizeMB"],
-                    "datastore": dsStore,
-                    "filePath": filePath,
-                    "newDiskNumber": diskNumber,
-                    "controllerKey": controllerKey
-                })
-
-                j += 1
-
-            for data in devsSpecsData:
-                specsList.append(self.buildDiskSpec(data))
-
-            return specsList
-        except Exception as e:
-            raise e
-
-
-
-
-
     def buildNetworkSpec(self, devicesData: dict) -> list:
-        specsList = list()
         """
-        devicesData (passed via POST) example:
+        devicesData example:
         {
             "existent": [
                 {
@@ -333,16 +34,21 @@ class VirtualMachineSpecsBuilder(Backend):
                 ...
             ]
         }
-        How to use it:
-        "existent" are the nics in the template. To remove them, pass an empty list.
-        To leave them untouched, remove completely the "existent" dict field.
-        "new" are the supplementary nics added to the new vm. 
+
+        "existent" are the nics in the template.
+            To remove them, pass an empty list.
+            To leave them untouched, remove completely the "existent" dict field.
+
+        "new" are the supplementary nics added to the new vm.
         """
+        specsList = list()
+
         try:
             if "existent" in devicesData:
-                specsList.extend(self.buildExistentNetDevicesSpecs(devicesData["existent"]))
+                specsList.extend(self.__buildExistentNetDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
-                specsList.extend(self.buildNewNetDevicesSpecs(devicesData["new"]))
+                specsList.extend(self.__buildNewNetDevicesSpecs(devicesData["new"]))
+
             return specsList
         except Exception as e:
             raise e
@@ -350,9 +56,8 @@ class VirtualMachineSpecsBuilder(Backend):
 
 
     def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: list) -> list:
-        specsList = list()
         """
-        devicesData (passed via POST) example:
+        devicesData example:
         {
             "existent": [
                 {
@@ -366,16 +71,20 @@ class VirtualMachineSpecsBuilder(Backend):
                 ...
             ]
         }
-        How to use it:
-        "existent" are the disks in the template. To remove them, pass an empty list.
-        To leave them untouched, remove completely the "existent" dict field.
-        "new" are the supplementary disks added to the new vm. 
+
+        "existent" are the disks in the template.
+            To remove them, pass an empty list.
+            To leave them untouched, remove completely the "existent" dict field.
+
+        "new" are the supplementary disks added to the new vm.
         """
+        specsList = list()
+
         try:
             if "existent" in devicesData:
-                specsList.extend(self.buildExistentDiskDevicesSpecs(devicesData["existent"]))
+                specsList.extend(self.__buildExistentDiskDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
-                specsList.extend(self.buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
+                specsList.extend(self.__buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
 
             return specsList
         except Exception as e:
@@ -443,6 +152,307 @@ class VirtualMachineSpecsBuilder(Backend):
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
+
+    def __buildDiskSpec(self, data: dict) -> object:
+        try:
+            diskSpec = vim.vm.device.VirtualDeviceSpec()
+            if data["operation"] == "edit":
+                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
+                diskSpec.device = data["device"]
+                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1000 # MB, not MiB.
+                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1000 * 1000
+
+                backingSpec = diskSpec.device.backing
+                diskSpec.device.backing = self._buildDiskBackingSpec(
+                    spec=backingSpec,
+                    oDatastore=data["datastore"].oDatastore,
+                    deviceType=data["deviceType"],
+                    filePath=data["filePath"]
+                )
+
+            elif data["operation"] == 'add':
+                diskSpec.fileOperation = "create"
+                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+                diskSpec.device = vim.vm.device.VirtualDisk()
+                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1000
+                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1000 * 1000
+                diskSpec.device.controllerKey = data["controllerKey"]
+                diskSpec.device.unitNumber = data["newDiskNumber"]
+                diskSpec.device.deviceInfo = vim.Description()
+                if "deviceLabel" in data:
+                    diskSpec.device.deviceInfo.label = data["deviceLabel"]
+
+                diskSpec.device.backing = self._buildDiskBackingSpec(
+                    spec=None,
+                    oDatastore=data["datastore"].oDatastore,
+                    deviceType=data["deviceType"],
+                    filePath=data["filePath"]
+                )
+
+            elif data["operation"] == 'remove':
+                diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
+                diskSpec.device = data["device"]
+            else:
+                raise CustomException(status=400, payload={"VMware": "__buildDiskSpec: not an operation."})
+
+            return diskSpec
+        except Exception as e:
+            raise e
+
+
+
+    def __buildNicSpec(self, data: dict) -> object:
+        try:
+            nicSpec = vim.vm.device.VirtualDeviceSpec()
+            if data["operation"] == "edit":
+                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
+                if VirtualMachineSpecsBuilder.getEthernetDeviceType(data["device"]) == data["deviceType"]:
+                    nicSpec.device = data["device"]
+                else:
+                    nicSpec.device = VirtualMachineSpecsBuilder.getEthernetDeviceInstance(data["deviceType"])
+                    nicSpec.device.deviceInfo = vim.Description()
+                    nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
+                    nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+                    nicSpec.device.connectable.startConnected = True
+                    nicSpec.device.connectable.allowGuestControl = True
+                    nicSpec.device.connectable.connected = False
+                nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
+                if "deviceLabel" in data:
+                    nicSpec.device.deviceInfo.label = data["deviceLabel"]
+                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
+                nicSpec.device.backing.network = data["network"].oNetwork
+            elif data["operation"] == 'add':
+                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+                nicSpec.device = VirtualMachineSpecsBuilder.getEthernetDeviceInstance(data["deviceType"])
+                nicSpec.device.deviceInfo = vim.Description()
+                nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
+                if "deviceLabel" in data:
+                    nicSpec.device.deviceInfo.label = data["deviceLabel"]
+                nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+                nicSpec.device.connectable.startConnected = True
+                nicSpec.device.connectable.allowGuestControl = True
+                nicSpec.device.connectable.connected = False
+                nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
+                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
+                nicSpec.device.backing.network = data["network"].oNetwork
+                if "additionalData" in data:
+                    nicSpec.device.controllerKey = data["additionalData"]["controllerKey"]
+                    nicSpec.device.unitNumber = data["additionalData"]["unitNumber"]
+
+            elif data["operation"] == 'remove':
+                nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
+                nicSpec.device = data["device"]
+            else:
+                raise CustomException(status=400, payload={"VMware": "__buildNicSpec: not an operation."})
+
+            return nicSpec
+        except Exception as e:
+            raise e
+
+
+
+    def __buildExistentNetDevicesSpecs(self, templDevData: list) -> list:
+        # Build the spec data structure for the devices present in the template.
+        from vmware.models.VMware.Network import Network
+
+        templDevsInfo = self.getNetworkInformation() # the network info of the template.
+        devsSpecsData = list() # intermediate data structure.
+        specsList = list() # real spec data obtained from  self.__buildNicSpec.
+
+        try:
+            for devData in templDevData:
+                # Use label to find the right device.
+                if "label" in devData and devData["label"]:
+                    found = False
+                    # Reverse the iterator to safely remove items from the same list that we are looping.
+                    for devInfo in reversed(templDevsInfo):
+                        if devInfo["label"] == devData["label"]:
+                            found = True
+                            if devInfo["deviceType"] == devData["deviceType"]: # Both the label and deviceType matches: device found ok.
+                                devsSpecsData.append({
+                                    "operation": "edit",
+                                    "device": self.oNic(devInfo["label"]),
+                                    "deviceLabel": devData["label"],
+                                    "deviceType": devData["deviceType"],
+                                    "network": Network(self.assetId, devData["networkMoId"])
+                                })
+                            else:
+                                # The label matches but the device type is wrong. Cannot change it, so remove it and add a new one.
+                                oldDev = self.oNic(devInfo["label"])
+                                # Put the re-added nic in the same pci slot to avoid changing the nics order.
+                                devAdditionalData = dict({
+                                    "controllerKey": "",
+                                    "unitNumber": ""
+                                })
+                                devAdditionalData["controllerKey"] = oldDev.controllerKey
+                                devAdditionalData["unitNumber"] = oldDev.unitNumber
+                                devsSpecsData.extend([
+                                    {
+                                        "operation": "remove",
+                                        "device": oldDev
+                                    },
+                                    {
+                                        "operation": "add",
+                                        "device": None,
+                                        "deviceLabel": devData["label"],
+                                        "deviceType": devData["deviceType"],
+                                        "network": Network(self.assetId, devData["networkMoId"]),
+                                        "devAdditionalData": devAdditionalData
+                                    }
+                                ])
+
+                            # If there is a match, remove the element from the list.
+                            templDevsInfo.remove(devInfo)
+                            break
+
+                    # Device not found: error in input data.
+                    if not found:
+                        raise CustomException(status=400, payload={"VMware": "__buildExistentNetDevicesSpecs: Can't find the network card: \"" + str(devData["label"]) + "\"."})
+
+            # If there are some template devices without match in the input data, they should be removed.
+            if templDevsInfo:
+                for devInfo in templDevsInfo:
+                    devsSpecsData.append({
+                        "operation": "remove",
+                        "device": self.oNic(devInfo["label"])
+                    })
+
+            for data in devsSpecsData:
+                specsList.append(self.__buildNicSpec(data))
+
+            return specsList
+        except Exception as e:
+            raise e
+
+
+
+    def __buildNewNetDevicesSpecs(self, newDevData: list) -> list:
+        # Build the spec data structure for the devices not present in the template.
+        from vmware.models.VMware.Network import Network
+
+        devsSpecsData = list() # intermediate data structure.
+        specsList = list() # real spec data obtained from self.__buildNicSpec.
+
+        try:
+            # Build an intermediate data structure and pass it to self.__buildNicSpec to obtain the real spec data struct.
+            for devData in newDevData:
+                devsSpecsData.append({
+                    "operation": "add",
+                    "device": None,
+                    "deviceLabel": devData["label"],
+                    "deviceType": devData["deviceType"],
+                    "network": Network(self.assetId, devData["networkMoId"])
+                })
+
+            for data in devsSpecsData:
+                specsList.append(self.__buildNicSpec(data))
+
+            return specsList
+        except Exception as e:
+            raise e
+
+
+
+    def __buildExistentDiskDevicesSpecs(self, templDevData: list) -> list:
+        # Build the spec data structure for the devices present in the template.
+        from vmware.models.VMware.Datastore import Datastore
+
+        templDevsInfo = self.getDisksInformation() # the disk info of the template.
+        devsSpecsData = list() # intermediate data structure.
+        specsList = list() # real spec data obtained from  self.__buildNicSpec.
+
+        try:
+            for devData in templDevData:
+                # Use label to find the right device.
+                if "label" in devData and devData["label"]:
+                    found = False
+                    # Reverse the iterator to safely remove items from the same list that we are looping.
+                    for devInfo in reversed(templDevsInfo):
+                        if devInfo["label"] == devData["label"]:
+                            found = True
+                            device = self.oDisk(devInfo["label"])
+                            datastore = Datastore(self.assetId, devData["datastoreMoId"])
+                            filePath = ""
+                            # If the disk is moving in another datastore, the datastore name in the filePath is also needed.
+                            if devData["datastoreMoId"] != device.backing.datastore._GetMoId():
+                                filePath = datastore.info()["name"]
+                            devsSpecsData.append({
+                                "operation": "edit",
+                                "device": self.oDisk(devInfo["label"]),
+                                "deviceLabel": devData["label"],
+                                "deviceType": devData["deviceType"],
+                                "sizeMB": devData["sizeMB"],
+                                "datastore": datastore,
+                                "filePath": filePath
+                            })
+
+                            # If there is a match, remove the element from the list.
+                            templDevsInfo.remove(devInfo)
+                            break
+
+                    # Device not found: error in input data.
+                    if not found:
+                        raise CustomException(status=400, payload={"VMware": "__buildExistentDiskDevicesSpecs: Can't find the disk: \"" + str(devData["label"]) + "\"."})
+
+            # If there are some template devices without match in the input data, they should be removed.
+            if templDevsInfo:
+                for devInfo in templDevsInfo:
+                    devsSpecsData.append({
+                        "operation": "remove",
+                        "device": self.oDisk(devInfo["label"])
+                    })
+
+            for data in devsSpecsData:
+                specsList.append(self.__buildDiskSpec(data))
+
+            return specsList
+        except Exception as e:
+            raise e
+
+
+
+    def __buildNewDiskDevicesSpecs(self, newDevData: list, vmDatastoreMoId: list) -> list:
+        # Build the spec data structure for the devices not present in the template.
+        from vmware.models.VMware.Datastore import Datastore
+
+        devsSpecsData = list() # intermediate data structure.
+        specsList = list() # real spec data obtained from  self.__buildNicSpec.
+
+        try:
+            # Build an intermediate data structure and pass it to self.__buildNicSpec to obtain the real spec data struct.
+            diskNumber = 0
+            j = 0
+
+            for devData in newDevData:
+                dsStore = Datastore(self.assetId, devData["datastoreMoId"])
+                # If the disk is not in the default datastore of the VM, the datastore name in the filePath is also needed.
+                filePath = ""
+                if devData["datastoreMoId"] != vmDatastoreMoId[j]:
+                    filePath = dsStore.info()["name"]
+                controllerKey = self.oController().key
+                diskNumber = self.__setDiskSlotNumber(diskNumber)
+                devsSpecsData.append({
+                    "operation": "add",
+                    "device": None,
+                    "deviceLabel": devData["label"],
+                    "deviceType": devData["deviceType"],
+                    "sizeMB": devData["sizeMB"],
+                    "datastore": dsStore,
+                    "filePath": filePath,
+                    "newDiskNumber": diskNumber,
+                    "controllerKey": controllerKey
+                })
+
+                j += 1
+
+            for data in devsSpecsData:
+                specsList.append(self.__buildDiskSpec(data))
+
+            return specsList
+        except Exception as e:
+            raise e
+
+
 
     def _buildDiskBackingSpec(self, spec: object, oDatastore: object, deviceType: str, filePath: str):
         try:
