@@ -163,7 +163,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1000 * 1000
 
                 backingSpec = diskSpec.device.backing
-                diskSpec.device.backing = self._buildDiskBackingSpec(
+                diskSpec.device.backing = self.__buildDiskBackingSpec(
                     spec=backingSpec,
                     oDatastore=data["datastore"].oDatastore,
                     deviceType=data["deviceType"],
@@ -182,7 +182,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 if "deviceLabel" in data:
                     diskSpec.device.deviceInfo.label = data["deviceLabel"]
 
-                diskSpec.device.backing = self._buildDiskBackingSpec(
+                diskSpec.device.backing = self.__buildDiskBackingSpec(
                     spec=None,
                     oDatastore=data["datastore"].oDatastore,
                     deviceType=data["deviceType"],
@@ -454,7 +454,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
 
 
-    def _buildDiskBackingSpec(self, spec: object, oDatastore: object, deviceType: str, filePath: str):
+    def __buildDiskBackingSpec(self, spec: object, oDatastore: object, deviceType: str, filePath: str):
         try:
             if not spec:
                 spec = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
