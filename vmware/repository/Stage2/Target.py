@@ -115,8 +115,8 @@ class Target:
             if "final_pubkeys" in data:
                 if data["final_pubkeys"]:
                     for el in data["final_pubkeys"]:
-                        pubKeysPlaceholders += "(%s, %s)," # Placeholders for the target_final_pubkey insert.
-                        pubKeysIds.extend([targetId, el["id"]]) # Arguments of the target_final_pubkey insert.
+                        pubKeysPlaceholders += "(%s, %s),"
+                        pubKeysIds.extend([targetId, el["id"]])
                 del data["final_pubkeys"]
 
             # Build the update query according to dict fields.
@@ -138,11 +138,13 @@ class Target:
                         "WHERE `id_target` = %s ",
                         [targetId]
                     )
-                    c.execute(
-                        "INSERT INTO target_final_pubkey "
-                        "(`id_target`, `id_pubkey`) VALUES "+pubKeysPlaceholders[:-1],
-                        pubKeysIds
-                    )
+
+                    if pubKeysIds:
+                        c.execute(
+                            "INSERT INTO target_final_pubkey "
+                            "(`id_target`, `id_pubkey`) VALUES "+pubKeysPlaceholders[:-1],
+                            pubKeysIds
+                        )
 
             except Exception as e:
                 raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
@@ -204,8 +206,8 @@ class Target:
         if "final_pubkeys" in data:
             if data["final_pubkeys"]:
                 for el in data["final_pubkeys"]:
-                    pubKeysPlaceholders += "(%s, %s),"  # Placeholders for the target_final_pubkey insert.
-                    pubKeysIds.extend([0, el["id"]])   # Arguments of the target_final_pubkey insert. Zero is for the targetId which don't exists yet.
+                    pubKeysPlaceholders += "(%s, %s),"
+                    pubKeysIds.extend([0, el["id"]]) # zero is for the targetId which does not exist yet.
             del data["final_pubkeys"]
 
         # Build SQL query according to dict fields.
@@ -227,11 +229,11 @@ class Target:
                 for i in range(0, len(pubKeysIds), 2):
                     pubKeysIds[i] = targetId
 
-                c.execute(
-                    "INSERT INTO target_final_pubkey "
-                    "(`id_target`, `id_pubkey`) VALUES " + pubKeysPlaceholders[:-1],
-                    pubKeysIds
-                )
+                if pubKeysIds:
+                    c.execute(
+                        "INSERT INTO target_final_pubkey (`id_target`, `id_pubkey`) VALUES "+pubKeysPlaceholders[:-1],
+                            pubKeysIds
+                    )
 
                 return targetId
         except Exception as e:

@@ -129,7 +129,7 @@ class VirtualMachine(Backend):
 
             # Put all together: build the cloneSpec.
             cloneSpec = specsBuilder.buildVMCloneSpecs(
-                oDatastore=Datastore(self.assetId, Input.datastoreMoId[0]).oDatastore, # deploy on first one.
+                oDatastore=Datastore(self.assetId, Input.datastoreMoId[0]).oDatastore, # deploy on first one. # @todo: is this correct?
                 devsSpecs=specs,
                 cluster=cluster,
                 host=host,

@@ -6,7 +6,7 @@ from vmware.models.Stage2.Target import Target
 from vmware.helpers.Log import Log
 
 
-def poolVmwareTask(assetId: int, taskMoId: str, targetId: int) -> None:
+def pollVmwareTask(assetId: int, taskMoId: str, targetId: int) -> None:
     timeout = 600 # [seconds]
 
     try:
@@ -14,7 +14,7 @@ def poolVmwareTask(assetId: int, taskMoId: str, targetId: int) -> None:
         while time.time() < timeout_start + timeout:
             Log.log("Celery worker for VMware task: "+taskMoId)
 
-            # Get task VMware info.
+            # Get VMware task info.
             tsk = Task(assetId=assetId, moId=taskMoId)
             info = tsk.info()
             del tsk
@@ -32,8 +32,7 @@ def poolVmwareTask(assetId: int, taskMoId: str, targetId: int) -> None:
                     or info["state"] == 'error':
                 break
 
-            # every 10s.
-            time.sleep(10)
+            time.sleep(10) # every 10s.
 
     except Exception as e:
         raise e
