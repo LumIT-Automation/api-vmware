@@ -122,26 +122,35 @@ class VirtualMachine(Backend):
                 nicsSpecs = specsBuilder.buildNetworkSpec(Input.networkDevices)
             specs = devsSpecs + nicsSpecs
 
-
-
-
-
-            datastore = Datastore(self.assetId, Input.datastoreMoId[0]) # todo: [0] is added for compatibility but code needs to do a for cycle ?.
-            vmFolder = FolderVM(self.assetId, Input.vmFolderMoId)
-
             # Apply the guest OS customization specifications.
             if Input.guestSpec:
                 oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
                 cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
-            # Put all together.
-            cloneSpec = specsBuilder.buildVMCloneSpecs(oDatastore=datastore.oDatastore, devsSpecs=specs, cluster=cluster, host=host, data=data, oCustomSpec=oCustomSpec)
+            # Put all together: build the cloneSpec.
+            cloneSpec = specsBuilder.buildVMCloneSpecs(
+                oDatastore=Datastore(self.assetId, Input.datastoreMoId[0]).oDatastore, # deploy on first one.
+                devsSpecs=specs,
+                cluster=cluster,
+                host=host,
+                data=data,
+                oCustomSpec=oCustomSpec
+            )
 
-            # Deploy
-            out["task_moId"] = self.clone(oVMFolder=vmFolder.oVMFolder, vmName=Input.vmName, cloneSpec=cloneSpec)
+            # Deploy.
+            out["task_moId"] = self.clone(
+                oVMFolder=FolderVM(self.assetId, Input.vmFolderMoId).oVMFolder,
+                vmName=Input.vmName,
+                cloneSpec=cloneSpec
+            )
 
-            if cSpecInfo:
-                out["targetId"] = self.poolVmwareDeployVMTask(bootStrapKeyId=1, userName="root", taskMoId=out["task_moId"], customSpecInfo=cSpecInfo)
+            # A worker will poll the vCenter and update the target table on stage2 database in order to track progress.
+            out["targetId"] = self.pollVmwareDeployVMTask(
+                bootStrapKeyId=1, # @todo.
+                userName="root",
+                taskMoId=out["task_moId"],
+                customSpecInfo=cSpecInfo
+            )
 
             return out
         except Exception as e:
@@ -149,22 +158,29 @@ class VirtualMachine(Backend):
 
 
 
-    def poolVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict) -> int:
+    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict) -> int:
         try:
+            ip = ""
             if "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
-                targetData = {
-                    "ip": customSpecInfo["network"][0]["ip"],
-                    "port": 22,
-                    "api_type": "ssh",
-                    "id_bootstrap_key": bootStrapKeyId,
-                    "username": userName,
-                    "id_asset": self.assetId,
-                    "task_moId": taskMoId
-                }
+                ip = customSpecInfo["network"][0]["ip"]
 
-                targetId = Target.add(targetData)
-                poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
-                return targetId
+            targetData = {
+                "ip": ip,
+                "port": 22,
+                "api_type": "ssh",
+                "id_bootstrap_key": bootStrapKeyId,
+                "username": userName,
+                "id_asset": self.assetId,
+                "task_moId": taskMoId
+            }
+
+            # Add target do db.
+            targetId = Target.add(targetData)
+
+            # Launch async worker.
+            poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
+
+            return targetId
         except Exception as e:
             raise e
 

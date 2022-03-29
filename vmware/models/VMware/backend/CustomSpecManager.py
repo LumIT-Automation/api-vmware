@@ -23,7 +23,10 @@ class CustomSpecManager(VmwareHandler):
 
     def oCustomSpec(self, name) -> object:
         try:
-            return self.oCustomSpecManager.GetCustomizationSpec(name=name)
+            if self.oCustomSpecManager.DoesCustomizationSpecExist(name):
+                return self.oCustomSpecManager.GetCustomizationSpec(name=name)
+            else:
+                raise CustomException(status=404, payload={"VMware": "cannot load resource."})
         except Exception as e:
             raise e
 
@@ -41,6 +44,8 @@ class CustomSpecManager(VmwareHandler):
         try:
             if self.oCustomSpecManager.DoesCustomizationSpecExist(srcSpecName):
                 self.oCustomSpecManager.DuplicateCustomizationSpec(name=srcSpecName, newName=newSpecName)
+            else:
+                raise CustomException(status=404, payload={"VMware": "cannot load resource."})
         except Exception as e:
             raise e
 
@@ -50,6 +55,8 @@ class CustomSpecManager(VmwareHandler):
         try:
             if self.oCustomSpecManager.DoesCustomizationSpecExist(name):
                 self.oCustomSpecManager.DeleteCustomizationSpec(name)
+            else:
+                raise CustomException(status=404, payload={"VMware": "cannot load resource."})
         except Exception as e:
             raise e
 
@@ -75,7 +82,7 @@ class CustomSpecManager(VmwareHandler):
         try:
             return self.getCustomizationSpecManager(assetId=self.assetId)
         except Exception:
-            raise CustomException(status=400, payload={"VMware": "cannot load resource."})
+            raise CustomException(status=404, payload={"VMware": "cannot load resource."})
 
 
 

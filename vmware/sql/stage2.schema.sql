@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `target` (
   `id` int(11) NOT NULL,
-  `ip` varchar(64) NOT NULL,
+  `ip` varchar(64) DEFAULT NULL,
   `port` int(11) DEFAULT NULL,
   `api_type` varchar(64) NOT NULL DEFAULT '',
   `id_bootstrap_key` INT DEFAULT NULL,

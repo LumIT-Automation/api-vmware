@@ -48,6 +48,6 @@ class Task(VmwareHandler):
             for task in taskManager.recentTask:
                 if task.info.key == self.moId:
                     return task
-            raise CustomException(status=400, payload={"VMware": "cannot load resource."})
+            raise CustomException(status=404, payload={"VMware": "cannot load resource."})
         except Exception as e:
             raise e

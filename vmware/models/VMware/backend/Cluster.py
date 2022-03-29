@@ -64,4 +64,4 @@ class Cluster(VmwareHandler):
         try:
             return self.getObjects(assetId=self.assetId, vimType=vim.ClusterComputeResource, moId=self.moId)[0]
         except Exception:
-            raise CustomException(status=400, payload={"VMware": "cannot load resource."})
+            raise CustomException(status=404, payload={"VMware": "cannot load resource."})

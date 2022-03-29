@@ -7,31 +7,33 @@ from vmware.helpers.Log import Log
 
 
 def poolVmwareTask(assetId: int, taskMoId: str, targetId: int) -> None:
-    # Gets vmware task information.
-    timeout = 300  # [seconds]
+    timeout = 600 # [seconds]
 
     try:
         timeout_start = time.time()
         while time.time() < timeout_start + timeout:
+            Log.log("Celery worker for VMware task: "+taskMoId)
+
+            # Get task VMware info.
             tsk = Task(assetId=assetId, moId=taskMoId)
             info = tsk.info()
-            Log.log('Celery worker: VMware Task moId: '+taskMoId, '_')
             del tsk
 
-            tgt = Target(targetId=targetId)
-            data = {
+            # Update db.
+            Target(targetId=targetId).modify({
                 "task_state": info["state"],
                 "task_progress": info["progress"],
                 "task_startTime": info["startTime"],
                 "task_queueTime": info["queueTime"]
-            }
-            tgt.modify(data)
+            })
 
-            if info["state"] == "success" or info["state"] == 'error':
+            # Until success or error.
+            if info["state"] == "success" \
+                    or info["state"] == 'error':
                 break
+
+            # every 10s.
             time.sleep(10)
 
     except Exception as e:
         raise e
-
-

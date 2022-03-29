@@ -107,7 +107,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 relocateSpec.pool = host.oHostSystem.parent.resourcePool # Standalone host resource pool.
                 relocateSpec.host = host.oHostSystem
             else:
-                raise CustomException(status=400, payload={"VMware": "missing both cluster and host params."})
+                raise CustomException(status=400, payload={"VMware": "missing cluster or host params."})
 
             cloneSpec.location = relocateSpec
             if "powerOn" in data:
