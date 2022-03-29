@@ -9,7 +9,7 @@ from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backen
 from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachineSpecsBuilder as SpecsBuilder
 
 from vmware.models.Stage2.Target import Target
-from vmware.tasks import poolVmwareAsync_task
+from vmware.tasks import pollVmwareAsync_task
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Exception import CustomException
@@ -178,7 +178,7 @@ class VirtualMachine(Backend):
             targetId = Target.add(targetData)
 
             # Launch async worker.
-            poolVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
+            pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
 
             return targetId
         except Exception as e:
