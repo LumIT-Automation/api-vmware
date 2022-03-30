@@ -1,3 +1,5 @@
+import base64
+import logging
 from typing import List
 
 from django.utils.html import strip_tags
@@ -48,23 +50,22 @@ class BootstrapKey:
         c = connections[BootstrapKey.db].cursor()
 
         if BootstrapKey.__exists(keyId):
-            # Build SQL query according to dict fields.
-            for k, v in data.items():
-                if v is None:
-                    sql += k+"=DEFAULT,"
-                else:
-                    sql += k+"=%s,"
-                    values.append(strip_tags(v)) # no HTML allowed.
-
-            Log.log("UPDATE bootstrap_key SET priv_key = 'XXXXXXXX', comment = 'yyyyy'", '_')
-
-            import logging
-            logging.disable(logging.WARNING)  # Do not log private key.
             try:
+                if "priv_key" in data:
+                    data["priv_key"] = base64.b64decode(data["priv_key"]).decode('utf-8')
+
+                # Build SQL query according to dict fields.
+                for k, v in data.items():
+                    if v is None:
+                        sql += k+"=DEFAULT,"
+                    else:
+                        sql += k+"=%s,"
+                        values.append(strip_tags(v)) # no HTML allowed.
+
+                logging.disable(logging.WARNING)  # Do not log private key.
                 c.execute("UPDATE bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(keyId),
                     values
                 )
-
             except Exception as e:
                 raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
             finally:
@@ -99,7 +100,7 @@ class BootstrapKey:
         c = connections[BootstrapKey.db].cursor()
 
         try:
-            c.execute("SELECT id, comment FROM bootstrap_key")
+            c.execute("SELECT * FROM bootstrap_key")
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
@@ -115,19 +116,18 @@ class BootstrapKey:
         values = []
         c = connections[BootstrapKey.db].cursor()
 
-        # Build SQL query according to dict fields.
-        for k, v in data.items():
-            s += "%s,"
-            keys += k+","
-            values.append(strip_tags(v)) # no HTML allowed.
-
-        keys = keys[:-1]+")"
-
-        Log.log("INSERT INTO bootstrap_key (`priv_key`, `comment`) VALUES ('XXXXXXXX', 'yyyyyyy')", '_')
-
-        import logging
-        logging.disable(logging.WARNING) # Do not log private key.
         try:
+            if "priv_key" in data:
+                data["priv_key"] = base64.b64decode(data["priv_key"]).decode('utf-8')
+
+            # Build SQL query according to dict fields.
+            for k, v in data.items():
+                s += "%s,"
+                keys += k+","
+                values.append(strip_tags(v)) # no HTML allowed.
+            keys = keys[:-1]+")"
+
+            logging.disable(logging.WARNING) # Do not log private key.
             with transaction.atomic():
                 c.execute("INSERT INTO bootstrap_key "+keys+" VALUES ("+s[:-1]+")",
                     values

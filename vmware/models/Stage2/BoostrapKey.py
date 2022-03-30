@@ -13,11 +13,12 @@ class BootstrapKey:
         self.id = int(keyId)
         self.priv_key: str = ""
         self.comment: str = ""
+        self.pub_key: str = ""
 
         self.__load()
 
-        # To POST an ssh private key, grab the output of the command:
-        # cat id_rsa | sed -e 's/$/\\n/g' | tr -d '\n'
+        # To POST an ssh private key in json format, grab the output of the command:
+        # cat id_rsa | tr -d '\n'
 
 
 
@@ -60,12 +61,12 @@ class BootstrapKey:
 
     @staticmethod
     def list() -> List[dict]:
-        data = List[dict]
         try:
             data = Repository.list()
             for el in data:
                 bKey = BootstrapKey(keyId=el["id"])
                 el["pub_key"] = bKey.getPublic()
+                el["priv_key"] = "undisclosed"
 
             return data
         except Exception as e:
@@ -74,7 +75,7 @@ class BootstrapKey:
 
 
     @staticmethod
-    def add(data: dict) -> None:
+    def add(data: dict) -> int:
         try:
             return Repository.add(data)
         except Exception as e:
