@@ -5,6 +5,7 @@ from vmware.models.VMware.Network import Network as vCenterNetwork
 from vmware.models.VMware.Datastore import Datastore as vCenterDatastore
 
 from vmware.helpers.Exception import CustomException
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 from vmware.repository.VMObject import VMObject as Repository
@@ -64,7 +65,7 @@ class VMObject:
     def add(moId: str, assetId: int, objectName: str, description: str = "") -> int:
         oId = ""
         oName = ""
-        objectType = VMObject.getType(moId)
+        objectType = VmwareHelper.getType(moId)
 
         # Check if the objectName exists in the vCenter. Skip for "any".
         if moId == "any":
@@ -105,25 +106,6 @@ class VMObject:
 
 
 
-    @staticmethod
-    def getType(moId: str) -> str:
-        objectType = ""
-
-        try:
-            moIdPrefix = moId.split('-')[0]
-            if moIdPrefix == "group":
-                objectType = "folder"
-            elif moIdPrefix == "datastore":
-                objectType = "datastore"
-            elif moIdPrefix == "network" or moIdPrefix == "dvportgroup":
-                objectType = "network"
-
-            return objectType
-        except Exception:
-            raise CustomException(status=400, payload={"VMware": "Object type not found. Wrong moId?"})
-
-
-
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
@@ -132,8 +114,7 @@ class VMObject:
         try:
             info = Repository.get(
                 self.id_asset,
-                self.moId,
-                VMObject.getType # Callable[[str], str].
+                self.moId
             )
 
             # Set attributes.

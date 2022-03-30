@@ -3,9 +3,10 @@ from vmware.models.Permission.VMObject import VMObject
 from vmware.models.Permission.Privilege import Privilege
 from vmware.models.VMware.FolderVM import FolderVM
 
-from vmware.helpers.Log import Log
-
 from vmware.repository.Permission import Permission as Repository
+
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 
 class Permission:
@@ -80,7 +81,7 @@ class Permission:
                 Repository.countUserPermissions(
                     groups,
                     action,
-                    VMObject.getType(moId), # vmware object type from the moId.
+                    VmwareHelper.getType(moId), # vmware object type from the moId.
                     assetId,
                     moId
                 )

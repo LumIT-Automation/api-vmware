@@ -81,17 +81,22 @@ class Datacenter(Backend):
 
 
     def __contains__(self, objMoId):
-        self.loadClusters()
-        for cluster in self.clusters:
-            if cluster.moId == objMoId:
-                return True
+        objType = VmwareHelper.getType(objMoId)
 
-        self.loadHosts()
-        for host in self.standalone_hosts:
-            if host.moId == objMoId:
-                return True
+        if objType == "cluster":
+            self.loadClusters()
+            for cluster in self.clusters:
+                if cluster.moId == objMoId:
+                    return True
+
+        if objType == "host":
+            self.loadHosts()
+            for host in self.standalone_hosts:
+                if host.moId == objMoId:
+                    return True
 
         return False
+
 
 
     ####################################################################################################################

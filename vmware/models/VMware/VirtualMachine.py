@@ -341,7 +341,7 @@ class VirtualMachine(Backend):
     def __checkDatastoreValidity(self, computeResource: object, datastoreMoId: str) -> None:
         if datastoreMoId:
             try:
-                if datastoreMoId not in computeResource:
+                if datastoreMoId not in computeResource: # host or cluster.
                     raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
             except Exception as e:
                 raise e
@@ -351,7 +351,7 @@ class VirtualMachine(Backend):
     def __checkNetworkValidity(self, computeResource: object, networkMoId: str) -> None:
         if networkMoId:
             try:
-                if networkMoId not in computeResource:
+                if networkMoId not in computeResource: # host or cluster.
                     raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
             except Exception as e:
                 raise e

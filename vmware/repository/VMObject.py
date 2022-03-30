@@ -1,9 +1,10 @@
 from django.db import connection
-from typing import Callable, List
+from typing import List
 from django.utils.html import strip_tags
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
+from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
@@ -24,7 +25,7 @@ class VMObject:
     ####################################################################################################################
 
     @staticmethod
-    def get(assetId: int, moId: str, getType: Callable[[str], str]) -> dict:
+    def get(assetId: int, moId: str) -> dict:
         c = connection.cursor()
 
         try:
@@ -35,7 +36,7 @@ class VMObject:
             info = DBHelper.asDict(c)[0]
 
             # VMware object type.
-            info["object_type"] = getType(moId)
+            info["object_type"] = VmwareHelper.getType(moId)
 
             return info
         except Exception as e:

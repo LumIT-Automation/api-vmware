@@ -115,16 +115,20 @@ class HostSystem(Backend):
 
 
 
-    def __contains__(self, objectMoId):
-        self.loadNetworks(objectMoId)
-        for network in self.networks:
-            if network.moId == objectMoId:
-                return True
+    def __contains__(self, objMoId):
+        objType = VmwareHelper.getType(objMoId)
 
-        self.loadDatastores()
-        for datastore in self.datastores:
-            if datastore.moId == objectMoId:
-                return True
+        if objType == "network":
+            self.loadNetworks(objMoId)
+            for network in self.networks:
+                if network.moId == objMoId:
+                    return True
+
+        if objType == "datastore":
+            self.loadDatastores()
+            for datastore in self.datastores:
+                if datastore.moId == objMoId:
+                    return True
 
         return False
 

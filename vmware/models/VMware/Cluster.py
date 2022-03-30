@@ -114,21 +114,26 @@ class Cluster(Backend):
 
 
 
-    def __contains__(self, objectMoId):
-        self.loadHosts()
-        for host in self.hosts:
-            if host.moId == objectMoId:
-                return True
+    def __contains__(self, objMoId):
+        objType = VmwareHelper.getType(objMoId)
 
-        self.loadDatastores()
-        for datastore in self.datastores:
-            if datastore.moId == objectMoId:
-                return True
+        if objType == "host":
+            self.loadHosts()
+            for host in self.hosts:
+                if host.moId == objMoId:
+                    return True
 
-        self.loadNetworks()
-        for network in self.networks:
-            if network.moId == objectMoId:
-                return True
+        if objType == "datastore":
+            self.loadDatastores()
+            for datastore in self.datastores:
+                if datastore.moId == objMoId:
+                    return True
+
+        if objType == "network":
+            self.loadNetworks()
+            for network in self.networks:
+                if network.moId == objMoId:
+                    return True
 
         return False
 

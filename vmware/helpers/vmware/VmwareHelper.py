@@ -13,3 +13,30 @@ class VmwareHelper:
             })
         except Exception as e:
             raise e
+
+
+
+    @staticmethod
+    def getType(moId: str) -> str:
+        objectType = ""
+
+        try:
+            moIdPrefix = moId.split('-')[0]
+            if moIdPrefix == "group":
+                objectType = "folder"
+            elif moIdPrefix == "domain":
+                objectType = "cluster"
+            elif moIdPrefix == "host":
+                objectType = "host"
+            elif moIdPrefix == "datacenter":
+                objectType = "datacenter"
+            elif moIdPrefix == "datastore":
+                objectType = "datastore"
+            elif moIdPrefix == "vm":
+                objectType = "virtualmachine"
+            elif moIdPrefix == "network" or moIdPrefix == "dvportgroup":
+                objectType = "network"
+        except Exception:
+            pass
+
+        return objectType
