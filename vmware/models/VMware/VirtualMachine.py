@@ -21,6 +21,7 @@ class Input:
     datacenterMoId = None
     clusterMoId = None
     hostMoId = None
+    mainDatastoreMoId = None
     datastoreMoId = []
     networkMoId = []
     vmFolderMoId = None
@@ -72,7 +73,7 @@ class VirtualMachine(Backend):
         out = dict()
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
-        for v in ("datacenterMoId", "clusterMoId", "hostMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName"):
+        for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -107,7 +108,7 @@ class VirtualMachine(Backend):
                 raise CustomException(status=400, payload={"VMware": "missing cluster and/or host parameters."})
 
             # Check target datastore/network validity for computeResource (cluster or single host).
-            for ds in Input.datastoreMoId:
+            for ds in (Input.datastoreMoId + [Input.mainDatastoreMoId]):
                 self.__checkDatastoreValidity(computeResource, ds)
 
             for net in Input.networkMoId:
@@ -129,7 +130,7 @@ class VirtualMachine(Backend):
 
             # Put all together: build the cloneSpec.
             cloneSpec = specsBuilder.buildVMCloneSpecs(
-                oDatastore=Datastore(self.assetId, Input.datastoreMoId[0]).oDatastore, # deploy on first one. # @todo: is this correct?
+                oDatastore=Datastore(self.assetId, Input.mainDatastoreMoId).oDatastore,
                 devsSpecs=specs,
                 cluster=cluster,
                 host=host,
