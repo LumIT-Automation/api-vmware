@@ -21,34 +21,35 @@ class SshCommand:
     # Public methods
     ####################################################################################################################
 
-    def exec(self, data: dict = None, silent: bool = False) -> dict:
+    def exec(self, data: dict = None, tcpTimeout: int = 10, silent: bool = False) -> dict:
         data = {} if data is None else data
         out = ""
         try:
             target = Target(self.targetId)
             connectionData = target.connectionData
-            Log.log(connectionData, '_')
+            if connectionData:
+                if "id_bootstrap_key" in connectionData and connectionData["id_bootstrap_key"]:
+                    privKeyStr = connectionData["id_bootstrap_key"]
+                    privKey = BootstrapKey(privKeyStr)
+                    connectionData["priv_key"] = privKey.priv_key
 
-            if "id_bootstrap_key" in connectionData and connectionData["id_bootstrap_key"]:
-                privKeyStr = connectionData["id_bootstrap_key"]
-                privKey = BootstrapKey(privKeyStr)
-                connectionData["priv_key"] = privKey.priv_key
+                if "sudo" in data and data["sudo"]:
+                    command = '[ `id -u` -eq 0 ] || sudo -i;'+self.command
+                else:
+                    command = self.command
 
-            if "sudo" in data and data["sudo"]:
-                command = '[ `id -u` -eq 0 ] || sudo -i;'+self.command
+                # Pass the value of the variables to the shell script.
+                # Example: scriptVar={httpPutVar}. The value of {httpPutVar} ends in $scriptVar.
+                if self.shellVars and "shellVars" in data:
+                    dataShellVars = self.cleanupShellParams(data["shellVars"])
+                    self.shellVars = self.shellVars.format(**dataShellVars) # Variables substitution.
+                    command = self.shellVars + command
+
+                Log.log('Trying ssh command: ' + str(command))
+                ssh = SshSupplicant(connectionData, tcpTimeout=tcpTimeout, silent=silent)
+                out = ssh.command(command, alwaysSuccess=self.alwaysSuccess)
             else:
-                command = self.command
-
-            # Pass the value of the variables to the shell script.
-            # Example: scriptVar={httpPutVar}. The value of {httpPutVar} ends in $scriptVar.
-            if self.shellVars and "shellVars" in data:
-                dataShellVars = self.cleanupShellParams(data["shellVars"])
-                self.shellVars = self.shellVars.format(**dataShellVars) # Variables substitution.
-                command = self.shellVars + command
-
-            Log.log('Trying ssh command: ' + str(command))
-            ssh = SshSupplicant(connectionData, silent=silent)
-            out = ssh.command(command, alwaysSuccess=self.alwaysSuccess)
+                raise CustomException(status=400, payload={"Ssh": "Target not found."})
 
         except Exception as e:
             raise e

@@ -8,7 +8,7 @@ from vmware.helpers.Exception import CustomException
 
 class SshSupplicant:
 
-    def __init__(self, dataConnection: dict, silent: bool = False, *args, **kwargs):
+    def __init__(self, dataConnection: dict, tcpTimeout: int = 10, silent: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for key in ["ip", "username"]:
@@ -33,6 +33,7 @@ class SshSupplicant:
         else:
             self.password = ""
 
+        self.tcpTimeout = tcpTimeout
         self.silent = silent
 
 
@@ -54,10 +55,10 @@ class SshSupplicant:
             Log.actionLog("Try paramiko ssh command: " + str(cmd))
             if self.privateKey:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " ssh key auth.")
-                ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, pkey=self.privateKey, timeout=10)
+                ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, pkey=self.privateKey, timeout=self.tcpTimeout)
             elif self.username and self.password:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
-                ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=10)
+                ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=self.tcpTimeout)
             else:
                 raise CustomException(status=503, payload={"Ssh": "Failed to execute the ssh command on the asset."})
 
