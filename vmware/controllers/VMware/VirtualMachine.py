@@ -31,10 +31,12 @@ class VMwareVirtualMachineController(CustomController):
                     lock.lock()
 
                     itemData = VirtualMachine(assetId, moId).info()
-                    serializer = Serializer(data=itemData)
-                    if serializer.is_valid():
-                        data["data"] = serializer.validated_data
-                        data["href"] = request.get_full_path()
+                    if True:
+                        data["data"] = itemData
+                    #serializer = Serializer(data=itemData)
+                    #if serializer.is_valid():
+                    #    data["data"] = serializer.validated_data
+                    #    data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
                         conditional = Conditional(request)
