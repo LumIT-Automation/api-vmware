@@ -159,8 +159,8 @@ class VirtualMachineSpecsBuilder(Backend):
             if data["operation"] == "edit":
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
                 diskSpec.device = data["device"]
-                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1000 # MB, not MiB.
-                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1000 * 1000
+                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024 # MB, not MiB.
+                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
 
                 backingSpec = diskSpec.device.backing
                 diskSpec.device.backing = self.__buildDiskBackingSpec(
@@ -174,8 +174,8 @@ class VirtualMachineSpecsBuilder(Backend):
                 diskSpec.fileOperation = "create"
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
                 diskSpec.device = vim.vm.device.VirtualDisk()
-                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1000
-                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1000 * 1000
+                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024
+                diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
                 diskSpec.device.controllerKey = data["controllerKey"]
                 diskSpec.device.unitNumber = data["newDiskNumber"]
                 diskSpec.device.deviceInfo = vim.Description()
