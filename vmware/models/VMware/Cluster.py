@@ -33,7 +33,7 @@ class Cluster(Backend):
                 self.hosts.append(
                     HostSystem(
                         self.assetId,
-                        VmwareHelper.vmwareObjToDict(h)["moId"]
+                        VmwareHelper.getInfo(h)["moId"]
                     )
                 )
         except Exception as e:
@@ -47,7 +47,7 @@ class Cluster(Backend):
                 self.datastores.append(
                     Datastore(
                         self.assetId,
-                        VmwareHelper.vmwareObjToDict(d)["moId"]
+                        VmwareHelper.getInfo(d)["moId"]
                     )
                 )
         except Exception as e:
@@ -61,7 +61,7 @@ class Cluster(Backend):
                 self.networks.append(
                     Network(
                         self.assetId,
-                        VmwareHelper.vmwareObjToDict(n)["moId"]
+                        VmwareHelper.getInfo(n)["moId"]
                     )
                 )
         except Exception as e:
@@ -148,7 +148,7 @@ class Cluster(Backend):
 
         try:
             for o in Backend.oClusters(assetId):
-                cluster = Cluster(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                cluster = Cluster(assetId, VmwareHelper.getInfo(o)["moId"])
                 clusters.append(
                     Cluster.__cleanup("list", cluster.info(related))
                 )
@@ -165,7 +165,7 @@ class Cluster(Backend):
 
         try:
             for o in Backend.oClusters(assetId):
-                cluster = VmwareHelper.vmwareObjToDict(o)
+                cluster = VmwareHelper.getInfo(o)
                 cluster["assetId"] = assetId
                 clusters.append(cluster)
 

@@ -5,7 +5,7 @@ class VmwareHelper:
     ####################################################################################################################
 
     @staticmethod
-    def vmwareObjToDict(vmwareObj) -> dict:
+    def getInfo(vmwareObj) -> dict:
         try:
             return dict({
                 "moId": vmwareObj._GetMoId(),

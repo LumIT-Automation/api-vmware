@@ -28,7 +28,7 @@ class Datacenter(Backend):
     def loadClusters(self) -> None:
         try:
             for c in self.oClusters():
-                cl = VmwareHelper.vmwareObjToDict(c)
+                cl = VmwareHelper.getInfo(c)
 
                 self.clusters.append(
                     Cluster(self.assetId, cl["moId"])
@@ -41,7 +41,7 @@ class Datacenter(Backend):
     def loadHosts(self) -> None:
         try:
             for h in self.oHosts():
-                host = VmwareHelper.vmwareObjToDict(h)
+                host = VmwareHelper.getInfo(h)
                 self.standalone_hosts.append(
                     HostSystem(self.assetId, host["moId"])
                 )
@@ -109,7 +109,7 @@ class Datacenter(Backend):
 
         try:
             for o in Backend.oDatacenters(assetId):
-                datacenter = Datacenter(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                datacenter = Datacenter(assetId, VmwareHelper.getInfo(o)["moId"])
                 datacenters.append(
                     Datacenter.__cleanup("list", datacenter.info(related))
                 )
@@ -126,7 +126,7 @@ class Datacenter(Backend):
 
         try:
             for o in Backend.oDatacenters(assetId):
-                datacenter = VmwareHelper.vmwareObjToDict(o)
+                datacenter = VmwareHelper.getInfo(o)
                 datacenter["assetId"] = assetId
                 datacenters.append(datacenter)
 

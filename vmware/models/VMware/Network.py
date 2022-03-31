@@ -32,7 +32,7 @@ class Network(Backend):
 
         try:
             for h in self.oHostSystems():
-                c = VmwareHelper.vmwareObjToDict(h)
+                c = VmwareHelper.getInfo(h)
 
                 self.configuredHosts.append(
                     HostSystem(self.assetId, c["moId"])
@@ -85,7 +85,7 @@ class Network(Backend):
 
         try:
             for o in Backend.oNetworks(assetId):
-                network = Network(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                network = Network(assetId, VmwareHelper.getInfo(o)["moId"])
                 networks.append(
                     Network.__cleanup("list", network.info(related))
                 )
@@ -102,7 +102,7 @@ class Network(Backend):
 
         try:
             for o in Backend.oNetworks(assetId):
-                network = VmwareHelper.vmwareObjToDict(o)
+                network = VmwareHelper.getInfo(o)
                 network["assetId"] = assetId
                 networks.append(network)
 

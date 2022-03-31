@@ -31,7 +31,7 @@ class HostSystem(Backend):
                 self.datastores.append(
                     Datastore(
                         self.assetId,
-                        VmwareHelper.vmwareObjToDict(d)["moId"]
+                        VmwareHelper.getInfo(d)["moId"]
                     )
                 )
         except Exception as e:
@@ -144,7 +144,7 @@ class HostSystem(Backend):
 
         try:
             for o in Backend.oHostSystems(assetId):
-                hostsystem = HostSystem(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                hostsystem = HostSystem(assetId, VmwareHelper.getInfo(o)["moId"])
                 hostsystems.append(
                     HostSystem.__cleanup("list", hostsystem.info(loadDatastores=related, loadNetworks=related))
                 )
@@ -161,7 +161,7 @@ class HostSystem(Backend):
 
         try:
             for o in Backend.oHostSystems(assetId):
-                hostsystem = VmwareHelper.vmwareObjToDict(o)
+                hostsystem = VmwareHelper.getInfo(o)
                 hostsystem["assetId"] = assetId
                 hostsystems.append(hostsystem)
 

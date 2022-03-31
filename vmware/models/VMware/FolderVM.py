@@ -29,7 +29,7 @@ class FolderVM(Backend):
     def loadContents(self, loadVms: bool = True) -> None:
         try:
             for o in self.oContents():
-                objData = VmwareHelper.vmwareObjToDict(o)
+                objData = VmwareHelper.getInfo(o)
                 if isinstance(o, vim.Folder):
                     self.folders.append(
                         FolderVM(self.assetId, objData["moId"])
@@ -201,7 +201,7 @@ class FolderVM(Backend):
         else:
             try:
                 for f in Backend.oVMFolders(assetId):
-                    folders.append(VmwareHelper.vmwareObjToDict(f))
+                    folders.append(VmwareHelper.getInfo(f))
 
             except Exception as e:
                 raise e

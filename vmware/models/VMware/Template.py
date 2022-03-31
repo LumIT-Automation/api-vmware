@@ -37,7 +37,7 @@ class VirtualMachineTemplate(VirtualMachine):
         try:
             for o in Backend.oVirtualMachines(assetId):
                 if o.config.template:
-                    virtualmachine = VirtualMachine(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                    virtualmachine = VirtualMachine(assetId, VmwareHelper.getInfo(o)["moId"])
                     virtualmachines.append(
                         VirtualMachine._cleanup("list", virtualmachine.info(related))
                     )
@@ -55,7 +55,7 @@ class VirtualMachineTemplate(VirtualMachine):
         try:
             for o in Backend.oVirtualMachines(assetId):
                 if o.config.template:
-                    virtualmachine = VmwareHelper.vmwareObjToDict(o)
+                    virtualmachine = VmwareHelper.getInfo(o)
                     virtualmachine["assetId"] = assetId
                     virtualmachines.append(virtualmachine)
 

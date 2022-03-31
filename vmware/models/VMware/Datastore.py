@@ -39,7 +39,7 @@ class Datastore(Backend):
 
         try:
             for h in self.oAttachedHosts():
-                c = VmwareHelper.vmwareObjToDict(h)
+                c = VmwareHelper.getInfo(h)
 
                 self.attachedHosts.append(
                     HostSystem(self.assetId, c["moId"])
@@ -105,7 +105,7 @@ class Datastore(Backend):
 
         try:
             for o in Backend.oDatastores(assetId):
-                datastore = Datastore(assetId, VmwareHelper.vmwareObjToDict(o)["moId"])
+                datastore = Datastore(assetId, VmwareHelper.getInfo(o)["moId"])
                 datastores.append(
                     Datastore.__cleanup("list", datastore.info(related))
                 )
@@ -123,7 +123,7 @@ class Datastore(Backend):
 
         try:
             for o in Backend.oDatastores(assetId):
-                datastore = VmwareHelper.vmwareObjToDict(o)
+                datastore = VmwareHelper.getInfo(o)
                 datastore["assetId"] = assetId
                 datastores.append(datastore)
 
