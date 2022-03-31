@@ -73,8 +73,10 @@ class VmwareHandler:
 
     def getTaskManager(self, assetId) -> object:
         try:
-            if not assetId in VmwareHandler.contents:
-                self.__fetchContent(assetId)
+            #if not assetId in VmwareHandler.contents:
+            #   self.__fetchContent(assetId)
+
+            self.__fetchContent(assetId) # method used by Celery daemon: content gets outdated, so must be refreshed at every call.
 
             return getattr(VmwareHandler.contents[assetId], "taskManager")
         except Exception as e:
