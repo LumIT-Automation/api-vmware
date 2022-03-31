@@ -5,6 +5,7 @@ from vmware.helpers.vmware.VmwareHandler import VmwareHandler
 
 from vmware.helpers.Log import Log
 
+
 class Task(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,7 +33,6 @@ class Task(VmwareHandler):
             oldDesc = self.oTask.info.description
             newDesc = vmodl.LocalizableMessage(key=oldDesc.key+'-concerto', message=description + oldDesc.message)
             self.oTask.SetTaskDescription(newDesc)
-
         except Exception as e:
             raise e
 

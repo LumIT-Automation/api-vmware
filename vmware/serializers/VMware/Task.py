@@ -7,4 +7,4 @@ class VMwareTaskSerializer(serializers.Serializer):
     startTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
     progress = serializers.IntegerField(required=False, allow_null=True)
     state = serializers.CharField(max_length=64, required=False, allow_blank=True, allow_null=True)
-    message = serializers.CharField(max_length=64, required=False)
+    message = serializers.CharField(max_length=64, required=False, allow_blank=True)
