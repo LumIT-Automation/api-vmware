@@ -18,7 +18,7 @@ class BootstrapKey:
         self.__load()
 
         # To POST an ssh private key in json format, grab the output of the command:
-        # cat id_rsa | tr -d '\n'
+        # cat ~/.ssh/id_rsa | base64 | tr -d '\n'
 
 
 

@@ -38,7 +38,8 @@ class PollWorker:
                     "task_state": info["state"],
                     "task_progress": info["progress"],
                     "task_startTime": info["startTime"],
-                    "task_queueTime": info["queueTime"]
+                    "task_queueTime": info["queueTime"],
+                    "task_message": info["message"]
                 })
 
                 # Until success or error.

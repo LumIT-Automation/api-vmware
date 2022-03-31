@@ -41,6 +41,7 @@ CREATE TABLE `target` (
   `task_progress` int DEFAULT NULL,
   `task_startTime` varchar(64) NOT NULL DEFAULT '',
   `task_queueTime` varchar(64) NOT NULL DEFAULT '',
+  `task_message` varchar(512) NOT NULL DEFAULT '',
   `vm_name` varchar(128) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
