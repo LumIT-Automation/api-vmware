@@ -159,7 +159,7 @@ class VirtualMachineSpecsBuilder(Backend):
             if data["operation"] == "edit":
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
                 diskSpec.device = data["device"]
-                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024 # MB, not MiB.
+                diskSpec.device.capacityInKB = int(data["sizeMB"]) * 1024 # MiB.
                 diskSpec.device.capacityInBytes = int(data["sizeMB"]) * 1024 * 1024
 
                 backingSpec = diskSpec.device.backing
@@ -193,7 +193,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
                 diskSpec.device = data["device"]
             else:
-                raise CustomException(status=400, payload={"VMware": "__buildDiskSpec: not an operation."})
+                raise CustomException(status=400, payload={"VMware": "invalid operation."})
 
             return diskSpec
         except Exception as e:
@@ -243,7 +243,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
                 nicSpec.device = data["device"]
             else:
-                raise CustomException(status=400, payload={"VMware": "__buildNicSpec: not an operation."})
+                raise CustomException(status=400, payload={"VMware": "invalid operation."})
 
             return nicSpec
         except Exception as e:
@@ -307,7 +307,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
                     # Device not found: error in input data.
                     if not found:
-                        raise CustomException(status=400, payload={"VMware": "__buildExistentNetDevicesSpecs: Can't find the network card: \"" + str(devData["label"]) + "\"."})
+                        raise CustomException(status=400, payload={"VMware": "can't find the network card: "+str(devData["label"])+"."})
 
             # If there are some template devices without match in the input data, they should be removed.
             if templDevsInfo:
@@ -392,7 +392,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
                     # Device not found: error in input data.
                     if not found:
-                        raise CustomException(status=400, payload={"VMware": "__buildExistentDiskDevicesSpecs: Can't find the disk: \"" + str(devData["label"]) + "\"."})
+                        raise CustomException(status=400, payload={"VMware": "can't find the disk: "+str(devData["label"])+"."})
 
             # If there are some template devices without match in the input data, they should be removed.
             if templDevsInfo:
@@ -471,7 +471,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 spec.eagerlyScrub = True
 
             if filePath:
-                spec.fileName = '[' + str(filePath) + ']'
+                spec.fileName = '['+str(filePath)+']'
 
             return spec
         except Exception as e:
