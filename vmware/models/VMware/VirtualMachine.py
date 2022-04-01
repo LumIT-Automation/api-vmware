@@ -64,8 +64,6 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.FolderVM import FolderVM
         from vmware.models.VMware.CustomSpec import CustomSpec
 
-        devsSpecs = list()
-        nicsSpecs = list()
         oCustomSpec = None
         host = None
         cluster = None
@@ -117,37 +115,35 @@ class VirtualMachine(Backend):
             # Build devsSpecs.
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
 
-            diskKeys = list()
             if Input.diskDevices:
-                [devsSpecs, diskKeys] = specsBuilder.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
+                specsBuilder.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
             if Input.networkDevices:
-                nicsSpecs = specsBuilder.buildNetworkSpec(Input.networkDevices)
-            specs = devsSpecs + nicsSpecs
+                specsBuilder.buildNetworkSpec(Input.networkDevices)
 
-            Log.log(specs, 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS')
+            devSpecs = specsBuilder.storageSpec + specsBuilder.networkSpec
+
             # Apply the guest OS customization specifications.
             if Input.guestSpec:
                 oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
                 cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
             # Put all together: build the cloneSpec.
-            cloneSpec = specsBuilder.buildVMCloneSpecs(
+            specsBuilder.buildVMCloneSpecs(
                 oDatastore=Datastore(self.assetId, Input.mainDatastoreMoId).oDatastore,
-                devsSpecs=specs,
+                devsSpecs=devSpecs,
                 cluster=cluster,
                 host=host,
                 data=data,
-                oCustomSpec=oCustomSpec,
-                diskKeys=diskKeys
+                oCustomSpec=oCustomSpec
             )
 
-            Log.log("Virtual Machine clone operation specs: "+str(cloneSpec))
+            Log.log("Virtual Machine clone operation specs: "+str(specsBuilder.cloneSpec))
 
             # Deploy.
             out["task_moId"] = self.clone(
                 oVMFolder=FolderVM(self.assetId, Input.vmFolderMoId).oVMFolder,
                 vmName=Input.vmName,
-                cloneSpec=cloneSpec
+                cloneSpec=specsBuilder.cloneSpec
             )
 
             # A worker will poll the vCenter and update the target table on stage2 database in order to track progress.
@@ -193,24 +189,19 @@ class VirtualMachine(Backend):
 
 
     def modify(self, data: dict) -> str:
-        devsSpecs = None
-
         try:
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
             vmDatastoreMoId = self.info(related=False)["defaultDatastoreMoId"]
 
             if "diskDevices" in data:
-                devsSpecs = specsBuilder.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
+                specsBuilder.buildStorageSpec(data["diskDevices"], vmDatastoreMoId)
                 data.pop("diskDevices")
             if "networkDevices" in data:
-                nicsSpec = specsBuilder.buildNetworkSpec(data["networkDevices"])
+                specsBuilder.buildNetworkSpec(data["networkDevices"])
                 data.pop("networkDevices")
-                if devsSpecs:
-                    devsSpecs.extend(nicsSpec)
-                else:
-                    devsSpecs = nicsSpec
 
-            modifySpec = specsBuilder.buildVMConfigSpecs(data, devsSpecs)
+            devSpecs = specsBuilder.storageSpec + specsBuilder.networkSpec
+            modifySpec = specsBuilder.buildVMConfigSpecs(data, devSpecs)
 
             return self.reconfig(configSpec=modifySpec)
         except Exception as e:

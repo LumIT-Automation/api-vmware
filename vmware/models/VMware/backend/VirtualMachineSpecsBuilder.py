@@ -12,6 +12,11 @@ class VirtualMachineSpecsBuilder(Backend):
 
         self.assetId = int(assetId)
         self.moId = moId
+        self.diskLocators = []
+        self.relocateSpec = vim.vm.RelocateSpec() # where put the new virtual machine.
+        self.cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
+        self.storageSpec = list()
+        self.networkSpec = list()
 
 
 
@@ -41,21 +46,19 @@ class VirtualMachineSpecsBuilder(Backend):
 
         "new" are the supplementary nics added to the new vm.
         """
-        specsList = list()
 
         try:
             if "existent" in devicesData:
-                specsList.extend(self.__buildExistentNetDevicesSpecs(devicesData["existent"]))
+                self.networkSpec.extend(self.__buildExistentNetDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
-                specsList.extend(self.__buildNewNetDevicesSpecs(devicesData["new"]))
+                self.networkSpec.extend(self.__buildNewNetDevicesSpecs(devicesData["new"]))
 
-            return specsList
         except Exception as e:
             raise e
 
 
 
-    def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: list) -> list:
+    def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: list):
         """
         devicesData example:
         {
@@ -78,67 +81,42 @@ class VirtualMachineSpecsBuilder(Backend):
 
         "new" are the supplementary disks added to the new vm.
         """
-        specsList = list()
-        deviceKeysList = list()
 
         try:
             if "existent" in devicesData:
-                [specs, deviceKeys] = self.__buildExistentDiskDevicesSpecs(devicesData["existent"])
-                specsList.extend(specs)
-                deviceKeysList.extend(deviceKeys)
+                self.storageSpec.extend(self.__buildExistentDiskDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
-                specsList.extend(self.__buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
+                self.storageSpec.extend(self.__buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
 
-            return [specsList, deviceKeysList]
         except Exception as e:
             raise e
 
 
 
-    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None, diskKeys: list = None):
-        diskKeys = [] if diskKeys is None else diskKeys
+    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None):
         try:
-            cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
-
-            # VirtualMachineRelocateSpec(vim.vm.RelocateSpec): where put the new virtual machine.
-            relocateSpec = vim.vm.RelocateSpec()
-            relocateSpec.datastore = oDatastore
+            self.relocateSpec.datastore = oDatastore
             if cluster:
-                relocateSpec.pool = cluster.oCluster.resourcePool # The resource pool associated to this cluster.
+                self.relocateSpec.pool = cluster.oCluster.resourcePool # The resource pool associated to this cluster.
                 if host:
-                    relocateSpec.host = host.oHostSystem
+                    self.relocateSpec.host = host.oHostSystem
             elif host:
-                relocateSpec.pool = host.oHostSystem.parent.resourcePool # Standalone host resource pool.
-                relocateSpec.host = host.oHostSystem
+                self.relocateSpec.pool = host.oHostSystem.parent.resourcePool # Standalone host resource pool.
+                self.relocateSpec.host = host.oHostSystem
             else:
                 raise CustomException(status=400, payload={"VMware": "missing cluster or host params."})
 
-            if diskKeys:
-                for key in diskKeys:
-                    diskLocator = vim.vm.RelocateSpec.DiskLocator()
-                    diskLocator.diskId = key
-                    datastore = None
-                    backing = None
-                    for dev in devsSpecs:
-                        if dev.device.key == key:
-                            datastore = dev.device.backing.datastore
-                            backing = dev.device.backing
-                    diskLocator.datastore = datastore
-                    diskLocator.diskBackingInfo = backing
-                    relocateSpec.disk.append(diskLocator)
-
-            cloneSpec.location = relocateSpec
+            self.relocateSpec.disk = self.diskLocators
+            self.cloneSpec.location = self.relocateSpec
             if "powerOn" in data:
-                cloneSpec.powerOn = data["powerOn"]
+                self.cloneSpec.powerOn = data["powerOn"]
                 data.pop("powerOn")
 
-            cloneSpec.config = self.buildVMConfigSpecs(data, devsSpecs)
+            self.cloneSpec.config = self.buildVMConfigSpecs(data, devsSpecs)
 
             # Apply the guest OS customization specifications.
             if oCustomSpec:
-                cloneSpec.customization = oCustomSpec.spec
-
-            return cloneSpec
+                self.cloneSpec.customization = oCustomSpec.spec
 
         except Exception as e:
             raise e
@@ -188,6 +166,14 @@ class VirtualMachineSpecsBuilder(Backend):
                     filePath=data["filePath"]
                 )
 
+                if data["deviceKey"]:
+                    diskLocator = vim.vm.RelocateSpec.DiskLocator()
+                    diskLocator.diskId = data["deviceKey"]
+                    diskLocator.datastore = data["datastore"].oDatastore
+                    diskLocator.diskBackingInfo = diskSpec.device.backing
+
+                    self.diskLocators.append(diskLocator)
+
             elif data["operation"] == 'add':
                 diskSpec.fileOperation = "create"
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
@@ -213,7 +199,7 @@ class VirtualMachineSpecsBuilder(Backend):
             else:
                 raise CustomException(status=400, payload={"VMware": "invalid operation."})
 
-            return [diskSpec, data["deviceKey"]]
+            return diskSpec
         except Exception as e:
             raise e
 
@@ -424,11 +410,10 @@ class VirtualMachineSpecsBuilder(Backend):
                     })
 
             for data in devsSpecsData:
-                [spec, keyId] = self.__buildDiskSpec(data)
+                spec = self.__buildDiskSpec(data)
                 specsList.append(spec)
-                deviceKeysList.append(keyId)
 
-            return [specsList, deviceKeysList]
+            return specsList
         except Exception as e:
             raise e
 
@@ -468,7 +453,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 j += 1
 
             for data in devsSpecsData:
-                [spec, keyId] = self.__buildDiskSpec(data)
+                spec = self.__buildDiskSpec(data)
                 specsList.append(spec)
 
             return specsList
