@@ -79,20 +79,24 @@ class VirtualMachineSpecsBuilder(Backend):
         "new" are the supplementary disks added to the new vm.
         """
         specsList = list()
+        deviceKeysList = list()
 
         try:
             if "existent" in devicesData:
-                specsList.extend(self.__buildExistentDiskDevicesSpecs(devicesData["existent"]))
+                [specs, deviceKeys] = self.__buildExistentDiskDevicesSpecs(devicesData["existent"])
+                specsList.extend(specs)
+                deviceKeysList.extend(deviceKeys)
             if "new" in devicesData:
                 specsList.extend(self.__buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
 
-            return specsList
+            return [specsList, deviceKeysList]
         except Exception as e:
             raise e
 
 
 
-    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None):
+    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None, diskKeys: list = None):
+        diskKeys = [] if diskKeys is None else diskKeys
         try:
             cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
 
@@ -108,6 +112,20 @@ class VirtualMachineSpecsBuilder(Backend):
                 relocateSpec.host = host.oHostSystem
             else:
                 raise CustomException(status=400, payload={"VMware": "missing cluster or host params."})
+
+            if diskKeys:
+                for key in diskKeys:
+                    diskLocator = vim.vm.RelocateSpec.DiskLocator()
+                    diskLocator.diskId = key
+                    datastore = None
+                    backing = None
+                    for dev in devsSpecs:
+                        if dev.device.key == key:
+                            datastore = dev.device.backing.datastore
+                            backing = dev.device.backing
+                    diskLocator.datastore = datastore
+                    diskLocator.diskBackingInfo = backing
+                    relocateSpec.disk.append(diskLocator)
 
             cloneSpec.location = relocateSpec
             if "powerOn" in data:
@@ -195,7 +213,7 @@ class VirtualMachineSpecsBuilder(Backend):
             else:
                 raise CustomException(status=400, payload={"VMware": "invalid operation."})
 
-            return diskSpec
+            return [diskSpec, data["deviceKey"]]
         except Exception as e:
             raise e
 
@@ -360,6 +378,7 @@ class VirtualMachineSpecsBuilder(Backend):
         templDevsInfo = self.getDisksInformation() # the disk info of the template.
         devsSpecsData = list() # intermediate data structure.
         specsList = list() # real spec data obtained from  self.__buildNicSpec.
+        deviceKeysList = list() # list of the disks ids of the template.
 
         try:
             for devData in templDevData:
@@ -372,10 +391,10 @@ class VirtualMachineSpecsBuilder(Backend):
                             found = True
                             device = self.oDisk(devInfo["label"])
                             datastore = Datastore(self.assetId, devData["datastoreMoId"])
-                            filePath = ""
-                            # If the disk is moving in another datastore, the datastore name in the filePath is also needed.
-                            if devData["datastoreMoId"] != device.backing.datastore._GetMoId():
-                                filePath = datastore.info()["name"]
+                            # If the disk is moving in another datastore, the filename of the template disk and the device key are needed also.
+                            # The info should be passed to the disk locator spec field in the relocate spec.
+                            filePath = device.backing.fileName # grab the disk filename from the template.
+                            deviceKey = device.key # grab the disk key from the template.
                             devsSpecsData.append({
                                 "operation": "edit",
                                 "device": self.oDisk(devInfo["label"]),
@@ -383,7 +402,8 @@ class VirtualMachineSpecsBuilder(Backend):
                                 "deviceType": devData["deviceType"],
                                 "sizeMB": devData["sizeMB"],
                                 "datastore": datastore,
-                                "filePath": filePath
+                                "filePath": filePath,
+                                "deviceKey": deviceKey
                             })
 
                             # If there is a match, remove the element from the list.
@@ -399,13 +419,16 @@ class VirtualMachineSpecsBuilder(Backend):
                 for devInfo in templDevsInfo:
                     devsSpecsData.append({
                         "operation": "remove",
-                        "device": self.oDisk(devInfo["label"])
+                        "device": self.oDisk(devInfo["label"]),
+                        "deviceKey": 0
                     })
 
             for data in devsSpecsData:
-                specsList.append(self.__buildDiskSpec(data))
+                [spec, keyId] = self.__buildDiskSpec(data)
+                specsList.append(spec)
+                deviceKeysList.append(keyId)
 
-            return specsList
+            return [specsList, deviceKeysList]
         except Exception as e:
             raise e
 
@@ -425,10 +448,8 @@ class VirtualMachineSpecsBuilder(Backend):
 
             for devData in newDevData:
                 dsStore = Datastore(self.assetId, devData["datastoreMoId"])
-                # If the disk is not in the default datastore of the VM, the datastore name in the filePath is also needed.
-                filePath = ""
-                if devData["datastoreMoId"] != vmDatastoreMoId[j]:
-                    filePath = dsStore.info()["name"]
+                # In many cases the datastore name of the new virtual disk is also needed in the filePath, with the naming convention [datastore_name].
+                filePath = '['+dsStore.info()["name"]+']'
                 controllerKey = self.oController().key
                 diskNumber = self.__setDiskSlotNumber(diskNumber)
                 devsSpecsData.append({
@@ -440,13 +461,15 @@ class VirtualMachineSpecsBuilder(Backend):
                     "datastore": dsStore,
                     "filePath": filePath,
                     "newDiskNumber": diskNumber,
-                    "controllerKey": controllerKey
+                    "controllerKey": controllerKey,
+                    "deviceKey": 0
                 })
 
                 j += 1
 
             for data in devsSpecsData:
-                specsList.append(self.__buildDiskSpec(data))
+                [spec, keyId] = self.__buildDiskSpec(data)
+                specsList.append(spec)
 
             return specsList
         except Exception as e:
@@ -454,7 +477,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
 
 
-    def __buildDiskBackingSpec(self, spec: object, oDatastore: object, deviceType: str, filePath: str):
+    def __buildDiskBackingSpec(self, spec: object, oDatastore: object, deviceType: str, filePath: str) -> object:
         try:
             if not spec:
                 spec = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
@@ -471,7 +494,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 spec.eagerlyScrub = True
 
             if filePath:
-                spec.fileName = '['+str(filePath)+']'
+                spec.fileName = filePath
 
             return spec
         except Exception as e:

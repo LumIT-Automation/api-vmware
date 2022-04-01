@@ -117,12 +117,14 @@ class VirtualMachine(Backend):
             # Build devsSpecs.
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
 
+            diskKeys = list()
             if Input.diskDevices:
-                devsSpecs = specsBuilder.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
+                [devsSpecs, diskKeys] = specsBuilder.buildStorageSpec(Input.diskDevices, Input.datastoreMoId)
             if Input.networkDevices:
                 nicsSpecs = specsBuilder.buildNetworkSpec(Input.networkDevices)
             specs = devsSpecs + nicsSpecs
 
+            Log.log(specs, 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS')
             # Apply the guest OS customization specifications.
             if Input.guestSpec:
                 oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
@@ -135,7 +137,8 @@ class VirtualMachine(Backend):
                 cluster=cluster,
                 host=host,
                 data=data,
-                oCustomSpec=oCustomSpec
+                oCustomSpec=oCustomSpec,
+                diskKeys=diskKeys
             )
 
             Log.log("Virtual Machine clone operation specs: "+str(cloneSpec))
@@ -244,6 +247,7 @@ class VirtualMachine(Backend):
 
         try:
             config = self.oVirtualMachine.config
+            Log.log(config, 'DDDDDDDDDDDDDDDDDDDDDDDD')
 
             if related:
                 # Get virtual disks info.
