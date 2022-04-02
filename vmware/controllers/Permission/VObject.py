@@ -3,15 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from vmware.models.Permission.Permission import Permission
-from vmware.models.Permission.VMObject import VMObject as PermissionVMObject
+from vmware.models.Permission.VObject import VObject as PermissionVMObject
 
-from vmware.serializers.Permission.VMObject import PermissionVMObjectSerializer as Serializer
+from vmware.serializers.Permission.VObject import PermissionVObjectSerializer as Serializer
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
 
 
-
-class PermissionVMObjectController(CustomController):
+class PermissionVObjectController(CustomController):
     @staticmethod
     def delete(request: Request, objectId: int) -> Response:
         user = CustomController.loggedUser(request)
@@ -21,7 +20,6 @@ class PermissionVMObjectController(CustomController):
                 Log.actionLog("Permission vmware object deletion ", user)
 
                 PermissionVMObject.delete(objectId)
-
                 httpStatus = status.HTTP_200_OK
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN

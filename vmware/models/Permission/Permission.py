@@ -1,5 +1,5 @@
 from vmware.models.Permission.Role import Role
-from vmware.models.Permission.VMObject import VMObject
+from vmware.models.Permission.VObject import VObject
 from vmware.models.Permission.Privilege import Privilege
 from vmware.models.VMware.FolderVM import FolderVM
 
@@ -20,7 +20,7 @@ class Permission:
         self.identity_group_identifier: int
         self.identity_group_name: str
         self.role: str
-        self.obj = VMObject
+        self.obj = VObject
 
 
 
@@ -28,11 +28,11 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroupId: int, role: str, vmwareObject: VMObject) -> None:
+    def modify(self, identityGroupId: int, role: str, vmwareObject: VObject) -> None:
         try:
             if role == "admin":
                 moId = "any" # if admin: override to "any".
-                objectId = VMObject(vmwareObject.id_asset, moId).id # get the id of object "any".
+                objectId = VObject(vmwareObject.id_asset, moId).id # get the id of object "any".
             else:
                 moId = vmwareObject.moId
                 objectId = vmwareObject.id
@@ -40,7 +40,7 @@ class Permission:
             if not objectId:
                 if moId != "any":
                     # If the VMObject does not exist (in the db), create it.
-                    objectId = VMObject.add(
+                    objectId = VObject.add(
                         moId=moId,
                         assetId=vmwareObject.id_asset,
                         objectName=vmwareObject.name
@@ -128,11 +128,11 @@ class Permission:
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, vmwareObject: VMObject) -> None:
+    def add(identityGroupId: int, role: str, vmwareObject: VObject) -> None:
         try:
             if role == "admin":
                 moId = "any" # if admin: override to "any".
-                objectId = VMObject(vmwareObject.id_asset, moId).id # get the id of object "any".
+                objectId = VObject(vmwareObject.id_asset, moId).id # get the id of object "any".
             else:
                 moId = vmwareObject.moId
                 objectId = vmwareObject.id
@@ -140,7 +140,7 @@ class Permission:
             if not objectId:
                 if moId != "any":
                     # If the VMObject does not exist (in the db), create it.
-                    objectId = VMObject.add(
+                    objectId = VObject.add(
                         moId=moId,
                         assetId=vmwareObject.id_asset,
                         objectName=vmwareObject.name

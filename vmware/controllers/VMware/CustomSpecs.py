@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.CustomSpecs import VMwareCustomizationSpecsSerializer as Serializer, VMwareCustomizationSpecCloneSerializer as CloneSerializer
+from vmware.serializers.VMware.CustomSpecs import VMwareCustomizationSpecsSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 
@@ -70,51 +70,3 @@ class VMwareCustomSpecsController(CustomController):
             "ETag": etagCondition["responseEtag"],
             "Cache-Control": "must-revalidate"
         })
-
-
-
-    @staticmethod
-    def post(request: Request, assetId: int) -> Response:
-        response = None
-        user = CustomController.loggedUser(request)
-
-        try:
-            if Permission.hasUserPermission(groups=user["groups"], action="custom_specs_post") or user["authDisabled"]:
-                Log.actionLog("Clone virtual machines customization specification", user)
-                Log.actionLog("User data: " + str(request.data), user)
-
-                serializer = CloneSerializer(data=request.data)
-                if serializer.is_valid():
-                    data = serializer.validated_data
-
-                    lock = Lock("custom_specs", locals(), data["data"]["sourceSpec"])
-                    if lock.isUnlocked():
-                        lock.lock()
-                        CustomSpec(assetId, serializer.validated_data["data"]["sourceSpec"]).clone(serializer.validated_data["data"]["newSpec"])
-
-                        httpStatus = status.HTTP_201_CREATED
-                        lock.release()
-                    else:
-                        httpStatus = status.HTTP_423_LOCKED
-                else:
-                    httpStatus = status.HTTP_400_BAD_REQUEST
-                    response = {
-                        "VMware": {
-                            "error": str(serializer.errors)
-                        }
-                    }
-                    Log.actionLog("User data incorrect: " + str(response), user)
-            else:
-                httpStatus = status.HTTP_403_FORBIDDEN
-
-        except Exception as e:
-            if "serializer" in locals():
-                Lock("custom_specs", locals(), locals()["serializer"].data["data"]["sourceSpec"]).release()
-
-            data, httpStatus, headers = CustomController.exceptionHandler(e)
-            return Response(data, status=httpStatus, headers=headers)
-
-        return Response(response, status=httpStatus, headers={
-            "Cache-Control": "no-cache"
-        })
-

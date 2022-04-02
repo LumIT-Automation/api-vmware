@@ -5,7 +5,8 @@ from rest_framework import status
 from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecSerializer as Serializer
+from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecSerializer as Serializer, \
+    VMwareCustomizationSpecCloneSerializer as CloneSerializer
 
 from vmware.controllers.CustomController import CustomController
 
@@ -135,6 +136,51 @@ class VMwareCustomSpecController(CustomController):
                     Log.actionLog("User data incorrect: "+str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
+        except Exception as e:
+            if "specName" in locals():
+                Lock("custom_spec", locals(), locals()["specName"]).release()
+
+            data, httpStatus, headers = CustomController.exceptionHandler(e)
+            return Response(data, status=httpStatus, headers=headers)
+
+        return Response(response, status=httpStatus, headers={
+            "Cache-Control": "no-cache"
+        })
+
+
+
+    @staticmethod
+    def post(request: Request, assetId: int, specName: str) -> Response:
+        response = None
+        user = CustomController.loggedUser(request)
+
+        try:
+            if Permission.hasUserPermission(groups=user["groups"], action="custom_specs_post") or user["authDisabled"]:
+                Log.actionLog("Clone virtual machines customization specification", user)
+                Log.actionLog("User data: " + str(request.data), user)
+
+                serializer = CloneSerializer(data=request.data["data"])
+                if serializer.is_valid():
+                    lock = Lock("custom_spec", locals(), specName)
+                    if lock.isUnlocked():
+                        lock.lock()
+                        CustomSpec(assetId, specName).clone(serializer.validated_data["destination"])
+
+                        httpStatus = status.HTTP_201_CREATED
+                        lock.release()
+                    else:
+                        httpStatus = status.HTTP_423_LOCKED
+                else:
+                    httpStatus = status.HTTP_400_BAD_REQUEST
+                    response = {
+                        "VMware": {
+                            "error": str(serializer.errors)
+                        }
+                    }
+                    Log.actionLog("User data incorrect: " + str(response), user)
+            else:
+                httpStatus = status.HTTP_403_FORBIDDEN
+
         except Exception as e:
             if "specName" in locals():
                 Lock("custom_spec", locals(), locals()["specName"]).release()

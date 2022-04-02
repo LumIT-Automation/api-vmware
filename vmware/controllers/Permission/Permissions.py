@@ -4,7 +4,7 @@ from rest_framework import status
 
 from vmware.models.Permission.IdentityGroup import IdentityGroup
 from vmware.models.Permission.Permission import Permission
-from vmware.models.Permission.VMObject import VMObject
+from vmware.models.Permission.VObject import VObject
 
 from vmware.serializers.Permission.Permissions import PermissionsSerializer
 from vmware.serializers.Permission.Permission import PermissionSerializer
@@ -85,7 +85,7 @@ class PermissionsController(CustomController):
                     Permission.add(
                         identityGroupId,
                         data["role"],
-                        VMObject(
+                        VObject(
                             assetId=data["object"]["id_asset"],
                             moId=data["object"]["moId"],
                             name=data["object"]["name"]

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 
-class PermissionVMObjectSerializer(serializers.Serializer):
+class PermissionVObjectSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     id_asset = serializers.IntegerField(required=True)
     moId = serializers.CharField(required=True, max_length=63)

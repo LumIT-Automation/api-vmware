@@ -11,7 +11,7 @@ from vmware.helpers.Log import Log
 from vmware.repository.VMObject import VMObject as Repository
 
 
-class VMObject:
+class VObject:
     def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 

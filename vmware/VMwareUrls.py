@@ -12,7 +12,7 @@ from .controllers.VMware import Templates, Template
 from .controllers.VMware import Task
 from .controllers.VMware import CustomSpecs, CustomSpec
 from .controllers.VMware.Asset import Asset, Assets
-from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions, VMObjects as PermissionVMObjects, VMObject as PermissionVMObject
+from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions, VObjects as PermissionVMObjects, VObject as PermissionVMObject
 from .controllers import History
 
 
@@ -24,8 +24,8 @@ urlpatterns = [
     path('roles/', Roles.PermissionRolesController.as_view(), name='permission-roles'),
     path('permissions/', Permissions.PermissionsController.as_view(), name='permissions'),
     path('permission/<int:permissionId>/', Permission.PermissionController.as_view(), name='permission'),
-    path('permissions/vmObjects/', PermissionVMObjects.PermissionVMObjectsController.as_view(), name='permissions-vmobject'),
-    path('permissions/vmObject/<int:objectId>/', PermissionVMObject.PermissionVMObjectController.as_view(), name='permissions-vmobject'),
+    path('permissions/vmObjects/', PermissionVMObjects.PermissionVObjectsController.as_view(), name='permissions-vmobject'),
+    path('permissions/vmObject/<int:objectId>/', PermissionVMObject.PermissionVObjectController.as_view(), name='permissions-vmobject'),
 
     path('authorizations/', Authorizations.AuthorizationsController.as_view(), name='authorizations'),
 

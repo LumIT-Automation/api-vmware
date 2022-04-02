@@ -72,8 +72,8 @@ class Asset:
             aId = Repository.add(data)
 
             # When inserting an asset, add the "any" vmObject (Permission).
-            from vmware.models.Permission.VMObject import VMObject
-            VMObject.add("any", aId, "any", "All the folders of this vCenter")
+            from vmware.models.Permission.VObject import VObject
+            VObject.add("any", aId, "any", "All the folders of this vCenter")
         except Exception as e:
             raise e
 
