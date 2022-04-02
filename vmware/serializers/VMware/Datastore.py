@@ -5,8 +5,8 @@ from vmware.serializers.VMware.HostSystem import VMwareHostSystemSerializer
 
 class VMwareDatastoreSerializer(serializers.Serializer):
     assetId = serializers.IntegerField(required=True)
-    moId = serializers.CharField(required=False, max_length=255)
-    name = serializers.CharField(required=False, max_length=255)
+    moId = serializers.CharField(required=True, max_length=255)
+    name = serializers.CharField(required=True, max_length=255)
     url = serializers.CharField(required=False, max_length=1024)
     freeSpace = serializers.IntegerField(required=False)
     maxFileSize = serializers.IntegerField(required=False)

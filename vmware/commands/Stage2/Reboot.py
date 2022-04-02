@@ -21,7 +21,7 @@ class TestConnect(SshCommand):
 
 
 
-class Reboot():
+class Reboot:
     def __init__(self, targetId: int, checkInterval: int = 5, maxChecks: int = 10, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -46,7 +46,7 @@ class Reboot():
             try:
                 test.exec(tcpTimeout=tcpTimeout)
                 return
-            except:
+            except Exception:
                 pass
             tests += 1
 
