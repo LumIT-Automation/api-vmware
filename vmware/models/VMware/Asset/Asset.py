@@ -18,6 +18,7 @@ DataConnection: Dict[str, Union[str, int]] = {
 }
 
 
+
 class Asset:
     def __init__(self, assetId: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
