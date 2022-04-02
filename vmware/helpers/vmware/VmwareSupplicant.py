@@ -4,25 +4,24 @@ import random
 
 from pyVim.connect import SmartConnect, Disconnect
 
+from vmware.models.VMware.Asset import Asset
 from vmware.helpers.Log import Log
 
 
 class VmwareSupplicant:
-    def __init__(self, connectionData, *args, **kwargs):
+    def __init__(self, asset: Asset, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         try:
-            self.ipAddr = connectionData["address"]
-            self.port = connectionData["port"] \
-                if connectionData["port"] else 443
-
-            self.username = connectionData["username"]
-            self.password = connectionData["password"]
+            self.ipAddr = asset.address
+            self.port = asset.port if asset.port else 443
+            self.username = asset.username
+            self.password = asset.password
 
             self.connection = None
             self.ran = random.random()
         except Exception:
-            raise ValueError('Missing key in connection data.')
+            raise ValueError('Error in connection data.')
 
 
 

@@ -42,33 +42,7 @@ class Asset:
                 assetId
             ])
 
-            a = DBHelper.asDict(c)[0]
-            if a["api_type"] == "vmware":
-                a["connectionData"] = {
-                    "address": a["address"],
-                    "port": a["port"],
-                    "fqdn": a["fqdn"],
-                    "baseurl": a["baseurl"],
-                    "tlsverify": a["tlsverify"],
-                    "api_type": a["api_type"],
-                    "api_additional_data": a["api_additional_data"],
-                    "username": a["username"],
-                    "password": a["password"]
-                }
-
-            del (
-                a["address"],
-                a["port"],
-                a["fqdn"],
-                a["baseurl"],
-                a["tlsverify"],
-                a["api_type"],
-                a["api_additional_data"],
-                a["username"],
-                a["password"]
-            )
-
-            return a
+            return DBHelper.asDict(c)[0]
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:

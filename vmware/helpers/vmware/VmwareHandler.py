@@ -90,7 +90,7 @@ class VmwareHandler:
 
     def __fetchContent(self, assetId) -> None:
         try:
-            supplicant = VmwareSupplicant(Asset(assetId).connectionData)
+            supplicant = VmwareSupplicant(Asset(assetId))
             connection = supplicant.connect()
 
             Log.actionLog("Fetch VMware content.")

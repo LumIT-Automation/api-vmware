@@ -1,22 +1,6 @@
-from typing import List, Dict, Union
-
-from dataclasses import dataclass
+from typing import List
 
 from vmware.repository.Asset import Asset as Repository
-
-
-DataConnection: Dict[str, Union[str, int]] = {
-    "address": "",
-    "port": 443,
-    "fqdn": "",
-    "baseurl": "",
-    "tlsverify": 1,
-    "api_type": "",
-    "api_additional_data": "",
-    "username": "",
-    "password": ""
-}
-
 
 
 class Asset:
@@ -24,10 +8,18 @@ class Asset:
         super().__init__(*args, **kwargs)
 
         self.id = int(assetId)
+        self.address: str = ""
+        self.port: int = 443
+        self.fqdn: str = ""
+        self.baseurl: str = ""
+        self.tlsverify: int = 1
+        self.api_type: str = ""
+        self.api_additional_data: int = 1
+        self.username: str = ""
+        self.password: str = ""
         self.datacenter: str
         self.environment: str
         self.position: str
-        self.connectionData: DataConnection = None
 
         self.__load()
 
