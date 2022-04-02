@@ -14,7 +14,8 @@ class VirtualMachineSpecsBuilder(Backend):
         self.moId = moId
         self.diskLocators = []
         self.relocateSpec = vim.vm.RelocateSpec() # where put the new virtual machine.
-        self.cloneSpec = vim.vm.CloneSpec()  # virtual machine specifications for a clone operation.
+        self.configSpec = vim.vm.ConfigSpec() # virtual machine configuration specification.
+        self.cloneSpec = None  # virtual machine specifications for a clone operation.
         self.storageSpec = list()
         self.networkSpec = list()
 
@@ -95,6 +96,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
     def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None):
         try:
+            self.cloneSpec = vim.vm.CloneSpec()
             self.relocateSpec.datastore = oDatastore
             if cluster:
                 self.relocateSpec.pool = cluster.oCluster.resourcePool # The resource pool associated to this cluster.
@@ -112,7 +114,8 @@ class VirtualMachineSpecsBuilder(Backend):
                 self.cloneSpec.powerOn = data["powerOn"]
                 data.pop("powerOn")
 
-            self.cloneSpec.config = self.buildVMConfigSpecs(data, devsSpecs)
+            self.buildVMConfigSpecs(data, devsSpecs)
+            self.cloneSpec.config = self.configSpec
 
             # Apply the guest OS customization specifications.
             if oCustomSpec:
@@ -123,23 +126,19 @@ class VirtualMachineSpecsBuilder(Backend):
 
 
 
-    def buildVMConfigSpecs(self, data: dict, devsSpecs: object = None):
+    def buildVMConfigSpecs(self, data: dict, devsSpecs: object = None) -> None:
         try:
-            configSpec = vim.vm.ConfigSpec()
-
             if "numCpu" in data and data["numCpu"]:
-                configSpec.numCPUs = data["numCpu"]
+                self.configSpec.numCPUs = data["numCpu"]
             if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
-                configSpec.numCoresPerSocket = data["numCoresPerSocket"]
+                self.configSpec.numCoresPerSocket = data["numCoresPerSocket"]
             if "memoryMB" in data and data["memoryMB"]:
-                configSpec.memoryMB = data["memoryMB"]
+                self.configSpec.memoryMB = data["memoryMB"]
             if "notes" in data and data["notes"]:
-                configSpec.annotation = data["notes"]
+                self.configSpec.annotation = data["notes"]
 
             if devsSpecs:
-                configSpec.deviceChange = devsSpecs
-
-            return configSpec
+                self.configSpec.deviceChange = devsSpecs
         except Exception as e:
             raise e
 
@@ -343,7 +342,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 devsSpecsData.append({
                     "operation": "add",
                     "device": None,
-                    "deviceLabel": devData["label"],
+                    "deviceLabel": "",
                     "deviceType": devData["deviceType"],
                     "network": Network(self.assetId, devData["networkMoId"])
                 })
@@ -440,7 +439,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 devsSpecsData.append({
                     "operation": "add",
                     "device": None,
-                    "deviceLabel": devData["label"],
+                    "deviceLabel": "",
                     "deviceType": devData["deviceType"],
                     "sizeMB": devData["sizeMB"],
                     "datastore": dsStore,

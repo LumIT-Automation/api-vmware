@@ -201,7 +201,8 @@ class VirtualMachine(Backend):
                 data.pop("networkDevices")
 
             devSpecs = specsBuilder.storageSpec + specsBuilder.networkSpec
-            modifySpec = specsBuilder.buildVMConfigSpecs(data, devSpecs)
+            specsBuilder.buildVMConfigSpecs(data, devSpecs)
+            modifySpec = specsBuilder.configSpec
 
             return self.reconfig(configSpec=modifySpec)
         except Exception as e:
