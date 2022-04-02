@@ -9,6 +9,7 @@ BODY FIELDS:
 "hostMoId": str <- The moId of the host where to put the new virtual machine. Alternative to "clusterMoId" OR preferred host in the cluster.
 "vmFolderMoId": str <- The moId of the virtual machine folder where to put the new virtual machine.
 "mainDatastoreMoId"::str <- The moId of the datastore where to put the new virtual machine. Must be connected to the host where the virtual machine is deployed.
+"powerOn": bool <- Whether power on the VM after the deploy or not (default false).
 "notes": str, <- An optional comment for the VM.
 "guestSpce" str, <- The customization specification for the OS in the VM, to set hostname, ip address, etc.
 
