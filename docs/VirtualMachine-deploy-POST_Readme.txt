@@ -8,7 +8,7 @@ BODY FIELDS:
 "clusterMoId": str <- The moId of the cluster where to put the new virtual machine.
 "hostMoId": str <- The moId of the host where to put the new virtual machine. Alternative to "clusterMoId" OR preferred host in the cluster.
 "vmFolderMoId": str <- The moId of the virtual machine folder where to put the new virtual machine.
-"mainDatastoreMoId"::str <- The moId of the datastore where to put the new virtual machine. Must be connected to the host where the virtual machine is deployed.
+"mainDatastoreMoId"::str <- The moId of the datastore where to put the new virtual machine (config files). Must be connected to the host where the virtual machine is deployed.
 "powerOn": bool <- Whether power on the VM after the deploy or not (default false).
 "notes": str, <- An optional comment for the VM.
 "guestSpce" str, <- The customization specification for the OS in the VM, to set hostname, ip address, etc.
@@ -23,7 +23,7 @@ If a field is missing, the device/attribute is cloned as is.
 
     
 ############## DISK DEVICES
-diskDevices": {
+"diskDevices": {
     "existent": [                   <-- disks present in the template, can be modified or deleted
         {
             "label": "Hard disk 1",
@@ -43,12 +43,12 @@ diskDevices": {
         }    
     ]                       <-- new disks to be added to the new virtual machine
 },
-
+If the whole "diskDevices" key is missing, the new virtual machine will have an exact copy of the template storage in the main datastore ("mainDatastoreMoId" key)
 "existent" dict key:
     - If the key is missing, the disks of the templates are cloned as is.
     - If the key is present but the list is empty ( "existent": [], ) the disks of the template are not
         copied in the new virtual machine (the vm can be diskless or have "new" disks only).
-    - If the label of a disk doesn't match any label in the template, the deploy fail with a 400 error.
+    - If the label of a disk doesn't match any label in the template, the deploy fail with a 400 error (a device with an empty label is skipped).
     - If the size of the disk is greater than the size of the disk in the template with the same label, the disk has grown. If it's smaller
         the deploy will fail on vmware (http code 202 ACCEPT, the error is reported by celery in the stage2 db).
     - If the deviceType of a disk is different from the one in the template with the same label the disk is converted (if the storage support the format).
@@ -81,12 +81,12 @@ diskDevices": {
 
     ]
 },
-
+If the whole "networkDevices" key is missing, the new virtual machine will have an exact copy of the nics of the template connected to tha same networks.
 "existent" dict key:
     - If the key is missing, the nics of the templates are cloned as is.
     - If the key is present but the list is empty ( "existent": [], ), the nics of the template are not
         copied in the new virtual machine (the vm can be without network cards or have "new" nics only).
-    - If the label of a nic doesn't match any label in the template, the deploy fail with a 400 error.
+    - If the label of a nic doesn't match any label in the template, the deploy fail with a 400 error (a device with an empty label is skipped).
     - If the deviceType of a nic is different from the one in the template with the same label the deviceType of the nic is changed.
     - If the networkMoId is not valid (there is not a network with that moId) the deploy fail with a 400 error.
 
