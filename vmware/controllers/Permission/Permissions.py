@@ -6,8 +6,8 @@ from vmware.models.Permission.IdentityGroup import IdentityGroup
 from vmware.models.Permission.Permission import Permission
 from vmware.models.Permission.VMObject import VMObject
 
-from vmware.serializers.Permission.Permissions import PermissionsSerializer as PermissionsSerializer
-from vmware.serializers.Permission.Permission import PermissionSerializer as PermissionSerializer
+from vmware.serializers.Permission.Permissions import PermissionsSerializer
+from vmware.serializers.Permission.Permission import PermissionSerializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -19,7 +19,7 @@ class PermissionsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = dict()
         etagCondition = {"responseEtag": ""}
 
         user = CustomController.loggedUser(request)
@@ -28,10 +28,10 @@ class PermissionsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_identityGroups_get") or user["authDisabled"]:
                 Log.actionLog("Permissions list", user)
 
-                itemData["data"]["items"] = Permission.rawList()
+                itemData["items"] = Permission.rawList()
                 serializer = PermissionsSerializer(data=itemData)
                 if serializer.is_valid():
-                    data["data"] = serializer.validated_data["data"]
+                    data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()
 
                     # Check the response's ETag validity (against client request).
@@ -73,9 +73,9 @@ class PermissionsController(CustomController):
                 Log.actionLog("Permission addition", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = PermissionSerializer(data=request.data)
+                serializer = PermissionSerializer(data=request.data["data"])
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
+                    data = serializer.validated_data
 
                     try:
                         identityGroupId = IdentityGroup(data["identity_group_identifier"]).id

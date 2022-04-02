@@ -16,7 +16,7 @@ class PermissionVMObjectsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = dict()
         etagCondition = {"responseEtag": ""}
 
         user = CustomController.loggedUser(request)
@@ -25,11 +25,10 @@ class PermissionVMObjectsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_vmobject_get") or user["authDisabled"]:
                 Log.actionLog("Permissions vmware objects list", user)
 
-                itemData["data"]["items"] = VMObject.list()
-
+                itemData["items"] = VMObject.list()
                 serializer = Serializer(data=itemData)
                 if serializer.is_valid():
-                    data["data"] = serializer.validated_data["data"]
+                    data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()
 
                     # Check the response's ETag validity (against client request).

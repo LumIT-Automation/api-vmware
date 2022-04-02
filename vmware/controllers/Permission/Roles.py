@@ -37,9 +37,9 @@ class PermissionRolesController(CustomController):
                 else:
                     itemData["data"]["items"] = Role.list()
 
-                serializer = Serializer(data=itemData)
+                serializer = Serializer(data=itemData["data"])
                 if serializer.is_valid():
-                    data["data"] = serializer.validated_data["data"]
+                    data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()
 
                     # Check the response's ETag validity (against client request).

@@ -29,7 +29,7 @@ class VmwareHandler:
         obj = []
 
         try:
-            if not assetId in VmwareHandler.contents:
+            if assetId not in VmwareHandler.contents:
                 self.__fetchContent(assetId)
 
             if VmwareHandler.contents[assetId]:
@@ -62,7 +62,7 @@ class VmwareHandler:
 
     def getCustomizationSpecManager(self, assetId) -> object:
         try:
-            if not assetId in VmwareHandler.contents:
+            if assetId not in VmwareHandler.contents:
                 self.__fetchContent(assetId)
 
             return getattr(VmwareHandler.contents[assetId], "customizationSpecManager")
@@ -95,7 +95,8 @@ class VmwareHandler:
 
             Log.actionLog("Fetch VMware content.")
             VmwareHandler.contents[assetId] = connection.RetrieveContent()
-            if not assetId in VmwareHandler.managedObjectCaches:
+
+            if assetId not in VmwareHandler.managedObjectCaches:
                 VmwareHandler.managedObjectCaches[assetId] = dict()
         except Exception as e:
             raise e

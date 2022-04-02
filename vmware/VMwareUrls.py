@@ -59,7 +59,7 @@ urlpatterns = [
     path('<int:assetId>/vmFolder/<str:moId>/', VMFolder.VMwareVMFolderController.as_view(), name='vmware-vmFolder'),
     path('<int:assetId>/vmFolder/<str:moId>/parentList/', VMFolder.VMwareVMFolderParentListController.as_view(), name='vmware-vmFolder-parentlist'),
 
-    # VirtualMachiner.
+    # VirtualMachine.
     path('<int:assetId>/virtualmachines/', VirtualMachines.VMwareVirtualMachinesController.as_view(), name='vmware-virtualmachines'),
     path('<int:assetId>/virtualmachine/<str:moId>/', VirtualMachine.VMwareVirtualMachineController.as_view(), name='vmware-virtualmachine'),
 

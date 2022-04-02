@@ -2,10 +2,9 @@ from rest_framework import serializers
 
 
 class PermissionVMObjectSerializer(serializers.Serializer):
-    class PermissionVMObjectInnerSerializer(serializers.Serializer):
-        id_asset = serializers.IntegerField(required=False)
-        moId = serializers.CharField(max_length=63, required=False)
-        name = serializers.CharField(max_length=255, required=False, allow_blank=True)
-        description = serializers.CharField(max_length=255, required=False, allow_blank=True)
-
-    data = PermissionVMObjectInnerSerializer(required=True)
+    id = serializers.IntegerField(required=True)
+    id_asset = serializers.IntegerField(required=True)
+    moId = serializers.CharField(required=True, max_length=63)
+    name = serializers.CharField(required=True, max_length=255, allow_blank=True)
+    object_type = serializers.CharField(required=False, max_length=15, allow_null=True)
+    description = serializers.CharField(required=False, max_length=255, allow_blank=True)
