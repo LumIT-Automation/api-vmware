@@ -1,6 +1,6 @@
 from typing import List
 
-from vmware.repository.Role import Role as Repository
+from vmware.repository.Permission.Role import Role as Repository
 
 
 class Role:

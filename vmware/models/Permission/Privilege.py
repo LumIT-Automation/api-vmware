@@ -1,6 +1,6 @@
 from typing import List
 
-from vmware.repository.Privilege import Privilege as Repository
+from vmware.repository.Permission.Privilege import Privilege as Repository
 
 
 class Privilege:
