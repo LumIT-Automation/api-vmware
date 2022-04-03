@@ -5,7 +5,7 @@ from django.conf import settings
 
 # https://realpython.com/asynchronous-tasks-with-django-and-celery
 
-# set the default Django settings module for the 'celery' program.
+# Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 app = Celery('api')
 

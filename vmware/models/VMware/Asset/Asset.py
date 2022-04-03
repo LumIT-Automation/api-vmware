@@ -1,6 +1,6 @@
 from typing import List
 
-from vmware.repository.Asset import Asset as Repository
+from vmware.repository.VMware.Asset.Asset import Asset as Repository
 
 
 class Asset:

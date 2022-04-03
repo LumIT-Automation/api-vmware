@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 skelAssetType="assetType"
 assetType="vmware"
 

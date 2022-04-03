@@ -3,10 +3,9 @@ from vmware.models.Permission.VObject import VObject
 from vmware.models.Permission.Privilege import Privilege
 from vmware.models.VMware.FolderVM import FolderVM
 
-from vmware.repository.Permission import Permission as Repository
+from vmware.repository.Permission.Permission import Permission as Repository
 
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
 
 
 class Permission:
