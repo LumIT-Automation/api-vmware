@@ -15,7 +15,7 @@ class VirtualMachineSpecsBuilder(Backend):
         self.diskLocators = []
         self.relocateSpec = vim.vm.RelocateSpec() # where put the new virtual machine.
         self.configSpec = vim.vm.ConfigSpec() # virtual machine configuration specification.
-        self.cloneSpec = None  # virtual machine specifications for a clone operation.
+        self.cloneSpec = None # virtual machine specifications for a clone operation.
         self.storageSpec = list()
         self.networkSpec = list()
 
@@ -25,7 +25,7 @@ class VirtualMachineSpecsBuilder(Backend):
     # Public methods
     ####################################################################################################################
 
-    def buildNetworkSpec(self, devicesData: dict) -> list:
+    def buildNetworkSpec(self, devicesData: dict) -> None:
         """
         devicesData example:
         {
@@ -59,7 +59,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
 
 
-    def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: list):
+    def buildStorageSpec(self, devicesData: dict, vmDatastoreMoId: list) -> None:
         """
         devicesData example:
         {
