@@ -42,7 +42,7 @@ class PermissionVObjectsController(CustomController):
                 else:
                     httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
                     data = {
-                        "VMware": "Upstream data mismatch."
+                        "VMware": "upstream data mismatch."
                     }
 
                     Log.log("Upstream data incorrect: "+str(serializer.errors))

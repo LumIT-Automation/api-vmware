@@ -239,7 +239,6 @@ class VirtualMachine(Backend):
 
         try:
             config = self.oVirtualMachine.config
-            Log.log(config, 'DDDDDDDDDDDDDDDDDDDDDDDD')
 
             if related:
                 # Get virtual disks info.
