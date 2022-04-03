@@ -99,9 +99,10 @@ class FolderVM(Backend):
     # Public static methods
     ####################################################################################################################
 
-    # Composition version
     @staticmethod
-    def folderTreeComp(assetId) -> list:
+    def foldersTreeComp(assetId) -> list:
+        # Composition version. Slower.
+
         treeList = list()
         try:
             datacenters = Datacenter.oDatacenters(assetId)
@@ -117,9 +118,8 @@ class FolderVM(Backend):
 
 
 
-    # Quick version
     @staticmethod
-    def foldersTree(assetId: int, folderMoIdList: list = None) -> list:
+    def foldersTreeQuick(assetId: int, folderMoIdList: list = None) -> list:
         folderMoIdList = [] if folderMoIdList is None else folderMoIdList
         treeList = list()
         try:
@@ -129,7 +129,7 @@ class FolderVM(Backend):
                     folderMoIdList.append(dc.vmFolder._GetMoId())
 
             for folderMoId in folderMoIdList:
-                treeList.extend(FolderVM.folderTree(assetId, folderMoId))
+                treeList.extend(FolderVM.folderTreeQuick(assetId, folderMoId))
 
             return treeList
         except Exception as e:
@@ -137,9 +137,8 @@ class FolderVM(Backend):
 
 
 
-    # Quick version
     @staticmethod
-    def folderTree(assetId: int, folderMoId: str) -> list:
+    def folderTreeQuick(assetId: int, folderMoId: str) -> list:
         treeList = list()
         try:
             parentFolder = FolderVM(assetId, folderMoId).oVMFolder
@@ -157,10 +156,11 @@ class FolderVM(Backend):
 
 
 
-    # Recursive. Get all the "moId" element of a folder tree and put them in a list (order doesn't matter).
     @staticmethod
-    def treeToSet(treeElements: list, moIdSet: set = None) -> list:
+    def treeToSet(treeElements: list, moIdSet: set = None) -> set:
+        # Recursive. Get all the "moId" element of a folder tree and put them in a set (order doesn't matter).
         moIdSet = set() if moIdSet is None else moIdSet
+
         for el in treeElements:
             moIdSet.add(el["moId"])
             if el["folders"]:
@@ -175,13 +175,13 @@ class FolderVM(Backend):
         try:
             treesDict = dict()
             for tree in treesList:
-                treesDict[tree["moId"]] = FolderVM.treeToSet(tree["folders"]) # Convert the trees to plain lists. Order doesn't matter.
+                treesDict[tree["moId"]] = FolderVM.treeToSet(tree["folders"]) # convert the trees to plain lists. Order doesn't matter.
 
             for parent in treesDict.keys():
                 for subTree in treesDict.values():
-                    if parent in subTree: # The moId of a parent folder was found in another subtree.
+                    if parent in subTree: # the moId of a parent folder was found in another subtree.
                         for item in treesList:
-                            if item["moId"] == parent: # Get the index of the element and remove it.
+                            if item["moId"] == parent: # get the index of the element and remove it.
                                 index = treesList.index(item)
                                 treesList.pop(index)
 
@@ -196,7 +196,7 @@ class FolderVM(Backend):
         folders = list()
 
         if formatTree:
-            folders = FolderVM.folderTree(assetId, folderMoId)
+            folders = FolderVM.folderTreeQuick(assetId, folderMoId)
         else:
             try:
                 for f in Backend.oVMFolders(assetId):
@@ -216,7 +216,7 @@ class FolderVM(Backend):
     @staticmethod
     def __folderTree(assetId: int, oVMFolder: object, tree: dict):
         if isinstance(oVMFolder, vim.Folder):
-            if not "folders" in tree:
+            if "folders" not in tree:
                 tree["folders"] = []
             children = oVMFolder.childEntity
             for child in children:

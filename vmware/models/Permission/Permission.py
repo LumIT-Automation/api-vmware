@@ -106,7 +106,7 @@ class Permission:
             if privilegeType == "object-folder": # for folder permissions allow the access for the subFolders also.
                 subItems = set()
                 for objMoId in objectMoIdSet:
-                    subTree = FolderVM.folderTree(assetId=assetId, folderMoId=objMoId)[0]["folders"]
+                    subTree = FolderVM.folderTreeQuick(assetId=assetId, folderMoId=objMoId)[0]["folders"]
                     subItems.update(FolderVM.treeToSet(subTree, moIdSet=None))
                 objectMoIdSet.update(subItems)
 
