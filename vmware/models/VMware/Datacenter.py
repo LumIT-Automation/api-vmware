@@ -4,8 +4,7 @@ from vmware.models.VMware.Cluster import Cluster
 from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.backend.Datacenter import Datacenter as Backend
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class Datacenter(Backend):

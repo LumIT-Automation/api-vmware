@@ -5,7 +5,7 @@ from vmware.models.VMware.FolderVM import FolderVM
 
 from vmware.repository.Permission.Permission import Permission as Repository
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class Permission:

@@ -5,8 +5,7 @@ from vmware.models.VMware.Network import Network
 from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.backend.Cluster import Cluster as Backend
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class Cluster(Backend):

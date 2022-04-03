@@ -4,8 +4,7 @@ from vmware.models.VMware.backend.Datastore import Datastore as Backend
 if TYPE_CHECKING:
     from vmware.models.VMware.HostSystem import HostSystem
 
-from vmware.helpers.Log import Log
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class Datastore(Backend):

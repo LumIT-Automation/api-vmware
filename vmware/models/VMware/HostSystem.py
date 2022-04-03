@@ -4,8 +4,7 @@ from vmware.models.VMware.Datastore import Datastore
 from vmware.models.VMware.Network import Network
 from vmware.models.VMware.backend.HostSystem import HostSystem as Backend
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class HostSystem(Backend):

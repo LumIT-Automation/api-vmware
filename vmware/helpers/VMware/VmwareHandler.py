@@ -2,7 +2,7 @@ from typing import List, Any
 
 from vmware.models.VMware.Asset.Asset import Asset
 
-from vmware.helpers.vmware.VmwareSupplicant import VmwareSupplicant
+from vmware.helpers.VMware.VmwareSupplicant import VmwareSupplicant
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 

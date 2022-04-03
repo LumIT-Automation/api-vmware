@@ -5,7 +5,7 @@ from vmware.models.VMware.Network import Network as vCenterNetwork
 from vmware.models.VMware.Datastore import Datastore as vCenterDatastore
 
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 from vmware.repository.Permission.VObject import VObject as Repository
 

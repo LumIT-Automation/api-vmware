@@ -11,7 +11,7 @@ from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachi
 from vmware.models.Stage2.Target import Target
 from vmware.tasks import pollVmwareAsync_task
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
