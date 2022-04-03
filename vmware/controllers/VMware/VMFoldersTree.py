@@ -57,7 +57,7 @@ class VMwareVMFoldersTreeController(CustomController):
                             for moId in reversed(folderMoIdList):
                                 if moId not in allowedObjectsMoId:
                                     folderMoIdList.remove(moId)
-                    itemData["items"] = FolderVM.foldersTree(assetId, folderMoIdList)
+                    itemData["items"] = FolderVM.foldersTreeQuick(assetId, folderMoIdList)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
