@@ -8,7 +8,7 @@ from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
 
-class VMObject:
+class VObject:
 
     # Table: vmware_object`
 
@@ -89,7 +89,7 @@ class VMObject:
         values = []
         c = connection.cursor()
 
-        if VMObject.__exists(id):
+        if VObject.__exists(id):
             # %s placeholders and values for SET.
             for k, v in data.items():
                 sql += k + "=%s,"

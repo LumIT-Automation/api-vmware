@@ -8,7 +8,7 @@ from vmware.helpers.Exception import CustomException
 from vmware.helpers.vmware.VmwareHelper import VmwareHelper
 from vmware.helpers.Log import Log
 
-from vmware.repository.VMObject import VMObject as Repository
+from vmware.repository.VObject import VObject as Repository
 
 
 class VObject:
@@ -19,6 +19,7 @@ class VObject:
         self.id_asset: int = assetId
         self.moId: str = moId
         self.name: str = name
+        self.object_type: str = ""
         self.description: str
 
         self.__load()
@@ -50,7 +51,7 @@ class VObject:
     @staticmethod
     def modify(objectId: int, data: dict) -> None:
         modifyData = dict()
-        for k, v in data.items(): # Remove ungiven fields.
+        for k, v in data.items():
             if v:
                 modifyData[k] = v
 

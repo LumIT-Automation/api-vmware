@@ -91,12 +91,11 @@ class Permission:
 
 
 
-    # Get all the moId of the objects on which the user has a privilege. Use sets to dedupe.
+    # Get all the moId of the objects on which the user has a privilege. Use sets to deduplicate.
     # Use this with actions of privilege_type = 'object-%'
     # (for privilege_type = 'global' or 'asset' hasUserPermission is the right choice).
     @staticmethod
     def allowedObjectsSet(groups: list, action: str, assetId: int = 0) -> set:
-        objectMoIdSet = set()
         # Superadmin's group.
         for gr in groups:
             if gr.lower() == "automation.local":
@@ -105,7 +104,7 @@ class Permission:
         try:
             objectMoIdSet = Repository.allowedObjectsByPrivilegeSet(groups=groups, action=action, assetId=assetId)
             privilegeType = Privilege.getType(action)
-            if privilegeType == 'object-folder': # for folder permissions allow the access for the subFolders also.
+            if privilegeType == "object-folder": # for folder permissions allow the access for the subFolders also.
                 subItems = set()
                 for objMoId in objectMoIdSet:
                     subTree = FolderVM.folderTree(assetId=assetId, folderMoId=objMoId)[0]["folders"]
