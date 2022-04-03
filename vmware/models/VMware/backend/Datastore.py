@@ -1,7 +1,7 @@
 from pyVmomi import vim
 
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.vmware.VmwareHandler import VmwareHandler
+from vmware.helpers.VMware.VmwareHandler import VmwareHandler
 
 
 class Datastore(VmwareHandler):

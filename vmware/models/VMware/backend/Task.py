@@ -1,9 +1,7 @@
-from pyVmomi import vim, vmodl
+from pyVmomi import vmodl
 
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.vmware.VmwareHandler import VmwareHandler
-
-from vmware.helpers.Log import Log
+from vmware.helpers.VMware.VmwareHandler import VmwareHandler
 
 
 class Task(VmwareHandler):

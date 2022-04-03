@@ -4,8 +4,7 @@ from django.utils.html import strip_tags
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class VObject:

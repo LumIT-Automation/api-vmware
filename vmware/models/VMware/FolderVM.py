@@ -5,8 +5,7 @@ from vmware.models.VMware.backend.FolderVM import FolderVM as Backend
 from vmware.models.VMware.Datacenter import Datacenter
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class FolderVM(Backend):

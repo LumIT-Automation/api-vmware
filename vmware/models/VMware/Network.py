@@ -5,8 +5,7 @@ if TYPE_CHECKING:
     from vmware.models.VMware.HostSystem import HostSystem
 from vmware.models.VMware.backend.Network import Network as Backend
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
-from vmware.helpers.Log import Log
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
 class Network(Backend):

@@ -3,7 +3,7 @@ from typing import List
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 
-from vmware.helpers.vmware.VmwareHelper import VmwareHelper
+from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 from vmware.helpers.Exception import CustomException
 
 
