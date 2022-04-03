@@ -50,4 +50,3 @@ class Task(Backend):
             self.oSetDescription(description)
         except Exception as e:
             raise e
-
