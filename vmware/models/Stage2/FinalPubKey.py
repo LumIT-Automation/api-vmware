@@ -1,6 +1,4 @@
 from typing import List
-import io
-import paramiko
 
 from vmware.repository.Stage2.FinalPubKey import FinalPubKey as Repository
 from vmware.helpers.Log import Log
@@ -55,9 +53,9 @@ class FinalPubKey:
 
 
     @staticmethod
-    def add(data: dict) -> None:
+    def add(data: dict) -> int:
         try:
-            return  Repository.add(data)
+            return Repository.add(data)
         except Exception as e:
             raise e
 

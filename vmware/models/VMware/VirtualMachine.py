@@ -10,6 +10,7 @@ from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachi
 
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.FinalPubKey import FinalPubKey
 from vmware.tasks import pollVmwareAsync_task
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
@@ -31,6 +32,7 @@ class Input:
     guestSpec = None
     vmName = None
     bootstrapKeyId = None
+    finalPubKeyIds = []
 
 
 
@@ -73,7 +75,8 @@ class VirtualMachine(Backend):
         out = dict()
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
-        for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName", "bootstrapKeyId"):
+        for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
+                  "networkDevices", "guestSpec", "vmName", "bootstrapKeyId", "finalPubKeyIds"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -90,18 +93,18 @@ class VirtualMachine(Backend):
             # Define if target is cluster or host and check its validity.
             if Input.clusterMoId and Input.hostMoId:
                 # Deploy within a preferred host in a cluster.
-                self.__checkClusterValidity(Input.datacenterMoId, Input.clusterMoId)
-                self.__checkHostValidity(Input.clusterMoId, Input.hostMoId)
+                self.__checkCluster(Input.datacenterMoId, Input.clusterMoId)
+                self.__checkHost(Input.clusterMoId, Input.hostMoId)
                 computeResource = host = HostSystem(self.assetId, Input.hostMoId)
 
             elif Input.clusterMoId and not Input.hostMoId:
                 # Deploy in a cluster.
-                self.__checkClusterValidity(Input.datacenterMoId, Input.clusterMoId)
+                self.__checkCluster(Input.datacenterMoId, Input.clusterMoId)
                 computeResource = cluster = Cluster(self.assetId, Input.clusterMoId)
 
             elif not Input.clusterMoId and Input.hostMoId:
                 # Deploy within a standalone host (not clusterized).
-                self.__checkStandaloneHostValidity(Input.datacenterMoId, Input.hostMoId)
+                self.__checkStandaloneHost(Input.datacenterMoId, Input.hostMoId)
                 computeResource = host = HostSystem(self.assetId, Input.hostMoId)
 
             else:
@@ -109,13 +112,16 @@ class VirtualMachine(Backend):
 
             # Check target datastore/network validity for computeResource (cluster or single host).
             for ds in (Input.datastoreMoId + [Input.mainDatastoreMoId]):
-                self.__checkDatastoreValidity(computeResource, ds)
+                self.__checkDatastore(computeResource, ds)
 
             for net in Input.networkMoId:
-                self.__checkNetworkValidity(computeResource, net)
+                self.__checkNetwork(computeResource, net)
 
             # Check bootstrapKey.
-            self.__checkBootstrapKeyValidity(Input.bootstrapKeyId)
+            self.__checkBootstrapKey(Input.bootstrapKeyId)
+
+            # Check final pubKeys.
+            self.__checkFinalPubkeys(Input.finalPubKeyIds)
 
             # Build devsSpecs.
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
@@ -294,7 +300,7 @@ class VirtualMachine(Backend):
     # Private methods
     ####################################################################################################################
 
-    def __checkClusterValidity(self, datacenterMoId: str, clusterMoId: str) -> None:
+    def __checkCluster(self, datacenterMoId: str, clusterMoId: str) -> None:
         from vmware.models.VMware.Datacenter import Datacenter
 
         if clusterMoId:
@@ -311,7 +317,7 @@ class VirtualMachine(Backend):
 
 
 
-    def __checkHostValidity(self, clusterMoId: str, hostMoId: str) -> None:
+    def __checkHost(self, clusterMoId: str, hostMoId: str) -> None:
         from vmware.models.VMware.Cluster import Cluster
 
         if hostMoId:
@@ -324,7 +330,7 @@ class VirtualMachine(Backend):
 
 
 
-    def __checkStandaloneHostValidity(self, datacenterMoId: str, hostMoId: str) -> None:
+    def __checkStandaloneHost(self, datacenterMoId: str, hostMoId: str) -> None:
         from vmware.models.VMware.Datacenter import Datacenter
 
         if hostMoId:
@@ -341,7 +347,7 @@ class VirtualMachine(Backend):
 
 
 
-    def __checkDatastoreValidity(self, computeResource: object, datastoreMoId: str) -> None:
+    def __checkDatastore(self, computeResource: object, datastoreMoId: str) -> None:
         if datastoreMoId:
             try:
                 if datastoreMoId not in computeResource: # host or cluster.
@@ -351,7 +357,7 @@ class VirtualMachine(Backend):
 
 
 
-    def __checkNetworkValidity(self, computeResource: object, networkMoId: str) -> None:
+    def __checkNetwork(self, computeResource: object, networkMoId: str) -> None:
         if networkMoId:
             try:
                 if networkMoId not in computeResource: # host or cluster.
@@ -361,12 +367,23 @@ class VirtualMachine(Backend):
 
 
 
-    def __checkBootstrapKeyValidity(self, keyId: int) -> None:
+    def __checkBootstrapKey(self, keyId: int) -> None:
         if keyId:
             try:
                 BootstrapKey(keyId)
             except Exception:
                 raise CustomException(status=400, payload={"VMware": "Invalid bootstrap key."})
+
+
+
+    def __checkFinalPubkeys(self, keyIds: list) -> None:
+        for k in keyIds:
+            if k:
+                try:
+                    FinalPubKey(k)
+                except Exception:
+                    raise CustomException(status=400, payload={"VMware": "Invalid final public key."})
+
 
 
 
