@@ -91,9 +91,11 @@ If the whole "networkDevices" key is missing, the new virtual machine will have 
     - If the label of a nic doesn't match any label in the template, the deploy fail with a 400 error (a device with an empty label is skipped).
     - If the deviceType of a nic is different from the one in the template with the same label the deviceType of the nic is changed.
     - If the networkMoId is not valid (there is not a network with that moId) the deploy fail with a 400 error.
+    - "deviceType": can have one of these values: 'vmrma', 'vmxnet3', 'e1000e', 'sr-iov', 'e1000', 'vmxnet2', 'vmxnet', 'pcnet32'.
 
 "new" dict key:
     - If the key missing, no new nics are added.
     - If the key is present but the list is empty ( "new": [], ) no new nics are added.
     - The "label" field for "new" devices can be present but it's ignored (vmware choose the label).
     - If the networkMoId is not valid (there is not a network with that moId) the deploy fail with a 400 error.
+    - "deviceType": can have one of these values: 'vmrma', 'vmxnet3', 'e1000e', 'sr-iov', 'e1000', 'vmxnet2', 'vmxnet', 'pcnet32'.
