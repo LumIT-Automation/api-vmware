@@ -23,7 +23,6 @@ class SshCommand:
 
     def exec(self, data: dict = None, tcpTimeout: int = 10, silent: bool = False) -> dict:
         data = {} if data is None else data
-        out = ""
         try:
             target = Target(self.targetId)
             connectionData = target.connectionData
@@ -45,7 +44,6 @@ class SshCommand:
                     self.shellVars = self.shellVars.format(**dataShellVars) # Variables substitution.
                     command = self.shellVars + command
 
-                Log.log('Trying ssh command: ' + str(command))
                 ssh = SshSupplicant(connectionData, tcpTimeout=tcpTimeout, silent=silent)
                 out = ssh.command(command, alwaysSuccess=self.alwaysSuccess)
             else:

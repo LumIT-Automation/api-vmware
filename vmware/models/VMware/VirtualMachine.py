@@ -143,7 +143,7 @@ class VirtualMachine(Backend):
             )
 
             Log.log("Virtual Machine clone operation specs: "+str(specsBuilder.cloneSpec))
-            
+
             # Deploy.
             out["task_moId"] = self.clone(
                 oVMFolder=FolderVM(self.assetId, Input.vmFolderMoId).oVMFolder,

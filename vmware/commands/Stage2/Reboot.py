@@ -36,7 +36,7 @@ class Reboot:
     def exec(self, data: dict = None) -> None:
         data = {} if data is None else data
         reboot = RebootCommand(targetId=self.targetId)
-        reboot.exec()
+        reboot.exec(data=data)
 
         tcpTimeout = self.checkInterval - 1
         tests = 0

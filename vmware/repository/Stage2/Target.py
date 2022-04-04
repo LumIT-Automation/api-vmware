@@ -174,44 +174,23 @@ class Target:
         s = ""
         keys = "("
         values = []
-        pubKeysIds = []
-        pubKeysPlaceholders = ""
         c = connections[Target.db].cursor()
-
-        # Build the last part of the insert query.
-        if "final_pubkeys" in data:
-            if data["final_pubkeys"]:
-                for el in data["final_pubkeys"]:
-                    pubKeysPlaceholders += "(%s, %s),"
-                    pubKeysIds.extend([0, el["id"]]) # zero is for the targetId which does not exist yet.
-            del data["final_pubkeys"]
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
-            s += "%s,"
-            keys += k+","
-            values.append(strip_tags(v)) # no HTML allowed.
-
+            if v:
+                s += "%s,"
+                keys += k + ","
+                values.append(strip_tags(v)) # no HTML allowed.
         keys = keys[:-1]+")"
 
         try:
-            with transaction.atomic():
-                c.execute("INSERT INTO target "+keys+" VALUES ("+s[:-1]+")",
-                    values
-                )
-                targetId = c.lastrowid
+            c.execute("INSERT INTO target "+keys+" VALUES ("+s[:-1]+")",
+                values
+            )
+            targetId = c.lastrowid
 
-                # Replace zeroes (which have the even indexes in the list) with the created targetId.
-                for i in range(0, len(pubKeysIds), 2):
-                    pubKeysIds[i] = targetId
-
-                if pubKeysIds:
-                    c.execute(
-                        "INSERT INTO target_final_pubkey (`id_target`, `id_pubkey`) VALUES "+pubKeysPlaceholders[:-1],
-                            pubKeysIds
-                    )
-
-                return targetId
+            return targetId
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
         finally:

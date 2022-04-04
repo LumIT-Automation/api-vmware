@@ -46,15 +46,17 @@ class SshSupplicant:
         # Execute an ssh command to the remote system defined in the dataConnection parameter.
 
         # In the event of a network problem (e.g. DNS failure, refused connection, etc), paramiko will raise the applicable exception.
-        # If a ssh command times out, a socket.timeout exception is raised.
+        # If an ssh command times out, a socket.timeout exception is raised.
 
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # auto add the remote ssh host key.
 
         try:
-            Log.actionLog("Try paramiko ssh command: " + str(cmd))
+            if not self.silent:
+                Log.actionLog("Try paramiko ssh command: " + str(cmd))
+
             if self.privateKey:
-                Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " ssh key auth.")
+                Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username + " ssh key auth.")
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, pkey=self.privateKey, timeout=self.tcpTimeout)
             elif self.username and self.password:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
@@ -82,7 +84,6 @@ class SshSupplicant:
                 raise CustomException(status=500, payload={"Ssh": "Command exit status: " + str(exitStatus)})
 
             return stdOutData
-
         except Exception as e:
             raise e
         
