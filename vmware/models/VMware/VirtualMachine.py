@@ -9,6 +9,7 @@ from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backen
 from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachineSpecsBuilder as SpecsBuilder
 
 from vmware.models.Stage2.Target import Target
+from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.tasks import pollVmwareAsync_task
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
@@ -29,6 +30,7 @@ class Input:
     networkDevices = None
     guestSpec = None
     vmName = None
+    bootstrapKeyId = None
 
 
 
@@ -71,7 +73,7 @@ class VirtualMachine(Backend):
         out = dict()
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
-        for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName"):
+        for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices", "networkDevices", "guestSpec", "vmName", "bootstrapKeyId"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -112,6 +114,9 @@ class VirtualMachine(Backend):
             for net in Input.networkMoId:
                 self.__checkNetworkValidity(computeResource, net)
 
+            # Check bootstrapKey.
+            self.__checkBootstrapKeyValidity(Input.bootstrapKeyId)
+
             # Build devsSpecs.
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
 
@@ -138,7 +143,7 @@ class VirtualMachine(Backend):
             )
 
             Log.log("Virtual Machine clone operation specs: "+str(specsBuilder.cloneSpec))
-
+            
             # Deploy.
             out["task_moId"] = self.clone(
                 oVMFolder=FolderVM(self.assetId, Input.vmFolderMoId).oVMFolder,
@@ -148,7 +153,7 @@ class VirtualMachine(Backend):
 
             # A worker will poll the vCenter and update the target table on stage2 database in order to track progress.
             out["targetId"] = self.pollVmwareDeployVMTask(
-                bootStrapKeyId=1, # @todo.
+                bootStrapKeyId=Input.bootstrapKeyId,
                 userName="root",
                 taskMoId=out["task_moId"],
                 customSpecInfo=cSpecInfo
@@ -353,6 +358,15 @@ class VirtualMachine(Backend):
                     raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
             except Exception as e:
                 raise e
+
+
+
+    def __checkBootstrapKeyValidity(self, keyId: int) -> None:
+        if keyId:
+            try:
+                BootstrapKey(keyId)
+            except Exception:
+                raise CustomException(status=400, payload={"VMware": "Invalid bootstrap key."})
 
 
 

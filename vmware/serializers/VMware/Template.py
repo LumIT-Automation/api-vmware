@@ -35,3 +35,4 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
     guestSpec = serializers.CharField(max_length=255, required=False, allow_blank=True)
     networkDevices = VMwareVirtualMachineNetworkDeviceTypeSerializer(required=False, allow_null=True)
     diskDevices = VMwareVirtualMachineDiskDeviceTypeSerializer(required=False, allow_null=True)
+    bootstrapKeyId = serializers.IntegerField(required=False)

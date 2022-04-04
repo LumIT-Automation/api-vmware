@@ -106,19 +106,9 @@ class Target:
     def modify(targetId: int, data: dict) -> None:
         sql = ""
         values = []
-        pubKeysIds = []
-        pubKeysPlaceholders = ""
         c = connections[Target.db].cursor()
 
         if Target.__exists(targetId):
-            # Build the last part of the insert query.
-            if "final_pubkeys" in data:
-                if data["final_pubkeys"]:
-                    for el in data["final_pubkeys"]:
-                        pubKeysPlaceholders += "(%s, %s),"
-                        pubKeysIds.extend([targetId, el["id"]])
-                del data["final_pubkeys"]
-
             # Build the update query according to dict fields.
             for k, v in data.items():
                 if v is None:
@@ -128,24 +118,10 @@ class Target:
                     values.append(strip_tags(v)) # no HTML allowed.
 
             try:
-                with transaction.atomic():
-                    c.execute(
-                        "UPDATE target SET "+sql[:-1]+" WHERE id = "+str(targetId),
-                        values
-                    )
-                    c.execute(
-                        "DELETE FROM target_final_pubkey "
-                        "WHERE `id_target` = %s ",
-                        [targetId]
-                    )
-
-                    if pubKeysIds:
-                        c.execute(
-                            "INSERT INTO target_final_pubkey "
-                            "(`id_target`, `id_pubkey`) VALUES "+pubKeysPlaceholders[:-1],
-                            pubKeysIds
-                        )
-
+                c.execute(
+                    "UPDATE target SET "+sql[:-1]+" WHERE id = "+str(targetId),
+                    values
+                )
             except Exception as e:
                 raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
             finally:
