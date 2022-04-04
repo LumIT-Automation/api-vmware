@@ -95,7 +95,7 @@ class CustomSpecManager(VmwareHandler):
         if spec.info.type == "Linux":
             if "network" in data and data["network"]:
                 for netSet in data["network"]:
-                    if netSet["ip"]:
+                    if "ip" in netSet and netSet["ip"]:
                         if not hasattr(spec.spec, 'nicSettingMap'):
                             spec.spec.nicSettingMap = []
                         if len(spec.spec.nicSettingMap) <= n:
@@ -106,9 +106,9 @@ class CustomSpecManager(VmwareHandler):
                                 spec.spec.nicSettingMap[n].adapter, vim.vm.customization.FixedIp):
                             spec.spec.nicSettingMap[n].adapter.ip = vim.vm.customization.FixedIp()
                         spec.spec.nicSettingMap[n].adapter.ip.ipAddress = netSet["ip"]
-                    if netSet["netMask"]:
+                    if "netMask" in netSet and netSet["netMask"]:
                         spec.spec.nicSettingMap[n].adapter.subnetMask = netSet["netMask"]
-                    if netSet["gw"]:
+                    if "gw" in netSet and netSet["gw"]:
                         spec.spec.nicSettingMap[n].adapter.gateway = netSet["gw"]
                     # spec.spec.nicSettingMap[n].adapter.dnsServerList = dnsList
                     n += 1
