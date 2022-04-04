@@ -4,7 +4,7 @@ from .controllers import Root
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 from .controllers.Stage2 import Targets, Target
 from .controllers.Stage2 import FinalPubKeys, FinalPubKey
-from .controllers.Stage2 import Reboot, ResizePartitions, RenameVg, AddMountPoint, LvsGrow, TargetDelBootStrapKey, TargetAddFinalPubKeys
+from .controllers.Stage2 import Reboot, ResizeLastPartition, RenameVg, AddMountPoint, LvsGrow, TargetDelBootStrapKey, TargetAddFinalPubKeys
 
 
 
@@ -22,7 +22,7 @@ urlpatterns = [
     path('finalpubkey/<int:keyId>/', FinalPubKey.Stage2FinalPubKeyController.as_view(), name='stage2-final-pub-key'),
 
     # Virtual machine commands
-    path('commands/resize-partition/<int:targetId>/', ResizePartitions.Stage2ResizePartitionController.as_view(), name='stage2-ssh-resize-partition'),
+    path('commands/resize-partition/<int:targetId>/', ResizeLastPartition.Stage2ResizeLastPartitionController.as_view(), name='stage2-ssh-resize-partition'),
     path('commands/rename-vg/<int:targetId>/', RenameVg.Stage2RenameVgController.as_view(), name='stage2-ssh-resize-partition'),
     path('commands/reboot/<int:targetId>/', Reboot.Stage2RebootController.as_view(), name='stage2-ssh-reboot'),
     path('commands/add-mount-point/<int:targetId>/', AddMountPoint.Stage2AddMountPointController.as_view(), name='stage2-ssh-add-mount-point'),
