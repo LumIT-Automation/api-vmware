@@ -6,12 +6,23 @@ class RenameVg(SshCommand):
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 
+        """ 
+        Vars expected from the http PUT:
+        "shellVars" = {
+            "vgName": "vg0",
+        }
+        """
+
+        # Variables passed to the shell script via shellVars.
+        self.shellVars = """
+            # Wanted vg name.
+            vg={vgName}
+        """
+
         self.command = """
             # Get default vg name.
             defVg=$(vgs --noheadings -o vg_name | tr -d " ")
             echo "defVg: $defVg"
-            # Wanted vg name.
-            vg="vg_`hostname -s`"
             echo "vg: $vg"
             # Get all lv names.
             lVs=$(lvs --noheadings -o lv_name | tr -d " ")
