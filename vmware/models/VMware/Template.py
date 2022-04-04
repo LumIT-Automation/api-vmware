@@ -54,7 +54,7 @@ class VirtualMachineTemplate(VirtualMachine):
 
         try:
             for o in Backend.oVirtualMachines(assetId):
-                if o.config.template:
+                if o.summary.config.template: # summary has a real value: it is not a lazy object as o.config.template.
                     virtualmachine = VmwareHelper.getInfo(o)
                     virtualmachine["assetId"] = assetId
                     virtualmachines.append(virtualmachine)
