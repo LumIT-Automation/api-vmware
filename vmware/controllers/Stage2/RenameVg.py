@@ -4,7 +4,7 @@ from rest_framework import status
 
 from vmware.commands.Stage2.RenameVg import RenameVg
 from vmware.models.Permission.Permission import Permission
-from vmware.serializers.Stage2.SshCommand import Stage2SshCommandSerializer as Serializer
+from vmware.serializers.Stage2.RenameVg import Stage2RenamveVgSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
