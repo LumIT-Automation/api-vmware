@@ -71,18 +71,6 @@ CREATE TABLE `final_pubkey` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- --------------------------------------------------------
-
---
--- Struttura della tabella `group_pubkey`
---
-
-CREATE TABLE `target_final_pubkey` (
-  `id_target` int(11) NOT NULL,
-  `id_pubkey` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
 --
 -- Indici per le tabelle scaricate
 --
@@ -106,12 +94,6 @@ ALTER TABLE `bootstrap_key`
 --
 ALTER TABLE `final_pubkey`
   ADD PRIMARY KEY (`id`);
-
---
--- Indici per le tabelle `group_pubkey`
---
-ALTER TABLE `target_final_pubkey`
-  ADD PRIMARY KEY `id_final_pubkey` (`id_target`, `id_pubkey`);
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate
@@ -145,13 +127,6 @@ ALTER TABLE `final_pubkey`
 --
 ALTER TABLE `target`
   ADD CONSTRAINT `bk_key` FOREIGN KEY (`id_bootstrap_key`) REFERENCES `bootstrap_key` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Limiti per la tabella `stage2_target`
---
-ALTER TABLE `target_final_pubkey`
-  ADD CONSTRAINT `tg_id_target` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `tg_id_pubkey` FOREIGN KEY (`id_pubkey`) REFERENCES `final_pubkey` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
