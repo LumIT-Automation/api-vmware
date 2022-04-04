@@ -33,9 +33,9 @@ class SshCommand:
                     connectionData["priv_key"] = privKey.priv_key
 
                 if "sudo" in data and data["sudo"]:
-                    command = '[ `id -u` -eq 0 ] || sudo -i;'+self.command
+                    command = '[ `id -u` -eq 0 ] || sudo -i; set -e;'+self.command
                 else:
-                    command = self.command
+                    command = 'set -e;'+self.command
 
                 # Pass the value of the variables to the shell script.
                 # Example: scriptVar={httpPutVar}. The value of {httpPutVar} ends in $scriptVar.
