@@ -52,7 +52,7 @@ class CustomController(APIView):
             data["error"] = {
                 "network (api supplicant)": e.__str__()
             }
-        elif e.__class__.__name__ in "gaierror":
+        elif e.__class__.__name__ in ("NoValidConnectionsError", "ChannelException", "BadHostKeyException", "SSHException", "timeout", "gaierror"):
             httpStatus = status.HTTP_503_SERVICE_UNAVAILABLE
             data["error"] = {
                 "network (vmware supplicant)": e.__str__()
@@ -60,9 +60,9 @@ class CustomController(APIView):
         elif e.__class__.__name__ == "CustomException":
             httpStatus = e.status
             data["error"] = e.payload
-        elif e.__class__.__name__ == "AuthenticationException":
+        elif e.__class__.__name__ in ("AuthenticationException", "BadAuthenticationType"):
             data["error"] = {
-                "ssh": "Wrong credentials for the target."
+                "ssh": "Wrong credentials or authentication type for the target."
             }
             httpStatus = status.HTTP_400_BAD_REQUEST # SshSupplicant: paramiko auth failed on target.
         elif e.__class__.__name__ == "ParseError":
