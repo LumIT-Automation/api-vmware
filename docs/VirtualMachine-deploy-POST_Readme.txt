@@ -54,6 +54,7 @@ If the whole "diskDevices" key is missing, the new virtual machine will have an 
     - If the deviceType of a disk is different from the one in the template with the same label the disk is converted (if the storage support the format).
     - If the datastoreMoId is not valid (there is not a datastore with that moId or the datastore is not connected with that host/cluster)
         the deploy fail with a 400 error.
+    - "deviceType": can have one of these values: "thin", "thick lazy zeroed", "thick eager zeroed".
 
 "new" dict key:
     - If the key missing, no new disk are added.
@@ -61,6 +62,7 @@ If the whole "diskDevices" key is missing, the new virtual machine will have an 
     - The "label" field for "new" devices can be present but it's ignored (vmware choose the label).
     - If the datastoreMoId is not valid (there is not a datastore with that moId or the datastore is not connected with that host/cluster)
         the deploy fail with a 400 error.
+    - "deviceType": can have one of these values: "thin", "thick lazy zeroed", "thick eager zeroed".
 
 
 ############## NETWORK DEVICES
