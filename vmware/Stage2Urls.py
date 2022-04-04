@@ -4,7 +4,7 @@ from .controllers import Root
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 from .controllers.Stage2 import Targets, Target
 from .controllers.Stage2 import FinalPubKeys, FinalPubKey
-from .controllers.Stage2 import Reboot, ResizePartitions, RenameVg, AddMountPoint, LvsGrow, TargetDelBootStrapKey
+from .controllers.Stage2 import Reboot, ResizePartitions, RenameVg, AddMountPoint, LvsGrow, TargetDelBootStrapKey, TargetAddFinalPubKeys
 
 
 
@@ -27,5 +27,6 @@ urlpatterns = [
     path('commands/reboot/<int:targetId>/', Reboot.Stage2RebootController.as_view(), name='stage2-ssh-reboot'),
     path('commands/add-mount-point/<int:targetId>/', AddMountPoint.Stage2AddMountPointController.as_view(), name='stage2-ssh-add-mount-point'),
     path('commands/lvs-grow/<int:targetId>/', LvsGrow.Stage2LvsGrowController.as_view(), name='stage2-lvs-grow'),
+    path('commands/add-final-pubkeys/<int:targetId>/', TargetAddFinalPubKeys.Stage2TargetAddFinalPubKeyController.as_view(), name='stage2-add-final-pubkeys'),
     path('commands/del-bootstrap-key/<int:targetId>/', TargetDelBootStrapKey.Stage2TargetDelBootstrapKeyController.as_view(), name='stage2-del-bootstrap-key'),
 ]
