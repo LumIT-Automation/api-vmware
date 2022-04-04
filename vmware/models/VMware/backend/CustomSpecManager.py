@@ -25,7 +25,7 @@ class CustomSpecManager(VmwareHandler):
             if self.oCustomSpecManager.DoesCustomizationSpecExist(name):
                 return self.oCustomSpecManager.GetCustomizationSpec(name=name)
             else:
-                raise CustomException(status=404, payload={"VMware": "cannot load resource."})
+                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
         except Exception as e:
             raise e
 
@@ -44,7 +44,7 @@ class CustomSpecManager(VmwareHandler):
             if self.oCustomSpecManager.DoesCustomizationSpecExist(srcSpecName):
                 self.oCustomSpecManager.DuplicateCustomizationSpec(name=srcSpecName, newName=newSpecName)
             else:
-                raise CustomException(status=404, payload={"VMware": "cannot load resource."})
+                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
         except Exception as e:
             raise e
 
@@ -55,7 +55,7 @@ class CustomSpecManager(VmwareHandler):
             if self.oCustomSpecManager.DoesCustomizationSpecExist(name):
                 self.oCustomSpecManager.DeleteCustomizationSpec(name)
             else:
-                raise CustomException(status=404, payload={"VMware": "cannot load resource."})
+                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
         except Exception as e:
             raise e
 
