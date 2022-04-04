@@ -23,7 +23,7 @@ class VirtualMachineDatastore:
         try:
             return {
                 "datastoreMoId": self.datastore.moId,
-                "disk": self.label,
+                "label": self.label,
                 "sizeMB": self.size,
                 "deviceType": self.deviceType
             }
