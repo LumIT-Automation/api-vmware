@@ -51,7 +51,8 @@ class TargetCommand:
             c.execute(
                 "SELECT * "
                 "FROM target_command "
-                "WHERE id_target = %s", [
+                "WHERE id_target = %s "
+                "ORDER BY id ", [
                     targetId
             ])
             o = DBHelper.asDict(c)

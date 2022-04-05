@@ -27,7 +27,8 @@ class PollWorker:
 
         try:
             if self.checkDeployStatus():
-                pass
+                for command in self.command:
+                    Log.log(command, '_')
         except Exception as e:
             raise e
 
@@ -69,6 +70,4 @@ class PollWorker:
 
 
 
-    def readCommands(self):
-        pass
 
