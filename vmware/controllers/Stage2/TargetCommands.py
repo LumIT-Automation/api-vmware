@@ -21,7 +21,7 @@ class Stage2TargetCommandsController(CustomController):
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="target_commands_get") or user["authDisabled"]:
-                Log.actionLog("Second stage target list", user)
+                Log.actionLog("Second stage target commands list", user)
 
                 itemData["items"] = TargetCommand.list(targetId)
                 serializer = CommandsSerializer(data=itemData)
@@ -56,7 +56,7 @@ class Stage2TargetCommandsController(CustomController):
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="target_commands_post") or user["authDisabled"]:
-                Log.actionLog("Second stage target addition", user)
+                Log.actionLog("Second stage target commands addition", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
                 serializer = CommandSerializer(data=request.data["data"])
