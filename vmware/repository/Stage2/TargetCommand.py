@@ -1,5 +1,5 @@
-from typing import List
 import json
+from typing import List
 
 from django.utils.html import strip_tags
 from django.db import connections
@@ -35,7 +35,7 @@ class TargetCommand:
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -61,7 +61,7 @@ class TargetCommand:
 
             return o
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -92,7 +92,7 @@ class TargetCommand:
 
             return c.lastrowid
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
