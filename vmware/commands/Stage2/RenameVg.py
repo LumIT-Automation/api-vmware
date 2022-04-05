@@ -108,13 +108,16 @@ class RenameVg(SshCommand):
                 sed -i -e "s#/${defVg}#/${vg}#" /etc/initramfs-tools/conf.d/resume
             fi
             if [ -x /sbin/update-initramfs ]; then
+                echo "Rebuilding initrd."
                 if ! update-initramfs -u; then 
                     exit 19
                 fi
             fi
             if [ -x /sbin/dracut ]; then
+                echo "Rebuilding initrd."
                 dracut --force
             fi
             
+            exit 0
         """
 
