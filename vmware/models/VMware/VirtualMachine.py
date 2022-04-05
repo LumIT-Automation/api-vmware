@@ -11,6 +11,7 @@ from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachi
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.models.Stage2.FinalPubKey import FinalPubKey
+from vmware.models.Stage2.TargetCommand import TargetCommand
 from vmware.tasks import pollVmwareAsync_task
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
@@ -33,6 +34,7 @@ class Input:
     vmName = None
     bootstrapKeyId = None
     finalPubKeyIds = []
+    postDeployCommands: List[dict] = None
 
 
 
@@ -76,7 +78,7 @@ class VirtualMachine(Backend):
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
-                  "networkDevices", "guestSpec", "vmName", "bootstrapKeyId", "finalPubKeyIds"):
+                  "networkDevices", "guestSpec", "vmName", "bootstrapKeyId", "finalPubKeyIds", "postDeployCommands"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -162,7 +164,8 @@ class VirtualMachine(Backend):
                 bootStrapKeyId=Input.bootstrapKeyId,
                 userName="root",
                 taskMoId=out["task_moId"],
-                customSpecInfo=cSpecInfo
+                customSpecInfo=cSpecInfo,
+                postDeployCommands=Input.postDeployCommands
             )
 
             return out
@@ -171,7 +174,7 @@ class VirtualMachine(Backend):
 
 
 
-    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict) -> int:
+    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list) -> int:
         try:
             ip = ""
             if "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
@@ -189,6 +192,11 @@ class VirtualMachine(Backend):
 
             # Add target do db.
             targetId = Target.add(targetData)
+
+            # Insert in the db the sequence of the commands to be executed on the target.
+            for c in postDeployCommands:
+                c["id_target"] = targetId
+                TargetCommand.add(c)
 
             # Launch async worker.
             pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)

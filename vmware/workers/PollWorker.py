@@ -15,7 +15,7 @@ class PollWorker:
         self.assetId: int = int(assetId)
         self.taskMoId: str = taskMoId
         self.targetId: int = int(targetId)
-        self.command: List[dict] = TargetCommand.list(self.targetId)
+        self.commands: List[dict] = TargetCommand.list(self.targetId)
 
 
 
@@ -28,7 +28,7 @@ class PollWorker:
 
         try:
             if self.checkDeployStatus():
-                for command in self.command:
+                for command in self.commands:
                     Log.log(command, '_')
         except Exception as e:
             raise e
