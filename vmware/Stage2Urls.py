@@ -3,9 +3,9 @@ from django.urls import path
 from .controllers import Root
 from .controllers.Stage2 import BoostrapKeys, BoostrapKey
 from .controllers.Stage2 import Targets, Target
+from .controllers.Stage2 import TargetCommands, TargetCommand
 from .controllers.Stage2 import FinalPubKeys, FinalPubKey
 from .controllers.Stage2 import Reboot, ResizeLastPartition, RenameVg, AddMountPoint, LvsGrow, TargetDelBootStrapKey, TargetAddFinalPubKeys
-
 
 
 urlpatterns = [
@@ -17,6 +17,10 @@ urlpatterns = [
     # Targets (virtualmachines to be processed)
     path('targets/', Targets.Stage2TargetsController.as_view(), name='stage2-targets'),
     path('target/<int:targetId>/', Target.Stage2TargetController.as_view(), name='stage2-target'),
+
+    # Target commands
+    path('target/<int:targetId>/command/<int:tCommandId>/', TargetCommand.Stage2TargetCommandController.as_view(), name='stage2-target-command'),
+    path('target/<int:targetId>/commands/', TargetCommands.Stage2TargetCommandsController.as_view(), name='stage2-target-commands'),
 
     path('finalpubkeys/', FinalPubKeys.Stage2FinalPubKeysController.as_view(), name='stage2-final-pub-keys'),
     path('finalpubkey/<int:keyId>/', FinalPubKey.Stage2FinalPubKeyController.as_view(), name='stage2-final-pub-key'),
