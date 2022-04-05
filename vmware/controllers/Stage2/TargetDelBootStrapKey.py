@@ -32,4 +32,3 @@ class Stage2TargetDelBootstrapKeyController(CustomController):
         return Response(None, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-

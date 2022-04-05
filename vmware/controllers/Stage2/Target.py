@@ -31,7 +31,7 @@ class Stage2TargetController(CustomController):
                 else:
                     httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
                     data = {
-                        "Database": "upstream data mismatch."
+                        "VMware": "upstream data mismatch."
                     }
 
                     Log.log("Upstream data incorrect: " + str(serializer.errors))
@@ -94,7 +94,7 @@ class Stage2TargetController(CustomController):
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
                     response = {
-                        "Database": {
+                        "VMware": {
                             "error": str(serializer.errors)
                         }
                     }
@@ -110,4 +110,3 @@ class Stage2TargetController(CustomController):
         return Response(response, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-

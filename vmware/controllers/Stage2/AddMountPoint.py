@@ -21,16 +21,16 @@ class Stage2AddMountPointController(CustomController):
                 Log.actionLog("Second stage system reboot", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = Serializer(data=request.data)
+                serializer = Serializer(data=request.data["data"])
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
+                    data = serializer.validated_data
                     target = AddMountPoint(targetId)
                     response = target.exec(data)
                     httpStatus = status.HTTP_200_OK
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
                     response = {
-                        "Database": {
+                        "VMware": {
                             "error": str(serializer.errors)
                         }
                     }

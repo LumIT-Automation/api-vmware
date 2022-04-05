@@ -57,7 +57,7 @@ class Stage2BootstrapKeyController(CustomController):
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
                     response = {
-                        "Database": {
+                        "VMware": {
                             "error": str(serializer.errors)
                         }
                     }
