@@ -62,14 +62,14 @@ class BootstrapKey:
                         sql += k+"=%s,"
                         values.append(strip_tags(v)) # no HTML allowed.
 
-                logging.disable(logging.WARNING)  # Do not log private key.
+                logging.disable(logging.WARNING) # do not ever log private key.
                 c.execute("UPDATE bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(keyId),
                     values
                 )
             except Exception as e:
                 raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
             finally:
-                logging.disable(logging.NOTSET)  # Re-enable django logging.
+                logging.disable(logging.NOTSET) # re-enable django logging.
                 c.close()
         else:
             raise CustomException(status=404, payload={"database": "Non existent endpoint"})
@@ -127,7 +127,7 @@ class BootstrapKey:
                 values.append(strip_tags(v)) # no HTML allowed.
             keys = keys[:-1]+")"
 
-            logging.disable(logging.WARNING) # Do not log private key.
+            logging.disable(logging.WARNING) # do not ever log private key.
             with transaction.atomic():
                 c.execute("INSERT INTO bootstrap_key "+keys+" VALUES ("+s[:-1]+")",
                     values

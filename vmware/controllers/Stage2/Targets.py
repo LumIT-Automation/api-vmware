@@ -16,17 +16,17 @@ class Stage2TargetsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = dict()
         user = CustomController.loggedUser(request)
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="targets_get") or user["authDisabled"]:
                 Log.actionLog("Second stage target list", user)
 
-                itemData["data"]["items"] = Target.list()
+                itemData["items"] = Target.list()
                 serializer = TargetsSerializer(data=itemData)
                 if serializer.is_valid():
-                    data["data"] = serializer.validated_data["data"]
+                    data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK
