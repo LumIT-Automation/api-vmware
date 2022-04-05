@@ -34,19 +34,15 @@ class SshCommand:
                     connectionData["priv_key"] = privKey.priv_key
 
                 if "sudo" in data and data["sudo"]:
-                    command = '[ `id -u` -eq 0 ] || sudo -i; set -e; '+self.command
+                    self.command = '[ `id -u` -eq 0 ] || sudo -i; set -e; '+self.command
                 else:
-                    command = 'set -e; '+self.command
+                    self.command = 'set -e; '+self.command
 
-                # Pass the value of the variables to the shell script.
-                # Example: scriptVar={httpPutVar}. The value of {httpPutVar} ends in $scriptVar.
                 if self.shellVars and "shellVars" in data:
-                    dataShellVars = self.cleanupShellParams(data["shellVars"])
-                    self.shellVars = self.shellVars.format(**dataShellVars) # Variables substitution.
-                    command = self.shellVars + command
+                    self.shellVarsSet(data["shellVars"])
 
                 ssh = SshSupplicant(connectionData, tcpTimeout=tcpTimeout, silent=silent)
-                out = ssh.command(command, alwaysSuccess=self.alwaysSuccess)
+                out = ssh.command(self.command, alwaysSuccess=self.alwaysSuccess)
             else:
                 raise CustomException(status=400, payload={"Ssh": "Target not found."})
         except Exception as e:
@@ -74,5 +70,17 @@ class SshCommand:
                     raise CustomException(status=400, payload={"Ssh": "Forbidden data type in shellVars"})
 
             return shellVars
+        except Exception as e:
+            raise e
+
+
+
+    def shellVarsSet(self, shellVars: dict):
+        # Pass the value of the variables to the shell script.
+        # Example: scriptVar={httpPutVar}. The value of {httpPutVar} ends in $scriptVar.
+        try:
+            dataShellVars = self.cleanupShellParams(shellVars)
+            self.shellVars = self.shellVars.format(**dataShellVars)  # Variables substitution.
+            self.command = self.shellVars + self.command
         except Exception as e:
             raise e
