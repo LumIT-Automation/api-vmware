@@ -61,7 +61,10 @@ INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VAL
 (32, 'custom_spec_get', 'asset', NULL),
 (33, 'custom_spec_delete', 'asset', NULL),
 (34, 'custom_spec_patch', 'asset', NULL),
-(35, 'historyComplete_get', 'global', NULL);
+(35, 'historyComplete_get', 'global', NULL),
+(36, 'target_commands_get', 'asset', NULL),
+(37, 'target_command_delete', 'asset', NULL),
+(39, 'target_commands_post', 'asset', NULL);
 
 
 --
@@ -114,6 +117,9 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (1, 33),
 (1, 34),
 (1, 35),
+(1, 36),
+(1, 37),
+(1, 39),
 (2, 3),
 (2, 12),
 (2, 13),
@@ -138,6 +144,9 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (2, 32),
 (2, 33),
 (2, 34),
+(2, 36),
+(2, 37),
+(2, 39),
 (3, 3),
 (3, 19),
 (3, 21),
@@ -153,7 +162,8 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (3, 31),
 (3, 32),
 (3, 33),
-(3, 34);
+(3, 34),
+(3, 36);
 
 
 COMMIT;

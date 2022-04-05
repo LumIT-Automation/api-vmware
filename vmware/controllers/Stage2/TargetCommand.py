@@ -15,8 +15,8 @@ class Stage2TargetCommandController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="target_coomand_delete") or user["authDisabled"]:
-                Log.actionLog("Second stage target coomand deletion", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="target_command_delete") or user["authDisabled"]:
+                Log.actionLog("Second stage target command deletion", user)
 
                 targetCommand = TargetCommand(tCommandId)
                 targetCommand.delete()
@@ -32,4 +32,3 @@ class Stage2TargetCommandController(CustomController):
         return Response(None, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-
