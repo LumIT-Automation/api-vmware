@@ -12,8 +12,8 @@ class BootstrapKey:
 
         self.id = int(keyId)
         self.priv_key: str = ""
-        self.comment: str = ""
         self.pub_key: str = ""
+        self.comment: str = ""
 
         self.__load()
 

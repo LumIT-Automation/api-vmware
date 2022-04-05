@@ -12,7 +12,7 @@ DataConnection: Dict[str, Union[str, int]] = {
     "ip":  "",
     "port": "",
     "api_type": "",
-    "keyId": "",
+    "id_bootstrap_key": "",
     "username": "",
     "password": ""
 }
@@ -25,7 +25,6 @@ class Target:
         self.connectionData: DataConnection = None
         self.id_asset: int = 0
         self.task_moid: str = ""
-        self.task_state: str = ""
         self.task_progress: int = 0
         self.task_startTime: str = ""
         self.task_queueTime: str = ""
