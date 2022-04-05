@@ -51,7 +51,3 @@ class Reboot:
             tests += 1
 
         raise CustomException(status=504, payload={"Ssh": "Wait for power on: timeout exceeded."})
-
-
-
-
