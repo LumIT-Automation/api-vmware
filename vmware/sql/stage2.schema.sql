@@ -53,7 +53,7 @@ CREATE TABLE `target` (
 
 CREATE TABLE `bootstrap_key` (
   `id` int(11) NOT NULL,
-  `priv_key` varchar(8192) NOT NULL DEFAULT '',
+  `priv_key` varchar(65536) NOT NULL DEFAULT '',
   `comment` varchar(1024) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -68,6 +68,36 @@ CREATE TABLE `final_pubkey` (
   `id` int(11) NOT NULL,
   `comment` varchar(1024) NOT NULL DEFAULT '',
   `pub_key` varchar(2048) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `target_command`
+--
+
+CREATE TABLE `target_command` (
+  `id` int(11) NOT NULL,
+  `id_target` int(11) NOT NULL,
+  `command` varchar(64) NOT NULL DEFAULT '',
+  `args` varchar(8192) CHECK (JSON_VALID(args))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `command_exec_status`
+--
+
+CREATE TABLE `command_exec_status` (
+  `id` int(11) NOT NULL,
+  `id_command` int(11) NOT NULL,
+  `exec_count` tinyint NOT NULL,
+  `exit_status` int(11) NOT NULL,
+  `stdout` varchar(65536) NOT NULL DEFAULT '',
+  `stderr` varchar(65536) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -96,6 +126,19 @@ ALTER TABLE `final_pubkey`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indici per le tabelle `command_launch`
+--
+ALTER TABLE `target_command`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indici per le tabelle `command_status`
+--
+ALTER TABLE `command_exec_status`
+  ADD PRIMARY KEY (`id`);
+
+
+--
 -- AUTO_INCREMENT per le tabelle scaricate
 --
 
@@ -112,9 +155,21 @@ ALTER TABLE `bootstrap_key`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `group_pubkey`
+-- AUTO_INCREMENT per la tabella `final_pubkey`
 --
 ALTER TABLE `final_pubkey`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `target_command`
+--
+ALTER TABLE `target_command`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `command_exec-status`
+--
+ALTER TABLE `command_exec_status`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 
@@ -123,10 +178,22 @@ ALTER TABLE `final_pubkey`
 --
 
 --
--- Limiti per la tabella `stage2_target`
+-- Limiti per la tabella `target`
 --
 ALTER TABLE `target`
   ADD CONSTRAINT `bk_key` FOREIGN KEY (`id_bootstrap_key`) REFERENCES `bootstrap_key` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limiti per la tabella `target_command`
+--
+ALTER TABLE `target_command`
+  ADD CONSTRAINT `tg_key` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limiti per la tabella `command_exec_status`
+--
+ALTER TABLE `command_exec_status`
+  ADD CONSTRAINT `cmd_key` FOREIGN KEY (`id_command`) REFERENCES `target_command` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
