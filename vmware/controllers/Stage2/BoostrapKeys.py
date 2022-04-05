@@ -16,17 +16,17 @@ class Stage2BootstrapKeysController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = {"data": dict()}
+        itemData = dict()
         user = CustomController.loggedUser(request)
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="bootstrap_keys_get") or user["authDisabled"]:
                 Log.actionLog("Second stage bootstrap keys list", user)
 
-                itemData["data"]["items"] = BootstrapKey.list()
+                itemData["items"] = BootstrapKey.list()
                 serializer = BoostrapKeysSerializer(data=itemData)
                 if serializer.is_valid():
-                    data["data"] = serializer.validated_data["data"]
+                    data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()
 
                     httpStatus = status.HTTP_200_OK
@@ -59,9 +59,9 @@ class Stage2BootstrapKeysController(CustomController):
                 Log.actionLog(" Second stage bootstrap key addition", user)
                 Log.actionLog(" User data (comment only): "+str(request.data["data"]["comment"]), user)
 
-                serializer = BoostrapKeySerializer(data=request.data)
+                serializer = BoostrapKeySerializer(data=request.data["data"])
                 if serializer.is_valid():
-                    BootstrapKey.add(serializer.validated_data["data"])
+                    BootstrapKey.add(serializer.validated_data)
                     httpStatus = status.HTTP_201_CREATED
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST

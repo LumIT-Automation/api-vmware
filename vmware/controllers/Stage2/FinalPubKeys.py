@@ -16,17 +16,14 @@ class Stage2FinalPubKeysController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
-        itemData = {
-            "data": dict()
-        }
+        itemData = dict()
         user = CustomController.loggedUser(request)
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="final_pub_keys_get") or user["authDisabled"]:
                 Log.actionLog("Second stage final public keys list", user)
 
-                itemData["data"]["items"] = FinalPubKey.list()
-                Log.log(itemData, '_')
+                itemData["items"] = FinalPubKey.list()
                 serializer = FinalPubKeysSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
