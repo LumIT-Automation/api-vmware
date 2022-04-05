@@ -20,7 +20,7 @@ class Stage2TargetCommandsController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="targets_get") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="target_commands_get") or user["authDisabled"]:
                 Log.actionLog("Second stage target list", user)
 
                 itemData["items"] = TargetCommand.list(targetId)
@@ -55,7 +55,7 @@ class Stage2TargetCommandsController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="target_command_post") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="target_commands_post") or user["authDisabled"]:
                 Log.actionLog("Second stage target addition", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
@@ -64,6 +64,7 @@ class Stage2TargetCommandsController(CustomController):
                     data = serializer.validated_data
                     data["id_target"] = targetId
                     TargetCommand.add(data)
+
                     httpStatus = status.HTTP_201_CREATED
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
