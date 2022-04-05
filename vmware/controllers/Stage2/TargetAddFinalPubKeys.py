@@ -32,7 +32,7 @@ class Stage2TargetAddFinalPubKeyController(CustomController):
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
                     response = {
-                        "Database": {
+                        "VMware": {
                             "error": str(serializer.errors)
                         }
                     }

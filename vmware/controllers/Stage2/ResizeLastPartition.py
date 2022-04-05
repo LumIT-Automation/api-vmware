@@ -31,7 +31,7 @@ class Stage2ResizeLastPartitionController(CustomController):
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
                     response = {
-                        "Database": {
+                        "VMware": {
                             "error": str(serializer.errors)
                         }
                     }
@@ -47,4 +47,3 @@ class Stage2ResizeLastPartitionController(CustomController):
         return Response(response, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-
