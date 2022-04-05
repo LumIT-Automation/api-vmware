@@ -1,3 +1,4 @@
+from typing import List
 import time
 
 from vmware.models.VMware.Task import Task
@@ -11,10 +12,10 @@ class PollWorker:
     def __init__(self, assetId: int, taskMoId: str, targetId: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.assetId = assetId
-        self.taskMoId = taskMoId
-        self.targetId = targetId
-        self.command = TargetCommand.list(self.targetId)
+        self.assetId: int = int(assetId)
+        self.taskMoId: str = taskMoId
+        self.targetId: int = int(targetId)
+        self.command: List[dict] = TargetCommand.list(self.targetId)
 
 
 
