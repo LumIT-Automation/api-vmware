@@ -123,7 +123,7 @@ class Target:
                     values
                 )
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -142,7 +142,7 @@ class Target:
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -163,7 +163,7 @@ class Target:
             )
             return DBHelper.asDict(c)
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -192,7 +192,7 @@ class Target:
 
             return targetId
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 

@@ -62,7 +62,7 @@ class FinalPubKey:
                 )
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -81,7 +81,7 @@ class FinalPubKey:
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -97,7 +97,7 @@ class FinalPubKey:
             c.execute("SELECT * FROM final_pubkey")
             return DBHelper.asDict(c)
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -125,7 +125,7 @@ class FinalPubKey:
                 )
                 return c.lastrowid
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 

@@ -12,7 +12,7 @@ class TargetCommand:
         self.id = int(tCommandId)
         self.id_target: int = 0
         self.command: str = ""
-        self.args: str = ""
+        self.args: dict = {}
 
 
 
