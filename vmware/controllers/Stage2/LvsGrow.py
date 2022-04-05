@@ -21,11 +21,12 @@ class Stage2LvsGrowController(CustomController):
                 Log.actionLog("Second stage, grow lvs", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = Serializer(data=request.data)
+                serializer = Serializer(data=request.data["data"])
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
-                    target = LvsGrow(targetId)
-                    response = target.exec(data)
+                    response = LvsGrow(targetId).exec(
+                        serializer.validated_data
+                    )
+
                     httpStatus = status.HTTP_200_OK
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST

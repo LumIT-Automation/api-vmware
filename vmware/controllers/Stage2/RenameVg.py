@@ -21,9 +21,9 @@ class Stage2RenameVgController(CustomController):
                 Log.actionLog("Second stage system reboot", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = Serializer(data=request.data, partial=True)
+                serializer = Serializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
+                    data = serializer.validated_data
 
                     target = RenameVg(targetId)
                     response = target.exec(data)
