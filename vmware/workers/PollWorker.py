@@ -2,6 +2,7 @@ import time
 
 from vmware.models.VMware.Task import Task
 from vmware.models.Stage2.Target import Target
+from vmware.models.Stage2.TargetCommand import TargetCommand
 
 from vmware.helpers.Log import Log
 
@@ -13,6 +14,7 @@ class PollWorker:
         self.assetId = assetId
         self.taskMoId = taskMoId
         self.targetId = targetId
+        self.command = TargetCommand.list(self.targetId)
 
 
 
@@ -21,13 +23,23 @@ class PollWorker:
     ####################################################################################################################
 
     def __call__(self) -> None:
+        Log.log("Celery worker for VMware task: " + self.taskMoId)
+
+        try:
+            if self.checkDeployStatus():
+                pass
+        except Exception as e:
+            raise e
+
+
+
+    def checkDeployStatus(self) -> bool:
         timeout = 600 # [seconds]
+        ret = False
 
         try:
             timeout_start = time.time()
             while time.time() < timeout_start + timeout:
-                Log.log("Celery worker for VMware task: "+self.taskMoId)
-
                 # Get VMware task info.
                 tsk = Task(assetId=self.assetId, moId=self.taskMoId)
                 info = tsk.info()
@@ -43,11 +55,20 @@ class PollWorker:
                 })
 
                 # Until success or error.
-                if info["state"] == "success" \
-                        or info["state"] == 'error':
+                if info["state"] == "success":
+                    ret = True
                     break
+                elif info["state"] == "error":
+                    break
+                else:
+                    time.sleep(10) # every 10s.
 
-                time.sleep(10) # every 10s.
-
+            return ret
         except Exception as e:
             raise e
+
+
+
+    def readCommands(self):
+        pass
+

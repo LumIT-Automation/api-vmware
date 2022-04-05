@@ -17,29 +17,11 @@ class TargetCommand:
         self.command: str = ""
         self.args: str = ""
 
-        self.__load()
-
 
 
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
-
-    def info(self) -> dict:
-        try:
-            return Repository.get(self.id)
-        except Exception as e:
-            raise e
-
-
-
-    def modify(self, data: dict) -> None:
-        try:
-            Repository.modify(self.id, data)
-        except Exception as e:
-            raise e
-
-
 
     def delete(self) -> None:
         try:
@@ -68,19 +50,3 @@ class TargetCommand:
             return Repository.add(data)
         except Exception as e:
             raise e
-
-
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __load(self) -> None:
-        try:
-            info = Repository.get(self.id)
-
-            # Set attributes.
-            for k, v in info.items():
-                setattr(self, k, v)
-        except Exception:
-            pass

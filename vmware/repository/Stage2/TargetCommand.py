@@ -1,4 +1,5 @@
 from typing import List
+import json
 
 from django.utils.html import strip_tags
 from django.db import connections
@@ -23,54 +24,6 @@ class TargetCommand:
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
-
-    @staticmethod
-    def get(targetId: int) -> dict:
-        c = connections[TargetCommand.db].cursor()
-
-        try:
-            c.execute("SELECT * FROM target_command "
-                      "WHERE target_command.id = %s ", [
-                        targetId
-                    ])
-
-            return DBHelper.asDict(c)[0]
-        except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
-
-    @staticmethod
-    def modify(tCommandId: int, data: dict) -> None:
-        sql = ""
-        values = []
-        c = connections[TargetCommand.db].cursor()
-
-        if TargetCommand.__exists(tCommandId):
-            # Build the update query according to dict fields.
-            for k, v in data.items():
-                if v is None:
-                    sql += k+"=DEFAULT,"
-                else:
-                    sql += k+"=%s,"
-                    values.append(strip_tags(v)) # no HTML allowed.
-
-            try:
-                c.execute(
-                    "UPDATE target SET "+sql[:-1]+" WHERE id = "+str(tCommandId),
-                    values
-                )
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-            finally:
-                c.close()
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent endpoint"})
-
-
 
     @staticmethod
     def delete(targetId: int) -> None:
@@ -102,7 +55,12 @@ class TargetCommand:
                 "WHERE id_target = %s", [
                     targetId
             ])
-            return DBHelper.asDict(c)
+            o = DBHelper.asDict(c)
+            for l in o:
+                if "args" in l:
+                    l["args"] = json.loads(l["args"])
+
+            return o
         except Exception as e:
             raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
         finally:
@@ -116,6 +74,9 @@ class TargetCommand:
         keys = "("
         values = []
         c = connections[TargetCommand.db].cursor()
+
+        if "args" in data:
+            data["args"] = json.dumps(data["args"])
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
