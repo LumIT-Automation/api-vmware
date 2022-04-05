@@ -81,7 +81,7 @@ CREATE TABLE `target_command` (
   `id` int(11) NOT NULL,
   `id_target` int(11) NOT NULL,
   `command` varchar(64) NOT NULL DEFAULT '',
-  `args` varchar(8192) CHECK (JSON_VALID(args))
+  `args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (JSON_VALID(args))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
