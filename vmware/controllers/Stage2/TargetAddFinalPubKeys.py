@@ -7,6 +7,8 @@ from vmware.models.Permission.Permission import Permission
 
 from vmware.controllers.CustomController import CustomController
 from vmware.serializers.Stage2.TargetAddFinalPubKeys import Stage2TargetAddFinalPubKeysSerializer as Serializer
+
+from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
@@ -21,9 +23,18 @@ class Stage2TargetAddFinalPubKeyController(CustomController):
                 Log.actionLog("Second stage: add final pub keys", user)
                 Log.actionLog("User data: " + str(request.data), user)
 
-                serializer = Serializer(data=request.data, partial=True)
+                serializer = Serializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
-                    data = serializer.validated_data["data"]
+                    data = serializer.validated_data
+
+                    # Have a check before.
+                    for k in data["keyIds"]:
+                        try:
+                            TargetAddFinalPubKey(targetId, k)
+                        except Exception:
+                            raise CustomException(status=400, payload={"VMware": "Some invalid key id passed."})
+
+                    # Finally execute.
                     for k in data["keyIds"]:
                         target = TargetAddFinalPubKey(targetId, k)
                         target.exec()
