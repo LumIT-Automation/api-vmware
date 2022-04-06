@@ -48,5 +48,5 @@ class Role:
             # Set attributes.
             for k, v in info.items():
                 setattr(self, k, v)
-        except Exception:
-            pass
+        except Exception as e:
+            raise e

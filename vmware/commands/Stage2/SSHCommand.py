@@ -2,7 +2,7 @@ import re
 
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
-from vmware.helpers.SshSupplicant import SshSupplicant
+from vmware.helpers.SSHSupplicant import SSHSupplicant
 from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
 
@@ -41,7 +41,7 @@ class SSHCommand:
                 if self.shellVars and "shellVars" in data:
                     self.shellVarsSet(data["shellVars"])
 
-                ssh = SshSupplicant(connectionData, tcpTimeout=tcpTimeout, silent=silent)
+                ssh = SSHSupplicant(connectionData, tcpTimeout=tcpTimeout, silent=silent)
                 out = ssh.command(self.command, alwaysSuccess=self.alwaysSuccess)
             else:
                 raise CustomException(status=400, payload={"Ssh": "Target not found."})
