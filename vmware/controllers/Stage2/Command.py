@@ -2,29 +2,28 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.Command import Command
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.Stage2.BoostrapKeys import Stage2BootstrapKeysSerializer as BoostrapKeysSerializer
-from vmware.serializers.Stage2.BoostrapKey import Stage2BootstrapKeySerializer as BoostrapKeySerializer
+from vmware.serializers.Stage2.Command import Stage2CommandSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
 
 
-class Stage2BootstrapKeysController(CustomController):
+class Stage2CommandController(CustomController):
     @staticmethod
-    def get(request: Request) -> Response:
+    def get(request: Request, commandUid: str) -> Response:
         data = dict()
-        itemData = dict()
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="bootstrap_keys_get") or user["authDisabled"]:
-                Log.actionLog("Second stage bootstrap keys list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="command_get") or user["authDisabled"]:
+                Log.actionLog("Second stage command info", user)
 
-                itemData["items"] = BootstrapKey.list()
-                serializer = BoostrapKeysSerializer(data=itemData)
+                serializer = Serializer(
+                    data=Command(commandUid).repr()
+                )
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()
@@ -36,7 +35,7 @@ class Stage2BootstrapKeysController(CustomController):
                         "VMware": "upstream data mismatch."
                     }
 
-                    Log.log("Upstream data incorrect: "+str(serializer.errors))
+                    Log.log("Upstream data incorrect: " + str(serializer.errors))
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
@@ -49,20 +48,46 @@ class Stage2BootstrapKeysController(CustomController):
         })
 
 
+
     @staticmethod
-    def post(request: Request) -> Response:
+    def delete(request: Request, commandUid: str) -> Response:
+        user = CustomController.loggedUser(request)
+
+        try:
+            if Permission.hasUserPermission(groups=user["groups"], action="command_delete") or user["authDisabled"]:
+                Log.actionLog("Second stage command deletion", user)
+
+                Command(commandUid).delete()
+                httpStatus = status.HTTP_200_OK
+            else:
+                httpStatus = status.HTTP_403_FORBIDDEN
+        except Exception as e:
+            data, httpStatus, headers = CustomController.exceptionHandler(e)
+            return Response(data, status=httpStatus, headers=headers)
+
+        return Response(None, status=httpStatus, headers={
+            "Cache-Control": "no-cache"
+        })
+
+
+
+    @staticmethod
+    def patch(request: Request, commandUid: str) -> Response:
         response = None
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="bootstrap_key_post") or user["authDisabled"]:
-                Log.actionLog("Second stage bootstrap key addition", user)
-                Log.actionLog("User data (comment only): "+str(request.data["data"]["comment"]), user)
+            if Permission.hasUserPermission(groups=user["groups"], action="command_patch") or user["authDisabled"]:
+                Log.actionLog("Second stage command modification", user)
+                Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = BoostrapKeySerializer(data=request.data["data"])
+                serializer = Serializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
-                    BootstrapKey.add(serializer.validated_data)
-                    httpStatus = status.HTTP_201_CREATED
+                    Command(uid=commandUid).modify(
+                        serializer.validated_data
+                    )
+
+                    httpStatus = status.HTTP_200_OK
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
                     response = {
@@ -74,7 +99,6 @@ class Stage2BootstrapKeysController(CustomController):
                     Log.actionLog("User data incorrect: "+str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)

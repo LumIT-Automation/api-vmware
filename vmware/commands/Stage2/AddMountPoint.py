@@ -1,8 +1,8 @@
 
-from vmware.commands.Stage2.SshCommand import SshCommand
+from vmware.commands.Stage2.SSHCommand import SSHCommand
 
 
-class AddMountPoint(SshCommand):
+class AddMountPoint(SSHCommand):
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 

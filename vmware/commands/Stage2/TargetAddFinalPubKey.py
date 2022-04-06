@@ -1,9 +1,9 @@
 
-from vmware.commands.Stage2.SshCommand import SshCommand
+from vmware.commands.Stage2.SSHCommand import SSHCommand
 from vmware.models.Stage2.FinalPubKey import FinalPubKey
 
 
-class TargetAddFinalPubKey(SshCommand):
+class TargetAddFinalPubKey(SSHCommand):
     def __init__(self, targetId: int, keyId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 

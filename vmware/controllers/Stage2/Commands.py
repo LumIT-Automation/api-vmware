@@ -2,17 +2,17 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.Command import Command
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.Stage2.BoostrapKeys import Stage2BootstrapKeysSerializer as BoostrapKeysSerializer
-from vmware.serializers.Stage2.BoostrapKey import Stage2BootstrapKeySerializer as BoostrapKeySerializer
+from vmware.serializers.Stage2.Commands import Stage2CommandsSerializer as CommandsSerializer
+from vmware.serializers.Stage2.Command import Stage2CommandSerializer as CommandSerializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Log import Log
 
 
-class Stage2BootstrapKeysController(CustomController):
+class Stage2CommandsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
         data = dict()
@@ -20,11 +20,11 @@ class Stage2BootstrapKeysController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="bootstrap_keys_get") or user["authDisabled"]:
-                Log.actionLog("Second stage bootstrap keys list", user)
+            if Permission.hasUserPermission(groups=user["groups"], action="commands_get") or user["authDisabled"]:
+                Log.actionLog("Second stage commands list", user)
 
-                itemData["items"] = BootstrapKey.list()
-                serializer = BoostrapKeysSerializer(data=itemData)
+                itemData["items"] = Command.list()
+                serializer = CommandsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()
@@ -49,19 +49,20 @@ class Stage2BootstrapKeysController(CustomController):
         })
 
 
+
     @staticmethod
     def post(request: Request) -> Response:
         response = None
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="bootstrap_key_post") or user["authDisabled"]:
-                Log.actionLog("Second stage bootstrap key addition", user)
-                Log.actionLog("User data (comment only): "+str(request.data["data"]["comment"]), user)
+            if Permission.hasUserPermission(groups=user["groups"], action="commands_post") or user["authDisabled"]:
+                Log.actionLog("Second stage command addition", user)
+                Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = BoostrapKeySerializer(data=request.data["data"])
+                serializer = CommandSerializer(data=request.data["data"])
                 if serializer.is_valid():
-                    BootstrapKey.add(serializer.validated_data)
+                    Command.add(serializer.validated_data)
                     httpStatus = status.HTTP_201_CREATED
                 else:
                     httpStatus = status.HTTP_400_BAD_REQUEST
@@ -74,7 +75,6 @@ class Stage2BootstrapKeysController(CustomController):
                     Log.actionLog("User data incorrect: "+str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)

@@ -49,6 +49,7 @@ class Stage2TargetCommandsController(CustomController):
         })
 
 
+
     @staticmethod
     def post(request: Request, targetId: int) -> Response:
         response = None
