@@ -1,4 +1,3 @@
-
 import paramiko
 import io
 
@@ -6,8 +5,7 @@ from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
 
 
-class SshSupplicant:
-
+class SSHSupplicant:
     def __init__(self, dataConnection: dict, tcpTimeout: int = 10, silent: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -86,4 +84,3 @@ class SshSupplicant:
             return stdOutData
         except Exception as e:
             raise e
-        

@@ -1,10 +1,9 @@
 from django.urls import path
 
 from .controllers import Root
-from .controllers.Stage2 import BoostrapKeys, BoostrapKey
-from .controllers.Stage2 import Targets, Target, Command, Commands, TargetCommands, TargetCommand
-from .controllers.Stage2 import FinalPubKeys, FinalPubKey
-from .controllers.Stage2 import Reboot, ResizeLastPartition, RenameVg, AddMountPoint, LvsGrow, TargetDelBootStrapKey, TargetAddFinalPubKeys
+from .controllers.Stage2 import BoostrapKeys, BoostrapKey, Targets, Target, Command, Commands, RunCommand, \
+    TargetCommands, TargetCommand, FinalPubKeys, FinalPubKey, Reboot, ResizeLastPartition, RenameVg, AddMountPoint, \
+    LvsGrow, TargetDelBootStrapKey, TargetAddFinalPubKeys
 
 
 urlpatterns = [
@@ -30,6 +29,8 @@ urlpatterns = [
     path('finalpubkey/<int:keyId>/', FinalPubKey.Stage2FinalPubKeyController.as_view(), name='stage2-final-pub-key'),
 
     # Virtual machine commands.
+    path('command/<str:commandUid>/run/<int:targetId>/', RunCommand.Stage2CommandRunController.as_view(), name='stage2-command-run'),
+
     path('commands/resize-last-partition/<int:targetId>/', ResizeLastPartition.Stage2ResizeLastPartitionController.as_view(), name='stage2-resize-last-partition'),
     path('commands/rename-vg/<int:targetId>/', RenameVg.Stage2RenameVgController.as_view(), name='stage2-rename-vg'),
     path('commands/reboot/<int:targetId>/', Reboot.Stage2RebootController.as_view(), name='stage2-reboot'),
