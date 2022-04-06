@@ -108,7 +108,6 @@ class VMwareVirtualMachineTemplateController(CustomController):
                     Log.actionLog("User data incorrect: " + str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
             if "moId" in locals():
                 Lock("template", locals(), locals()["moId"]).release()

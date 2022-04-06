@@ -1,9 +1,9 @@
 
 from vmware.models.Stage2.Target import Target
-from vmware.commands.Stage2.SshCommand import SshCommand
+from vmware.commands.Stage2.SSHCommand import SSHCommand
 
 
-class TargetDelBootstrapKey(SshCommand):
+class TargetDelBootstrapKey(SSHCommand):
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 

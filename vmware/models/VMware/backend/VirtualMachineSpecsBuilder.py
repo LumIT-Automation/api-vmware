@@ -53,7 +53,6 @@ class VirtualMachineSpecsBuilder(Backend):
                 self.networkSpec.extend(self.__buildExistentNetDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
                 self.networkSpec.extend(self.__buildNewNetDevicesSpecs(devicesData["new"]))
-
         except Exception as e:
             raise e
 
@@ -88,7 +87,6 @@ class VirtualMachineSpecsBuilder(Backend):
                 self.storageSpec.extend(self.__buildExistentDiskDevicesSpecs(devicesData["existent"]))
             if "new" in devicesData:
                 self.storageSpec.extend(self.__buildNewDiskDevicesSpecs(devicesData["new"], vmDatastoreMoId))
-
         except Exception as e:
             raise e
 
@@ -120,7 +118,6 @@ class VirtualMachineSpecsBuilder(Backend):
             # Apply the guest OS customization specifications.
             if oCustomSpec:
                 self.cloneSpec.customization = oCustomSpec.spec
-
         except Exception as e:
             raise e
 

@@ -1,10 +1,10 @@
 import time
 
-from vmware.commands.Stage2.SshCommand import SshCommand
+from vmware.commands.Stage2.SSHCommand import SSHCommand
 from vmware.helpers.Exception import CustomException
 
 
-class RebootCommand(SshCommand):
+class RebootCommand(SSHCommand):
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 
@@ -13,7 +13,7 @@ class RebootCommand(SshCommand):
 
 
 
-class TestConnect(SshCommand):
+class TestConnect(SSHCommand):
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(targetId, *args, **kwargs)
 

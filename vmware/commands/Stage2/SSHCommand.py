@@ -7,7 +7,7 @@ from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
 
 
-class SshCommand:
+class SSHCommand:
     def __init__(self, targetId: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

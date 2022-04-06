@@ -56,8 +56,8 @@ class Stage2FinalPubKeysController(CustomController):
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="final_pub_key_post") or user["authDisabled"]:
-                Log.actionLog(" Second stage final pub key addition", user)
-                Log.actionLog(" User data (comment only): "+str(request.data["data"]["comment"]), user)
+                Log.actionLog("Second stage final pub key addition", user)
+                Log.actionLog("User data (comment only): "+str(request.data["data"]["comment"]), user)
 
                 serializer = FinalPubKeySerializer(data=request.data["data"])
                 if serializer.is_valid():
