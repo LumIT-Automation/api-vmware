@@ -80,7 +80,7 @@ CREATE TABLE `final_pubkey` (
 CREATE TABLE `command` (
   `uid` varchar(64) NOT NULL,
   `command` text NOT NULL,
-  `args` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
+  `args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`args`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
