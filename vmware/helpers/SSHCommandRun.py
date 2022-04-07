@@ -16,15 +16,14 @@ class SSHCommandRun:
         try:
             # Load command and its arguments template from db.
             c = Command(commandUid)
+
             self.command = c.command
             self.templateArgs = c.args
-
-            self.targetId = targetId
-
-            # User args.
-            self.userArgs = userArgs
         except Exception as e:
             raise e
+
+        self.targetId = targetId
+        self.userArgs = userArgs
 
         self.alwaysSuccess = False
         self.timeout = 10
