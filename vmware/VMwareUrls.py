@@ -8,6 +8,7 @@ from .controllers.VMware import Datastores, Datastore
 from .controllers.VMware import Networks,Network
 from .controllers.VMware import VMFolders, VMFolder, VMFoldersTree
 from .controllers.VMware import VirtualMachines, VirtualMachine
+from .controllers.VMware import CustomizeVMGuestOS
 from .controllers.VMware import Templates, Template
 from .controllers.VMware import Task
 from .controllers.VMware import CustomSpecs, CustomSpec
@@ -62,6 +63,7 @@ urlpatterns = [
     # VirtualMachine.
     path('<int:assetId>/virtualmachines/', VirtualMachines.VMwareVirtualMachinesController.as_view(), name='vmware-virtualmachines'),
     path('<int:assetId>/virtualmachine/<str:moId>/', VirtualMachine.VMwareVirtualMachineController.as_view(), name='vmware-virtualmachine'),
+    path('<int:assetId>/virtualmachine/<str:moId>/customize-guestos/', CustomizeVMGuestOS.VMwareCustomizeVMGuestOSController.as_view(), name='vmware-customize-guestos'),
 
     path('<int:assetId>/templates/', Templates.VMwareTemplatesController.as_view(), name='vmware-templates'),
     path('<int:assetId>/template/<str:moId>/', Template.VMwareVirtualMachineTemplateController.as_view(), name='vmware-template'),

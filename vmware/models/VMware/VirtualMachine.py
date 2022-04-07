@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.Datastore import Datastore
+from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachineSpecsBuilder as SpecsBuilder
 
@@ -224,6 +225,16 @@ class VirtualMachine(Backend):
             modifySpec = specsBuilder.configSpec
 
             return self.reconfig(configSpec=modifySpec)
+        except Exception as e:
+            raise e
+
+
+
+    def customizeGuestOS(self, data: dict) -> str:
+        try:
+            if "specName" in data and data["specName"]:
+                customSpec = CustomSpec(self.assetId, data["specName"])
+                return customSpec.customizeGuestOS(self.oVirtualMachine) # Task
         except Exception as e:
             raise e
 

@@ -108,6 +108,14 @@ class CustomSpec(Backend):
 
 
 
+    def customizeGuestOS(self, oVirtualMachine: object) -> str:
+        try:
+            return self.customizeVMGuestOS(oVirtualMachine=oVirtualMachine, specName=self.name)
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
