@@ -1,9 +1,7 @@
 from django.urls import path
 
 from .controllers import Root
-from .controllers.Stage2 import BoostrapKeys, BoostrapKey, Targets, Target, Command, Commands, RunCommand, \
-    TargetCommands, TargetCommand, FinalPubKeys, FinalPubKey, Reboot, ResizeLastPartition, RenameVg, AddMountPoint, \
-    LvsGrow, TargetDelBootStrapKey, TargetAddFinalPubKeys
+from .controllers.Stage2 import BoostrapKeys, BoostrapKey, Targets, Target, Command, Commands, RunCommand, TargetCommands, TargetCommand, FinalPubKeys, FinalPubKey
 
 
 urlpatterns = [
@@ -30,12 +28,4 @@ urlpatterns = [
 
     # Virtual machine commands.
     path('command/<str:commandUid>/run/<int:targetId>/', RunCommand.Stage2CommandRunController.as_view(), name='stage2-command-run'),
-
-    path('commands/resize-last-partition/<int:targetId>/', ResizeLastPartition.Stage2ResizeLastPartitionController.as_view(), name='stage2-resize-last-partition'),
-    path('commands/rename-vg/<int:targetId>/', RenameVg.Stage2RenameVgController.as_view(), name='stage2-rename-vg'),
-    path('commands/reboot/<int:targetId>/', Reboot.Stage2RebootController.as_view(), name='stage2-reboot'),
-    path('commands/add-mount-point/<int:targetId>/', AddMountPoint.Stage2AddMountPointController.as_view(), name='stage2-add-mount-point'),
-    path('commands/lvs-grow/<int:targetId>/', LvsGrow.Stage2LvsGrowController.as_view(), name='stage2-lvs-grow'),
-    path('commands/add-final-pubkeys/<int:targetId>/', TargetAddFinalPubKeys.Stage2TargetAddFinalPubKeyController.as_view(), name='stage2-add-final-pubkeys'),
-    path('commands/del-bootstrap-key/<int:targetId>/', TargetDelBootStrapKey.Stage2TargetDelBootstrapKeyController.as_view(), name='stage2-del-bootstrap-key'),
 ]
