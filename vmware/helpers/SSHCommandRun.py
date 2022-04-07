@@ -15,7 +15,6 @@ class SSHCommandRun:
 
         try:
             # Load command and its arguments template from db.
-            # User args must be validated against args template. # @todo.
             c = Command(commandUid)
             self.command = c.command
             self.templateArgs = c.args
@@ -48,7 +47,7 @@ class SSHCommandRun:
             # Apply command (with user arguments) to target.
             ssh = SSHSupplicant(connectionData, tcpTimeout=self.timeout, silent=self.silent)
             out = ssh.command(
-                SSHCommandRun.__commandCompile(self.command, self.userArgs),
+                SSHCommandRun.__commandCompile(self.command, self.userArgs, self.templateArgs),
                 alwaysSuccess=self.alwaysSuccess
             )
         except Exception as e:
@@ -63,20 +62,35 @@ class SSHCommandRun:
     ####################################################################################################################
 
     @staticmethod
-    def __cleanupArgs(args: dict) -> dict:
-        # Allow ony safe chars in args.
+    def __validateUserArgs(userArgs: dict, templateArgs: dict):
+        # Validate user args against args template.
+        try:
+            # User args must be of the expected type (i.e. the type specified in the template args).
+            for ku, vu in userArgs.items():
+                if isinstance(vu, eval(templateArgs[ku])):
+                    del(templateArgs[ku]) # delete to keep track of available args.
+                else:
+                    raise CustomException(status=400, payload={"Ssh": "forbidden data type in args."})
 
+            # All template args passed?
+            if templateArgs:
+                raise CustomException(status=400, payload={"Ssh": "some args missing."})
+        except KeyError:
+            # Something not needed passed (causing a KeyError).
+            raise CustomException(status=400, payload={"Ssh": "some args not required."})
+
+
+
+    @staticmethod
+    def __cleanupArgs(args: dict) -> dict:
         try:
             def cleanString(inputString: str):
                 return re.sub(r'[^a-z0-9A-Z_/-]+', '', inputString, 0)
 
+            # Allow ony safe chars in args.
             for key, value in args.items():
                 if isinstance(value, str):
                     args[key] = cleanString(value)
-                elif isinstance(value, int):
-                    pass
-                else:
-                    raise CustomException(status=400, payload={"Ssh": "forbidden data type in args."})
 
             return args
         except Exception as e:
@@ -85,9 +99,13 @@ class SSHCommandRun:
 
 
     @staticmethod
-    def __commandCompile(command: str, userArgs: dict) -> str:
+    def __commandCompile(command: str, userArgs: dict, templateArgs: dict) -> str:
         try:
+            # Are args enough and of the correct type?
+            SSHCommandRun.__validateUserArgs(userArgs, templateArgs)
+
             # Replace ${argument} in command with userArgs["argument"] value.
+            # @todo: replace only within a "header" area.
             for k, v in SSHCommandRun.__cleanupArgs(userArgs).items():
                 command = command.replace("${"+k+"}", v)
 
