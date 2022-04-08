@@ -45,7 +45,6 @@ class SSHSupplicant:
 
         # In the event of a network problem (e.g. DNS failure, refused connection, etc), paramiko will raise the applicable exception.
         # If an ssh command times out, a socket.timeout exception is raised.
-
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # auto add the remote ssh host key.
 
