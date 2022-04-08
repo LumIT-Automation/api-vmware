@@ -23,9 +23,11 @@ urlpatterns = [
     path('target/<int:targetId>/command/<int:tCommandId>/', TargetCommand.Stage2TargetCommandController.as_view(), name='stage2-target-command'),
     path('target/<int:targetId>/commands/', TargetCommands.Stage2TargetCommandsController.as_view(), name='stage2-target-commands'),
 
+    # Final public keys.
     path('finalpubkeys/', FinalPubKeys.Stage2FinalPubKeysController.as_view(), name='stage2-final-pub-keys'),
     path('finalpubkey/<int:keyId>/', FinalPubKey.Stage2FinalPubKeyController.as_view(), name='stage2-final-pub-key'),
 
     # Virtual machine commands.
     path('command/<str:commandUid>/run/<int:targetId>/', RunCommand.Stage2CommandRunController.as_view(), name='stage2-command-run'),
+    path('command/<str:commandUid>/run/<int:targetId>/<int:pubKeyId>/', RunCommand.Stage2CommandRunController.as_view(), name='stage2-command-run-pubkey'),
 ]
