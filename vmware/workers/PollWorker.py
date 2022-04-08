@@ -17,7 +17,7 @@ class PollWorker:
         self.assetId: int = int(assetId)
         self.taskMoId: str = taskMoId
         self.targetId: int = int(targetId)
-        self.commands: List[dict] = TargetCommand.list(self.targetId)
+        #self.commands: List[dict] = TargetCommand.list(self.targetId)
 
 
 
@@ -30,17 +30,19 @@ class PollWorker:
 
         try:
             if self.checkDeployStatus():
-                time.sleep(30)
-                for command in self.commands:
-                    Log.log(command["command"], 'CCCCCCCCCCCCCCCCCCCCTTTTTTTTTTTTTT')
-                    Log.log(command["args"], 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATTTTTTTTTTT')
-                    CommandClass = getattr(importlib.import_module("vmware.commands.Stage2."+command["command"]), command["command"])
-                    # Instantiate the class (pass arguments to the constructor, if needed)
+                pass
 
-                    classInstance = CommandClass(self.targetId)
-                    Log.log(classInstance, 'CCCCCCCCCCCCCCCCCCCC')
-                    classInstance.exec(command["args"])
-                    time.sleep(1)
+                #time.sleep(30)
+                #for command in self.commands:
+                #    Log.log(command["command"], 'CCCCCCCCCCCCCCCCCCCCTTTTTTTTTTTTTT')
+                #    Log.log(command["args"], 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATTTTTTTTTTT')
+                #    CommandClass = getattr(importlib.import_module("vmware.commands.Stage2."+command["command"]), command["command"])
+                #    # Instantiate the class (pass arguments to the constructor, if needed)
+
+                #    classInstance = CommandClass(self.targetId)
+                #    Log.log(classInstance, 'CCCCCCCCCCCCCCCCCCCC')
+                #    classInstance.exec(command["args"])
+                #    time.sleep(1)
         except Exception as e:
             raise e
 
@@ -79,7 +81,3 @@ class PollWorker:
             return ret
         except Exception as e:
             raise e
-
-
-
-

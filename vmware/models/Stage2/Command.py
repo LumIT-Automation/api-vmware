@@ -1,6 +1,8 @@
 from typing import List
 
 from vmware.repository.Stage2.Command import Command as Repository
+
+from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
@@ -77,5 +79,5 @@ class Command:
             # Set attributes.
             for k, v in info.items():
                 setattr(self, k, v)
-        except Exception as e:
-            raise e
+        except Exception:
+            raise CustomException(status=400, payload={"Ssh": "non existent command."})
