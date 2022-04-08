@@ -175,7 +175,8 @@ class VirtualMachine(Backend):
 
 
 
-    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list) -> int:
+    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None) -> int:
+        postDeployCommands = [] if postDeployCommands is None else postDeployCommands
         try:
             ip = ""
             if "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
@@ -395,14 +396,14 @@ class VirtualMachine(Backend):
 
 
 
-    def __checkFinalPubkeys(self, keyIds: list) -> None:
+    def __checkFinalPubkeys(self, keyIds: list = None) -> None:
+        keyIds = [] if keyIds is None else keyIds
         for k in keyIds:
             if k:
                 try:
                     FinalPubKey(k)
                 except Exception:
                     raise CustomException(status=400, payload={"VMware": "Invalid final public key."})
-
 
 
 
