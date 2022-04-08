@@ -4,6 +4,7 @@ import time
 from vmware.models.Stage2.Command import Command
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.FinalPubKey import FinalPubKey
 
 from vmware.helpers.SSHSupplicant import SSHSupplicant
 from vmware.helpers.Exception import CustomException
@@ -11,8 +12,13 @@ from vmware.helpers.Log import Log
 
 
 class SSHCommandRun:
-    def __init__(self, commandUid: str, targetId: int, userArgs: dict, silent: bool = False, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, commandUid: str, targetId: int, userArgs: dict, *args, **kwargs):
+        super().__init__()
+
+        self.targetId = targetId
+        self.userArgs = userArgs
+        self.pubKeyId = kwargs.get("pubKeyId", 0)
+        self.timeout = 10
 
         try:
             # Load command and its arguments template from db.
@@ -21,15 +27,14 @@ class SSHCommandRun:
             self.commandUid = commandUid
             self.command = c.command
             self.templateArgs = c.args
+
+            # Target connection information.
+            self.connectionData = Target(self.targetId).connectionData
+            if "id_bootstrap_key" in self.connectionData \
+                    and self.connectionData["id_bootstrap_key"]:
+                self.connectionData["priv_key"] = BootstrapKey(self.connectionData["id_bootstrap_key"]).priv_key
         except Exception as e:
             raise e
-
-        self.targetId = targetId
-        self.userArgs = userArgs
-
-        self.alwaysSuccess = False
-        self.timeout = 10
-        self.silent = silent
 
 
 
@@ -39,37 +44,32 @@ class SSHCommandRun:
 
     def __call__(self, *args, **kwargs) -> str:
         try:
-            # Target connection information.
-            connectionData = Target(self.targetId).connectionData
-            if "id_bootstrap_key" in connectionData and connectionData["id_bootstrap_key"]:
-                connectionData["priv_key"] = BootstrapKey(connectionData["id_bootstrap_key"]).priv_key
-
-            if self.commandUid == "reboot":
-                self.alwaysSuccess = True # reboot on RH does not return 0.
-
             # Run command (with user arguments) against target (SSH).
-            ssh = SSHSupplicant(connectionData, tcpTimeout=self.timeout, silent=self.silent)
-            out = ssh.command(
-                SSHCommandRun.__commandCompile(self.command, self.userArgs, self.templateArgs).replace("\r", ""), # complete and purged command.
-                alwaysSuccess=self.alwaysSuccess
-            )
-
-            # Synchronize reboot command.
             if self.commandUid == "reboot":
-                o = ""
-                tStart = time.time()
-                while time.time() < tStart + 120: # [seconds]
-                    try:
-                        o = SSHCommandRun("echo", self.targetId, {"__echo": "i-am-alive"})()
-                        if o:
-                            break
-                    except Exception:
-                        pass
+                o = self.__reboot()
+            elif self.commandUid == "addPubKey":
+                o = self.__publicKey()
+            else:
+                o = self.__command()
+        except Exception as e:
+            raise e
 
-                    time.sleep(10) # every 10s.
+        return o
 
-                if not o:
-                    raise CustomException(status=400, payload={"Ssh": "machine not responding anymore."})
+
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __command(self) -> str:
+        try:
+            ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
+            out = ssh.command(
+                SSHCommandRun.__commandCompile(
+                    self.command, self.userArgs, self.templateArgs
+                ).replace("\r", "") # complete and purged command.
+            )
         except Exception as e:
             raise e
 
@@ -77,9 +77,55 @@ class SSHCommandRun:
 
 
 
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
+    def __publicKey(self) -> str:
+        try:
+            # Load public key as it was put by the user.
+            self.userArgs["__pubKey"] = FinalPubKey(self.pubKeyId).pub_key
+
+            ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
+            out = ssh.command(
+                SSHCommandRun.__commandCompile(
+                    self.command, self.userArgs, self.templateArgs, validate=False
+                ).replace("\r", "")
+            )
+        except Exception as e:
+            raise e
+
+        return out
+
+
+
+    def __reboot(self) -> str:
+        o = ""
+
+        try:
+            ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
+            out = ssh.command(
+                SSHCommandRun.__commandCompile(
+                    self.command, self.userArgs, self.templateArgs).replace("\r", ""),
+                alwaysSuccess=True # reboot on RH does not return 0
+            )
+
+            # Synchronize reboot command.
+            tStart = time.time()
+            while time.time() < tStart + 120: # [seconds]
+                try:
+                    o = SSHCommandRun("echo", self.targetId, {"__echo": "i-am-alive"})()
+                    if o:
+                        break
+                except Exception:
+                    pass
+
+                time.sleep(10) # every 10s.
+
+            if not o:
+                raise CustomException(status=400, payload={"Ssh": "machine not responding anymore."})
+        except Exception as e:
+            raise e
+
+        return out
+
+
 
     @staticmethod
     def __validateUserArgs(userArgs: dict, templateArgs: dict):
@@ -120,13 +166,14 @@ class SSHCommandRun:
 
 
     @staticmethod
-    def __commandCompile(command: str, userArgs: dict, templateArgs: dict) -> str:
+    def __commandCompile(command: str, userArgs: dict, templateArgs: dict, validate: bool = True) -> str:
         try:
-            # Are args enough and of the correct type?
-            SSHCommandRun.__validateUserArgs(userArgs, templateArgs)
+            if validate:
+                SSHCommandRun.__validateUserArgs(userArgs, templateArgs) # are args enough and of the correct type?
+                userArgs = SSHCommandRun.__cleanupArgs(userArgs) # allow only safe chars.
 
             # Replace ${argument} in command with userArgs["argument"] value.
-            for k, v in SSHCommandRun.__cleanupArgs(userArgs).items():
+            for k, v in userArgs.items():
                 command = command.replace("${"+k+"}", v)
 
             return command
