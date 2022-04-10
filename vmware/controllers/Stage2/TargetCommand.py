@@ -11,14 +11,14 @@ from vmware.helpers.Log import Log
 
 class Stage2TargetCommandController(CustomController):
     @staticmethod
-    def delete(request: Request, targetId: int, tCommandId: int) -> Response:
+    def delete(request: Request, targetId: int, commandUid: str) -> Response:
         user = CustomController.loggedUser(request)
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="target_command_delete") or user["authDisabled"]:
                 Log.actionLog("Second stage target command deletion", user)
 
-                targetCommand = TargetCommand(tCommandId)
+                targetCommand = TargetCommand(targetId, commandUid)
                 targetCommand.delete()
 
                 httpStatus = status.HTTP_200_OK

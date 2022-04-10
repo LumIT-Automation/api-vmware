@@ -21,9 +21,9 @@ class Stage2TargetCommandsController(CustomController):
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="target_commands_get") or user["authDisabled"]:
-                Log.actionLog("Second stage target commands list", user)
+                Log.actionLog("Second stage commands per target", user)
 
-                itemData["items"] = TargetCommand.list(targetId)
+                itemData["items"] = TargetCommand.listTargetCommands(targetId)
                 serializer = CommandsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data

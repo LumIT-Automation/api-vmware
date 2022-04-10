@@ -13,10 +13,10 @@ class TargetCommand:
     db = 'stage2'
 
     # Table: target_command
-    #   `id` int(11) NOT NULL,
     #   `id_target` int(11) NOT NULL,
     #   `command` varchar(64) NOT NULL DEFAULT '',
-    #   `args` varchar(8192) DEFAULT NULL;
+    #   `args` varchar(8192) NOT NULL DEFAULT '{}',
+    #   `sequence` int(11) NOT NULL
 
 
 
@@ -25,13 +25,13 @@ class TargetCommand:
     ####################################################################################################################
 
     @staticmethod
-    def delete(targetId: int) -> None:
+    def delete(targetId: int, commandUid: str) -> None:
         c = connections[TargetCommand.db].cursor()
 
-        if TargetCommand.__exists(targetId):
+        if TargetCommand.__exists(targetId, commandUid):
             try:
-                c.execute("DELETE FROM target_command WHERE id = %s", [
-                    targetId
+                c.execute("DELETE FROM target_command WHERE id_target = %s AND command = %s", [
+                    targetId, commandUid
                 ])
 
             except Exception as e:
@@ -52,7 +52,7 @@ class TargetCommand:
                 "SELECT * "
                 "FROM target_command "
                 "WHERE id_target = %s "
-                "ORDER BY id ", [
+                "ORDER BY sequence ", [
                     targetId
             ])
             o = DBHelper.asDict(c)
@@ -104,12 +104,12 @@ class TargetCommand:
     ####################################################################################################################
 
     @staticmethod
-    def __exists(targetId: int) -> int:
+    def __exists(targetId: int, commandUid: str) -> int:
         c = connections[TargetCommand.db].cursor()
 
         try:
-            c.execute("SELECT COUNT(*) AS c FROM target_command WHERE id = %s", [
-                targetId
+            c.execute("SELECT COUNT(*) AS c FROM target_command WHERE id_target = %s AND command = %s", [
+                targetId, commandUid
             ])
             o = DBHelper.asDict(c)
 

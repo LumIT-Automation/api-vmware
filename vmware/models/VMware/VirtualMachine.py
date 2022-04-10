@@ -200,6 +200,13 @@ class VirtualMachine(Backend):
                 c["id_target"] = targetId
                 TargetCommand.add(c)
 
+                # @todo: broken, input must be:
+                #         "command": "echo",
+                #         "args": {
+                #             "__path": "/"
+                #         },
+                #         "sequence": 1
+
             # Launch async worker.
             pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
 

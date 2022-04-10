@@ -91,10 +91,10 @@ CREATE TABLE `command` (
 --
 
 CREATE TABLE `target_command` (
-  `id` int(11) NOT NULL,
   `id_target` int(11) NOT NULL,
   `command` varchar(64) NOT NULL DEFAULT '',
-  `args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (JSON_VALID(args))
+  `args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`args`)),
+  `sequence` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -106,11 +106,11 @@ CREATE TABLE `target_command` (
 
 CREATE TABLE `command_exec_status` (
   `id` int(11) NOT NULL,
-  `id_command` int(11) NOT NULL,
-  `exec_count` tinyint NOT NULL,
+  `id_command` varchar(64) NOT NULL,
+  `exec_count` tinyint(4) NOT NULL,
   `exit_status` int(11) NOT NULL,
-  `stdout` varchar(65536) NOT NULL DEFAULT '',
-  `stderr` varchar(65536) NOT NULL DEFAULT ''
+  `stdout` mediumtext NOT NULL DEFAULT '',
+  `stderr` mediumtext NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -152,10 +152,16 @@ ALTER TABLE `target_command`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `command_status`
+-- Indici per le tabelle `command_exec_status`
 --
 ALTER TABLE `command_exec_status`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ces_command` (`id_command`);
+
+
+--
+-- Indici per le tabelle `command_status`
+--
 
 
 --
@@ -181,13 +187,7 @@ ALTER TABLE `final_pubkey`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `target_command`
---
-ALTER TABLE `target_command`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT per la tabella `command_exec-status`
+-- AUTO_INCREMENT per la tabella `command_exec_status`
 --
 ALTER TABLE `command_exec_status`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
@@ -207,13 +207,16 @@ ALTER TABLE `target`
 -- Limiti per la tabella `target_command`
 --
 ALTER TABLE `target_command`
-  ADD CONSTRAINT `tg_key` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `tc_command` FOREIGN KEY (`command`) REFERENCES `command` (`uid`),
+  ADD CONSTRAINT `tc_target` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
 
 --
 -- Limiti per la tabella `command_exec_status`
 --
 ALTER TABLE `command_exec_status`
-  ADD CONSTRAINT `cmd_key` FOREIGN KEY (`id_command`) REFERENCES `target_command` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `ces_command` FOREIGN KEY (`id_command`) REFERENCES `command` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
 
 
 -- --------------------------------------------------------
