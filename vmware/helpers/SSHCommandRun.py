@@ -47,7 +47,8 @@ class SSHCommandRun:
             # Run command (with user arguments) against target (SSH).
             if self.commandUid == "reboot":
                 o = self.__reboot()
-            elif self.commandUid == "addPubKey":
+            elif self.commandUid == "addPubKey" \
+                    or self.commandUid == "removeBootstrapKey":
                 o = self.__publicKey()
             else:
                 o = self.__command()
@@ -78,18 +79,27 @@ class SSHCommandRun:
 
 
     def __publicKey(self) -> str:
-        try:
-            # Load public key as it was put by the user.
-            self.userArgs["__pubKey"] = FinalPubKey(self.pubKeyId).pub_key
+        out = ""
+        if self.commandUid in ("addPubKey", "removeBootstrapKey"):
+            try:
+                if self.commandUid == "addPubKey":
+                    # Load public key as it was put by the user.
+                    self.userArgs["__pubKey"] = FinalPubKey(self.pubKeyId).pub_key
+                else:
+                    # Load public bootstrap key.
+                    target = Target(self.targetId)
+                    self.userArgs["__pubKey"] = target.getBootstrapPubKey()
 
-            ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
-            out = ssh.command(
-                SSHCommandRun.__commandCompile(
-                    self.command, self.userArgs, self.templateArgs, validate=False
-                ).replace("\r", "")
-            )
-        except Exception as e:
-            raise e
+                    # @todo: broken (public key must be saved together with private one)
+
+                ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
+                out = ssh.command(
+                    SSHCommandRun.__commandCompile(
+                        self.command, self.userArgs, self.templateArgs, validate=False
+                    ).replace("\r", "")
+                )
+            except Exception as e:
+                raise e
 
         return out
 
@@ -119,7 +129,7 @@ class SSHCommandRun:
                 time.sleep(10) # every 10s.
 
             if not o:
-                raise CustomException(status=400, payload={"Ssh": "machine not responding anymore."})
+                raise CustomException(status=400, payload={"SSH": "machine not responding anymore."})
         except Exception as e:
             raise e
 
@@ -137,14 +147,14 @@ class SSHCommandRun:
                 if isinstance(vu, eval(templateArgs[ku])):
                     del(templateArgs[ku]) # delete to keep track of available args.
                 else:
-                    raise CustomException(status=400, payload={"Ssh": "forbidden data type in args."})
+                    raise CustomException(status=400, payload={"SSH": "forbidden data type in args."})
 
             # All template args passed?
             if templateArgs:
-                raise CustomException(status=400, payload={"Ssh": "some args missing."})
+                raise CustomException(status=400, payload={"SSH": "some args missing."})
         except KeyError:
             # Something not needed passed (causing a KeyError).
-            raise CustomException(status=400, payload={"Ssh": "some args not required."})
+            raise CustomException(status=400, payload={"SSH": "some args not required."})
 
 
 
@@ -172,7 +182,7 @@ class SSHCommandRun:
                 SSHCommandRun.__validateUserArgs(userArgs, templateArgs) # are args enough and of the correct type?
                 userArgs = SSHCommandRun.__cleanupArgs(userArgs) # allow only safe chars.
 
-            # Replace ${argument} in command with userArgs["argument"] value.
+            # Replace ${__argument} in command with userArgs["__argument"] value.
             for k, v in userArgs.items():
                 command = command.replace("${"+k+"}", v)
 

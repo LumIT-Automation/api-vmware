@@ -59,7 +59,7 @@ class SSHSupplicant:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=self.tcpTimeout)
             else:
-                raise CustomException(status=503, payload={"Ssh": "Failed to execute the ssh command on the asset."})
+                raise CustomException(status=503, payload={"SSH": "Failed to execute the ssh command on the asset."})
 
             stdIn, stdOut, stdErr = ssh.exec_command(cmd)
             exitStatus = stdOut.channel.recv_exit_status()
@@ -78,7 +78,7 @@ class SSHSupplicant:
                 Log.actionLog("Paramiko stdout: silenced by caller.")
 
             if not alwaysSuccess and exitStatus != 0:
-                raise CustomException(status=500, payload={"Ssh": "Command exit status: " + str(exitStatus)})
+                raise CustomException(status=500, payload={"SSH": "Command exit status: " + str(exitStatus)})
 
             return stdOutData
         except Exception as e:
