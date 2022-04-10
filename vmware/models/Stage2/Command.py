@@ -80,4 +80,4 @@ class Command:
             for k, v in info.items():
                 setattr(self, k, v)
         except Exception:
-            raise CustomException(status=400, payload={"Ssh": "non existent command."})
+            raise CustomException(status=400, payload={"SSH": "non existent command."})
