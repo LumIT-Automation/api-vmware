@@ -73,7 +73,6 @@ class VMwareVirtualMachineTemplateController(CustomController):
 
 
 
-    # @todo: move away.
     @staticmethod
     def post(request: Request, assetId: int, moId: str) -> Response:
         response = dict()
@@ -118,6 +117,3 @@ class VMwareVirtualMachineTemplateController(CustomController):
         return Response(response, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-
-
-
