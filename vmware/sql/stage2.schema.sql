@@ -160,11 +160,6 @@ ALTER TABLE `command_exec_status`
 
 
 --
--- Indici per le tabelle `command_status`
---
-
-
---
 -- AUTO_INCREMENT per le tabelle scaricate
 --
 
