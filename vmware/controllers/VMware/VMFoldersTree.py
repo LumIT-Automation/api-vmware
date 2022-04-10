@@ -99,7 +99,3 @@ class VMwareVMFoldersTreeController(CustomController):
         return Response(data, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-
-
-
-

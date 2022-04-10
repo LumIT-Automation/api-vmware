@@ -20,7 +20,7 @@ urlpatterns = [
     path('target/<int:targetId>/', Target.Stage2TargetController.as_view(), name='stage2-target'),
 
     # Target commands.
-    path('target/<int:targetId>/command/<int:tCommandId>/', TargetCommand.Stage2TargetCommandController.as_view(), name='stage2-target-command'),
+    path('target/<int:targetId>/command/<str:commandUid>/', TargetCommand.Stage2TargetCommandController.as_view(), name='stage2-target-command'),
     path('target/<int:targetId>/commands/', TargetCommands.Stage2TargetCommandsController.as_view(), name='stage2-target-commands'),
 
     # Final public keys.
