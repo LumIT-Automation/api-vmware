@@ -20,9 +20,9 @@ class Stage2TargetController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="target_get") or user["authDisabled"]:
                 Log.actionLog("Second stage target info", user)
 
-                target = Target(targetId)
-                itemData = target.info()
-                serializer = Serializer(data=itemData)
+                serializer = Serializer(
+                    data=Target(targetId).repr()
+                )
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
                     data["href"] = request.get_full_path()

@@ -29,10 +29,10 @@ class SSHCommandRun:
             self.templateArgs = c.args
 
             # Target connection information.
-            self.connectionData = Target(self.targetId).connectionData
-            if "id_bootstrap_key" in self.connectionData \
-                    and self.connectionData["id_bootstrap_key"]:
-                self.connectionData["priv_key"] = BootstrapKey(self.connectionData["id_bootstrap_key"]).priv_key
+            self.connection = Target(self.targetId).connection
+            if "id_bootstrap_key" in self.connection \
+                    and self.connection["id_bootstrap_key"]:
+                self.connection["priv_key"] = BootstrapKey(self.connection["id_bootstrap_key"]).priv_key
         except Exception as e:
             raise e
 
@@ -65,7 +65,7 @@ class SSHCommandRun:
 
     def __command(self) -> str:
         try:
-            ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
+            ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
             out = ssh.command(
                 SSHCommandRun.__commandCompile(
                     self.command, self.userArgs, self.templateArgs
@@ -90,7 +90,7 @@ class SSHCommandRun:
                     target = Target(self.targetId)
                     self.userArgs["__pubKey"] = target.getBootstrapPubKey()
 
-                ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
+                ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
                 out = ssh.command(
                     SSHCommandRun.__commandCompile(
                         self.command, self.userArgs, self.templateArgs, validate=False
@@ -107,7 +107,7 @@ class SSHCommandRun:
         o = ""
 
         try:
-            ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
+            ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
             out = ssh.command(
                 SSHCommandRun.__commandCompile(
                     self.command, self.userArgs, self.templateArgs),

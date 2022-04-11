@@ -4,7 +4,6 @@ from vmware.models.Stage2.BoostrapKey import BootstrapKey
 
 from vmware.repository.Stage2.Target import Target as Repository
 
-from vmware.helpers.Utils import GroupConcatToDict
 from vmware.helpers.Log import Log
 
 
@@ -22,7 +21,7 @@ class Target:
         super().__init__(*args, **kwargs)
 
         self.id = int(targetId)
-        self.connectionData: DataConnection = None
+        self.connection: DataConnection = None
         self.id_asset: int = 0
         self.task_moid: str = ""
         self.task_progress: int = 0
@@ -38,14 +37,9 @@ class Target:
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
+    def repr(self) -> dict:
         try:
-            info = Repository.getInfo(self.id)
-            if info["final_pubkeys"]:
-                pKeys = GroupConcatToDict(["id", "comment", "pub_key"])
-                pubKeyStruct = pKeys.makeDict(info["final_pubkeys"])
-                info["final_pubkeys"] = pubKeyStruct
-            return info
+            return vars(self)
         except Exception as e:
             raise e
 
