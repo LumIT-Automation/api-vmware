@@ -177,6 +177,7 @@ class VirtualMachine(Backend):
 
     def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None) -> int:
         postDeployCommands = [] if postDeployCommands is None else postDeployCommands
+
         try:
             ip = ""
             if "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
@@ -199,13 +200,6 @@ class VirtualMachine(Backend):
             for c in postDeployCommands:
                 c["id_target"] = targetId
                 TargetCommand.add(c)
-
-                # @todo: broken, input must be:
-                #         "command": "echo",
-                #         "args": {
-                #             "__path": "/"
-                #         },
-                #         "sequence": 1
 
             # Launch async worker.
             pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
