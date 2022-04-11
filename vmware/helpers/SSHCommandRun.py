@@ -69,7 +69,7 @@ class SSHCommandRun:
             out = ssh.command(
                 SSHCommandRun.__commandCompile(
                     self.command, self.userArgs, self.templateArgs
-                ).replace("\r", "") # complete and purged command.
+                ) # complete and purged command.
             )
         except Exception as e:
             raise e
@@ -94,7 +94,7 @@ class SSHCommandRun:
                 out = ssh.command(
                     SSHCommandRun.__commandCompile(
                         self.command, self.userArgs, self.templateArgs, validate=False
-                    ).replace("\r", "")
+                    )
                 )
             except Exception as e:
                 raise e
@@ -110,7 +110,7 @@ class SSHCommandRun:
             ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
             out = ssh.command(
                 SSHCommandRun.__commandCompile(
-                    self.command, self.userArgs, self.templateArgs).replace("\r", ""),
+                    self.command, self.userArgs, self.templateArgs),
                 alwaysSuccess=True # reboot on RH does not return 0
             )
 
@@ -182,7 +182,7 @@ class SSHCommandRun:
 
             # Replace ${__argument} in command with userArgs["__argument"] value.
             for k, v in userArgs.items():
-                command = command.replace("${"+k+"}", v)
+                command = command.replace("${"+k+"}", str(v))
 
             return command
         except Exception as e:

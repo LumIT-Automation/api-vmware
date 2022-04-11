@@ -56,7 +56,7 @@ class Command:
         # %s placeholders and values for SET.
         for k, v in data.items():
             sql += k + "=%s,"
-            values.append(strip_tags(v)) # no HTML allowed.
+            values.append(strip_tags(v.replace('\r\n', '\n').replace('\r', '\n'))) # no HTML allowed, strip \r.
 
         # Condition for WHERE.
         values.append(uid)
@@ -121,7 +121,7 @@ class Command:
         for k, v in data.items():
             s += "%s,"
             keys += k+","
-            values.append(strip_tags(v)) # no HTML allowed.
+            values.append(strip_tags(v.replace('\r\n', '\n').replace('\r', '\n'))) # no HTML allowed, strip \r.
 
         keys = keys[:-1]+")"
 
