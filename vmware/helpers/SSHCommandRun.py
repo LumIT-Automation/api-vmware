@@ -90,8 +90,6 @@ class SSHCommandRun:
                     target = Target(self.targetId)
                     self.userArgs["__pubKey"] = target.getBootstrapPubKey()
 
-                    # @todo: broken (public key must be saved together with private one)
-
                 ssh = SSHSupplicant(self.connectionData, tcpTimeout=self.timeout)
                 out = ssh.command(
                     SSHCommandRun.__commandCompile(
