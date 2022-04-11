@@ -146,17 +146,18 @@ ALTER TABLE `command`
 COMMIT;
 
 --
--- Indici per le tabelle `command_launch`
---
-ALTER TABLE `target_command`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indici per le tabelle `command_exec_status`
 --
 ALTER TABLE `command_exec_status`
   ADD PRIMARY KEY (`id`),
   ADD KEY `ces_command` (`id_command`);
+
+--
+-- Indici per le tabelle `target_command`
+--
+ALTER TABLE `target_command`
+  ADD PRIMARY KEY (`id_target`,`command`),
+  ADD KEY `tc_command` (`command`);
 
 
 --
