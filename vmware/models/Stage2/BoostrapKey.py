@@ -14,6 +14,7 @@ class BootstrapKey:
         self.priv_key: str = ""
         self.pub_key: str = ""
         self.comment: str = ""
+        self.keyType = 'rsa' # Todo: support dsa, ecdsa ...
 
         self.__load()
 
@@ -47,7 +48,7 @@ class BootstrapKey:
         try:
             keyStringIO = io.StringIO(self.priv_key)
             privateKey = paramiko.RSAKey.from_private_key(keyStringIO)
-            pubKey = privateKey.get_base64()
+            pubKey = 'ssh-'+self.keyType+' '+privateKey.get_base64()
         except Exception:
             pass
 
