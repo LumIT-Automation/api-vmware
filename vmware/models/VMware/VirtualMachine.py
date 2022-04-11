@@ -126,6 +126,8 @@ class VirtualMachine(Backend):
             # Check final pubKeys.
             self.__checkFinalPubkeys(Input.finalPubKeyIds)
 
+            # @todo: check post deploy commands.
+
             # Build devsSpecs.
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
 

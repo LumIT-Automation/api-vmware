@@ -26,9 +26,11 @@ class Target:
         self.connection: DataConnection = None
         self.id_asset: int = 0
         self.task_moid: str = ""
+        self.task_state: str = ""
         self.task_progress: int = 0
         self.task_startTime: str = ""
         self.task_queueTime: str = ""
+        self.task_message: str = ""
         self.vm_name: str = ""
 
         self.commands: List[Command] = []

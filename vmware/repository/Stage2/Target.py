@@ -128,7 +128,7 @@ class Target:
             c.execute(
                 "SELECT "
                 "id, ip, port, api_type, username, id_bootstrap_key, id_asset, "
-                "task_moid, task_state,task_progress, task_startTime, task_queueTime, vm_name "
+                "task_moid, task_state, task_progress, task_startTime, task_queueTime, task_message, vm_name "
                 "FROM target"
             )
             o = DBHelper.asDict(c)
