@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from vmware.serializers.Stage2.FinalPubKey import Stage2FinalPubKeySerializer
+from vmware.serializers.Stage2.Command import Stage2CommandSerializer
 
 
 class Stage2TargetSerializer(serializers.Serializer):
@@ -21,4 +21,4 @@ class Stage2TargetSerializer(serializers.Serializer):
     vm_name = serializers.CharField(required=False, max_length=128, allow_blank=True)
     connection = Stage2TargetSerializerConnection(required=False)
 
-    final_pubkeys = Stage2FinalPubKeySerializer(many=True, required=False, allow_null=True)
+    commands = Stage2CommandSerializer(many=True, required=False)

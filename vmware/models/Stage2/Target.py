@@ -1,6 +1,8 @@
 from typing import List, Dict, Union
 
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.Command import Command
+from vmware.models.Stage2.TargetCommand import TargetCommand
 
 from vmware.repository.Stage2.Target import Target as Repository
 
@@ -29,6 +31,8 @@ class Target:
         self.task_queueTime: str = ""
         self.vm_name: str = ""
 
+        self.commands: List[Command] = []
+
         self.__load()
 
 
@@ -38,8 +42,17 @@ class Target:
     ####################################################################################################################
 
     def repr(self) -> dict:
+        out = list()
+
         try:
-            return vars(self)
+            o = vars(self)
+            for el in o["commands"]:
+                out = {"commands": list()}
+                out["commands"].append(el.repr())
+
+            o["commands"] = out["commands"] # replace.
+
+            return o
         except Exception as e:
             raise e
 
@@ -80,7 +93,15 @@ class Target:
     @staticmethod
     def list() -> List[dict]:
         try:
-            return Repository.list()
+            o = Repository.list()
+            for el in o:
+                el["commands"] = list()
+
+                commands = TargetCommand.listTargetCommands(el["id"])
+                for command in commands:
+                    el["commands"].append(Command(command["command"]).repr())
+
+            return o
         except Exception as e:
             raise e
 
@@ -106,5 +127,9 @@ class Target:
             # Set attributes.
             for k, v in info.items():
                 setattr(self, k, v)
+
+            commands = TargetCommand.listTargetCommands(self.id)
+            for command in commands:
+                self.commands.append(Command(command["command"]))
         except Exception as e:
             raise e
