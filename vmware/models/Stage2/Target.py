@@ -42,12 +42,13 @@ class Target:
     ####################################################################################################################
 
     def repr(self) -> dict:
-        out = list()
+        out = {
+            "commands": list()
+        }
 
         try:
             o = vars(self)
             for el in o["commands"]:
-                out = {"commands": list()}
                 out["commands"].append(el.repr())
 
             o["commands"] = out["commands"] # replace.
