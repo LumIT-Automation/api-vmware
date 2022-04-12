@@ -2,7 +2,6 @@ from typing import List
 
 from django.utils.html import strip_tags
 from django.db import connections
-from django.db import transaction
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
@@ -37,64 +36,28 @@ class Target:
     @staticmethod
     def get(targetId: int) -> dict:
         c = connections[Target.db].cursor()
-        o = dict()
 
         try:
-            c.execute("SELECT * FROM target "
-                      "WHERE target.id = %s ", [
-                        targetId
-                    ])
+            c.execute("SELECT * FROM target WHERE target.id = %s ", [
+                targetId
+            ])
 
-            a = DBHelper.asDict(c)[0]
-            if a["api_type"] == "ssh":
-                o["connectionData"] = {
-                    "ip": a["ip"],
-                    "port": a["port"],
-                    "api_type": a["api_type"],
-                    "id_bootstrap_key": a["id_bootstrap_key"],
-                    "username": a["username"],
-                    "password": a["password"]
-                }
-                o["id"] = a["id"]
-                o["id_asset"] = a["id_asset"]
-                o["task_moid"] = a["task_moid"]
-                o["task_state"] = a["task_state"]
-                o["task_progress"] = a["task_progress"]
-                o["task_startTime"] = a["task_startTime"]
-                o["task_queueTime"] = a["task_queueTime"]
-                o["vm_name"] = a["vm_name"]
+            o = DBHelper.asDict(c)[0]
+            o["connection"] = {
+                "ip": o["ip"],
+                "port": o["port"],
+                "api_type": o["api_type"],
+                "id_bootstrap_key": o["id_bootstrap_key"],
+                "username": o["username"]
+            }
 
-                return o
-        except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
+            del(o["ip"])
+            del(o["port"])
+            del(o["api_type"])
+            del(o["id_bootstrap_key"])
+            del(o["username"])
 
-
-
-    @staticmethod
-    def getInfo(targetId: int) -> dict:
-        c = connections[Target.db].cursor()
-
-        try:
-            c.execute(
-                "SELECT "
-                    "target.id, target.ip, target.port, "
-                    "target.api_type, target.id_bootstrap_key, target.username, "
-                    "target.id_asset, target.task_moid, target.task_state, target.task_progress, "
-                    "target.task_startTime, target.task_queueTime, "
-                    "target.vm_name, target.id, "
-                    "GROUP_CONCAT("
-                        "CONCAT(final_pubkey.id,'::',final_pubkey.comment,'::',final_pubkey.pub_key) "
-                    ")  AS final_pubkeys "
-                "FROM target "
-                "LEFT JOIN target_final_pubkey ON target_final_pubkey.id_target = target.id "
-                "LEFT JOIN final_pubkey on final_pubkey.id = target_final_pubkey.id_pubkey "
-                "WHERE target.id = %s ", [
-                    targetId
-                ])
-
-            return DBHelper.asDict(c)[0]
+            return o
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -107,6 +70,13 @@ class Target:
         sql = ""
         values = []
         c = connections[Target.db].cursor()
+
+        if "connection" in data:
+            for el in ("ip", "port", "api_type", "id_bootstrap_key", "username"):
+                if el in data["connection"]:
+                    data[el] = data["connection"][el]
+
+            del(data["connection"])
 
         if Target.__exists(targetId):
             # Build the update query according to dict fields.
@@ -123,7 +93,7 @@ class Target:
                     values
                 )
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -142,7 +112,7 @@ class Target:
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -157,13 +127,30 @@ class Target:
         try:
             c.execute(
                 "SELECT "
-                "id, ip, port, api_type, id_bootstrap_key, id_asset, "
-                "task_moid, task_state,task_progress, task_startTime, task_queueTime, vm_name "
+                "id, ip, port, api_type, username, id_bootstrap_key, id_asset, "
+                "task_moid, task_state, task_progress, task_startTime, task_queueTime, task_message, vm_name "
                 "FROM target"
             )
-            return DBHelper.asDict(c)
+            o = DBHelper.asDict(c)
+            for el in o:
+                el["connection"] = {
+                    "ip": el["ip"],
+                    "port": el["port"],
+                    "api_type": el["api_type"],
+                    "id_bootstrap_key": el["id_bootstrap_key"],
+                    "username": el["username"]
+                }
+
+                del(el["ip"])
+                del(el["port"])
+                del(el["api_type"])
+                del(el["id_bootstrap_key"])
+                del(el["username"])
+
+            return o
+
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -175,6 +162,13 @@ class Target:
         keys = "("
         values = []
         c = connections[Target.db].cursor()
+
+        if "connection" in data:
+            for el in ("ip", "port", "api_type", "id_bootstrap_key", "username"):
+                if el in data["connection"]:
+                    data[el] = data["connection"][el]
+
+            del(data["connection"])
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
@@ -192,7 +186,7 @@ class Target:
 
             return targetId
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 

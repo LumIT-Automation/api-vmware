@@ -1,10 +1,11 @@
 from typing import List, Dict, Union
 
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
+from vmware.models.Stage2.Command import Command
+from vmware.models.Stage2.TargetCommand import TargetCommand
 
 from vmware.repository.Stage2.Target import Target as Repository
 
-from vmware.helpers.Utils import GroupConcatToDict
 from vmware.helpers.Log import Log
 
 
@@ -22,13 +23,17 @@ class Target:
         super().__init__(*args, **kwargs)
 
         self.id = int(targetId)
-        self.connectionData: DataConnection = None
+        self.connection: DataConnection = None
         self.id_asset: int = 0
         self.task_moid: str = ""
+        self.task_state: str = ""
         self.task_progress: int = 0
         self.task_startTime: str = ""
         self.task_queueTime: str = ""
+        self.task_message: str = ""
         self.vm_name: str = ""
+
+        self.commands: List[dict] = [] # composition with Command and TargetCommand's user_args.
 
         self.__load()
 
@@ -38,14 +43,9 @@ class Target:
     # Public methods
     ####################################################################################################################
 
-    def info(self) -> dict:
+    def repr(self) -> dict:
         try:
-            info = Repository.getInfo(self.id)
-            if info["final_pubkeys"]:
-                pKeys = GroupConcatToDict(["id", "comment", "pub_key"])
-                pubKeyStruct = pKeys.makeDict(info["final_pubkeys"])
-                info["final_pubkeys"] = pubKeyStruct
-            return info
+            return vars(self)
         except Exception as e:
             raise e
 
@@ -86,7 +86,31 @@ class Target:
     @staticmethod
     def list() -> List[dict]:
         try:
-            return Repository.list()
+            o = Repository.list()
+            for el in o:
+                el["commands"] = list()
+
+                targetCommands = TargetCommand.listTargetCommands(el["id"])
+                # "id_target": 1,
+                # "command": "ls",
+                # "user_args": {
+                #     "__path": "/"
+                # },
+                # "sequence": 1
+
+                for targetCommand in targetCommands:
+                    command = Command(targetCommand["command"]).repr()
+                    # "uid": "ls",
+                    # "command": "ls ${__path}",
+                    # "template_args": {
+                    #     "__path": "str"
+                    # }
+
+                    command["user_args"] = targetCommand["user_args"]
+
+                    el["commands"].append(command)
+
+            return o
         except Exception as e:
             raise e
 
@@ -112,5 +136,12 @@ class Target:
             # Set attributes.
             for k, v in info.items():
                 setattr(self, k, v)
-        except Exception:
-            pass
+
+            targetCommands = TargetCommand.listTargetCommands(self.id)
+            for targetCommand in targetCommands:
+                command = Command(targetCommand["command"]).repr()
+                command["user_args"] = targetCommand["user_args"]
+
+                self.commands.append(command)
+        except Exception as e:
+            raise e

@@ -5,12 +5,14 @@ from dataclasses import dataclass
 from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.Datastore import Datastore
+from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.VMware.backend.VirtualMachine import VirtualMachine as Backend
 from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachineSpecsBuilder as SpecsBuilder
 
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.models.Stage2.FinalPubKey import FinalPubKey
+from vmware.models.Stage2.TargetCommand import TargetCommand
 from vmware.tasks import pollVmwareAsync_task
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
@@ -33,6 +35,7 @@ class Input:
     vmName = None
     bootstrapKeyId = None
     finalPubKeyIds = []
+    postDeployCommands: List[dict] = None
 
 
 
@@ -76,7 +79,7 @@ class VirtualMachine(Backend):
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
-                  "networkDevices", "guestSpec", "vmName", "bootstrapKeyId", "finalPubKeyIds"):
+                  "networkDevices", "guestSpec", "vmName", "bootstrapKeyId", "finalPubKeyIds", "postDeployCommands"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -123,6 +126,8 @@ class VirtualMachine(Backend):
             # Check final pubKeys.
             self.__checkFinalPubkeys(Input.finalPubKeyIds)
 
+            # @todo: check post deploy commands.
+
             # Build devsSpecs.
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
 
@@ -162,7 +167,8 @@ class VirtualMachine(Backend):
                 bootStrapKeyId=Input.bootstrapKeyId,
                 userName="root",
                 taskMoId=out["task_moId"],
-                customSpecInfo=cSpecInfo
+                customSpecInfo=cSpecInfo,
+                postDeployCommands=Input.postDeployCommands
             )
 
             return out
@@ -171,7 +177,9 @@ class VirtualMachine(Backend):
 
 
 
-    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict) -> int:
+    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None) -> int:
+        postDeployCommands = [] if postDeployCommands is None else postDeployCommands
+
         try:
             ip = ""
             if "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
@@ -189,6 +197,11 @@ class VirtualMachine(Backend):
 
             # Add target do db.
             targetId = Target.add(targetData)
+
+            # Insert in the db the sequence of the commands to be executed on the target.
+            for c in postDeployCommands:
+                c["id_target"] = targetId
+                TargetCommand.add(c)
 
             # Launch async worker.
             pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
@@ -216,6 +229,16 @@ class VirtualMachine(Backend):
             modifySpec = specsBuilder.configSpec
 
             return self.reconfig(configSpec=modifySpec)
+        except Exception as e:
+            raise e
+
+
+
+    def customizeGuestOS(self, data: dict) -> str:
+        try:
+            if "specName" in data and data["specName"]:
+                customSpec = CustomSpec(self.assetId, data["specName"])
+                return customSpec.customizeGuestOS(self.oVirtualMachine) # Task
         except Exception as e:
             raise e
 
@@ -376,14 +399,14 @@ class VirtualMachine(Backend):
 
 
 
-    def __checkFinalPubkeys(self, keyIds: list) -> None:
+    def __checkFinalPubkeys(self, keyIds: list = None) -> None:
+        keyIds = [] if keyIds is None else keyIds
         for k in keyIds:
             if k:
                 try:
                     FinalPubKey(k)
                 except Exception:
                     raise CustomException(status=400, payload={"VMware": "Invalid final public key."})
-
 
 
 

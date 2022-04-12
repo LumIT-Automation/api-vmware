@@ -73,6 +73,18 @@ class CustomSpecManager(VmwareHandler):
 
 
 
+    def customizeVMGuestOS(self, oVirtualMachine: object, specName: str) -> str:
+        try:
+            if self.oCustomSpecManager.DoesCustomizationSpecExist(specName):
+                spec = self.oCustomSpec(specName)
+                task = oVirtualMachine.CustomizeVM_Task(spec.spec)
+
+                return task._GetMoId()
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
