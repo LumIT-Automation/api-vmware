@@ -4,7 +4,7 @@ import time
 
 from vmware.models.VMware.Task import Task
 from vmware.models.Stage2.Target import Target
-from vmware.models.Stage2.TargetCommand import TargetCommand
+from vmware.models.Stage2.Command import Command
 
 
 from vmware.helpers.Log import Log
@@ -17,7 +17,8 @@ class PollWorker:
         self.assetId: int = int(assetId)
         self.taskMoId: str = taskMoId
         self.targetId: int = int(targetId)
-        #self.commands: List[dict] = TargetCommand.list(self.targetId)
+
+        self.commands: List[Command] = Target(self.targetId).commands
 
 
 
@@ -30,19 +31,14 @@ class PollWorker:
 
         try:
             if self.checkDeployStatus():
-                pass
-
-                #time.sleep(30)
-                #for command in self.commands:
-                #    Log.log(command["command"], 'CCCCCCCCCCCCCCCCCCCCTTTTTTTTTTTTTT')
-                #    Log.log(command["args"], 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATTTTTTTTTTT')
-                #    CommandClass = getattr(importlib.import_module("vmware.commands.Stage2."+command["command"]), command["command"])
-                #    # Instantiate the class (pass arguments to the constructor, if needed)
-
-                #    classInstance = CommandClass(self.targetId)
-                #    Log.log(classInstance, 'CCCCCCCCCCCCCCCCCCCC')
-                #    classInstance.exec(command["args"])
-                #    time.sleep(1)
+                time.sleep(30)
+                for command in self.commands:
+                    Log.log("Executing command uuid "+command.uid+" with user params: "+str(command.args), "_") #@todo.
+                    #    CommandClass = getattr(importlib.import_module("vmware.commands.Stage2."+command["command"]), command["command"])
+                    #    # Instantiate the class (pass arguments to the constructor, if needed)
+                    #    classInstance = CommandClass(self.targetId)
+                    #    classInstance.exec(command["args"])
+                    time.sleep(1)
         except Exception as e:
             raise e
 

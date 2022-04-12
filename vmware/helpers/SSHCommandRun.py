@@ -26,7 +26,7 @@ class SSHCommandRun:
 
             self.commandUid = commandUid
             self.command = c.command
-            self.templateArgs = c.args
+            self.templateArgs = c.template_args
 
             # Target connection information.
             self.connection = Target(self.targetId).connection
