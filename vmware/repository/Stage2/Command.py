@@ -15,7 +15,7 @@ class Command:
     # Table: command
     #   `uid` varchar(64) NOT NULL,
     #   `command` text NOT NULL,
-    #   `arguments` longtext NOT NULL
+    #   `template_args` varchar(8192) NOT NULL DEFAULT '{}'
 
 
 
@@ -33,8 +33,8 @@ class Command:
             ])
 
             o = DBHelper.asDict(c)[0]
-            if "args" in o:
-                o["args"] = json.loads(o["args"])
+            if "template_args" in o:
+                o["template_args"] = json.loads(o["template_args"])
 
             return o
         except Exception as e:
@@ -50,8 +50,8 @@ class Command:
         values = []
         c = connections[Command.db].cursor()
 
-        if "args" in data:
-            data["args"] = json.dumps(data["args"])
+        if "template_args" in data:
+            data["template_args"] = json.dumps(data["template_args"])
 
         # %s placeholders and values for SET.
         for k, v in data.items():
@@ -96,8 +96,8 @@ class Command:
 
             o = DBHelper.asDict(c)
             for l in o:
-                if "args" in l:
-                    l["args"] = json.loads(l["args"])
+                if "template_args" in l:
+                    l["template_args"] = json.loads(l["template_args"])
 
             return o
         except Exception as e:
@@ -114,8 +114,8 @@ class Command:
         values = []
         c = connections[Command.db].cursor()
 
-        if "args" in data:
-            data["args"] = json.dumps(data["args"])
+        if "template_args" in data:
+            data["template_args"] = json.dumps(data["template_args"])
 
         # Build SQL query according to dict fields.
         for k, v in data.items():

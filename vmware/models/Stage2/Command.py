@@ -12,7 +12,7 @@ class Command:
 
         self.uid = uid
         self.command: str = ""
-        self.args: dict = {}
+        self.template_args: dict = {}
 
         self.__load()
 
