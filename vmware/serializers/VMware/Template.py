@@ -23,7 +23,7 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
 
     class VMwareVirtualMachinePostDeployCommand(serializers.Serializer):
         command = serializers.CharField(required=True, max_length=64, allow_blank=True)
-        args = serializers.JSONField(required=False)
+        user_args = serializers.JSONField(required=False)
 
     vmName = serializers.CharField(max_length=255, required=True)
     datacenterMoId = serializers.CharField(max_length=64, required=True)
