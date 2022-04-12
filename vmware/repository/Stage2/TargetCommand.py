@@ -15,7 +15,7 @@ class TargetCommand:
     # Table: target_command
     #   `id_target` int(11) NOT NULL,
     #   `command` varchar(64) NOT NULL DEFAULT '',
-    #   `args` varchar(8192) NOT NULL DEFAULT '{}',
+    #   `user_args` varchar(8192) NOT NULL DEFAULT '{}',
     #   `sequence` int(11) NOT NULL
 
 
@@ -57,8 +57,8 @@ class TargetCommand:
             ])
             o = DBHelper.asDict(c)
             for l in o:
-                if "args" in l:
-                    l["args"] = json.loads(l["args"])
+                if "user_args" in l:
+                    l["user_args"] = json.loads(l["user_args"])
 
             return o
         except Exception as e:
@@ -75,8 +75,8 @@ class TargetCommand:
         values = []
         c = connections[TargetCommand.db].cursor()
 
-        if "args" in data:
-            data["args"] = json.dumps(data["args"])
+        if "user_args" in data:
+            data["user_args"] = json.dumps(data["user_args"])
 
         # Build SQL query according to dict fields.
         for k, v in data.items():

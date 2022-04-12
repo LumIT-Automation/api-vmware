@@ -11,7 +11,7 @@ class TargetCommand:
 
         self.id_target: int = int(targetId)
         self.command: str = commandUid
-        self.args: dict = {}
+        self.user_args: dict = {}
         self.sequence: int = 0
 
 

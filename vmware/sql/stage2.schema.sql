@@ -93,7 +93,7 @@ CREATE TABLE `command` (
 CREATE TABLE `target_command` (
   `id_target` int(11) NOT NULL,
   `command` varchar(64) NOT NULL DEFAULT '',
-  `args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`args`)),
+  `user_args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`user_args`)),
   `sequence` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

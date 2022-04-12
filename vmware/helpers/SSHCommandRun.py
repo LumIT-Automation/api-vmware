@@ -111,7 +111,7 @@ class SSHCommandRun:
             out = ssh.command(
                 SSHCommandRun.__commandCompile(
                     self.command, self.userArgs, self.templateArgs),
-                alwaysSuccess=True # reboot on RH does not return 0
+                alwaysSuccess=True # reboot on RH does not return 0.
             )
 
             # Synchronize reboot command.
