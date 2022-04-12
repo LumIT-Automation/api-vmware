@@ -33,7 +33,7 @@ class Target:
         self.task_message: str = ""
         self.vm_name: str = ""
 
-        self.commands: List[Command] = []
+        self.commands: List[dict] = [] # composition with Command and TargetCommand's user_args.
 
         self.__load()
 
@@ -44,18 +44,8 @@ class Target:
     ####################################################################################################################
 
     def repr(self) -> dict:
-        out = {
-            "commands": list()
-        }
-
         try:
-            o = vars(self)
-            for el in o["commands"]:
-                out["commands"].append(el.repr())
-
-            o["commands"] = out["commands"] # replace.
-
-            return o
+            return vars(self)
         except Exception as e:
             raise e
 
@@ -100,9 +90,25 @@ class Target:
             for el in o:
                 el["commands"] = list()
 
-                commands = TargetCommand.listTargetCommands(el["id"])
-                for command in commands:
-                    el["commands"].append(Command(command["command"]).repr())
+                targetCommands = TargetCommand.listTargetCommands(el["id"])
+                # "id_target": 1,
+                # "command": "ls",
+                # "user_args": {
+                #     "__path": "/"
+                # },
+                # "sequence": 1
+
+                for targetCommand in targetCommands:
+                    command = Command(targetCommand["command"]).repr()
+                    # "uid": "ls",
+                    # "command": "ls ${__path}",
+                    # "template_args": {
+                    #     "__path": "str"
+                    # }
+
+                    command["user_args"] = targetCommand["user_args"]
+
+                    el["commands"].append(command)
 
             return o
         except Exception as e:
@@ -131,8 +137,11 @@ class Target:
             for k, v in info.items():
                 setattr(self, k, v)
 
-            commands = TargetCommand.listTargetCommands(self.id)
-            for command in commands:
-                self.commands.append(Command(command["command"]))
+            targetCommands = TargetCommand.listTargetCommands(self.id)
+            for targetCommand in targetCommands:
+                command = Command(targetCommand["command"]).repr()
+                command["user_args"] = targetCommand["user_args"]
+
+                self.commands.append(command)
         except Exception as e:
             raise e
