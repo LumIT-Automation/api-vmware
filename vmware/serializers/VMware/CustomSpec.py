@@ -6,7 +6,7 @@ class VMwareCustomizationSpecSerializer(serializers.Serializer):
         ip = serializers.IPAddressField(required=False, allow_blank=True, allow_null=True)
         netMask = serializers.CharField(required=False, max_length=64, allow_blank=True, allow_null=True)
         gw = serializers.ListField(
-            child=serializers.IPAddressField(required=False, allow_blank=True, allow_null=True)
+            child=serializers.IPAddressField(required=False, allow_blank=True, allow_null=True), required=False, allow_null=True
         )
 
     assetId = serializers.IntegerField(required=True)

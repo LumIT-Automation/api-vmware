@@ -1,6 +1,9 @@
 from typing import List, Dict
+import string
+import random
 
 from vmware.models.VMware.backend.CustomSpecManager import CustomSpecManager as Backend
+from vmware.helpers.Log import Log
 
 
 NetInfo = {
@@ -95,6 +98,21 @@ class CustomSpec(Backend):
     def clone(self, newSpec: str) -> None:
         try:
             self.cloneCustomSpec(self.name, newSpec)
+        except Exception as e:
+            raise e
+
+
+
+    def cloneAndModify(self, data: dict) -> str:
+        try:
+            # Clone the customization specification in a new onr with a random name
+            randStr = ''.join(random.choice(string.ascii_letters) for x in range(6))
+            newSpecName = self.name+'-tmp-'+randStr
+            self.clone(newSpecName)
+            newSpec = CustomSpec(self.assetId, newSpecName)
+            newSpec.modify(data) # edit the new custom spec.
+
+            return newSpecName
         except Exception as e:
             raise e
 
