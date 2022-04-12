@@ -21,6 +21,10 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
         existent = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
         new = VMwareVirtualMachineDiskDevicesSerializer(many=True, required=False, allow_null=True)
 
+    class VMwareVirtualMachinePostDeployCommand(serializers.Serializer):
+        command = serializers.CharField(required=True, max_length=64, allow_blank=True)
+        user_args = serializers.JSONField(required=False)
+
     vmName = serializers.CharField(max_length=255, required=True)
     datacenterMoId = serializers.CharField(max_length=64, required=True)
     clusterMoId = serializers.CharField(max_length=64, required=False)
@@ -40,3 +44,4 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
         child=serializers.IntegerField(required=False),
         required=False
     )
+    postDeployCommands = VMwareVirtualMachinePostDeployCommand(many=True, required=False)

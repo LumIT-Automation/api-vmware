@@ -73,7 +73,6 @@ class VMwareVirtualMachineTemplateController(CustomController):
 
 
 
-    # @todo: move away.
     @staticmethod
     def post(request: Request, assetId: int, moId: str) -> Response:
         response = dict()
@@ -108,7 +107,6 @@ class VMwareVirtualMachineTemplateController(CustomController):
                     Log.actionLog("User data incorrect: " + str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
-
         except Exception as e:
             if "moId" in locals():
                 Lock("template", locals(), locals()["moId"]).release()
@@ -119,6 +117,3 @@ class VMwareVirtualMachineTemplateController(CustomController):
         return Response(response, status=httpStatus, headers={
             "Cache-Control": "no-cache"
         })
-
-
-

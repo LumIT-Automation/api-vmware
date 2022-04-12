@@ -1,4 +1,3 @@
-
 import paramiko
 import io
 
@@ -6,8 +5,7 @@ from vmware.helpers.Log import Log
 from vmware.helpers.Exception import CustomException
 
 
-class SshSupplicant:
-
+class SSHSupplicant:
     def __init__(self, dataConnection: dict, tcpTimeout: int = 10, silent: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -47,7 +45,6 @@ class SshSupplicant:
 
         # In the event of a network problem (e.g. DNS failure, refused connection, etc), paramiko will raise the applicable exception.
         # If an ssh command times out, a socket.timeout exception is raised.
-
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # auto add the remote ssh host key.
 
@@ -62,7 +59,7 @@ class SshSupplicant:
                 Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=self.tcpTimeout)
             else:
-                raise CustomException(status=503, payload={"Ssh": "Failed to execute the ssh command on the asset."})
+                raise CustomException(status=503, payload={"SSH": "Failed to execute the ssh command on the asset."})
 
             stdIn, stdOut, stdErr = ssh.exec_command(cmd)
             exitStatus = stdOut.channel.recv_exit_status()
@@ -81,9 +78,8 @@ class SshSupplicant:
                 Log.actionLog("Paramiko stdout: silenced by caller.")
 
             if not alwaysSuccess and exitStatus != 0:
-                raise CustomException(status=500, payload={"Ssh": "Command exit status: " + str(exitStatus)})
+                raise CustomException(status=500, payload={"SSH": "Command exit status: " + str(exitStatus)})
 
             return stdOutData
         except Exception as e:
             raise e
-        

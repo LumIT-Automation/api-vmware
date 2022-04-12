@@ -68,7 +68,7 @@ class Asset:
                 )
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -87,7 +87,7 @@ class Asset:
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -107,7 +107,7 @@ class Asset:
             c.execute("SELECT id, address, fqdn, baseurl, tlsverify, api_type, datacenter, environment, position FROM asset")
             return DBHelper.asDict(c)
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -136,7 +136,7 @@ class Asset:
 
                 return c.lastrowid
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 

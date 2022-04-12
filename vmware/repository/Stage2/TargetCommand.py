@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 from django.utils.html import strip_tags
@@ -12,11 +13,10 @@ class TargetCommand:
     db = 'stage2'
 
     # Table: target_command
-    #   `id` int(11) NOT NULL,
     #   `id_target` int(11) NOT NULL,
     #   `command` varchar(64) NOT NULL DEFAULT '',
-    #   `args` varchar(8192) DEFAULT NULL;
-
+    #   `user_args` varchar(8192) NOT NULL DEFAULT '{}',
+    #   `sequence` int(11) NOT NULL
 
 
 
@@ -25,65 +25,17 @@ class TargetCommand:
     ####################################################################################################################
 
     @staticmethod
-    def get(targetId: int) -> dict:
+    def delete(targetId: int, commandUid: str) -> None:
         c = connections[TargetCommand.db].cursor()
 
-        try:
-            c.execute("SELECT * FROM target_command "
-                      "WHERE target_command.id = %s ", [
-                        targetId
-                    ])
-
-            return DBHelper.asDict(c)[0]
-        except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
-
-    @staticmethod
-    def modify(tCommandId: int, data: dict) -> None:
-        sql = ""
-        values = []
-        c = connections[TargetCommand.db].cursor()
-
-        if TargetCommand.__exists(tCommandId):
-            # Build the update query according to dict fields.
-            for k, v in data.items():
-                if v is None:
-                    sql += k+"=DEFAULT,"
-                else:
-                    sql += k+"=%s,"
-                    values.append(strip_tags(v)) # no HTML allowed.
-
+        if TargetCommand.__exists(targetId, commandUid):
             try:
-                c.execute(
-                    "UPDATE target SET "+sql[:-1]+" WHERE id = "+str(tCommandId),
-                    values
-                )
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
-            finally:
-                c.close()
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent endpoint"})
-
-
-
-    @staticmethod
-    def delete(targetId: int) -> None:
-        c = connections[TargetCommand.db].cursor()
-
-        if TargetCommand.__exists(targetId):
-            try:
-                c.execute("DELETE FROM target_command WHERE id = %s", [
-                    targetId
+                c.execute("DELETE FROM target_command WHERE id_target = %s AND command = %s", [
+                    targetId, commandUid
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -99,12 +51,18 @@ class TargetCommand:
             c.execute(
                 "SELECT * "
                 "FROM target_command "
-                "WHERE id_target = %s", [
+                "WHERE id_target = %s "
+                "ORDER BY sequence ", [
                     targetId
             ])
-            return DBHelper.asDict(c)
+            o = DBHelper.asDict(c)
+            for l in o:
+                if "user_args" in l:
+                    l["user_args"] = json.loads(l["user_args"])
+
+            return o
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -116,6 +74,9 @@ class TargetCommand:
         keys = "("
         values = []
         c = connections[TargetCommand.db].cursor()
+
+        if "user_args" in data:
+            data["user_args"] = json.dumps(data["user_args"])
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
@@ -132,7 +93,7 @@ class TargetCommand:
 
             return c.lastrowid
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -143,12 +104,12 @@ class TargetCommand:
     ####################################################################################################################
 
     @staticmethod
-    def __exists(targetId: int) -> int:
+    def __exists(targetId: int, commandUid: str) -> int:
         c = connections[TargetCommand.db].cursor()
 
         try:
-            c.execute("SELECT COUNT(*) AS c FROM target_command WHERE id = %s", [
-                targetId
+            c.execute("SELECT COUNT(*) AS c FROM target_command WHERE id_target = %s AND command = %s", [
+                targetId, commandUid
             ])
             o = DBHelper.asDict(c)
 

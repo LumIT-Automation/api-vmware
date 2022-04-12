@@ -67,7 +67,7 @@ class BootstrapKey:
                     values
                 )
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 logging.disable(logging.NOTSET) # re-enable django logging.
                 c.close()
@@ -87,7 +87,7 @@ class BootstrapKey:
                 ])
 
             except Exception as e:
-                raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+                raise CustomException(status=400, payload={"database": e.__str__()})
             finally:
                 c.close()
         else:
@@ -103,7 +103,7 @@ class BootstrapKey:
             c.execute("SELECT * FROM bootstrap_key")
             return DBHelper.asDict(c)
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -134,7 +134,7 @@ class BootstrapKey:
                 )
                 return c.lastrowid
         except Exception as e:
-            raise CustomException(status=400, payload={"database": {"message": e.__str__()}})
+            raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             logging.disable(logging.NOTSET) # Re-enable django logging.
             c.close()
