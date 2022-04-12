@@ -1,7 +1,5 @@
 from rest_framework import serializers
 
-from vmware.serializers.Stage2.Command import Stage2CommandSerializer
-
 
 class Stage2TargetSerializer(serializers.Serializer):
     class Stage2TargetSerializerConnection(serializers.Serializer):
@@ -23,4 +21,4 @@ class Stage2TargetSerializer(serializers.Serializer):
     vm_name = serializers.CharField(required=False, max_length=128, allow_blank=True)
     connection = Stage2TargetSerializerConnection(required=False)
 
-    commands = Stage2CommandSerializer(many=True, required=False)
+    commands = serializers.JSONField(required=False)
