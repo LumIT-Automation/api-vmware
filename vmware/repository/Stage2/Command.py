@@ -1,4 +1,5 @@
 import json
+import base64
 from typing import List
 
 from django.utils.html import strip_tags
@@ -52,11 +53,17 @@ class Command:
 
         if "template_args" in data:
             data["template_args"] = json.dumps(data["template_args"])
+        if "base64" in data and data["base64"]:
+            b64 = base64.b64decode(data["command"])
+            data["command"] = b64.decode('ascii')
+            del data["base64"]
+        data["command"] = data["command"].replace('\r\n', '\n').replace('\r', '\n')
+
 
         # %s placeholders and values for SET.
         for k, v in data.items():
             sql += k + "=%s,"
-            values.append(strip_tags(v.replace('\r\n', '\n').replace('\r', '\n'))) # no HTML allowed, strip \r.
+            values.append(strip_tags(v)) # no HTML allowed, strip \r.
 
         # Condition for WHERE.
         values.append(uid)
@@ -116,12 +123,17 @@ class Command:
 
         if "template_args" in data:
             data["template_args"] = json.dumps(data["template_args"])
+        if "base64" in data and data["base64"]:
+            b64 = base64.b64decode(data["command"])
+            data["command"] = b64.decode('ascii')
+            del data["base64"]
+        data["command"] = data["command"].replace('\r\n', '\n').replace('\r', '\n')
 
         # Build SQL query according to dict fields.
         for k, v in data.items():
             s += "%s,"
             keys += k+","
-            values.append(strip_tags(v.replace('\r\n', '\n').replace('\r', '\n'))) # no HTML allowed, strip \r.
+            values.append(strip_tags(v)) # no HTML allowed, strip \r.
 
         keys = keys[:-1]+")"
 
