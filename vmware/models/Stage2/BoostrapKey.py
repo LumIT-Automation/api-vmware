@@ -1,9 +1,13 @@
 from typing import List
-import io
-import paramiko
+import os
+
 
 from vmware.repository.Stage2.BoostrapKey import BootstrapKey as Repository
+
+from vmware.helpers.Process import Process
 from vmware.helpers.Log import Log
+
+
 
 
 class BootstrapKey:
@@ -42,27 +46,22 @@ class BootstrapKey:
 
 
 
+    # Use shell command to get the public key fron the private. Using paramiko seems to work only if all the keys are 
+    #    of the same type, because paramiko.from_private_key is a class method.
     def getPublic(self) -> str:
-        pubKey = ""
-        keyType = ""
-        privateKey = None
+        pub_key = ""
         try:
-            keyStringIO = io.StringIO(self.priv_key)
-            for cls in [paramiko.RSAKey, paramiko.ECDSAKey, paramiko.Ed25519Key, paramiko.DSSKey]:
-                try:
-                    privateKey = cls.from_private_key(keyStringIO)
-                    keyType = privateKey.get_name()
-                    break
-                except paramiko.ssh_exception.SSHException:
-                    # Wrong type, try the next one.
-                    pass
+            subEnv = os.environ.copy()
+            subEnv["PRIV_KEY"] = self.priv_key
+            command = 'ssh-keygen -yf /dev/stdin <<< $(echo -n "$PRIV_KEY")'
 
-            if privateKey:
-                pubKey = keyType+' '+privateKey.get_base64()
-        except Exception:
-            pass
+            out = Process.execCommandString(invocation=command, procEnv=subEnv)
+            if out["success"]:
+                pub_key = out["stdout"].decode('utf-8')
 
-        return pubKey
+            return pub_key
+        except Exception as e:
+            raise e
 
 
 
