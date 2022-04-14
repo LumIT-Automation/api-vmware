@@ -10,6 +10,9 @@ if [ "$1" == "configure" ]; then
     # Build container image.
     buildah bud -t api-vmware .
 
+    # Grab the host timezone.
+    timeZone=$(timedatectl show| awk -F'=' '/Timezone/ {print $2}')
+
     # First container run: associate name, bind ports, bind fs volume, define init process, ...
     # api-vmware folder will be bound to /var/lib/containers/storage/volumes/.
     # Until the package is not uninstalled+purged, fs volumes remain untouched -> newly installed package's configuration files are then rewritten with volume's ones (this is why some services are restarted).
@@ -33,6 +36,9 @@ if [ "$1" == "configure" ]; then
     cp -f /var/lib/containers/storage/volumes/sso/_data/settings_jwt.py /var/lib/containers/storage/volumes/api-vmware/_data/settings_jwt.py
     sed -i -e ':a;N;$!ba;s|\s*"privateKey.*}|\n}|g' /var/lib/containers/storage/volumes/api-vmware/_data/settings_jwt.py
 
+    printf "\n Set the timezone of the container to be the same as the host timezone...\n"
+    podman exec api-vmware bash -c "timedatectl set-timezone $timeZone"
+
     printf "\n* Internal database configuration...\n"
     if podman exec api-vmware mysql -e "exit"; then
         # User api.
@@ -45,7 +51,7 @@ if [ "$1" == "configure" ]; then
             podman exec api-vmware mysql -e "CREATE USER 'api'@'localhost' IDENTIFIED BY '$databaseUserPassword';"
             podman exec api-vmware mysql -e "GRANT USAGE ON *.* TO 'api'@'localhost' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;"
             podman exec api-vmware mysql -e 'GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER, CREATE TEMPORARY TABLES, CREATE VIEW, SHOW VIEW, EXECUTE ON `api`.* TO `api`@`localhost`;'
-            podman exec api-vmware mysql -e 'GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER, CREATE TEMPORARY TABLES, CREATE VIEW, SHOW VIEW, EXECUTE ON `api`.* TO `stage2`@`localhost`;'
+            podman exec api-vmware mysql -e 'GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER, CREATE TEMPORARY TABLES, CREATE VIEW, SHOW VIEW, EXECUTE ON `stage2`.* TO `api`@`localhost`;'
         else
             # Update user's password.
             echo "Updating api user's password..."
