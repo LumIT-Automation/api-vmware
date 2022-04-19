@@ -18,7 +18,7 @@ class Stage2CommandRunController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="command_run") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="commandrun_put") or user["authDisabled"]:
                 Log.actionLog("Second stage command run", user)
                 Log.actionLog("User data: "+str(request.data), user)
 

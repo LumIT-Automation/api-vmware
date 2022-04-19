@@ -64,7 +64,31 @@ INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VAL
 (35, 'historyComplete_get', 'global', NULL),
 (36, 'target_commands_get', 'asset', NULL),
 (37, 'target_command_delete', 'asset', NULL),
-(39, 'target_commands_post', 'asset', NULL);
+(39, 'target_commands_post', 'asset', NULL),
+(40, 'task_get', 'asset', NULL),
+(41, 'task_delete', 'asset', NULL),
+(42, 'task_patch', 'asset', NULL),
+(43, 'template_patch', 'asset', NULL),
+(44, 'vm_guestos_patch', 'asset', NULL),
+(45, 'bootstrap_keys_get', 'asset', NULL),
+(46, 'bootstrap_key_delete', 'asset', NULL),
+(47, 'bootstrap_key_patch', 'asset', NULL),
+(48, 'bootstrap_key_post', 'asset', NULL),
+(49, 'final_pub_keys_get', 'asset', NULL),
+(50, 'final_pub_key_delete', 'asset', NULL),
+(51, 'final_pub_key_patch', 'asset', NULL),
+(52, 'final_pub_key_post', 'asset', NULL),
+(53, 'commands_get', 'asset', NULL),
+(54, 'commands_post', 'asset', NULL),
+(55, 'command_get', 'asset', NULL),
+(56, 'command_delete', 'asset', NULL),
+(57, 'command_patch', 'asset', NULL),
+(58, 'commandrun_put', 'asset', NULL),
+(59, 'targets_get', 'asset', NULL),
+(60, 'target_get', 'asset', NULL),
+(61, 'target_delete', 'asset', NULL),
+(62, 'target_patch', 'asset', NULL),
+(63, 'target_post', 'asset', NULL);
 
 
 --
