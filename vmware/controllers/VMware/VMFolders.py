@@ -35,7 +35,7 @@ class VMwareVMFoldersController(CustomController):
             if allowedObjectsMoId:
                 Log.actionLog("VMFolders get", user)
 
-                lock = Lock("vmFolders", locals())
+                lock = Lock("vmFolder", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -76,7 +76,7 @@ class VMwareVMFoldersController(CustomController):
                 httpStatus = status.HTTP_403_FORBIDDEN
 
         except Exception as e:
-            Lock("vmFolders", locals()).release()
+            Lock("vmFolder", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

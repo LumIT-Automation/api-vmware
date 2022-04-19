@@ -26,7 +26,7 @@ class VMwareClustersController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="clusters_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Clusters list", user)
 
-                lock = Lock("clusters", locals())
+                lock = Lock("cluster", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -62,7 +62,7 @@ class VMwareClustersController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("clusters", locals()).release()
+            Lock("cluster", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

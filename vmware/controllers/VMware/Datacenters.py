@@ -26,7 +26,7 @@ class VMwareDatacentersController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="datacenters_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Datacenters list", user)
 
-                lock = Lock("datacenters", locals())
+                lock = Lock("datacenter", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -62,7 +62,7 @@ class VMwareDatacentersController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("datacenters", locals()).release()
+            Lock("datacenter", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

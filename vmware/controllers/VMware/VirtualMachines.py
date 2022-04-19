@@ -26,7 +26,7 @@ class VMwareVirtualMachinesController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="virtualmachines_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("VirtualMachines list", user)
 
-                lock = Lock("virtualmachines", locals())
+                lock = Lock("virtualmachine", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -62,7 +62,7 @@ class VMwareVirtualMachinesController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("virtualmachines", locals()).release()
+            Lock("virtualmachine", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

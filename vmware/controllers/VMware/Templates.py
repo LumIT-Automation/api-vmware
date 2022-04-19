@@ -26,7 +26,7 @@ class VMwareTemplatesController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="templates_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Templates list", user)
 
-                lock = Lock("templates", locals())
+                lock = Lock("template", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -62,7 +62,7 @@ class VMwareTemplatesController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("templates", locals()).release()
+            Lock("template", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

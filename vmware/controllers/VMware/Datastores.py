@@ -35,7 +35,7 @@ class VMwareDatastoresController(CustomController):
             if allowedObjectsMoId:
                 Log.actionLog("datastores list", user)
 
-                lock = Lock("datastores", locals())
+                lock = Lock("datastore", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -79,7 +79,7 @@ class VMwareDatastoresController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("datastores", locals()).release()
+            Lock("datastore", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

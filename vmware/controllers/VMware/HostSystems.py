@@ -26,7 +26,7 @@ class VMwareHostSystemsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="hostsystems_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("HostSystems list", user)
 
-                lock = Lock("hostsystems", locals())
+                lock = Lock("hostsystem", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -62,7 +62,7 @@ class VMwareHostSystemsController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("clusters", locals()).release()
+            Lock("hostsystem", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
