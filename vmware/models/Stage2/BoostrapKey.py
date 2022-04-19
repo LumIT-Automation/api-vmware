@@ -1,13 +1,10 @@
 from typing import List
 import os
 
-
 from vmware.repository.Stage2.BoostrapKey import BootstrapKey as Repository
 
 from vmware.helpers.Process import Process
 from vmware.helpers.Log import Log
-
-
 
 
 class BootstrapKey:
@@ -46,11 +43,14 @@ class BootstrapKey:
 
 
 
-    # Use shell command to get the public key fron the private. Using paramiko seems to work only if all the keys are 
-    #    of the same type, because paramiko.from_private_key is a class method.
     def getPublic(self) -> str:
         pub_key = ""
+
         try:
+            # Use shell command to get the public key from the private one.
+            # Using paramiko instead works only if all the keys are of the same type,
+            # because paramiko.from_private_key is a class method, which hardly works well in a for loop.
+
             subEnv = os.environ.copy()
             subEnv["PRIV_KEY"] = self.priv_key
             command = 'ssh-keygen -yf /dev/stdin <<< $(echo -n "$PRIV_KEY")'
