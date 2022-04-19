@@ -202,7 +202,7 @@ class VMwareCustomSpecController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="custom_specs_put") or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="custom_specs_post") or user["authDisabled"]:
                 Log.actionLog("Clone virtual machines customization specification", user)
                 Log.actionLog("User data:"+str(request.data), user)
 
