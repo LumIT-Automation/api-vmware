@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 from django.utils.html import strip_tags
@@ -13,19 +14,21 @@ class Target:
 
     # Table: stage2_target
     #   `id` int(11) NOT NULL,
-    #   `ip` varchar(64) NOT NULL,
+    #   `ip` varchar(64) DEFAULT NULL,
     #   `port` int(11) DEFAULT NULL,
     #   `api_type` varchar(64) NOT NULL DEFAULT '',
     #   `id_bootstrap_key` int(11) DEFAULT NULL,
     #   `username` varchar(64) NOT NULL DEFAULT '',
-    #   `password` varchar(64) NOT NULL DEFAULT ''
-    #   `id_asset` int(11) NOT NULL,
-    #   `task_moid` varchar(63) NOT NULL DEFAULT '',
-    #   `task_state` varchar(63) NOT NULL DEFAULT 'undefined',
+    #   `password` varchar(64) NOT NULL DEFAULT '',
+    #   `id_asset` int(11) DEFAULT NULL,
+    #   `task_moid` varchar(64) DEFAULT NULL,
+    #   `task_state` varchar(64) NOT NULL DEFAULT 'undefined',
     #   `task_progress` int(11) DEFAULT NULL,
     #   `task_startTime` varchar(64) NOT NULL DEFAULT '',
     #   `task_queueTime` varchar(64) NOT NULL DEFAULT '',
-    #   `vm_name` varchar(127) NOT NULL DEFAULT '';
+    #   `task_message` varchar(512) NOT NULL DEFAULT '',
+    #   `second_stage` varchar(8192) NOT NULL DEFAULT '[]',
+    #   `vm_name` varchar(128) NOT NULL DEFAULT ''
 
 
 
@@ -57,6 +60,9 @@ class Target:
             del(o["id_bootstrap_key"])
             del(o["username"])
 
+            if "second_stage" in o:
+                o["second_stage"] = json.loads(o["second_stage"])
+
             return o
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
@@ -75,8 +81,10 @@ class Target:
             for el in ("ip", "port", "api_type", "id_bootstrap_key", "username"):
                 if el in data["connection"]:
                     data[el] = data["connection"][el]
-
             del(data["connection"])
+
+        if "second_stage" in data:
+            data["second_stage"] = json.dumps(data["second_stage"])
 
         if Target.__exists(targetId):
             # Build the update query according to dict fields.
@@ -128,7 +136,7 @@ class Target:
             c.execute(
                 "SELECT "
                 "id, ip, port, api_type, username, id_bootstrap_key, id_asset, "
-                "task_moid, task_state, task_progress, task_startTime, task_queueTime, task_message, vm_name "
+                "task_moid, task_state, task_progress, task_startTime, task_queueTime, task_message, second_stage, vm_name "
                 "FROM target"
             )
             o = DBHelper.asDict(c)
@@ -146,6 +154,9 @@ class Target:
                 del(el["api_type"])
                 del(el["id_bootstrap_key"])
                 del(el["username"])
+
+                if "second_stage" in el:
+                    el["second_stage"] = json.loads(el["second_stage"])
 
             return o
 
@@ -167,8 +178,10 @@ class Target:
             for el in ("ip", "port", "api_type", "id_bootstrap_key", "username"):
                 if el in data["connection"]:
                     data[el] = data["connection"][el]
-
             del(data["connection"])
+
+        if "second_stage" in data:
+            data["second_stage"] = json.dumps(data["second_stage"])
 
         # Build SQL query according to dict fields.
         for k, v in data.items():

@@ -31,6 +31,7 @@ class Target:
         self.task_startTime: str = ""
         self.task_queueTime: str = ""
         self.task_message: str = ""
+        self.second_stage: List[dict] = []
         self.vm_name: str = ""
 
         self.commands: List[dict] = [] # composition with Command and TargetCommand's user_args.

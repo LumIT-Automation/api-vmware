@@ -42,6 +42,7 @@ CREATE TABLE `target` (
   `task_startTime` varchar(64) NOT NULL DEFAULT '',
   `task_queueTime` varchar(64) NOT NULL DEFAULT '',
   `task_message` varchar(512) NOT NULL DEFAULT '',
+  `second_stage` varchar(8192) NOT NULL DEFAULT '[]' CHECK (json_valid(`second_stage`)),
   `vm_name` varchar(128) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

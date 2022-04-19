@@ -19,6 +19,7 @@ class Stage2TargetSerializer(serializers.Serializer):
     task_queueTime = serializers.CharField(required=False, max_length=64, allow_blank=True, allow_null=True)
     task_message = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     vm_name = serializers.CharField(required=False, max_length=128, allow_blank=True)
+    second_stage = serializers.JSONField(required=False)
     connection = Stage2TargetSerializerConnection(required=False)
 
     commands = serializers.JSONField(required=False)
