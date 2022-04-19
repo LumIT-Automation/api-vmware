@@ -34,7 +34,7 @@ class VMwareNetworksController(CustomController):
 
             if allowedObjectsMoId:
                 Log.actionLog("Networks list", user)
-                lock = Lock("networks", locals())
+                lock = Lock("network", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -78,7 +78,7 @@ class VMwareNetworksController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("networks", locals()).release()
+            Lock("network", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 

@@ -26,7 +26,7 @@ class VMwareCustomSpecsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="custom_specs_get", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Virtual machines customization specifications list", user)
 
-                lock = Lock("custom_specs", locals())
+                lock = Lock("custom_spec", locals())
                 if lock.isUnlocked():
                     lock.lock()
 
@@ -62,7 +62,7 @@ class VMwareCustomSpecsController(CustomController):
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:
-            Lock("custom_specs", locals()).release()
+            Lock("custom_spec", locals()).release()
             data, httpStatus, headers = CustomController.exceptionHandler(e)
             return Response(data, status=httpStatus, headers=headers)
 
