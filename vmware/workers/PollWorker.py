@@ -25,7 +25,7 @@ class PollWorker:
     ####################################################################################################################
 
     def __call__(self) -> None:
-        Log.log("Celery worker for VMware task: " + self.taskMoId)
+        Log.log("Celery worker for VMware task: "+self.taskMoId)
 
         try:
             # Wait for VMware VM cloning completion.
@@ -42,21 +42,20 @@ class PollWorker:
                         userArgs=command["user_args"]
                     )()
 
-                    # Update db (never fail).
-                    try:
-                        previousData = Target(targetId=self.targetId).repr()["second_stage"] or []
-                        Target(targetId=self.targetId).modify({
-                            "second_stage": previousData.append({
-                                "command": command["uid"],
-                                "output": o,
-                                "error": e,
-                                "status": s
-                            })
-                        })
-                    except Exception:
-                        pass
+                    # Update db.
+                    data = Target(targetId=self.targetId).repr()["second_stage"] or []
+                    data.append({
+                        "command": command["uid"],
+                        "output": o,
+                        "error": e,
+                        "status": s
+                    })
 
-                    time.sleep(1)
+                    Target(targetId=self.targetId).modify({
+                        "second_stage": data
+                    })
+
+                    time.sleep(2)
         except Exception as e:
             raise e
 
