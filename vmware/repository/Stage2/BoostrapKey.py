@@ -63,7 +63,7 @@ class BootstrapKey:
                         values.append(strip_tags(v)) # no HTML allowed.
 
                 logging.disable(logging.WARNING) # do not ever log private key.
-                c.execute("UPDATE bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(keyId),
+                c.execute("UPDATE bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(int(keyId)),
                     values
                 )
             except Exception as e:

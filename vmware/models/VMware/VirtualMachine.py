@@ -32,6 +32,7 @@ class Input:
     diskDevices = None
     networkDevices = None
     guestSpec = None
+    deleteGuestSpecAfterDeploy = False
     vmName = None
     bootstrapKeyId = None
     finalPubKeyIds = []
@@ -79,7 +80,7 @@ class VirtualMachine(Backend):
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
-                  "networkDevices", "guestSpec", "vmName", "bootstrapKeyId", "finalPubKeyIds", "postDeployCommands"):
+                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "vmName", "bootstrapKeyId", "finalPubKeyIds", "postDeployCommands"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -163,12 +164,16 @@ class VirtualMachine(Backend):
             )
 
             # A worker will poll the vCenter and update the target table on stage2 database in order to track progress.
+            if not Input.deleteGuestSpecAfterDeploy:
+                Input.guestSpec = ""
+
             out["targetId"] = self.pollVmwareDeployVMTask(
                 bootStrapKeyId=Input.bootstrapKeyId,
                 userName="root",
                 taskMoId=out["task_moId"],
                 customSpecInfo=cSpecInfo,
-                postDeployCommands=Input.postDeployCommands
+                postDeployCommands=Input.postDeployCommands,
+                guestSpec=Input.guestSpec
             )
 
             return out
@@ -177,7 +182,7 @@ class VirtualMachine(Backend):
 
 
 
-    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None) -> int:
+    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None, guestSpec: str = "") -> int:
         postDeployCommands = [] if postDeployCommands is None else postDeployCommands
 
         try:
@@ -204,7 +209,7 @@ class VirtualMachine(Backend):
                 TargetCommand.add(c)
 
             # Launch async worker.
-            pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId)
+            pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId, guestSpec=guestSpec)
 
             return targetId
         except Exception as e:
