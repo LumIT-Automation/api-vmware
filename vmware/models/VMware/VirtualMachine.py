@@ -13,6 +13,7 @@ from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.models.Stage2.FinalPubKey import FinalPubKey
 from vmware.models.Stage2.TargetCommand import TargetCommand
+from vmware.models.Stage2.Command import Command
 from vmware.tasks import pollVmwareAsync_task
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
@@ -127,7 +128,8 @@ class VirtualMachine(Backend):
             # Check final pubKeys.
             self.__checkFinalPubkeys(Input.finalPubKeyIds)
 
-            # @todo: check post deploy commands.
+            # Check post deploy commands.
+            self.__checkPostDeployCommands(Input.postDeployCommands)
 
             # Build devsSpecs.
             specsBuilder = SpecsBuilder(self.assetId, self.moId)
@@ -412,6 +414,17 @@ class VirtualMachine(Backend):
                     FinalPubKey(k)
                 except Exception:
                     raise CustomException(status=400, payload={"VMware": "Invalid final public key."})
+
+
+
+    def __checkPostDeployCommands(self, commandIds: list = None) -> None:
+        commandIds = [] if commandIds is None else commandIds
+        for c in commandIds:
+            if c:
+                try:
+                    Command(c["command"])
+                except Exception:
+                    raise CustomException(status=400, payload={"VMware": "Invalid post-deploy command identifier."})
 
 
 
