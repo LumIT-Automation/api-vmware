@@ -2,6 +2,7 @@ from typing import List
 import time
 
 from vmware.models.VMware.Task import Task
+from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.Stage2.Target import Target
 
 from vmware.helpers.SSHCommandRun import SSHCommandRun
@@ -9,12 +10,13 @@ from vmware.helpers.Log import Log
 
 
 class PollWorker:
-    def __init__(self, assetId: int, taskMoId: str, targetId: int, *args, **kwargs):
+    def __init__(self, assetId: int, taskMoId: str, targetId: int, guestSpec: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId: int = int(assetId)
         self.taskMoId: str = taskMoId
         self.targetId: int = int(targetId)
+        self.guestSpec: str = guestSpec
 
         self.commands: List[dict] = Target(self.targetId).commands
 
@@ -56,6 +58,14 @@ class PollWorker:
                     })
 
                     time.sleep(2)
+
+                # Delete guestSpec (never fail).
+                if self.guestSpec:
+                    try:
+                        Log.actionLog("Deleting guest spec: "+str(self.guestSpec))
+                        CustomSpec(self.assetId, self.guestSpec).delete()
+                    except Exception:
+                        pass
         except Exception as e:
             raise e
 

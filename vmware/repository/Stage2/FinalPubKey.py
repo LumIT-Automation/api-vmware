@@ -57,7 +57,7 @@ class FinalPubKey:
                     values.append(strip_tags(v)) # no HTML allowed.
 
             try:
-                c.execute("UPDATE final_pubkey SET "+sql[:-1]+" WHERE id = "+str(keyId),
+                c.execute("UPDATE final_pubkey SET "+sql[:-1]+" WHERE id = "+str(int(keyId)),
                     values
                 )
 

@@ -37,6 +37,7 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
     memoryMB = serializers.IntegerField(required=False)
     notes = serializers.CharField(max_length=2048, required=False, allow_blank=True, allow_null=True)
     guestSpec = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    deleteGuestSpecAfterDeploy = serializers.BooleanField(required=False)
     networkDevices = VMwareVirtualMachineNetworkDeviceTypeSerializer(required=False, allow_null=True)
     diskDevices = VMwareVirtualMachineDiskDeviceTypeSerializer(required=False, allow_null=True)
     bootstrapKeyId = serializers.IntegerField(required=False)
