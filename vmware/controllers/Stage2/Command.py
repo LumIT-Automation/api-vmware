@@ -35,7 +35,7 @@ class Stage2CommandController(CustomController):
                         "VMware": "upstream data mismatch."
                     }
 
-                    Log.log("Upstream data incorrect: " + str(serializer.errors))
+                    Log.log("Upstream data incorrect:"+str(serializer.errors))
             else:
                 data = None
                 httpStatus = status.HTTP_403_FORBIDDEN

@@ -82,7 +82,7 @@ class VMwareVMFoldersTreeController(CustomController):
                         data = {
                             "VMware": "upstream data mismatch."
                         }
-                        Log.log("Upstream data incorrect: " + str(serializer.errors))
+                        Log.log("Upstream data incorrect:"+str(serializer.errors))
                     lock.release()
                 else:
                     data = None
