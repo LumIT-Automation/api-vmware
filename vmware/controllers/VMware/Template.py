@@ -81,7 +81,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="template_post", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Deploy new virtual machines from template", user)
-                Log.actionLog("User data: " + str(request.data), user)
+                Log.actionLog("User data:"+str(request.data), user)
 
                 serializer = DeploySerializer(data=request.data["data"])
                 if serializer.is_valid():
@@ -104,7 +104,7 @@ class VMwareVirtualMachineTemplateController(CustomController):
                             "error": str(serializer.errors)
                         }
                     }
-                    Log.actionLog("User data incorrect: " + str(response), user)
+                    Log.actionLog("User data incorrect:"+str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
         except Exception as e:

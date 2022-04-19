@@ -159,7 +159,7 @@ class VMwareCustomSpecController(CustomController):
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="custom_specs_post") or user["authDisabled"]:
                 Log.actionLog("Clone virtual machines customization specification", user)
-                Log.actionLog("User data: " + str(request.data), user)
+                Log.actionLog("User data:"+str(request.data), user)
 
                 serializer = Serializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
@@ -179,7 +179,7 @@ class VMwareCustomSpecController(CustomController):
                             "error": str(serializer.errors)
                         }
                     }
-                    Log.actionLog("User data incorrect: " + str(response), user)
+                    Log.actionLog("User data incorrect:"+str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
 
@@ -204,7 +204,7 @@ class VMwareCustomSpecController(CustomController):
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="custom_specs_put") or user["authDisabled"]:
                 Log.actionLog("Clone virtual machines customization specification", user)
-                Log.actionLog("User data: " + str(request.data), user)
+                Log.actionLog("User data:"+str(request.data), user)
 
                 serializer = CloneSerializer(data=request.data["data"])
                 if serializer.is_valid():
@@ -224,7 +224,7 @@ class VMwareCustomSpecController(CustomController):
                             "error": str(serializer.errors)
                         }
                     }
-                    Log.actionLog("User data incorrect: " + str(response), user)
+                    Log.actionLog("User data incorrect:"+str(response), user)
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
 
