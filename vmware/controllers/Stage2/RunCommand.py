@@ -24,7 +24,7 @@ class Stage2CommandRunController(CustomController):
 
                 serializer = Serializer(data=request.data["data"])
                 if serializer.is_valid():
-                    data["data"] = SSHCommandRun(
+                    data["data"], error, exitStatus = SSHCommandRun(
                         commandUid=commandUid,
                         targetId=targetId,
                         userArgs=serializer.validated_data["args"],

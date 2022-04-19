@@ -28,19 +28,33 @@ class PollWorker:
         Log.log("Celery worker for VMware task: " + self.taskMoId)
 
         try:
+            # Wait for VMware VM cloning completion.
             if self.checkDeployStatus():
-                time.sleep(30)
-                for command in self.commands:
-                    Log.log("Executing command uuid "+command["uid"]+" with user params: "+str(command["user_args"]))
+                time.sleep(30) # wait for guest spec apply (a reboot occurs).
 
-                    r = SSHCommandRun(
+                # Execute scheduled SSH commands.
+                for command in self.commands:
+                    Log.actionLog("Executing command uuid "+command["uid"]+" with user params: "+str(command["user_args"]))
+
+                    o, e, s = SSHCommandRun(
                         commandUid=command["uid"],
                         targetId=self.targetId,
                         userArgs=command["user_args"]
                     )()
 
-                    Log.log(r, "_")
-                    # @todo: update db.
+                    # Update db (never fail).
+                    try:
+                        previousData = Target(targetId=self.targetId).repr()["second_stage"] or []
+                        Target(targetId=self.targetId).modify({
+                            "second_stage": previousData.append({
+                                "command": command["uid"],
+                                "output": o,
+                                "error": e,
+                                "status": s
+                            })
+                        })
+                    except Exception:
+                        pass
 
                     time.sleep(1)
         except Exception as e:
@@ -54,6 +68,7 @@ class PollWorker:
 
         try:
             timeout_start = time.time()
+            # Until timeout reached.
             while time.time() < timeout_start + timeout:
                 # Get VMware task info.
                 tsk = Task(assetId=self.assetId, moId=self.taskMoId)

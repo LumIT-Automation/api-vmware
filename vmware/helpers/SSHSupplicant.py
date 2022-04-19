@@ -40,7 +40,7 @@ class SSHSupplicant:
     # Public methods
     ####################################################################################################################
 
-    def command(self, cmd, alwaysSuccess: bool = False) -> str:
+    def command(self, cmd, alwaysSuccess: bool = False) -> tuple:
         # Execute an ssh command to the remote system defined in the dataConnection parameter.
 
         # In the event of a network problem (e.g. DNS failure, refused connection, etc), paramiko will raise the applicable exception.
@@ -50,36 +50,39 @@ class SSHSupplicant:
 
         try:
             if not self.silent:
-                Log.actionLog("Try paramiko ssh command: " + str(cmd))
+                Log.actionLog("Try paramiko ssh command: "+str(cmd))
 
             if self.privateKey:
-                Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username + " ssh key auth.")
+                Log.actionLog("Paramiko ssh connection: host: "+str(self.ipAddr)+" port: "+str(self.port)+" username: "+self.username+" ssh key auth.")
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, pkey=self.privateKey, timeout=self.tcpTimeout)
             elif self.username and self.password:
-                Log.actionLog("Paramiko ssh connection: host: " + str(self.ipAddr) + " port: " + str(self.port) + " username: " + self.username)
+                Log.actionLog("Paramiko ssh connection: host: "+str(self.ipAddr)+" port: "+str(self.port)+" username: "+self.username)
                 ssh.connect(hostname=self.ipAddr, port=self.port, username=self.username, password=self.password, timeout=self.tcpTimeout)
             else:
-                raise CustomException(status=503, payload={"SSH": "Failed to execute the ssh command on the asset."})
+                raise CustomException(status=503, payload={"SSH": "failed to execute the SSH command."})
 
             stdIn, stdOut, stdErr = ssh.exec_command(cmd)
-            exitStatus = stdOut.channel.recv_exit_status()
 
+            # Exit status.
+            exitStatus = stdOut.channel.recv_exit_status()
+            Log.actionLog("Paramiko exit status: "+str(exitStatus))
+            if alwaysSuccess and exitStatus != 0:
+                exitStatus = 0
+
+            # Stdout data.
             outlines = stdOut.readlines()
             stdOutData = ''.join(outlines)
-            errLines = stdErr.readlines()
-            stdErrData = ''.join(errLines)
-
-            Log.actionLog("Paramiko exit status: " + str(exitStatus))
-            if stdErrData:
-                Log.actionLog("Paramiko stderr: " + stdErrData)
             if not self.silent:
-                Log.actionLog("Paramiko stdout: " + stdOutData)
+                Log.actionLog("Paramiko stdout: "+stdOutData)
             else:
                 Log.actionLog("Paramiko stdout: silenced by caller.")
 
-            if not alwaysSuccess and exitStatus != 0:
-                raise CustomException(status=500, payload={"SSH": "Command exit status: " + str(exitStatus)})
+            # Stderr data.
+            errLines = stdErr.readlines()
+            stdErrData = ''.join(errLines)
+            if stdErrData:
+                Log.actionLog("Paramiko stderr: "+stdErrData)
 
-            return stdOutData
+            return stdOutData, stdErrData, exitStatus
         except Exception as e:
             raise e

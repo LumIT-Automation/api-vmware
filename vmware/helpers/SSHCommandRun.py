@@ -42,20 +42,20 @@ class SSHCommandRun:
     # Public methods
     ####################################################################################################################
 
-    def __call__(self, *args, **kwargs) -> str:
+    def __call__(self, *args, **kwargs) -> tuple:
         try:
             # Run command (with user arguments) against target (SSH).
             if self.commandUid == "reboot":
-                o = self.__reboot()
+                o, e, s = self.__reboot()
             elif self.commandUid == "addPubKey" \
                     or self.commandUid == "removeBootstrapKey":
-                o = self.__publicKey()
+                o, e, s = self.__publicKey()
             else:
-                o = self.__command()
+                o, e, s = self.__command()
+
+            return o, e, s
         except Exception as e:
             raise e
-
-        return o
 
 
 
@@ -63,23 +63,25 @@ class SSHCommandRun:
     # Private methods
     ####################################################################################################################
 
-    def __command(self) -> str:
+    def __command(self) -> tuple:
         try:
             ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
-            out = ssh.command(
+            out, err, status = ssh.command(
                 SSHCommandRun.__commandCompile(
                     self.command, self.userArgs, self.templateArgs
                 ) # complete and purged command.
             )
+
+            return out, err, status
         except Exception as e:
             raise e
 
-        return out
 
 
+    def __publicKey(self) -> tuple:
+        out = err = ""
+        status = -1
 
-    def __publicKey(self) -> str:
-        out = ""
         if self.commandUid in ("addPubKey", "removeBootstrapKey"):
             try:
                 if self.commandUid == "addPubKey":
@@ -91,7 +93,7 @@ class SSHCommandRun:
                     self.userArgs["__pubKey"] = target.getBootstrapPubKey()
 
                 ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
-                out = ssh.command(
+                out, err, status = ssh.command(
                     SSHCommandRun.__commandCompile(
                         self.command, self.userArgs, self.templateArgs, validate=False
                     )
@@ -99,16 +101,16 @@ class SSHCommandRun:
             except Exception as e:
                 raise e
 
-        return out
+        return out, err, status
 
 
 
-    def __reboot(self) -> str:
+    def __reboot(self) -> tuple:
         o = ""
 
         try:
             ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
-            out = ssh.command(
+            out, err, status = ssh.command(
                 SSHCommandRun.__commandCompile(
                     self.command, self.userArgs, self.templateArgs),
                 alwaysSuccess=True # reboot on RH does not return 0.
@@ -128,10 +130,10 @@ class SSHCommandRun:
 
             if not o:
                 raise CustomException(status=400, payload={"SSH": "machine not responding anymore."})
+
+            return "", "", 0
         except Exception as e:
             raise e
-
-        return out
 
 
 
