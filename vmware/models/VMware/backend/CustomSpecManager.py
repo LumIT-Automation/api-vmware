@@ -78,8 +78,9 @@ class CustomSpecManager(VmwareHandler):
             if self.oCustomSpecManager.DoesCustomizationSpecExist(specName):
                 spec = self.oCustomSpec(specName)
                 task = oVirtualMachine.CustomizeVM_Task(spec.spec)
-
                 return task._GetMoId()
+            else:
+                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
         except Exception as e:
             raise e
 
