@@ -110,7 +110,7 @@ class SSHCommandRun:
 
         try:
             ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
-            out, err, status = ssh.command(
+            ssh.command(
                 SSHCommandRun.__commandCompile(
                     self.command, self.userArgs, self.templateArgs),
                 alwaysSuccess=True # reboot on RH does not return 0.
