@@ -59,7 +59,6 @@ class Command:
             del data["base64"]
         data["command"] = data["command"].replace('\r\n', '\n').replace('\r', '\n')
 
-
         # %s placeholders and values for SET.
         for k, v in data.items():
             sql += k + "=%s,"

@@ -13,6 +13,7 @@ class Command:
         self.uid = uid
         self.command: str = ""
         self.template_args: dict = {}
+        self.reserved: int = 0
 
         self.__load()
 
@@ -32,7 +33,10 @@ class Command:
 
     def modify(self, data: dict) -> None:
         try:
-            Repository.modify(self.uid, data)
+            if not self.reserved:
+                Repository.modify(self.uid, data)
+            else:
+                raise CustomException(status=400, payload={"database": "reserved command not modifiable."})
         except Exception as e:
             raise e
 
@@ -40,7 +44,10 @@ class Command:
 
     def delete(self) -> None:
         try:
-            Repository.delete(self.uid)
+            if not self.reserved:
+                Repository.delete(self.uid)
+            else:
+                raise CustomException(status=400, payload={"database": "reserved command not modifiable."})
         except Exception as e:
             raise e
 
