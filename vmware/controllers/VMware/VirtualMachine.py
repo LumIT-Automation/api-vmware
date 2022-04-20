@@ -79,7 +79,7 @@ class VMwareVirtualMachineController(CustomController):
         user = CustomController.loggedUser(request)
 
         try:
-            if Permission.hasUserPermission(groups=user["groups"], action="template_patch", assetId=assetId) or user["authDisabled"]:
+            if Permission.hasUserPermission(groups=user["groups"], action="virtualmachine_patch", assetId=assetId) or user["authDisabled"]:
                 Log.actionLog("Virtual machine modification", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
