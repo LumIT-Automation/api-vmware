@@ -89,16 +89,17 @@ CREATE TABLE `command` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `target_command`
+-- Struttura della tabella `target_command_exec`
 --
 
-CREATE TABLE `target_command` (
-  `id_target` int(11) NOT NULL,
-  `command` varchar(64) NOT NULL DEFAULT '',
-  `user_args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`user_args`)),
-  `sequence` int(11) NOT NULL DEFAULT '0'
+CREATE TABLE `target_command_exec` (
+  `id` int(11) NOT NULL,
+  `id_target_command` int(11) NOT NULL,
+  `timestamp` datetime NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP,
+  `exit_status` int(11) NOT NULL,
+  `stdout` mediumtext NOT NULL DEFAULT '',
+  `stderr` mediumtext NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 -- --------------------------------------------------------
 
@@ -155,12 +156,10 @@ ALTER TABLE `command_exec_status`
   ADD KEY `ces_command` (`id_command`);
 
 --
--- Indici per le tabelle `target_command`
+-- Indici per le tabelle `target_command_exec`
 --
-ALTER TABLE `target_command`
-  ADD PRIMARY KEY (`id_target`,`command`),
-  ADD KEY `tc_command` (`command`);
-
+ALTER TABLE `target_command_exec`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate
@@ -200,14 +199,6 @@ ALTER TABLE `command_exec_status`
 --
 ALTER TABLE `target`
   ADD CONSTRAINT `bk_key` FOREIGN KEY (`id_bootstrap_key`) REFERENCES `bootstrap_key` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Limiti per la tabella `target_command`
---
-ALTER TABLE `target_command`
-  ADD CONSTRAINT `tc_command` FOREIGN KEY (`command`) REFERENCES `command` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `tc_target` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-COMMIT;
 
 --
 -- Limiti per la tabella `command_exec_status`
