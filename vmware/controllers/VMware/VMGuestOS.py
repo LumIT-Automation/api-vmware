@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.VirtualMachine import VMwareVirtualMachineSerializer as Serializer
+from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecApplySerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 
@@ -25,10 +25,9 @@ class VMwareCustomizeVMGuestOSController(CustomController):
                 Log.actionLog("User data: "+str(request.data), user)
 
                 serializer = Serializer(data=request.data["data"], partial=True)
-                #if serializer.is_valid():
-                #    data = serializer.validated_data
-                if True:
-                    data = request.data["data"]
+                if serializer.is_valid():
+                    data = serializer.validated_data
+
                     lock = Lock("virtualmachine", locals(), moId)
                     if lock.isUnlocked():
                         lock.lock()
