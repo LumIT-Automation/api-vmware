@@ -14,20 +14,23 @@ class Process:
             "stderr": ""
         }
 
+        subProc = subprocess.Popen(
+            invocation,
+            executable="/bin/bash",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=procEnv
+        )
+
         try:
             Log.actionLog("Try paramiko local bash command: "+str(invocation))
 
-            subProc = subprocess.Popen(
-                invocation,
-                executable="/bin/bash",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                env=procEnv
-            )
-
             execution["stdout"], execution["stderr"] = subProc.communicate(timeout=15)
             execution["status"] = int(subProc.returncode)
+        except subprocess.TimeoutExpired:
+            subProc.kill()
+            subProc.communicate()
         except Exception as e:
             raise e
 
