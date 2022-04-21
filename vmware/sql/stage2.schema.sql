@@ -42,7 +42,6 @@ CREATE TABLE `target` (
   `task_startTime` varchar(64) NOT NULL DEFAULT '',
   `task_queueTime` varchar(64) NOT NULL DEFAULT '',
   `task_message` varchar(512) NOT NULL DEFAULT '',
-  `second_stage` varchar(8192) NOT NULL DEFAULT '[]' CHECK (json_valid(`second_stage`)),
   `vm_name` varchar(128) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -111,8 +110,8 @@ CREATE TABLE `target_command_exec` (
   `id_target_command` int(11) NOT NULL,
   `timestamp` datetime(4) NOT NULL DEFAULT current_timestamp(4),
   `exit_status` int(11) NOT NULL,
-  `stdout` mediumtext NOT NULL DEFAULT '',
-  `stderr` mediumtext NOT NULL DEFAULT ''
+  `stdout` mediumtext DEFAULT NULL,
+  `stderr` mediumtext DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

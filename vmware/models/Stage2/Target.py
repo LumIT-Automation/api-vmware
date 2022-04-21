@@ -3,6 +3,7 @@ from typing import List, Dict, Union
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.models.Stage2.Command import Command
 from vmware.models.Stage2.TargetCommand import TargetCommand
+from vmware.models.Stage2.TargetCommandExecution import TargetCommandExecution
 
 from vmware.repository.Stage2.Target import Target as Repository
 
@@ -31,10 +32,10 @@ class Target:
         self.task_startTime: str = ""
         self.task_queueTime: str = ""
         self.task_message: str = ""
-        self.second_stage: List[dict] = []
         self.vm_name: str = ""
 
         self.commands: List[dict] = [] # composition with Command and TargetCommand's user_args + id.
+        self.commandsExecutions: List[TargetCommandExecution] = []
 
         self.__load()
 
@@ -108,7 +109,11 @@ class Target:
                     # }
 
                     command["user_args"] = targetCommand["user_args"]
+                    command["id_target_command"] = targetCommand["id"]
+
                     el["commands"].append(command)
+
+                el["commandsExecutions"] = TargetCommandExecution.listTargetCommandExecutions(el["id"])
 
             return o
         except Exception as e:
@@ -140,8 +145,11 @@ class Target:
             targetCommands = TargetCommand.listTargetCommands(self.id)
             for targetCommand in targetCommands:
                 command = Command(targetCommand["command"]).repr()
-                command["user_args"] = targetCommand["user_args"]
 
+                command["user_args"] = targetCommand["user_args"]
+                command["id_target_command"] = targetCommand["id"]
                 self.commands.append(command)
+
+            self.commandsExecutions = TargetCommandExecution.listTargetCommandExecutions(self.id)
         except Exception as e:
             raise e
