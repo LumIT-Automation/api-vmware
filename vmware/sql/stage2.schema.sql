@@ -89,28 +89,27 @@ CREATE TABLE `command` (
 -- --------------------------------------------------------
 
 --
+-- Struttura della tabella `target_command`
+--
+
+CREATE TABLE `target_command` (
+  `id_target` int(11) NOT NULL,
+  `command` varchar(64) NOT NULL DEFAULT '',
+  `user_args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`user_args`)),
+  `sequence` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- --------------------------------------------------------
+
+--
 -- Struttura della tabella `target_command_exec`
 --
 
 CREATE TABLE `target_command_exec` (
   `id` int(11) NOT NULL,
   `id_target_command` int(11) NOT NULL,
-  `timestamp` datetime NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP,
-  `exit_status` int(11) NOT NULL,
-  `stdout` mediumtext NOT NULL DEFAULT '',
-  `stderr` mediumtext NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `command_exec_status`
---
-
-CREATE TABLE `command_exec_status` (
-  `id` int(11) NOT NULL,
-  `id_command` varchar(64) NOT NULL,
-  `exec_count` tinyint(4) NOT NULL,
+  `timestamp` datetime(4) NOT NULL DEFAULT current_timestamp(4),
   `exit_status` int(11) NOT NULL,
   `stdout` mediumtext NOT NULL DEFAULT '',
   `stderr` mediumtext NOT NULL DEFAULT ''
@@ -149,17 +148,19 @@ ALTER TABLE `command`
 COMMIT;
 
 --
--- Indici per le tabelle `command_exec_status`
---
-ALTER TABLE `command_exec_status`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `ces_command` (`id_command`);
-
---
 -- Indici per le tabelle `target_command_exec`
 --
 ALTER TABLE `target_command_exec`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ces_command` (`id_target_command`);
+
+--
+-- Indici per le tabelle `target_command`
+--
+ALTER TABLE `target_command`
+  ADD PRIMARY KEY (`id_target`,`command`),
+  ADD KEY `tc_command` (`command`);
+
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate
@@ -184,10 +185,11 @@ ALTER TABLE `final_pubkey`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT per la tabella `command_exec_status`
+-- AUTO_INCREMENT per la tabella `target_command_exec`
 --
-ALTER TABLE `command_exec_status`
+ALTER TABLE `target_command_exec`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+COMMIT;
 
 
 --
@@ -201,10 +203,11 @@ ALTER TABLE `target`
   ADD CONSTRAINT `bk_key` FOREIGN KEY (`id_bootstrap_key`) REFERENCES `bootstrap_key` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Limiti per la tabella `command_exec_status`
+-- Limiti per la tabella `target_command`
 --
-ALTER TABLE `command_exec_status`
-  ADD CONSTRAINT `ces_command` FOREIGN KEY (`id_command`) REFERENCES `command` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `target_command`
+  ADD CONSTRAINT `tc_command` FOREIGN KEY (`command`) REFERENCES `command` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `tc_target` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 
