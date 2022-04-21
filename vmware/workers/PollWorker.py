@@ -4,6 +4,7 @@ import time
 from vmware.models.VMware.Task import Task
 from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.Stage2.Target import Target
+from vmware.models.Stage2.TargetCommandExecution import TargetCommandExecution
 
 from vmware.helpers.SSHCommandRun import SSHCommandRun
 from vmware.helpers.Log import Log
@@ -44,17 +45,12 @@ class PollWorker:
                         userArgs=command["user_args"]
                     )()
 
-                    # Update db.
-                    data = Target(targetId=self.targetId).repr()["second_stage"] or []
-                    data.append({
-                        "command": command["uid"],
-                        "output": o,
-                        "error": e,
-                        "status": s
-                    })
-
-                    Target(targetId=self.targetId).modify({
-                        "second_stage": data
+                    # Save results into db.
+                    TargetCommandExecution.add({
+                        "id_target_command": command["id_target_command"],
+                        "stdout": o,
+                        "stderr": e,
+                        "exit_status": s
                     })
 
                     time.sleep(2)
