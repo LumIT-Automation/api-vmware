@@ -93,10 +93,10 @@ CREATE TABLE `command` (
 --
 
 CREATE TABLE `target_command` (
+  `id` int(11) NOT NULL,
   `id_target` int(11) NOT NULL,
   `command` varchar(64) NOT NULL DEFAULT '',
-  `user_args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`user_args`)),
-  `sequence` int(11) NOT NULL DEFAULT '0'
+  `user_args` varchar(8192) NOT NULL DEFAULT '{}' CHECK (json_valid(`user_args`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -158,7 +158,7 @@ ALTER TABLE `target_command_exec`
 -- Indici per le tabelle `target_command`
 --
 ALTER TABLE `target_command`
-  ADD PRIMARY KEY (`id_target`,`command`),
+  ADD PRIMARY KEY (`id`),
   ADD KEY `tc_command` (`command`);
 
 
@@ -185,6 +185,12 @@ ALTER TABLE `final_pubkey`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT per la tabella `target_command`
+--
+ALTER TABLE `target_command`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT per la tabella `target_command_exec`
 --
 ALTER TABLE `target_command_exec`
@@ -208,6 +214,13 @@ ALTER TABLE `target`
 ALTER TABLE `target_command`
   ADD CONSTRAINT `tc_command` FOREIGN KEY (`command`) REFERENCES `command` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `tc_target` FOREIGN KEY (`id_target`) REFERENCES `target` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+--
+-- Limiti per la tabella `target_command_exec`
+--
+ALTER TABLE `target_command_exec`
+  ADD CONSTRAINT `tc_exec` FOREIGN KEY (`id_target_command`) REFERENCES `target_command` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 
