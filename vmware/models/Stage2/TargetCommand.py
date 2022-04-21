@@ -10,6 +10,8 @@ class TargetCommand:
         super().__init__(*args, **kwargs)
 
         self.id: int = targetCommandId
+        self.id_target: int = 0
+        self.command: str = ""
         self.user_args: dict = {}
 
 
