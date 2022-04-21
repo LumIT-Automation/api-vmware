@@ -34,7 +34,7 @@ class Target:
         self.second_stage: List[dict] = []
         self.vm_name: str = ""
 
-        self.commands: List[dict] = [] # composition with Command and TargetCommand's user_args.
+        self.commands: List[dict] = [] # composition with Command and TargetCommand's user_args + id.
 
         self.__load()
 
@@ -92,12 +92,12 @@ class Target:
                 el["commands"] = list()
 
                 targetCommands = TargetCommand.listTargetCommands(el["id"])
+                # "id": 1,
                 # "id_target": 1,
                 # "command": "ls",
                 # "user_args": {
                 #     "__path": "/"
-                # },
-                # "sequence": 1
+                # }
 
                 for targetCommand in targetCommands:
                     command = Command(targetCommand["command"]).repr()
@@ -108,7 +108,6 @@ class Target:
                     # }
 
                     command["user_args"] = targetCommand["user_args"]
-
                     el["commands"].append(command)
 
             return o

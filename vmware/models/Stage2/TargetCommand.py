@@ -6,13 +6,11 @@ from vmware.helpers.Log import Log
 
 
 class TargetCommand:
-    def __init__(self, targetId: int, commandUid: str, *args, **kwargs):
+    def __init__(self, targetCommandId: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id_target: int = int(targetId)
-        self.command: str = commandUid
+        self.id: int = targetCommandId
         self.user_args: dict = {}
-        self.sequence: int = 0
 
 
 
@@ -22,7 +20,7 @@ class TargetCommand:
 
     def delete(self) -> None:
         try:
-            Repository.delete(self.id_target, self.command)
+            Repository.delete(self.id)
         except Exception as e:
             raise e
 
