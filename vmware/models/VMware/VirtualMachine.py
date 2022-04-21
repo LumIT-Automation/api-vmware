@@ -100,6 +100,7 @@ class VirtualMachine(Backend):
                 # Deploy within a preferred host in a cluster.
                 self.__checkCluster(Input.datacenterMoId, Input.clusterMoId)
                 self.__checkHost(Input.clusterMoId, Input.hostMoId)
+                cluster = Cluster(self.assetId, Input.clusterMoId)
                 computeResource = host = HostSystem(self.assetId, Input.hostMoId)
 
             elif Input.clusterMoId and not Input.hostMoId:
