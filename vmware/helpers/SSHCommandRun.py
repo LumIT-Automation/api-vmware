@@ -47,6 +47,8 @@ class SSHCommandRun:
             # Run command (with user arguments) against target (SSH).
             if self.commandUid == "reboot":
                 o, e, s = self.__reboot()
+            elif self.commandUid == "waitPowerOn":
+                o, e, s = self.__waitPowerOn()
             elif self.commandUid == "addPubKey" \
                     or self.commandUid == "removeBootstrapKey":
                 o, e, s = self.__publicKey()
@@ -106,8 +108,6 @@ class SSHCommandRun:
 
 
     def __reboot(self) -> tuple:
-        o = ""
-
         try:
             ssh = SSHSupplicant(self.connection, tcpTimeout=self.timeout)
             ssh.command(
@@ -116,9 +116,19 @@ class SSHCommandRun:
                 alwaysSuccess=True # reboot on RH does not return 0.
             )
 
+            return self.__waitPowerOn()
+        except Exception as e:
+            raise e
+
+
+
+    def __waitPowerOn(self) -> tuple:
+        o = ""
+
+        try:
             # Synchronize reboot command.
             tStart = time.time()
-            while time.time() < tStart + 120: # [seconds]
+            while time.time() < tStart + 120:  # [seconds]
                 try:
                     o = SSHCommandRun("echo", self.targetId, {"__echo": "i-am-alive"})()
                     if o:
@@ -126,10 +136,10 @@ class SSHCommandRun:
                 except Exception:
                     pass
 
-                time.sleep(10) # every 10s.
+                time.sleep(10)  # every 10s.
 
             if not o:
-                raise CustomException(status=400, payload={"SSH": "machine not responding anymore."})
+                raise CustomException(status=400, payload={"SSH": "machine not responding."})
 
             return "", "", 0
         except Exception as e:

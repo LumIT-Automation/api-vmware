@@ -33,7 +33,7 @@ class PollWorker:
         try:
             # Wait for VMware VM cloning completion.
             if self.checkDeployStatus():
-                time.sleep(30) # wait for guest spec apply (a reboot occurs).
+                time.sleep(50) # wait for guest spec apply (a reboot occurs).
 
                 # Execute scheduled SSH commands.
                 for command in self.commands:
