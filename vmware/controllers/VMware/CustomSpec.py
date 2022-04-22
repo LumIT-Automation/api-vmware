@@ -161,7 +161,7 @@ class VMwareCustomSpecController(CustomController):
                 Log.actionLog("Clone virtual machines customization specification", user)
                 Log.actionLog("User data:"+str(request.data), user)
 
-                serializer = Serializer(data=request.data["data"], partial=True)
+                serializer = Serializer(data=request.data["data"])
                 if serializer.is_valid():
                     lock = Lock("custom_spec", locals(), specName)
                     if lock.isUnlocked():

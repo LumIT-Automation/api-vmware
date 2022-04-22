@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
 class VMwareTaskSerializer(serializers.Serializer):
-    entityName = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
-    entity_moId = serializers.CharField(max_length=64, required=False, allow_blank=True, allow_null=True)
-    queueTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
-    startTime = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    entityName = serializers.CharField(required=True, max_length=255)
+    entity_moId = serializers.CharField(required=True, max_length=64)
+    queueTime = serializers.DateTimeField(required=True, format="%Y-%m-%d %H:%M:%S")
+    startTime = serializers.DateTimeField(required=True, format="%Y-%m-%d %H:%M:%S")
     progress = serializers.IntegerField(required=False, allow_null=True)
-    state = serializers.CharField(max_length=64, required=False, allow_blank=True, allow_null=True)
-    message = serializers.CharField(max_length=64, required=False, allow_blank=True)
+    state = serializers.CharField(required=True, max_length=64)
+    message = serializers.CharField(required=False, max_length=64, allow_blank=True)

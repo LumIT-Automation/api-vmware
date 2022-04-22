@@ -3,12 +3,12 @@ from rest_framework import serializers
 
 class HistorySerializer(serializers.Serializer):
     class HistoryItemsSerializer(serializers.Serializer):
-        username = serializers.CharField(max_length=255, required=True)
-        action = serializers.CharField(max_length=255, required=True)
+        username = serializers.CharField(required=True, max_length=255)
+        action = serializers.CharField(required=True, max_length=255)
         asset_id = serializers.IntegerField(required=True)
-        config_object_type = serializers.CharField(max_length=255, required=True)
-        config_object = serializers.CharField(max_length=255, required=True)
-        status = serializers.CharField(max_length=255, required=True)
-        date = serializers.CharField(max_length=255, required=True)
+        config_object_type = serializers.CharField(required=True, max_length=255)
+        config_object = serializers.CharField(required=True, max_length=255)
+        status = serializers.CharField(required=True, max_length=255)
+        date = serializers.CharField(required=True, max_length=255)
 
     items = HistoryItemsSerializer(many=True)
