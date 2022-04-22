@@ -55,9 +55,12 @@ class BootstrapKey:
             subEnv["PRIV_KEY"] = self.priv_key
             command = 'ssh-keygen -yf /dev/stdin <<< $(echo -n "$PRIV_KEY")'
 
-            out = Process.execCommandString(invocation=command, procEnv=subEnv)
-            if out["success"]:
-                pub_key = out["stdout"].decode('utf-8')
+            try:
+                out = Process.execCommandString(invocation=command, procEnv=subEnv)
+                if out["success"]:
+                    pub_key = out["stdout"].decode('utf-8')
+            except ValueError:
+                pub_key = "<error>"
 
             return pub_key
         except Exception as e:

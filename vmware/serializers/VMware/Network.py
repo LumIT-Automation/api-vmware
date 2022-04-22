@@ -7,6 +7,8 @@ class VMwareNetworkSerializer(serializers.Serializer):
     assetId = serializers.IntegerField()
     moId = serializers.CharField(required=True, max_length=64)
     name = serializers.CharField(required=True, max_length=255)
+
+    # The following information is not available for quick API.
     accessible = serializers.BooleanField(required=False)
     type = serializers.CharField(required=False, max_length=15, allow_blank=True)
     vlanId = serializers.CharField(required=False, max_length=15, allow_blank=True)
