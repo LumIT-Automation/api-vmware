@@ -17,7 +17,6 @@ class SSHCommandRun:
 
         self.targetId = targetId
         self.userArgs = userArgs
-        self.pubKeyId = kwargs.get("pubKeyId", 0)
         self.timeout = 10
 
         try:
@@ -88,7 +87,7 @@ class SSHCommandRun:
             try:
                 if self.commandUid == "addPubKey":
                     # Load public key as it was put by the user.
-                    self.userArgs["__pubKey"] = FinalPubKey(self.pubKeyId).pub_key
+                    self.userArgs["__pubKey"] = FinalPubKey(self.userArgs["__pubKeyId"]).pub_key
                 else:
                     # Load public bootstrap key.
                     target = Target(self.targetId)
@@ -196,6 +195,7 @@ class SSHCommandRun:
             for k, v in userArgs.items():
                 command = command.replace("${"+k+"}", str(v))
 
+            Log.log(command, 'CCCCCCCCCC')
             return command
         except Exception as e:
             raise e

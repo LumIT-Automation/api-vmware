@@ -13,7 +13,7 @@ from vmware.helpers.Log import Log
 
 class Stage2CommandRunController(CustomController):
     @staticmethod
-    def put(request: Request, commandUid: str, targetId: int, pubKeyId: int = 0) -> Response:
+    def put(request: Request, commandUid: str, targetId: int) -> Response:
         data = dict()
         user = CustomController.loggedUser(request)
 
@@ -28,8 +28,6 @@ class Stage2CommandRunController(CustomController):
                         commandUid=commandUid,
                         targetId=targetId,
                         userArgs=serializer.validated_data["args"],
-
-                        pubKeyId=pubKeyId # useful only for public key management.
                     )()
 
                     data["href"] = request.get_full_path()
