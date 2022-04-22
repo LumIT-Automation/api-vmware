@@ -29,5 +29,4 @@ urlpatterns = [
 
     # Virtual machine commands.
     path('command/<str:commandUid>/run/<int:targetId>/', RunCommand.Stage2CommandRunController.as_view(), name='stage2-command-run'),
-    #path('command/<str:commandUid>/run/<int:targetId>/<int:pubKeyId>/', RunCommand.Stage2CommandRunController.as_view(), name='stage2-command-run-pubkey'),
 ]

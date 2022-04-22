@@ -72,7 +72,7 @@ class Target:
     def getBootstrapPubKey(self) -> str:
         try:
             t = Repository.get(self.id)
-            bootStrapKey = BootstrapKey(t["connectionData"]["id_bootstrap_key"])
+            bootStrapKey = BootstrapKey(t["connection"]["id_bootstrap_key"])
             pubKey = bootStrapKey.getPublic()
             return pubKey
 

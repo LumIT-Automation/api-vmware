@@ -42,8 +42,5 @@ class VMwareDeployTemplateSerializer(serializers.Serializer):
     networkDevices = VMwareVirtualMachineNetworkDeviceTypeSerializer(required=False, allow_null=True)
     diskDevices = VMwareVirtualMachineDiskDeviceTypeSerializer(required=False, allow_null=True)
     bootstrapKeyId = serializers.IntegerField(required=False)
-    finalPubKeyIds = serializers.ListField(
-        child=serializers.IntegerField(required=False),
-        required=False
-    )
+
     postDeployCommands = VMwareVirtualMachinePostDeployCommand(many=True, required=False)

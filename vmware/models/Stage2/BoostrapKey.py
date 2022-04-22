@@ -58,7 +58,7 @@ class BootstrapKey:
             try:
                 out = Process.execCommandString(invocation=command, procEnv=subEnv)
                 if out["success"]:
-                    pub_key = out["stdout"].decode('utf-8')
+                    pub_key = out["stdout"].decode('utf-8').replace('\n', '')
             except ValueError:
                 pub_key = "<error>"
 

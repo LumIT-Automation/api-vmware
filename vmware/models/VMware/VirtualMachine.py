@@ -11,7 +11,6 @@ from vmware.models.VMware.backend.VirtualMachineSpecsBuilder import VirtualMachi
 
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.BoostrapKey import BootstrapKey
-from vmware.models.Stage2.FinalPubKey import FinalPubKey
 from vmware.models.Stage2.TargetCommand import TargetCommand
 from vmware.models.Stage2.Command import Command
 from vmware.tasks import pollVmwareAsync_task
@@ -36,7 +35,7 @@ class Input:
     deleteGuestSpecAfterDeploy = False
     vmName = None
     bootstrapKeyId = None
-    finalPubKeyIds = []
+    PubKeyIds = []
     postDeployCommands: List[dict] = None
 
 
@@ -81,7 +80,7 @@ class VirtualMachine(Backend):
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
-                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "finalPubKeyIds", "postDeployCommands"):
+                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "postDeployCommands"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -125,9 +124,6 @@ class VirtualMachine(Backend):
 
             # Check bootstrapKey.
             self.__checkBootstrapKey(Input.bootstrapKeyId)
-
-            # Check final pubKeys.
-            self.__checkFinalPubkeys(Input.finalPubKeyIds)
 
             # Check post deploy commands.
             self.__checkPostDeployCommands(Input.postDeployCommands)
@@ -407,17 +403,6 @@ class VirtualMachine(Backend):
                 BootstrapKey(keyId)
             except Exception:
                 raise CustomException(status=400, payload={"VMware": "Invalid bootstrap key."})
-
-
-
-    def __checkFinalPubkeys(self, keyIds: list = None) -> None:
-        keyIds = [] if keyIds is None else keyIds
-        for k in keyIds:
-            if k:
-                try:
-                    FinalPubKey(k)
-                except Exception:
-                    raise CustomException(status=400, payload={"VMware": "Invalid final public key."})
 
 
 
