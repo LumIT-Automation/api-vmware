@@ -81,7 +81,7 @@ class VirtualMachine(Backend):
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
-                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "vmName", "bootstrapKeyId", "finalPubKeyIds", "postDeployCommands"):
+                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "finalPubKeyIds", "postDeployCommands"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -176,7 +176,8 @@ class VirtualMachine(Backend):
                 taskMoId=out["task_moId"],
                 customSpecInfo=cSpecInfo,
                 postDeployCommands=Input.postDeployCommands,
-                guestSpec=Input.guestSpec
+                guestSpec=Input.guestSpec,
+                secondStageIp=Input.secondStageIp
             )
 
             return out
@@ -185,12 +186,14 @@ class VirtualMachine(Backend):
 
 
 
-    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None, guestSpec: str = "") -> int:
+    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None, guestSpec: str = "", secondStageIp: str = "") -> int:
         postDeployCommands = [] if postDeployCommands is None else postDeployCommands
 
         try:
             ip = ""
-            if "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
+            if secondStageIp:
+                ip = secondStageIp
+            elif "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
                 ip = customSpecInfo["network"][0]["ip"]
 
             targetData = {
