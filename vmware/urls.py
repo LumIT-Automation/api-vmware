@@ -8,5 +8,6 @@ urlpatterns = [
     path('api/v1/', Root.RootController.as_view()),
 
     path('api/v1/vmware/', include('vmware.VMwareUrls')),
-    path('api/v1/stage2/', include('vmware.Stage2Urls'))
+    path('api/v1/stage2/', include('vmware.Stage2Urls')),
+    path('api/v1/vmware/stage2/', include('vmware.Stage2Urls'))
 ]

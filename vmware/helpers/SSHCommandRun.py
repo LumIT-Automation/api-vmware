@@ -195,7 +195,6 @@ class SSHCommandRun:
             for k, v in userArgs.items():
                 command = command.replace("${"+k+"}", str(v))
 
-            Log.log(command, 'CCCCCCCCCC')
             return command
         except Exception as e:
             raise e
