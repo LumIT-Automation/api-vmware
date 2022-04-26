@@ -1,4 +1,5 @@
 from typing import List, Any
+from pyVmomi import vim
 
 from vmware.models.VMware.Asset.Asset import Asset
 
@@ -53,6 +54,9 @@ class VmwareHandler:
                         obj.append(managedObject_ref)
             else:
                 raise CustomException(status=400, payload={"VMware": "cannot fetch VMware objects."})
+        except vim.fault.NotAuthenticated: # when token expires.
+            self.__fetchContent(assetId)
+            obj = self.getObjects(assetId, vimType, moId)
         except Exception as e:
             raise e
 
