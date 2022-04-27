@@ -211,16 +211,15 @@ class VirtualMachineSpecsBuilder(Backend):
                 else:
                     nicSpec.device = VirtualMachineSpecsBuilder.getEthernetDeviceInstance(data["deviceType"])
                     nicSpec.device.deviceInfo = vim.Description()
-                    nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
                     nicSpec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
                     nicSpec.device.connectable.startConnected = True
                     nicSpec.device.connectable.allowGuestControl = True
                     nicSpec.device.connectable.connected = False
+                    nicSpec.device.connectable.status = 'untried'
                 nicSpec.device.deviceInfo.summary = data["network"].oNetwork.name
                 if "deviceLabel" in data:
                     nicSpec.device.deviceInfo.label = data["deviceLabel"]
-                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
-                nicSpec.device.backing.network = data["network"].oNetwork
+                nicSpec.device.backing = self.__buildNicBackingSpec(data["network"].oNetwork)
             elif data["operation"] == 'add':
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
                 nicSpec.device = VirtualMachineSpecsBuilder.getEthernetDeviceInstance(data["deviceType"])
@@ -232,9 +231,8 @@ class VirtualMachineSpecsBuilder(Backend):
                 nicSpec.device.connectable.startConnected = True
                 nicSpec.device.connectable.allowGuestControl = True
                 nicSpec.device.connectable.connected = False
-                nicSpec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
-                nicSpec.device.backing.deviceName = data["network"].oNetwork.name
-                nicSpec.device.backing.network = data["network"].oNetwork
+                nicSpec.device.connectable.status = 'untried'
+                nicSpec.device.backing = self.__buildNicBackingSpec(data["network"].oNetwork)
                 if "additionalData" in data:
                     nicSpec.device.controllerKey = data["additionalData"]["controllerKey"]
                     nicSpec.device.unitNumber = data["additionalData"]["unitNumber"]
@@ -478,6 +476,28 @@ class VirtualMachineSpecsBuilder(Backend):
                 spec.fileName = filePath
 
             return spec
+        except Exception as e:
+            raise e
+
+
+
+    def __buildNicBackingSpec(self, portGroup: object):
+        try:
+            if isinstance(portGroup, vim.dvs.DistributedVirtualPortgroup):  # distributed port group
+                backing = vim.vm.device.VirtualEthernetCard.DistributedVirtualPortBackingInfo()
+                backing.port = vim.dvs.PortConnection()
+                backing.port.portgroupKey = portGroup.key
+                backing.port.switchUuid = portGroup.config.distributedVirtualSwitch.uuid
+            elif isinstance(portGroup, vim.OpaqueNetwork):  # third-party network
+                backing = vim.vm.device.VirtualEthernetCard.OpaqueNetworkBackingInfo()
+                backing.opaqueNetworkType = portGroup.summary.opaqueNetworkType
+                backing.opaqueNetworkId = portGroup.summary.opaqueNetworkId
+            else: # standard port group
+                backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
+                backing.deviceName = portGroup.name
+                backing.network = portGroup
+
+            return backing
         except Exception as e:
             raise e
 
