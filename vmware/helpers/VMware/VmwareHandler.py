@@ -11,7 +11,6 @@ from vmware.helpers.Log import Log
 
 
 class VmwareHandler:
-    connections = dict()
     contents = dict() # share content amongst all instances: do not re-fetch it during a "session".
     managedObjectCaches = dict()
     cacheTimeOut = 1799
@@ -19,9 +18,6 @@ class VmwareHandler:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # self.assetId = int(assetId)
-        # self.moId = moId # VMware Managed Object Id.
 
 
 
@@ -56,6 +52,7 @@ class VmwareHandler:
                     c = VmwareHandler.contents[assetId].viewManager.CreateContainerView(VmwareHandler.contents[assetId].rootFolder, [vimType], True)
                     for managedObject_ref in c.view:
                         obj.append(managedObject_ref)
+                        VmwareHandler.managedObjectCaches[assetId][moId] = managedObject_ref  # put in cache.
             else:
                 raise CustomException(status=400, payload={"VMware": "cannot fetch VMware objects."})
         except vim.fault.NotAuthenticated: # when token expires.
@@ -98,8 +95,8 @@ class VmwareHandler:
 
     def __fetchContent(self, assetId) -> None:
         try:
-            self.__checkConnect(assetId)
-            connection = VmwareHandler.connections[assetId]["connection"]
+            supplicant = VmwareSupplicant(Asset(assetId))
+            connection = supplicant.connect()
 
             Log.actionLog("Fetch VMware content.")
             VmwareHandler.contents[assetId] = connection.RetrieveContent()
@@ -108,31 +105,3 @@ class VmwareHandler:
                 VmwareHandler.managedObjectCaches[assetId] = TTLCache(maxsize=100, ttl=VmwareHandler.cacheTimeOut)
         except Exception as e:
             raise e
-
-
-
-    def __checkConnect(self, assetId) -> object:
-        try:
-            Log.log("Check VMware conenction.")
-            if assetId not in VmwareHandler.connections:
-                supplicant = VmwareSupplicant(Asset(assetId))
-                connection = supplicant.connect()
-                VmwareHandler.connections[assetId] = {
-                    "connection": connection,
-                    "lastUsed": time.time()
-                }
-            else:
-                now = time.time()
-                Log.log("Check time")
-                if now - VmwareHandler.connections[assetId]["lastUsed"] > VmwareHandler.timeOut or not VmwareHandler.connections[assetId]["connection"]:
-                    Log.log("Refresh connection: diff = "+str(now - VmwareHandler.connections[assetId]["lastUsed"]), '_')
-                    supplicant = VmwareSupplicant(Asset(assetId))
-                    connection = supplicant.connect()
-                    VmwareHandler.connections[assetId] = {
-                        "connection": connection,
-                        "lastUsed": time.time()
-                    }
-
-        except Exception as e:
-            raise e
-
