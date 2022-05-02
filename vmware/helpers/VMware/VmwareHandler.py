@@ -1,7 +1,9 @@
 from typing import List, Any
-import time
+
 from pyVmomi import vim
 from cachetools import TTLCache
+
+from django.conf import settings
 
 from vmware.models.VMware.Asset.Asset import Asset
 
@@ -13,7 +15,6 @@ from vmware.helpers.Log import Log
 class VmwareHandler:
     contents = dict() # share content amongst all instances: do not re-fetch it during a "session".
     managedObjectCaches = dict()
-    cacheTimeOut = 1799
 
 
     def __init__(self, *args, **kwargs):
@@ -31,7 +32,7 @@ class VmwareHandler:
         obj = []
 
         try:
-            if assetId not in VmwareHandler.contents or assetId not in VmwareHandler.managedObjectCaches:
+            if assetId not in VmwareHandler.contents:
                 self.__fetchContent(assetId)
 
             if VmwareHandler.contents[assetId]:
@@ -45,14 +46,18 @@ class VmwareHandler:
                         for managedObject_ref in c.view:
                             if managedObject_ref._GetMoId() == moId:
                                 obj.append(managedObject_ref)
-                                VmwareHandler.managedObjectCaches[assetId][moId] = managedObject_ref # put in cache.
+
+                                # Save content into managedObjectCaches[assetId][moId] with a timeout (a "cache"):
+                                # VMware connection expires after some time (==timeout) (and fires a vim.fault.NotAuthenticated exception).
+                                # We handle the token expiration by setting a timeout when saving managedObjectCaches[assetId][moId] instead of handling the exception.
+                                # After the timeout, managedObjectCaches[assetId][moId] becomes None.
+                                VmwareHandler.managedObjectCaches[assetId][moId] = managedObject_ref
                                 break
                 else:
                     # Return complete list.
                     c = VmwareHandler.contents[assetId].viewManager.CreateContainerView(VmwareHandler.contents[assetId].rootFolder, [vimType], True)
                     for managedObject_ref in c.view:
                         obj.append(managedObject_ref)
-                        VmwareHandler.managedObjectCaches[assetId][moId] = managedObject_ref  # put in cache.
             else:
                 raise CustomException(status=400, payload={"VMware": "cannot fetch VMware objects."})
         except vim.fault.NotAuthenticated: # when token expires.
@@ -95,13 +100,12 @@ class VmwareHandler:
 
     def __fetchContent(self, assetId) -> None:
         try:
-            supplicant = VmwareSupplicant(Asset(assetId))
-            connection = supplicant.connect()
+            connection = VmwareSupplicant(Asset(assetId)).connect()
 
-            Log.actionLog("Fetch VMware content.")
+            Log.actionLog("Fetch VMware content from connection.")
             VmwareHandler.contents[assetId] = connection.RetrieveContent()
 
             if assetId not in VmwareHandler.managedObjectCaches:
-                VmwareHandler.managedObjectCaches[assetId] = TTLCache(maxsize=100, ttl=VmwareHandler.cacheTimeOut)
+                VmwareHandler.managedObjectCaches[assetId] = TTLCache(maxsize=100, ttl=settings.VMWARE_CONTENT_CACHE_TIMEOUT)
         except Exception as e:
             raise e
