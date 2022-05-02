@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Backup script for databases in the api-vmware container.
+# Run from the host via podman exec, so the backup is not deleted even if the container package is purged.
+
 PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin
 
 if [ -z "$1" ]; then
