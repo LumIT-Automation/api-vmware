@@ -47,10 +47,11 @@ class VmwareHandler:
                             if managedObject_ref._GetMoId() == moId:
                                 obj.append(managedObject_ref)
 
-                                # Save content into managedObjectCaches[assetId][moId] with a timeout (a "cache"):
-                                # VMware connection expires after some time (==timeout) (and fires a vim.fault.NotAuthenticated exception).
-                                # We handle the token expiration by setting a timeout when saving managedObjectCaches[assetId][moId] instead of handling the exception.
-                                # After the timeout, managedObjectCaches[assetId][moId] becomes None.
+                                # Save content into managedObjectCaches[assetId][moId] "cache" with the ttl timeout defined:
+                                # VmwareHandler.contents[assetId] object's token expires after some time (==timeout) (and fires a vim.fault.NotAuthenticated exception).
+                                # We can handle the token expiration via the vim.fault.NotAuthenticated catching below only when object is not in the cache.
+                                # On the contrary ('cause we serve the cached object anyway), we must set a caching-timeout when saving managedObjectCaches[assetId][moId]
+                                # (after the timeout, managedObjectCaches[assetId][moId] becomes None).
                                 VmwareHandler.managedObjectCaches[assetId][moId] = managedObject_ref
                                 break
                 else:
