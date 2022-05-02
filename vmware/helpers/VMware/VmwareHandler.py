@@ -13,7 +13,7 @@ from vmware.helpers.Log import Log
 
 
 class VmwareHandler:
-    contents = dict() # share content amongst all instances: do not re-fetch it during a "session".
+    contents = dict() # share content amongst all instances: do not re-fetch it during a "session" [!! in daemon mode: until an apache restart !!].
     managedObjectCaches = dict()
 
 
