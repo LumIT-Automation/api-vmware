@@ -107,6 +107,10 @@ function containerSetup()
         fi
     fi
 
+    # Schedule the databases backup.
+    (crontab -l ; echo "01 3 * * * /usr/bin/bck-db_api-vmware.sh api >/dev/null 2>&1") | crontab -
+    (crontab -l ; echo "02 3 * * * /usr/bin/bck-db_api-vmware.sh stage2 >/dev/null 2>&1") | crontab -
+
     printf "$wallBanner Installation completed." | wall -n
 }
 

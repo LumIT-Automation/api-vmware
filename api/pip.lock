@@ -1,6 +1,6 @@
 amqp==5.1.1
-asgiref==3.5.0
-bcrypt==3.2.0
+asgiref==3.5.1
+bcrypt==3.2.2
 billiard==3.6.4.0
 cached-property==1.5.2
 cachetools==5.0.0
@@ -24,11 +24,12 @@ importlib-metadata==4.11.3
 kombu==5.2.4
 lxml==4.8.0
 mysqlclient==2.0.3
-nsx-policy-python-sdk @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/nsx-policy-python-sdk/nsx_policy_python_sdk-3.1.5.0.0-py2.py3-none-any.whl
-nsx-python-sdk @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/nsx-python-sdk/nsx_python_sdk-3.1.5.0.0-py2.py3-none-any.whl
-nsx-vmc-aws-integration-python-sdk @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/nsx-vmc-aws-integration-python-sdk/nsx_vmc_aws_integration_python_sdk-3.1.5.0.0-py2.py3-none-any.whl
-nsx-vmc-policy-python-sdk @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/nsx-vmc-policy-python-sdk/nsx_vmc_policy_python_sdk-3.1.5.0.0-py2.py3-none-any.whl
+nsx-policy-python-sdk==3.1.5.0.0
+nsx-python-sdk==3.1.5.0.0
+nsx-vmc-aws-integration-python-sdk==3.1.5.0.0
+nsx-vmc-policy-python-sdk==3.1.5.0.0
 paramiko==2.10.4
+pip==22.0.4
 pkg_resources==0.0.0
 prompt-toolkit==3.0.29
 pycparser==2.21
@@ -39,16 +40,17 @@ pytz==2022.1
 pyvmomi==7.0.3
 redis==3.5.3
 requests==2.25.1
+setuptools==40.8.0
 six==1.16.0
 sqlparse==0.4.2
 typing_extensions==4.2.0
 urllib3==1.26.9
-vapi-client-bindings @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/vapi-client-bindings/vapi_client_bindings-3.8.0-py2.py3-none-any.whl
-vapi-common-client @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/vapi-common-client/vapi_common_client-2.34.0-py2.py3-none-any.whl
-vapi-runtime @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/vapi-runtime/vapi_runtime-2.34.0-py2.py3-none-any.whl
+vapi-client-bindings==3.8.0
+vapi-common-client==2.34.0
+vapi-runtime==2.34.0
 vine==5.0.0
-vmc-client-bindings @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/vmc-client-bindings/vmc_client_bindings-1.59.0-py2.py3-none-any.whl
-vmc-draas-client-bindings @ file://localhost//tmp/pip-req-build-jmf0ln7h/lib/vmc-draas-client-bindings/vmc_draas_client_bindings-1.18.0-py2.py3-none-any.whl
+vmc-client-bindings==1.59.0
+vmc-draas-client-bindings==1.18.0
 vSphere-Automation-SDK==1.76.0
 wcwidth==0.2.5
 zipp==3.8.0
