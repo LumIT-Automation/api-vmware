@@ -17,6 +17,15 @@ class VmwareHelper:
 
 
     @staticmethod
+    def getMoId(vmwareObj) -> str:
+        try:
+            return vmwareObj._GetMoId()
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
     def getType(moId: str) -> str:
         objectType = ""
 

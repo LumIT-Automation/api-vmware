@@ -10,7 +10,7 @@ from .controllers.VMware import VMFolders, VMFolder, VMFoldersTree
 from .controllers.VMware import VirtualMachines, VirtualMachine
 from .controllers.VMware import VMGuestOS
 from .controllers.VMware import Templates, Template
-from .controllers.VMware import Task
+from .controllers.VMware import Task, Tasks
 from .controllers.VMware import CustomSpecs, CustomSpec
 from .controllers.VMware.Asset import Asset, Assets
 from .controllers.Permission import Authorizations, IdentityGroups, IdentityGroup, Roles, Permission, Permissions, VObjects as PermissionVMObjects, VObject as PermissionVMObject
@@ -69,6 +69,7 @@ urlpatterns = [
     path('<int:assetId>/template/<str:moId>/', Template.VMwareVirtualMachineTemplateController.as_view(), name='vmware-template'),
 
     path('<int:assetId>/task/<str:moId>/', Task.VMwareTaskController.as_view(), name='vmware-task'),
+    path('<int:assetId>/tasks/', Tasks.VMwareTasksController.as_view(), name='vmware-tasks'),
 
     # Virtual machines customization specifications.
     path('<int:assetId>/customSpecs/', CustomSpecs.VMwareCustomSpecsController.as_view(), name='vmware-customSpecs'),
