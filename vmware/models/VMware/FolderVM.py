@@ -16,7 +16,7 @@ class FolderVM(Backend):
         self.moId = moId
         self.name = self.oVMFolder.name
 
-        self.folders: List[FolderVM] = []
+        self.children: List[FolderVM] = []
         self.virtualmachines: List[VirtualMachine] = []
 
 
@@ -30,7 +30,7 @@ class FolderVM(Backend):
             for o in self.oContents():
                 objData = VmwareHelper.getInfo(o)
                 if isinstance(o, vim.Folder):
-                    self.folders.append(
+                    self.children.append(
                         FolderVM(self.assetId, objData["moId"])
                     )
 
@@ -45,13 +45,13 @@ class FolderVM(Backend):
 
 
     def info(self, loadVms: bool = True) -> dict:
-        folders = list()
+        children = list()
         vms = list()
 
         try:
             self.loadContents(loadVms)
-            for f in self.folders:
-                folders.append(
+            for f in self.children:
+                children.append(
                     FolderVM.__cleanup("", f.info(loadVms))
                 )
 
@@ -65,7 +65,7 @@ class FolderVM(Backend):
                 "assetId": self.assetId,
                 "moId": self.moId,
                 "name": self.name,
-                "folders": folders
+                "children": children
             }
 
             if loadVms:
@@ -146,7 +146,7 @@ class FolderVM(Backend):
                 "assetId": assetId,
                 "moId": parentFolder._GetMoId(),
                 "name": parentFolder.name,
-                "folders": []
+                "children": []
             }
             treeList.append(FolderVM.__folderTree(assetId, parentFolder, tree))
 
@@ -163,8 +163,8 @@ class FolderVM(Backend):
 
         for el in treeElements:
             moIdSet.add(el["moId"])
-            if el["folders"]:
-                FolderVM.treeToSet(el["folders"], moIdSet)
+            if el["children"]:
+                FolderVM.treeToSet(el["children"], moIdSet)
 
         return moIdSet
 
@@ -175,7 +175,7 @@ class FolderVM(Backend):
         try:
             treesDict = dict()
             for tree in treesList:
-                treesDict[tree["moId"]] = FolderVM.treeToSet(tree["folders"]) # convert the trees to plain lists. Order doesn't matter.
+                treesDict[tree["moId"]] = FolderVM.treeToSet(tree["children"]) # convert the trees to plain lists. Order doesn't matter.
 
             for parent in treesDict.keys():
                 for subTree in treesDict.values():
@@ -216,8 +216,8 @@ class FolderVM(Backend):
     @staticmethod
     def __folderTree(assetId: int, oVMFolder: object, tree: dict):
         if isinstance(oVMFolder, vim.Folder):
-            if "folders" not in tree:
-                tree["folders"] = []
+            if "children" not in tree:
+                tree["children"] = []
             children = oVMFolder.childEntity
             for child in children:
                 if isinstance(child, vim.Folder):
@@ -225,9 +225,9 @@ class FolderVM(Backend):
                         "assetId": assetId,
                         "moId": child._GetMoId(),
                         "name": child.name,
-                        "folders": []
+                        "children": []
                     }
-                    tree["folders"].append(subTree)
+                    tree["children"].append(subTree)
                     FolderVM.__folderTree(assetId, child, subTree)
         return tree
 

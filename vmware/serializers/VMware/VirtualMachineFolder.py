@@ -10,7 +10,7 @@ class VMwareVirtualMachineFolderSerializer(serializers.Serializer):
     assetId = serializers.IntegerField(required=False)
     moId = serializers.CharField(required=True, max_length=255)
     name = serializers.CharField(required=False, max_length=255)
-    folders = serializers.ListField(child=RecursiveField(), required=False)
+    children = serializers.ListField(child=RecursiveField(), required=False)
     virtualmachines = VMwareVirtualMachineBriefSerializer(required=False, many=True)
 
 
