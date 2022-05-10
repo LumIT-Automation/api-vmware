@@ -9,7 +9,9 @@ class VMwareVirtualMachineFolderSerializer(serializers.Serializer):
 
     assetId = serializers.IntegerField(required=False)
     moId = serializers.CharField(required=True, max_length=255)
+    key = serializers.CharField(required=False, max_length=255) # workaround for the Ant Design shitty tree object.
     name = serializers.CharField(required=False, max_length=255)
+    title = serializers.CharField(required=False, max_length=255) # workaround for the Ant Design shitty tree object.
     children = serializers.ListField(child=RecursiveField(), required=False)
     virtualmachines = VMwareVirtualMachineBriefSerializer(required=False, many=True)
 

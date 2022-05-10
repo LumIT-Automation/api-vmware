@@ -145,7 +145,9 @@ class FolderVM(Backend):
             tree = {
                 "assetId": assetId,
                 "moId": parentFolder._GetMoId(),
+                "key": parentFolder._GetMoId(), # workaround for the Ant Design shitty tree object.
                 "name": parentFolder.name,
+                "title": parentFolder.name, # workaround for the Ant Design shitty tree object.
                 "children": []
             }
             treeList.append(FolderVM.__folderTree(assetId, parentFolder, tree))
@@ -224,7 +226,9 @@ class FolderVM(Backend):
                     subTree = {
                         "assetId": assetId,
                         "moId": child._GetMoId(),
+                        "key": child._GetMoId(), # workaround for the Ant Design shitty tree object.
                         "name": child.name,
+                        "title": child.name, # workaround for the Ant Design shitty tree object.
                         "children": []
                     }
                     tree["children"].append(subTree)
