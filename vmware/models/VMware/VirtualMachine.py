@@ -35,6 +35,7 @@ class Input:
     deleteGuestSpecAfterDeploy = False
     vmName = None
     bootstrapKeyId = None
+    secondStageIp = None
     PubKeyIds = []
     postDeployCommands: List[dict] = None
 
