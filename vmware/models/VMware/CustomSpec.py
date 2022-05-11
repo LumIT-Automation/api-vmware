@@ -45,6 +45,9 @@ class CustomSpec(Backend):
         try:
             spec = self.oCustomSpec(self.name)
 
+            if hasattr(spec, "info"):
+                if hasattr(spec.info, "type"):
+                    o["type"] = spec.info.type
             if hasattr(spec, "spec"):
                 if hasattr(spec.spec, "identity"):
                     if hasattr(spec.spec.identity, "hostName") and hasattr(spec.spec.identity.hostName, "name"):
@@ -67,20 +70,23 @@ class CustomSpec(Backend):
                     for nicSet in spec.spec.nicSettingMap:
                         if hasattr(nicSet, "adapter"):
                             nic = {"gw": list()}
-
-                            if hasattr(nicSet.adapter, "ip") and hasattr(nicSet.adapter.ip, "ipAddress"):
-                                nic["ip"] = nicSet.adapter.ip.ipAddress
-                            if hasattr(nicSet.adapter, "subnetMask"):
-                                nic["netMask"] = nicSet.adapter.subnetMask or ""
-                            if hasattr(nicSet.adapter, "gateway"):
-                                for el in nicSet.adapter.gateway:
-                                    nic["gw"].append(el)
+                            if hasattr(nicSet.adapter, "ip"):
+                                if hasattr(nicSet.adapter.ip, "ipAddress"):
+                                    nic["ip"] = nicSet.adapter.ip.ipAddress
+                                    if hasattr(nicSet.adapter, "subnetMask"):
+                                        nic["netMask"] = nicSet.adapter.subnetMask or ""
+                                    if hasattr(nicSet.adapter, "gateway"):
+                                        for el in nicSet.adapter.gateway:
+                                            nic["gw"].append(el)
+                                else:
+                                    nic["dhcp"] = True
                             # DNS settings for a single network card is available in the data structure but not from the vCenter interface.
                             #if hasattr(nicSet.adapter, "dnsServerList"):
                             #    nic["dns"] = nicSet.adapter.dnsServerList # overwrite global settings.
                             if nic:
                                 o["network"].append(nic)
 
+            Log.log(o, 'OOOOOOOOOOOSSSSSSSSSSSSs')
             return o
         except Exception as e:
             raise e

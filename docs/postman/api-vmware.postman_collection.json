@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "00a6bd4a-d082-40d1-a9fe-3f689967ebcc",
+		"_postman_id": "ba4bd358-5cfe-44fb-a538-a964ca089f34",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -4728,7 +4728,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"network\": [\n            {\n                \"ip\": \"192.168.18.206\",\n                \"netMask\": \"255.255.255.0\",\n                \"gw\": [\n                    \"192.168.18.1\"\n                ]\n            },\n            {\n                \"ip\": \"192.168.18.207\",\n                \"netMask\": \"255.255.255.0\"\n            }\n        ],\n        \"dns1\": \"192.168.18.20\",\n        \"dns2\": \"8.8.8.8\",\n        \"hostName\": \"robo\",\n        \"domainName\": \"robevarie.vlab.local\",\n        \"timeZone\": \"Antarctica/Troll\"\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"network\": [\n            {\n                \"ip\": \"192.168.18.206\",\n                \"netMask\": \"255.255.255.0\",\n                \"gw\": [\n                    \"192.168.18.1\"\n                ]\n            },\n            {\n                \"ip\": \"192.168.18.207\",\n                \"netMask\": \"255.255.255.0\"\n            },\n            {\n                \"dhcp\": true,\n                \"ip\": \"\",\n                \"netMask\": \"\"\n            }\n        ],\n        \"dns1\": \"192.168.18.20\",\n        \"dns2\": \"8.8.8.8\",\n        \"hostName\": \"robo\",\n        \"domainName\": \"robevarie.vlab.local\",\n        \"timeZone\": \"Antarctica/Troll\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
