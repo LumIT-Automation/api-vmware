@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 class VMwareTaskSerializer(serializers.Serializer):
+    moId = serializers.CharField(required=True, max_length=64)
     entityName = serializers.CharField(required=True, max_length=255)
     entity_moId = serializers.CharField(required=True, max_length=64)
     queueTime = serializers.DateTimeField(required=True, format="%Y-%m-%d %H:%M:%S")

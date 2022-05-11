@@ -26,6 +26,7 @@ class Task(Backend):
                 msg = self.oTask.info.error.msg
 
             info = {
+                "moId": self.moId,
                 "entityName": self.oTask.info.entityName,
                 "entity_moId": self.oTask.info.entity._GetMoId(),
                 "queueTime": str(self.oTask.info.queueTime),
