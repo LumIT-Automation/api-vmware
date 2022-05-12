@@ -122,16 +122,20 @@ class Target:
 
 
     @staticmethod
-    def list() -> List[dict]:
+    def list(maxResults: int) -> List[dict]:
+        limit = ""
         c = connections[Target.db].cursor()
+
+        if maxResults:
+            limit = "LIMIT "+str(int(maxResults))
 
         try:
             c.execute(
                 "SELECT "
                 "id, ip, port, api_type, username, id_bootstrap_key, id_asset, "
                 "task_moid, task_state, task_progress, task_startTime, task_queueTime, task_message, vm_name "
-                "FROM target"
-            )
+                "FROM target ORDER BY id DESC "+limit)
+
             o = DBHelper.asDict(c)
             for el in o:
                 el["connection"] = {

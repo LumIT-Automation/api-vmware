@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ba4bd358-5cfe-44fb-a538-a964ca089f34",
+		"_postman_id": "546cdf58-fe53-45e5-9037-85f32f6cf1a2",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2621,7 +2621,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/targets/",
+							"raw": "http://10.0.111.25/api/v1/stage2/targets/?results=1",
 							"protocol": "http",
 							"host": [
 								"10",
@@ -2635,6 +2635,12 @@
 								"stage2",
 								"targets",
 								""
+							],
+							"query": [
+								{
+									"key": "results",
+									"value": "1"
+								}
 							]
 						}
 					},

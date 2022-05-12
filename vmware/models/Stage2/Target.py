@@ -86,9 +86,9 @@ class Target:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> List[dict]:
+    def list(maxResults: int) -> List[dict]:
         try:
-            o = Repository.list()
+            o = Repository.list(maxResults)
             for el in o:
                 el["commands"] = list()
 

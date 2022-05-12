@@ -15,6 +15,7 @@ from vmware.helpers.Log import Log
 class Stage2TargetsController(CustomController):
     @staticmethod
     def get(request: Request) -> Response:
+        n = 0
         data = dict()
         itemData = dict()
         user = CustomController.loggedUser(request)
@@ -23,7 +24,12 @@ class Stage2TargetsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="targets_get") or user["authDisabled"]:
                 Log.actionLog("Second stage target list", user)
 
-                itemData["items"] = Target.list()
+                if "results" in request.GET:
+                    n = request.GET.getlist('results')[0] # max results.
+
+                Log.log(n, "_")
+
+                itemData["items"] = Target.list(n)
                 serializer = TargetsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
