@@ -86,7 +86,6 @@ class CustomSpec(Backend):
                             if nic:
                                 o["network"].append(nic)
 
-            Log.log(o, 'OOOOOOOOOOOSSSSSSSSSSSSs')
             return o
         except Exception as e:
             raise e
