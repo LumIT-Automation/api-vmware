@@ -152,7 +152,7 @@ class VMwareCustomSpecController(CustomController):
     @staticmethod
     def post(request: Request, assetId: int, specName: str) -> Response:
         response = {
-            "newSpecName": ""
+            "data": dict()
         }
         user = CustomController.loggedUser(request)
 
@@ -166,7 +166,7 @@ class VMwareCustomSpecController(CustomController):
                     lock = Lock("custom_spec", locals(), specName)
                     if lock.isUnlocked():
                         lock.lock()
-                        response["newSpecName"] = CustomSpec(assetId, specName).cloneAndModify(serializer.validated_data)
+                        response["data"]["newSpecName"] = CustomSpec(assetId, specName).cloneAndModify(serializer.validated_data)
 
                         httpStatus = status.HTTP_201_CREATED
                         lock.release()
