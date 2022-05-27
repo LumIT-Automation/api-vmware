@@ -32,7 +32,7 @@ class TargetCommandExecution:
 
         try:
             c.execute(
-                "SELECT id_target_command, exit_status, stdout, stderr, CAST(timestamp AS char) AS timestamp "
+                "SELECT id_target_command, command, exit_status, stdout, stderr, CAST(timestamp AS char) AS timestamp "
                 "FROM target_command_exec "
                 "LEFT JOIN target_command "
                 "ON target_command_exec.id_target_command = target_command.id "

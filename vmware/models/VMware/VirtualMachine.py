@@ -171,6 +171,7 @@ class VirtualMachine(Backend):
                 bootStrapKeyId=Input.bootstrapKeyId,
                 userName="root",
                 taskMoId=out["task_moId"],
+                vmName=Input.vmName,
                 customSpecInfo=cSpecInfo,
                 postDeployCommands=Input.postDeployCommands,
                 guestSpec=Input.guestSpec,
@@ -183,7 +184,7 @@ class VirtualMachine(Backend):
 
 
 
-    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, customSpecInfo: dict, postDeployCommands: list = None, guestSpec: str = "", secondStageIp: str = "") -> int:
+    def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, vmName: str, customSpecInfo: dict, postDeployCommands: list = None, guestSpec: str = "", secondStageIp: str = "") -> int:
         postDeployCommands = [] if postDeployCommands is None else postDeployCommands
 
         try:
@@ -200,7 +201,8 @@ class VirtualMachine(Backend):
                 "id_bootstrap_key": bootStrapKeyId,
                 "username": userName,
                 "id_asset": self.assetId,
-                "task_moId": taskMoId
+                "task_moId": taskMoId,
+                "vm_name": vmName
             }
 
             # Add target do db.
