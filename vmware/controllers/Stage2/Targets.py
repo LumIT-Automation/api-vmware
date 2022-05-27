@@ -27,8 +27,6 @@ class Stage2TargetsController(CustomController):
                 if "results" in request.GET:
                     n = request.GET.getlist('results')[0] # max results.
 
-                Log.log(n, "_")
-
                 itemData["items"] = Target.list(n)
                 serializer = TargetsSerializer(data=itemData)
                 if serializer.is_valid():
