@@ -28,32 +28,40 @@ class PollWorker:
     ####################################################################################################################
 
     def __call__(self) -> None:
+        globalExitStatus = "completed with success"
         Log.log("Celery worker for VMware task: "+self.taskMoId)
 
         try:
             # Wait for VMware VM cloning completion.
             if self.checkDeployStatus():
-                time.sleep(50) # wait for guest spec apply (a reboot occurs).
+                if self.commands:
+                    # Update db/target.
+                    Target(targetId=self.targetId).modify({"second_stage_state": "running"})
 
-                # Execute scheduled SSH commands.
-                for command in self.commands:
-                    Log.actionLog("Executing command uuid "+command["uid"]+" with user params: "+str(command["user_args"]))
+                    # Execute scheduled SSH commands.
+                    time.sleep(50) # wait for guest spec apply (a reboot occurs).
 
-                    o, e, s = SSHCommandRun(
-                        commandUid=command["uid"],
-                        targetId=self.targetId,
-                        userArgs=command["user_args"]
-                    )()
+                    for command in self.commands:
+                        Log.actionLog("Executing command uuid "+command["uid"]+" with user params: "+str(command["user_args"]))
 
-                    # Save results into db.
-                    TargetCommandExecution.add({
-                        "id_target_command": command["id_target_command"],
-                        "stdout": o,
-                        "stderr": e,
-                        "exit_status": s
-                    })
+                        o, e, s = SSHCommandRun(
+                            commandUid=command["uid"],
+                            targetId=self.targetId,
+                            userArgs=command["user_args"]
+                        )()
 
-                    time.sleep(2)
+                        # Save results into db/target_command_exec.
+                        TargetCommandExecution.add({
+                            "id_target_command": command["id_target_command"],
+                            "stdout": o,
+                            "stderr": e,
+                            "exit_status": s
+                        })
+
+                        if s:
+                            globalExitStatus = "completed with errors"
+
+                        time.sleep(2)
 
                 # Delete guestSpec (never fail).
                 if self.guestSpec:
@@ -64,6 +72,11 @@ class PollWorker:
                         pass
         except Exception as e:
             raise e
+        finally:
+            # Update db/target.
+            Target(targetId=self.targetId).modify({
+                "second_stage_state": globalExitStatus
+            })
 
 
 
@@ -80,13 +93,14 @@ class PollWorker:
                 info = tsk.info()
                 del tsk
 
-                # Update db.
+                # Update db/target.
                 Target(targetId=self.targetId).modify({
                     "task_state": info["state"],
                     "task_progress": info["progress"],
                     "task_startTime": info["startTime"],
                     "task_queueTime": info["queueTime"],
-                    "task_message": info["message"]
+                    "task_message": info["message"],
+                    "second_stage_state": ""
                 })
 
                 # Until success or error.

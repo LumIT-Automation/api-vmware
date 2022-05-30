@@ -131,9 +131,7 @@ class Target:
 
         try:
             c.execute(
-                "SELECT "
-                "id, ip, port, api_type, username, id_bootstrap_key, id_asset, "
-                "task_moid, task_state, task_progress, task_startTime, task_queueTime, task_message, vm_name "
+                "SELECT * "
                 "FROM target ORDER BY id DESC "+limit)
 
             o = DBHelper.asDict(c)
