@@ -28,12 +28,13 @@ class PollWorker:
     ####################################################################################################################
 
     def __call__(self) -> None:
-        globalExitStatus = "completed with success"
+        globalExitStatus = 0
         Log.log("Celery worker for VMware task: "+self.taskMoId)
 
         try:
             # Wait for VMware VM cloning completion.
             if self.checkDeployStatus():
+                # On successful vm creation.
                 if self.commands:
                     # Update db/target.
                     Target(targetId=self.targetId).modify({"second_stage_state": "running"})
@@ -55,12 +56,10 @@ class PollWorker:
                             "id_target_command": command["id_target_command"],
                             "stdout": o,
                             "stderr": e,
-                            "exit_status": s
+                            "exit_status": s # exit ok = 0.
                         })
 
-                        if s:
-                            globalExitStatus = "completed with errors"
-
+                        globalExitStatus += s
                         time.sleep(2)
 
                 # Delete guestSpec (never fail).
@@ -71,12 +70,18 @@ class PollWorker:
                     except Exception:
                         pass
         except Exception as e:
+            globalExitStatus = 1
             raise e
         finally:
-            # Update db/target.
-            Target(targetId=self.targetId).modify({
-                "second_stage_state": globalExitStatus
-            })
+            if self.commands:
+                # Update db/target.
+                v = "completed with errors"
+                if not globalExitStatus:
+                    v = "completed with success"
+
+                Target(targetId=self.targetId).modify({
+                    "second_stage_state": v
+                })
 
 
 
