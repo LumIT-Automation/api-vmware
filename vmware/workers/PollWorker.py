@@ -92,21 +92,20 @@ class PollWorker:
 
         try:
             timeout_start = time.time()
-            # Until timeout reached.
-            while time.time() < timeout_start + timeout:
+
+            while True:
                 # Get VMware task info.
                 tsk = Task(assetId=self.assetId, moId=self.taskMoId)
                 info = tsk.info()
                 del tsk
 
-                # Update db/target.
+                # Update db/target during normal operation.
                 Target(targetId=self.targetId).modify({
                     "task_state": info["state"],
                     "task_progress": info["progress"],
                     "task_startTime": info["startTime"],
                     "task_queueTime": info["queueTime"],
-                    "task_message": info["message"],
-                    "second_stage_state": ""
+                    "task_message": info["message"]
                 })
 
                 # Until success or error.
@@ -118,6 +117,23 @@ class PollWorker:
                 else:
                     time.sleep(10) # every 10s.
 
+                # Timeout reached.
+                if time.time() >= timeout_start + timeout:
+                    # Update db/target on timeout.
+                    Target(targetId=self.targetId).modify({
+                        "task_state": "error",
+                        "task_progress": None,
+                        "task_message": "Concerto Orchestration: Timeout reached during operation."
+                    })
+                    break
+
             return ret
         except Exception as e:
+            # Update db/target on exception.
+            Target(targetId=self.targetId).modify({
+                "task_state": "error",
+                "task_progress": None,
+                "task_message": "Concerto Orchestration exception: VMware task not found."
+            })
+
             raise e
