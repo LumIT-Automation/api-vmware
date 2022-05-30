@@ -28,12 +28,14 @@ class PollWorker:
     ####################################################################################################################
 
     def __call__(self) -> None:
+        deployStatus = False
         globalExitStatus = 0
         Log.log("Celery worker for VMware task: "+self.taskMoId)
 
         try:
             # Wait for VMware VM cloning completion.
-            if self.checkDeployStatus():
+            deployStatus = self.checkDeployStatus()
+            if deployStatus:
                 # On successful vm creation.
                 if self.commands:
                     # Update db/target.
@@ -69,11 +71,10 @@ class PollWorker:
                         CustomSpec(self.assetId, self.guestSpec).delete()
                     except Exception:
                         pass
-        except Exception as e:
+        except Exception:
             globalExitStatus = 1
-            raise e
         finally:
-            if self.commands:
+            if deployStatus and self.commands:
                 # Update db/target.
                 v = "completed with errors"
                 if not globalExitStatus:
@@ -86,7 +87,7 @@ class PollWorker:
 
 
     def checkDeployStatus(self) -> bool:
-        timeout = 600 # [seconds]
+        timeout = 1200 # [seconds]
         ret = False
 
         try:
