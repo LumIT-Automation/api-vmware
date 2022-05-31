@@ -2,6 +2,8 @@ from pyVmomi import vim
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.VMware.VmwareHandler import VmwareHandler
+from vmware.helpers.Log import Log
+
 
 
 class CustomSpecManager(VmwareHandler):
@@ -104,11 +106,11 @@ class CustomSpecManager(VmwareHandler):
 
     @staticmethod
     def __replaceSpecObjectAttr(spec, data: dict):
-        n = 0
         if spec.info.type == "Linux" or spec.info.type == "Windows":
             if "network" in data and data["network"]:
+                n = 0
                 for netSet in data["network"]:
-                    if "ip" in netSet and netSet["ip"]:
+                    if "ip" in netSet:
                         if not hasattr(spec.spec, 'nicSettingMap'):
                             spec.spec.nicSettingMap = []
                         if len(spec.spec.nicSettingMap) <= n:
@@ -131,6 +133,11 @@ class CustomSpecManager(VmwareHandler):
                                 spec.spec.nicSettingMap[n].adapter.gateway = netSet["gw"]
                         # spec.spec.nicSettingMap[n].adapter.dnsServerList = dnsList
                     n += 1
+                # If there are more nics in the original customSpec than in the new one, remove all the  exceeding elements
+                # (use reverse order to remove the elements).
+                if len(spec.spec.nicSettingMap) > n:
+                    for i in range(len(spec.spec.nicSettingMap) - 1, n - 1, -1):
+                        spec.spec.nicSettingMap.pop(i)
 
             dns = []
             if "dns1" in data and data["dns1"]:
