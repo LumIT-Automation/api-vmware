@@ -105,7 +105,7 @@ class CustomSpecManager(VmwareHandler):
     @staticmethod
     def __replaceSpecObjectAttr(spec, data: dict):
         n = 0
-        if spec.info.type == "Linux" or spec.info.type == "Windows" :
+        if spec.info.type == "Linux" or spec.info.type == "Windows":
             if "network" in data and data["network"]:
                 for netSet in data["network"]:
                     if "ip" in netSet and netSet["ip"]:
@@ -116,7 +116,7 @@ class CustomSpecManager(VmwareHandler):
                         if not hasattr(spec.spec.nicSettingMap[n], 'adapter') or not spec.spec.nicSettingMap[n].adapter:
                             spec.spec.nicSettingMap[n].adapter = vim.vm.customization.IPSettings()
 
-                        if "dhcp" in netSet and netSet["dhcp"]:  # bool.
+                        if "dhcp" in netSet and netSet["dhcp"]: # bool.
                             if not hasattr(spec.spec.nicSettingMap[n].adapter, 'ip') or not isinstance(
                                     spec.spec.nicSettingMap[n].adapter, vim.vm.customization.DhcpIpGenerator):
                                 spec.spec.nicSettingMap[n].adapter.ip = vim.vm.customization.DhcpIpGenerator()

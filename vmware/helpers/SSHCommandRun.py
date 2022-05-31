@@ -127,7 +127,7 @@ class SSHCommandRun:
         try:
             # Synchronize reboot command.
             tStart = time.time()
-            while time.time() < tStart + 120:  # [seconds]
+            while time.time() < tStart + 120: # [seconds]
                 try:
                     o = SSHCommandRun("echo", self.targetId, {"__echo": "i-am-alive"})()
                     if o:
@@ -135,7 +135,7 @@ class SSHCommandRun:
                 except Exception:
                     pass
 
-                time.sleep(10)  # every 10s.
+                time.sleep(10) # every 10s.
 
             if not o:
                 raise CustomException(status=400, payload={"SSH": "machine not responding."})

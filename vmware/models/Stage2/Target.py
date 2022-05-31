@@ -20,7 +20,7 @@ DataConnection: Dict[str, Union[str, int]] = {
 }
 
 class Target:
-    def __init__(self, targetId: int, *args, **kwargs):
+    def __init__(self, targetId: int, loadCommands: bool = True, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.id = int(targetId)
@@ -38,7 +38,7 @@ class Target:
         self.commands: List[dict] = [] # composition with Command and TargetCommand's user_args + id.
         self.commandsExecutions: List[TargetCommandExecution] = []
 
-        self.__load()
+        self.__load(loadCommands)
 
 
 
@@ -135,7 +135,7 @@ class Target:
     # Private methods
     ####################################################################################################################
 
-    def __load(self) -> None:
+    def __load(self, loadCommands: bool) -> None:
         try:
             info = Repository.get(self.id)
 
@@ -143,14 +143,15 @@ class Target:
             for k, v in info.items():
                 setattr(self, k, v)
 
-            targetCommands = TargetCommand.listTargetCommands(self.id)
-            for targetCommand in targetCommands:
-                command = Command(targetCommand["command"]).repr()
+            if loadCommands:
+                targetCommands = TargetCommand.listTargetCommands(self.id)
+                for targetCommand in targetCommands:
+                    command = Command(targetCommand["command"]).repr()
 
-                command["user_args"] = targetCommand["user_args"]
-                command["id_target_command"] = targetCommand["id"]
-                self.commands.append(command)
+                    command["user_args"] = targetCommand["user_args"]
+                    command["id_target_command"] = targetCommand["id"]
+                    self.commands.append(command)
 
-            self.commandsExecutions = TargetCommandExecution.listTargetCommandExecutions(self.id)
+                self.commandsExecutions = TargetCommandExecution.listTargetCommandExecutions(self.id)
         except Exception as e:
             raise e

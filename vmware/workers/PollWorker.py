@@ -100,7 +100,7 @@ class PollWorker:
                 del tsk
 
                 # Update db/target during normal operation.
-                Target(targetId=self.targetId).modify({
+                Target(targetId=self.targetId, loadCommands=False).modify({
                     "task_state": info["state"],
                     "task_progress": info["progress"],
                     "task_startTime": info["startTime"],
