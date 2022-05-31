@@ -127,7 +127,7 @@ class SSHCommandRun:
         try:
             # Synchronize reboot command.
             tStart = time.time()
-            while time.time() < tStart + 120: # [seconds]
+            while time.time() < tStart + 300: # [seconds]
                 try:
                     o = SSHCommandRun("echo", self.targetId, {"__echo": "i-am-alive"})()
                     if o:
