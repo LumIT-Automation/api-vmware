@@ -19,7 +19,7 @@ class PollWorker:
         self.targetId: int = int(targetId)
         self.guestSpec: str = guestSpec
 
-        self.commands: List[dict] = Target(self.targetId).commands
+        self.commands: List[dict] = Target(self.targetId, loadCommands=True).commands
 
 
 
@@ -100,7 +100,7 @@ class PollWorker:
                 del tsk
 
                 # Update db/target during normal operation.
-                Target(targetId=self.targetId, loadCommands=False).modify({
+                Target(targetId=self.targetId).modify({
                     "task_state": info["state"],
                     "task_progress": info["progress"],
                     "task_startTime": info["startTime"],

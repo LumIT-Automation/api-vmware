@@ -20,7 +20,7 @@ DataConnection: Dict[str, Union[str, int]] = {
 }
 
 class Target:
-    def __init__(self, targetId: int, loadCommands: bool = True, *args, **kwargs):
+    def __init__(self, targetId: int, loadCommands: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.id = int(targetId)
@@ -72,11 +72,7 @@ class Target:
 
     def getBootstrapPubKey(self) -> str:
         try:
-            t = Repository.get(self.id)
-            bootStrapKey = BootstrapKey(t["connection"]["id_bootstrap_key"])
-            pubKey = bootStrapKey.getPublic()
-            return pubKey
-
+            return BootstrapKey(self.connection["id_bootstrap_key"]).getPublic()
         except Exception as e:
             raise e
 
@@ -87,34 +83,36 @@ class Target:
     ####################################################################################################################
 
     @staticmethod
-    def list(maxResults: int) -> List[dict]:
+    def list(maxResults: int, loadCommands: bool = True) -> List[dict]:
         try:
             o = Repository.list(maxResults)
-            for el in o:
-                el["commands"] = list()
 
-                targetCommands = TargetCommand.listTargetCommands(el["id"])
-                # "id": 1,
-                # "id_target": 1,
-                # "command": "ls",
-                # "user_args": {
-                #     "__path": "/"
-                # }
+            if loadCommands:
+                for el in o:
+                    el["commands"] = list()
 
-                for targetCommand in targetCommands:
-                    command = Command(targetCommand["command"]).repr()
-                    # "uid": "ls",
-                    # "command": "ls ${__path}",
-                    # "template_args": {
-                    #     "__path": "str"
+                    targetCommands = TargetCommand.listTargetCommands(el["id"])
+                    # "id": 1,
+                    # "id_target": 1,
+                    # "command": "ls",
+                    # "user_args": {
+                    #     "__path": "/"
                     # }
 
-                    command["user_args"] = targetCommand["user_args"]
-                    command["id_target_command"] = targetCommand["id"]
+                    for targetCommand in targetCommands:
+                        command = Command(targetCommand["command"]).repr()
+                        # "uid": "ls",
+                        # "command": "ls ${__path}",
+                        # "template_args": {
+                        #     "__path": "str"
+                        # }
 
-                    el["commands"].append(command)
+                        command["user_args"] = targetCommand["user_args"]
+                        command["id_target_command"] = targetCommand["id"]
 
-                el["commandsExecutions"] = TargetCommandExecution.listTargetCommandExecutions(el["id"])
+                        el["commands"].append(command)
+
+                    el["commandsExecutions"] = TargetCommandExecution.listTargetCommandExecutions(el["id"])
 
             return o
         except Exception as e:

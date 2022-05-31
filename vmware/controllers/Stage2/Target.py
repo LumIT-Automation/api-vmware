@@ -21,7 +21,7 @@ class Stage2TargetController(CustomController):
                 Log.actionLog("Second stage target info", user)
 
                 serializer = Serializer(
-                    data=Target(targetId).repr()
+                    data=Target(targetId, loadCommands=True).repr()
                 )
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
