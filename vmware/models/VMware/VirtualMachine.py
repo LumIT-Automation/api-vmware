@@ -186,9 +186,10 @@ class VirtualMachine(Backend):
 
     def pollVmwareDeployVMTask(self, bootStrapKeyId: int, userName: str, taskMoId: str, vmName: str, customSpecInfo: dict, postDeployCommands: list = None, guestSpec: str = "", secondStageIp: str = "") -> int:
         postDeployCommands = [] if postDeployCommands is None else postDeployCommands
+        ip = ""
 
         try:
-            ip = ""
+            # Set up the IPv4 address which the second stage worker will SSH into.
             if secondStageIp:
                 ip = secondStageIp
             elif "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
@@ -214,7 +215,8 @@ class VirtualMachine(Backend):
                 TargetCommand.add(c)
 
             # Launch async worker.
-            pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId, guestSpec=guestSpec)
+            # Disable second stage if no IPv4 is assigned.
+            pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId, guestSpec=guestSpec, forceDisableSecondStage=not bool(ip))
 
             return targetId
         except Exception as e:

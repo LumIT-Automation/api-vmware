@@ -11,13 +11,14 @@ from vmware.helpers.Log import Log
 
 
 class PollWorker:
-    def __init__(self, assetId: int, taskMoId: str, targetId: int, guestSpec: str, *args, **kwargs):
+    def __init__(self, assetId: int, taskMoId: str, targetId: int, guestSpec: str, forceDisableSecondStage: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId: int = int(assetId)
         self.taskMoId: str = taskMoId
         self.targetId: int = int(targetId)
         self.guestSpec: str = guestSpec
+        self.forceDisableSecondStage: bool = forceDisableSecondStage
 
         self.commands: List[dict] = Target(self.targetId, loadCommands=True).commands
 
@@ -35,7 +36,7 @@ class PollWorker:
         try:
             # Wait for VMware VM cloning completion.
             deployStatus = self.checkDeployStatus()
-            if deployStatus:
+            if deployStatus and not self.forceDisableSecondStage:
                 # On successful vm creation.
                 if self.commands:
                     # Update db/target.
@@ -74,15 +75,16 @@ class PollWorker:
         except Exception:
             globalExitStatus = 1
         finally:
-            if deployStatus and self.commands:
-                # Update db/target.
-                v = "completed with errors"
-                if not globalExitStatus:
-                    v = "completed with success"
+            if deployStatus and not self.forceDisableSecondStage:
+                if self.commands:
+                    # Update db/target.
+                    v = "completed with errors"
+                    if not globalExitStatus:
+                        v = "completed with success"
 
-                Target(targetId=self.targetId).modify({
-                    "second_stage_state": v
-                })
+                    Target(targetId=self.targetId).modify({
+                        "second_stage_state": v
+                    })
 
 
 
