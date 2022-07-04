@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bbcfaeef-9d6c-496c-9473-ae7825a73422",
+		"_postman_id": "ba4cbe33-4b00-4431-a849-6fa3abe90531",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -4236,6 +4236,51 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"data\": {\n        \"vmName\": \"TEST-TWO\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-1363\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 25600,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test2\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"secondStageIp\": \"192.168.18.217\",\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"var\",\n                    \"__lvSize\": 2,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n                        {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-2441/",
+					"protocol": "http",
+					"host": [
+						"10",
+						"0",
+						"111",
+						"25"
+					],
+					"path": [
+						"api",
+						"v1",
+						"vmware",
+						"1",
+						"template",
+						"vm-2441",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "template prod standard",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{jwttoken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTOIDE\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-1363\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 25600,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test2\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"secondStageIp\": \"192.168.18.217\",\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"swap\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 4\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"root\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": true,\n                    \"__totSize\": 0\n                }\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n            {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
