@@ -64,6 +64,9 @@ class PollWorker:
 
                         globalExitStatus += s
                         time.sleep(2)
+                else:
+                    # Update db/target.
+                    Target(targetId=self.targetId).modify({"second_stage_state": "-"})
 
                 # Delete guestSpec (never fail).
                 if self.guestSpec:
