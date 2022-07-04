@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ba4cbe33-4b00-4431-a849-6fa3abe90531",
+		"_postman_id": "60aa36cc-97d8-45d1-99be-2b4816843a53",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -4310,6 +4310,51 @@
 			"response": []
 		},
 		{
+			"name": "template prod custom",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{jwttoken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTOSO\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-1363\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 204800,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test177\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"secondStageIp\": \"192.168.18.177\",\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"swap\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 4\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"root\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 50\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"home\",\n                    \"__lvSize\": 40,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/home\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"var\",\n                    \"__lvSize\": 10,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"var_log\",\n                    \"__lvSize\": 10,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var/log\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"var_log_audit\",\n                    \"__lvSize\": 5,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var/log/audit\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"tmp\",\n                    \"__lvSize\": 10,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/tmp\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"u01\",\n                    \"__lvSize\": 1,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u01\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"u02\",\n                    \"__lvSize\": 10,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u02\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"u03\",\n                    \"__lvSize\": 10,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u03\"\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"u01\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": true,\n                    \"__totSize\": 0\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n            {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-2441/",
+					"protocol": "http",
+					"host": [
+						"10",
+						"0",
+						"111",
+						"25"
+					],
+					"path": [
+						"api",
+						"v1",
+						"vmware",
+						"1",
+						"template",
+						"vm-2441",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "task",
 			"request": {
 				"auth": {
@@ -4779,7 +4824,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"network\": [\n            {\n                \"ip\": \"192.168.18.206\",\n                \"netMask\": \"255.255.255.0\",\n                \"gw\": [\n                    \"192.168.18.1\"\n                ]\n            },\n            {\n                \"ip\": \"192.168.18.207\",\n                \"netMask\": \"255.255.255.0\"\n            },\n            {\n                \"dhcp\": true,\n                \"ip\": \"\",\n                \"netMask\": \"\"\n            }\n        ],\n        \"dns1\": \"192.168.18.20\",\n        \"dns2\": \"8.8.8.8\",\n        \"hostName\": \"robo\",\n        \"domainName\": \"robevarie.vlab.local\",\n        \"timeZone\": \"Antarctica/Troll\"\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"network\": [\n            {\n                \"ip\": \"192.168.18.176\",\n                \"netMask\": \"255.255.255.0\",\n                \"gw\": [\n                    \"192.168.18.1\"\n                ]\n            },\n            {\n                \"ip\": \"192.168.18.177\",\n                \"netMask\": \"255.255.255.0\"\n            },\n            {\n                \"dhcp\": true,\n                \"ip\": \"\",\n                \"netMask\": \"\"\n            }\n        ],\n        \"dns1\": \"192.168.18.20\",\n        \"dns2\": \"8.8.8.8\",\n        \"hostName\": \"robo\",\n        \"domainName\": \"robevarie.vlab.local\",\n        \"timeZone\": \"Antarctica/Troll\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4824,7 +4869,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"destination\": \"try3\"\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"destination\": \"centos-test3\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4832,7 +4877,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/try/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4846,7 +4891,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"try",
+						"centos-test",
 						""
 					]
 				}
