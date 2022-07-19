@@ -6,6 +6,7 @@ from vmware.models.VMware.FolderVM import FolderVM
 from vmware.repository.Permission.Permission import Permission as Repository
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 
 class Permission:
@@ -103,11 +104,15 @@ class Permission:
         try:
             objectMoIdSet = Repository.allowedObjectsByPrivilegeSet(groups=groups, action=action, assetId=assetId)
             privilegeType = Privilege.getType(action)
+
             if privilegeType == "object-folder": # for folder permissions allow the access for the subFolders also.
                 subItems = set()
                 for objMoId in objectMoIdSet:
-                    subTree = FolderVM.folderTreeQuick(assetId=assetId, folderMoId=objMoId)[0]["children"]
-                    subItems.update(FolderVM.treeToSet(subTree, moIdSet=None))
+                    try:
+                        subTree = FolderVM.folderTreeQuick(assetId=assetId, folderMoId=objMoId)[0]["children"]
+                        subItems.update(FolderVM.treeToSet(subTree, moIdSet=None))
+                    except Exception:
+                        pass
                 objectMoIdSet.update(subItems)
 
             return objectMoIdSet

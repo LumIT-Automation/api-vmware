@@ -136,7 +136,6 @@ class Permission:
             args = groups.copy()
             groupWhere = ""
             assetWhere = ""
-            objectWhere = ""
 
             c = connection.cursor()
 
@@ -194,13 +193,7 @@ class Permission:
                     "role.role AS role, "
                     "vmware_object.id AS object_id, vmware_object.moId, "
                     "vmware_object.id_asset AS object_asset, "
-                    "vmware_object.name AS object_name, "
-                    "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
-                            "WHEN 'group' THEN 'folder' "
-                            "WHEN 'datastore' THEN 'datastore' "
-                            "WHEN 'network' THEN 'network' "
-                            "WHEN 'dvportgroup' THEN 'network' "
-                    "END) AS object_type "              
+                    "vmware_object.name AS object_name "
                                     
                     "FROM identity_group "
                     "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
@@ -214,15 +207,13 @@ class Permission:
                     "object_id": el["object_id"],
                     "id_asset": el["object_asset"],
                     "moId": el["moId"],
-                    "name": el["object_name"],
-                    "object_type": el["object_type"]
+                    "name": el["object_name"]
                 }
 
                 del(el["object_id"])
                 del(el["object_asset"])
                 del(el["moId"])
                 del(el["object_name"])
-                del(el["object_type"])
 
             return l
         except Exception as e:
