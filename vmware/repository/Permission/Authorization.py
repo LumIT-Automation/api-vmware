@@ -25,6 +25,16 @@ class Authorization:
                 for g in groups:
                     groupWhere += 'identity_group.identity_group_identifier = %s || '
 
+                # Simple example start query:
+                # SELECT identity_group.*, role.role, privilege.privilege, vmware_object.id_asset, vmware_object.moId, vmware_object.name
+                # FROM identity_group
+                # LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id
+                # LEFT JOIN role ON role.id = group_role_object.id_role
+                # LEFT JOIN vmware_object ON vmware_object.id = group_role_object.id_object
+                # LEFT JOIN role_privilege ON role_privilege.id_role = role.id
+                # LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege
+                # WHERE identity_group.identity_group_identifier LIKE 'cn=groupstaff,cn=users,dc=lab,dc=local'
+
                 query = (
                     "SELECT "                                               
                         "privilege.privilege, "
@@ -38,7 +48,7 @@ class Authorization:
                                             "CASE SUBSTRING_INDEX(privilege.privilege_type, '-', -1) "
                                                 "WHEN 'folder' THEN "
                                                     "IF(SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'group', "
-                                                        "CONCAT(vmware_object.id_asset,'::',vmware_object.moId,'::',vmware_object.name,'::folder'), "
+                                                        "CONCAT(vmware_object.id_asset,'::',vmware_object.moId,'::',vmware_object.name,'::folder'), " # id asset :: moId :: name :: type.
                                                         "NULL "
                                                     ") "
                                                 "WHEN 'datastore' THEN "
@@ -67,6 +77,13 @@ class Authorization:
 
                 c.execute(query, groups)
                 items = DBHelper.asDict(c)
+
+                #  [
+                #      {"privilege": "assets_get", "privilege_objects": "1::any::any::any"},
+                #      {"privilege": "datastore_get", "privilege_objects": "1::datastore-2341::NFS_Datastore::datastore"},
+                #      {"privilege": "folder_get", "privilege_objects": "1::group-v1082::Varie::folder,1::group-v2477::VarieBis::folder"},
+                #      ...
+                #  ]
 
                 aIn = GroupConcatToDict(["assetId", "moId", "objectName", "object_type"])
 
