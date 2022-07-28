@@ -29,7 +29,7 @@ nsx-python-sdk==3.1.5.0.0
 nsx-vmc-aws-integration-python-sdk==3.1.5.0.0
 nsx-vmc-policy-python-sdk==3.1.5.0.0
 paramiko==2.10.5
-pip==22.1.2
+pip==22.2.1
 pkg_resources==0.0.0
 prompt-toolkit==3.0.30
 pycparser==2.21
@@ -44,7 +44,7 @@ setuptools==40.8.0
 six==1.16.0
 sqlparse==0.4.2
 typing_extensions==4.3.0
-urllib3==1.26.10
+urllib3==1.26.11
 vapi-client-bindings==3.8.0
 vapi-common-client==2.34.0
 vapi-runtime==2.34.0
