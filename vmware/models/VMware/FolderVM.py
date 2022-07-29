@@ -6,6 +6,7 @@ from vmware.models.VMware.Datacenter import Datacenter
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
+from vmware.helpers.Log import Log
 
 
 class FolderVM(Backend):
@@ -95,6 +96,20 @@ class FolderVM(Backend):
 
 
 
+    # Plain list of the parent folders.
+    def parentDatacenter(self) -> list:
+        folder = self.oVMFolder
+        try:
+            while True:
+                folder = folder.parent
+                if isinstance(folder, vim.Datacenter):
+                    return [ folder._GetMoId(), folder.name ]
+
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
@@ -122,14 +137,26 @@ class FolderVM(Backend):
     def foldersTreeQuick(assetId: int, folderMoIdList: list = None) -> list:
         folderMoIdList = [] if folderMoIdList is None else folderMoIdList
         treeList = list()
+        folderDataList = list()
         try:
             if not folderMoIdList:
                 datacenters = Datacenter.oDatacenters(assetId)
                 for dc in datacenters:
-                    folderMoIdList.append(dc.vmFolder._GetMoId())
+                    fData = [dc.vmFolder._GetMoId(), dc._GetMoId(), dc.name] # [folder.moId, datacenter.moId, datacenter.name].
+                    folderDataList.append(fData)
+            else:
+                for folderMoId in folderMoIdList:
+                    folder = FolderVM(assetId, folderMoId)
+                    datacenterData = folder.parentDatacenter() # [datacenter.moId, datacenter.name].
+                    folderDataList.append([folderMoId, datacenterData[0], datacenterData[1]])
 
-            for folderMoId in folderMoIdList:
-                treeList.extend(FolderVM.folderTreeQuick(assetId, folderMoId))
+            # For each tree/subtree, append the datacenter info to the parent folder data.
+            for folderData in folderDataList:
+                tree = FolderVM.folderTreeQuick(assetId, folderData[0])
+                if not hasattr(tree[0], 'datacenterMoId'):
+                    tree[0]['datacenterMoId'] = folderData[1]
+                    tree[0]['datacenterName'] = folderData[2]
+                treeList.extend(tree)
 
             return treeList
         except Exception as e:
