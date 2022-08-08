@@ -13,7 +13,7 @@ click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.2.0
 cryptography==36.0.2
-Django==3.2.14
+Django==3.2.15
 django-redis==5.0.0
 djangorestframework==3.12.4
 djangorestframework-recursive==0.1.2
@@ -29,7 +29,7 @@ nsx-python-sdk==3.1.5.0.0
 nsx-vmc-aws-integration-python-sdk==3.1.5.0.0
 nsx-vmc-policy-python-sdk==3.1.5.0.0
 paramiko==2.10.5
-pip==22.2.1
+pip==22.2.2
 pkg_resources==0.0.0
 prompt-toolkit==3.0.30
 pycparser==2.21
