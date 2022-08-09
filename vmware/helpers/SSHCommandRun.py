@@ -56,6 +56,8 @@ class SSHCommandRun:
 
             return o, e, s
         except Exception as e:
+            if str(self.commandUid) != "echo":
+                Log.actionLog("\nSSHSupplicant Exception on executing the command with uid: \""+str(self.commandUid)+"\": "+str(e.__str__()))
             raise e
 
 

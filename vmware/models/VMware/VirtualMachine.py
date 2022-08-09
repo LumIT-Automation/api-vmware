@@ -195,6 +195,11 @@ class VirtualMachine(Backend):
             elif "network" in customSpecInfo and customSpecInfo["network"][0] and "ip" in customSpecInfo["network"][0]:
                 ip = customSpecInfo["network"][0]["ip"]
 
+            if customSpecInfo["type"] == "Linux" and bool(ip):
+                disableSecondStage = False
+            else:
+                disableSecondStage = True
+
             targetData = {
                 "ip": ip,
                 "port": 22,
@@ -216,7 +221,7 @@ class VirtualMachine(Backend):
 
             # Launch async worker.
             # Disable second stage if no IPv4 is assigned.
-            pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId, guestSpec=guestSpec, forceDisableSecondStage=not bool(ip))
+            pollVmwareAsync_task.delay(assetId=self.assetId, taskMoId=taskMoId, targetId=targetId, guestSpec=guestSpec, forceDisableSecondStage=disableSecondStage)
 
             return targetId
         except Exception as e:
