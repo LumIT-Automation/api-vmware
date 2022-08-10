@@ -45,47 +45,89 @@ class CustomSpec(Backend):
         try:
             spec = self.oCustomSpec(self.name)
 
-            if hasattr(spec, "info"):
-                if hasattr(spec.info, "type"):
-                    o["type"] = spec.info.type
-            if hasattr(spec, "spec"):
-                if hasattr(spec.spec, "identity"):
-                    if hasattr(spec.spec.identity, "hostName") and hasattr(spec.spec.identity.hostName, "name"):
-                        o["hostName"] = spec.spec.identity.hostName.name
-                    if hasattr(spec.spec.identity, "domain"):
-                        o["domainName"] = spec.spec.identity.domain
-                    if hasattr(spec.spec.identity, "timeZone"):
-                        o["timeZone"] = spec.spec.identity.timeZone
+            if hasattr(spec, "info") and hasattr(spec.info, "type"):
+                o["type"] = spec.info.type
 
-                if hasattr(spec.spec, "globalIPSettings"):
-                    if hasattr(spec.spec.globalIPSettings, "dnsServerList"):
-                        dns = spec.spec.globalIPSettings.dnsServerList
+                if o["type"] == "Linux":
+                    if hasattr(spec, "spec"):
+                        if hasattr(spec.spec, "identity"):
+                            if hasattr(spec.spec.identity, "hostName") and hasattr(spec.spec.identity.hostName, "name"):
+                                o["hostName"] = spec.spec.identity.hostName.name
+                            if hasattr(spec.spec.identity, "domain"):
+                                o["domainName"] = spec.spec.identity.domain
+                            if hasattr(spec.spec.identity, "timeZone"):
+                                o["timeZone"] = spec.spec.identity.timeZone
 
-                if dns:
-                    o["dns1"] = dns[0]
-                    if 1 < len(dns):
-                        o["dns2"] = dns[1]
+                        if hasattr(spec.spec, "globalIPSettings"):
+                            if hasattr(spec.spec.globalIPSettings, "dnsServerList"):
+                                dns = spec.spec.globalIPSettings.dnsServerList
+                            if not o["domainName"]:
+                                if hasattr(spec.spec.globalIPSettings, "dnsSuffixList"):
+                                    o["domainName"] = spec.spec.globalIPSettings.dnsSuffixList[0]
 
-                if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap:
-                    for nicSet in spec.spec.nicSettingMap:
-                        if hasattr(nicSet, "adapter"):
-                            nic = {"gw": list()}
-                            if hasattr(nicSet.adapter, "ip"):
-                                if hasattr(nicSet.adapter.ip, "ipAddress"):
-                                    nic["ip"] = nicSet.adapter.ip.ipAddress
-                                    if hasattr(nicSet.adapter, "subnetMask"):
-                                        nic["netMask"] = nicSet.adapter.subnetMask or ""
-                                    if hasattr(nicSet.adapter, "gateway"):
-                                        for el in nicSet.adapter.gateway:
-                                            nic["gw"].append(el)
-                                else:
-                                    nic["dhcp"] = True
-                            # DNS settings for a single network card is available in the data structure but not from the vCenter interface.
-                            #if hasattr(nicSet.adapter, "dnsServerList"):
-                            #    nic["dns"] = nicSet.adapter.dnsServerList # overwrite global settings.
-                            if nic:
-                                o["network"].append(nic)
+                        if dns:
+                            o["dns1"] = dns[0]
+                            if 1 < len(dns):
+                                o["dns2"] = dns[1]
 
+                        if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap:
+                            for nicSet in spec.spec.nicSettingMap:
+                                if hasattr(nicSet, "adapter"):
+                                    nic = {"gw": list()}
+                                    if hasattr(nicSet.adapter, "ip"):
+                                        if hasattr(nicSet.adapter.ip, "ipAddress"):
+                                            nic["ip"] = nicSet.adapter.ip.ipAddress
+                                            if hasattr(nicSet.adapter, "subnetMask"):
+                                                nic["netMask"] = nicSet.adapter.subnetMask or ""
+                                            if hasattr(nicSet.adapter, "gateway"):
+                                                for el in nicSet.adapter.gateway:
+                                                    nic["gw"].append(el)
+                                        else:
+                                            nic["dhcp"] = True
+                                    if nic:
+                                        o["network"].append(nic)
+
+                elif o["type"] == "Windows":
+                    if hasattr(spec, "spec"):
+                        if hasattr(spec.spec, "identity"):
+                            if hasattr(spec.spec.identity, "guiUnattended"):
+                                if hasattr(spec.spec.identity.guiUnattended, "timeZone"):
+                                    o["timeZone"] = spec.spec.identity.guiUnattended.timeZone
+                            if hasattr(spec.spec.identity, "userData"):
+                                if hasattr(spec.spec.identity.userData, "computerName"):
+                                    if hasattr(spec.spec.identity.userData.computerName, "name"):
+                                        o["hostName"] = spec.spec.identity.userData.computerName.name
+
+                        if hasattr(spec.spec, "globalIPSettings"):
+                            if hasattr(spec.spec.globalIPSettings, "dnsSuffixList"):
+                                o["domainName"] = spec.spec.globalIPSettings.dnsSuffixList[0]
+
+                        if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap:
+                            for nicSet in spec.spec.nicSettingMap:
+                                if hasattr(nicSet, "adapter"):
+                                    nic = {"gw": list()}
+                                    if hasattr(nicSet.adapter, "ip"):
+                                        if hasattr(nicSet.adapter.ip, "ipAddress"):
+                                            nic["ip"] = nicSet.adapter.ip.ipAddress
+                                            if hasattr(nicSet.adapter, "subnetMask"):
+                                                nic["netMask"] = nicSet.adapter.subnetMask or ""
+                                            if hasattr(nicSet.adapter, "gateway"):
+                                                for el in nicSet.adapter.gateway:
+                                                    nic["gw"].append(el)
+                                        else:
+                                            nic["dhcp"] = True
+
+                                    # Windows custom specs use DNS settings for single network cards.
+                                    if hasattr(nicSet.adapter, "dnsServerList"):
+                                        dns = nicSet.adapter.dnsServerList # overwrite global settings.
+                                        if dns:
+                                            if not "dns1" in o or not o["dns1"]:
+                                                o["dns1"] = dns[0]
+                                            if 1 < len(dns):
+                                                if not "dns2" in o or not o["dns2"]:
+                                                    o["dns2"] = dns[1]
+                                    if nic:
+                                        o["network"].append(nic)
             return o
         except Exception as e:
             raise e

@@ -42,6 +42,12 @@ class VirtualMachineTemplate(VirtualMachine):
                         VirtualMachine._cleanup("list", virtualmachine.info(related))
                     )
 
+            # Sort the list using "name" as sort key.
+            def sortFunc(el: dict):
+                return el["name"].lower()
+
+            virtualmachines.sort(key=sortFunc)
+
             return virtualmachines
         except Exception as e:
             raise e
@@ -58,6 +64,12 @@ class VirtualMachineTemplate(VirtualMachine):
                     virtualmachine = VmwareHelper.getInfo(o)
                     virtualmachine["assetId"] = assetId
                     virtualmachines.append(virtualmachine)
+
+            # Sort the list using "name" as sort key.
+            def sortFunc(el: dict):
+                return el["name"].lower()
+
+            virtualmachines.sort(key=sortFunc)
 
             return virtualmachines
         except Exception as e:
