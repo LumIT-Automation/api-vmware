@@ -283,6 +283,14 @@ class VirtualMachine(Backend):
 
 
 
+    def guestIpInfo(self) -> dict:
+        try:
+            return Backend.guestIpInfo(self)
+        except Exception as e:
+            raise e
+
+
+
     def info(self, related: bool = True) -> dict:
         vmDisks = list()
         vmNets = list()

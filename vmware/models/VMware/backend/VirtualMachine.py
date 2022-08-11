@@ -75,6 +75,22 @@ class VirtualMachine(VmwareHandler):
 
 
 
+    def guestIpInfo(self) -> dict:
+        networkLabel = dict()
+
+        try:
+            for nic in self.oVirtualMachine.guest.net:
+                if hasattr(nic, "network") and nic.network:
+                    networkLabel[nic.network] = []
+                    for ip in nic.ipAddress:
+                        networkLabel[nic.network] .append(ip)
+
+            return networkLabel
+        except Exception as e:
+            raise e
+
+
+
     def getNetworkInformation(self) -> list:
         nets = list()
 
