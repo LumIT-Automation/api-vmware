@@ -59,10 +59,10 @@ class CustomSpec(Backend):
                                 o["timeZone"] = spec.spec.identity.timeZone
 
                         if hasattr(spec.spec, "globalIPSettings"):
-                            if hasattr(spec.spec.globalIPSettings, "dnsServerList"):
+                            if hasattr(spec.spec.globalIPSettings, "dnsServerList") and spec.spec.globalIPSettings.dnsServerList:
                                 dns = spec.spec.globalIPSettings.dnsServerList
                             if not o["domainName"]:
-                                if hasattr(spec.spec.globalIPSettings, "dnsSuffixList"):
+                                if hasattr(spec.spec.globalIPSettings, "dnsSuffixList") and spec.spec.globalIPSettings.dnsSuffixList:
                                     o["domainName"] = spec.spec.globalIPSettings.dnsSuffixList[0]
 
                         if dns:
@@ -99,7 +99,7 @@ class CustomSpec(Backend):
                                         o["hostName"] = spec.spec.identity.userData.computerName.name
 
                         if hasattr(spec.spec, "globalIPSettings"):
-                            if hasattr(spec.spec.globalIPSettings, "dnsSuffixList"):
+                            if hasattr(spec.spec.globalIPSettings, "dnsSuffixList") and spec.spec.globalIPSettings.dnsSuffixList:
                                 o["domainName"] = spec.spec.globalIPSettings.dnsSuffixList[0]
 
                         if hasattr(spec.spec, "nicSettingMap") and spec.spec.nicSettingMap:
@@ -118,7 +118,7 @@ class CustomSpec(Backend):
                                             nic["dhcp"] = True
 
                                     # Windows custom specs use DNS settings for single network cards.
-                                    if hasattr(nicSet.adapter, "dnsServerList"):
+                                    if hasattr(nicSet.adapter, "dnsServerList") and nicSet.adapter.dnsServerList:
                                         dns = nicSet.adapter.dnsServerList # overwrite global settings.
                                         if dns:
                                             if not "dns1" in o or not o["dns1"]:
