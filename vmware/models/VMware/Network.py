@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from vmware.models.VMware.backend.Network import Network as Backend
 
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
-
+from vmware.helpers.Log import Log
 
 class Network(Backend):
     def __init__(self, assetId: int, moId: str, name: str = "", vlanId: str = "", *args, **kwargs):
@@ -36,6 +36,26 @@ class Network(Backend):
                 self.configuredHosts.append(
                     HostSystem(self.assetId, c["moId"])
                 )
+        except Exception as e:
+            raise e
+
+
+
+    def listUsedIps(self) -> list:
+        from vmware.models.VMware.VirtualMachine import VirtualMachine
+        ipList = list()
+
+        try:
+            oVmList = Backend.listAttachedVMs(self)
+            self.name = self.oNetwork.summary.name
+            for v in oVmList:
+                vm = VmwareHelper.getInfo(v)
+                virtualmachine = VirtualMachine(self.assetId, vm["moId"])
+                ipInfo = virtualmachine.guestIpInfo()
+                if self.name in ipInfo and ipInfo[self.name]: # Get only the info about this port group if the vm have more than one network card.
+                    ipList.extend(ipInfo[self.name])
+
+            return ipList
         except Exception as e:
             raise e
 
