@@ -55,7 +55,7 @@ class CustomController(APIView):
         elif e.__class__.__name__ in ("NoValidConnectionsError", "ChannelException", "BadHostKeyException", "SSHException", "timeout", "gaierror"):
             httpStatus = status.HTTP_503_SERVICE_UNAVAILABLE
             data["error"] = {
-                "network (vmware supplicant)": e.__str__()
+                "network (ssh supplicant)": e.__str__()
             }
         elif e.__class__.__name__ == "CustomException":
             httpStatus = e.status
