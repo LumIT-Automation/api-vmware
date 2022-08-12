@@ -9,11 +9,71 @@ from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecApplySer
 
 from vmware.controllers.CustomController import CustomController
 
+from vmware.helpers.Conditional import Conditional
 from vmware.helpers.Lock import Lock
 from vmware.helpers.Log import Log
 
 
-class VMwareCustomizeVMGuestOSController(CustomController):
+class VMwareVirtualMachineGuestOSController(CustomController):
+    @staticmethod
+    def get(request: Request, assetId: int, moId: str) -> Response:
+        data = dict()
+        itemData = dict()
+        user = CustomController.loggedUser(request)
+        etagCondition = {"responseEtag": ""}
+
+        try:
+            if Permission.hasUserPermission(groups=user["groups"], action="virtualmachine_get", assetId=assetId) or user["authDisabled"]:
+                Log.actionLog("VirtualMachine guest info", user)
+
+                lock = Lock("virtualmachine", locals(), moId)
+                if lock.isUnlocked():
+                    lock.lock()
+
+                    virtualmachine = VirtualMachine(assetId, moId)
+                    itemData = virtualmachine.guestInfo()
+                    #serializer = Serializer(data=itemData)
+                    #if serializer.is_valid():
+                    #    data["data"] = serializer.validated_data
+                    if True:
+                        data["data"] = itemData
+                        data["href"] = request.get_full_path()
+
+                        # Check the response's ETag validity (against client request).
+                        conditional = Conditional(request)
+                        etagCondition = conditional.responseEtagFreshnessAgainstRequest(data["data"])
+                        if etagCondition["state"] == "fresh":
+                            data = None
+                            httpStatus = status.HTTP_304_NOT_MODIFIED
+                        else:
+                            httpStatus = status.HTTP_200_OK
+                    else:
+                        httpStatus = status.HTTP_500_INTERNAL_SERVER_ERROR
+                        data = {
+                            "VMware": "upstream data mismatch."
+                        }
+                        Log.log("Upstream data incorrect: "+str(serializer.errors))
+                    lock.release()
+                else:
+                    data = None
+                    httpStatus = status.HTTP_423_LOCKED
+            else:
+                data = None
+                httpStatus = status.HTTP_403_FORBIDDEN
+        except Exception as e:
+            if "moId" in locals():
+                Lock("virtualmachine", locals(), locals()["moId"]).release()
+
+            data, httpStatus, headers = CustomController.exceptionHandler(e)
+            return Response(data, status=httpStatus, headers=headers)
+
+        return Response(data, status=httpStatus, headers={
+            "ETag": etagCondition["responseEtag"],
+            "Cache-Control": "must-revalidate"
+        })
+
+
+
     @staticmethod
     def patch(request: Request, assetId: int, moId: str) -> Response:
         response = None

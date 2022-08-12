@@ -4,6 +4,9 @@ from vmware.helpers.Exception import CustomException
 from vmware.helpers.VMware.VmwareHandler import VmwareHandler
 
 
+from vmware.helpers.Log import Log
+
+
 class VirtualMachine(VmwareHandler):
     def __init__(self, assetId: int, moId: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,17 +78,47 @@ class VirtualMachine(VmwareHandler):
 
 
 
-    def guestIpInfo(self) -> dict:
-        networkLabel = dict()
+    def guestInfo(self) -> dict:
+        info = {
+            "network": {},
+            "dnsConfig": {},
+            "vmTools": {}
+        }
 
         try:
+            infoData = self.oVirtualMachine.guest
+
+            if hasattr(infoData, "guestFamily"):
+                info["guestOS"] = infoData.guestFamily
+            if hasattr(infoData, "hostName"):
+                info["hostname"] = infoData.hostName
+
+            if hasattr(infoData, "toolsVersion"):
+                info["vmTools"]["version"] = infoData.toolsVersion
+            if hasattr(infoData, "toolsInstallType"):
+                info["vmTools"]["type"] = infoData.toolsInstallType
+            if hasattr(infoData, "toolsStatus"):
+                info["vmTools"]["status"] = infoData.toolsStatus
+            if hasattr(infoData, "toolsRunningStatus"):
+                info["vmTools"]["runningStatus"] = infoData.toolsRunningStatus
+
+            if hasattr(infoData, "ipStack"):
+                if infoData.ipStack and hasattr(infoData.ipStack[0], "dnsConfig"):
+                    if infoData.ipStack[0].dnsConfig:
+                        if hasattr(infoData.ipStack[0].dnsConfig, "ipAddress"):
+                            info["dnsConfig"]["dnsList"] = infoData.ipStack[0].dnsConfig.ipAddress
+                        if hasattr(infoData.ipStack[0].dnsConfig, "domainName"):
+                            info["dnsConfig"]["domain"] = infoData.ipStack[0].dnsConfig.domainName
+                        if hasattr(infoData.ipStack[0].dnsConfig, "searchDomain"):
+                            info["dnsConfig"]["searchDomain"] = infoData.ipStack[0].dnsConfig.searchDomain
+
             for nic in self.oVirtualMachine.guest.net:
                 if hasattr(nic, "network") and nic.network:
-                    networkLabel[nic.network] = []
+                    info["network"][nic.network] = []
                     for ip in nic.ipAddress:
-                        networkLabel[nic.network] .append(ip)
+                        info["network"][nic.network] .append(ip)
 
-            return networkLabel
+            return info
         except Exception as e:
             raise e
 

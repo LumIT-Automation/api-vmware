@@ -63,7 +63,7 @@ urlpatterns = [
     # VirtualMachine.
     path('<int:assetId>/virtualmachines/', VirtualMachines.VMwareVirtualMachinesController.as_view(), name='vmware-virtualmachines'),
     path('<int:assetId>/virtualmachine/<str:moId>/', VirtualMachine.VMwareVirtualMachineController.as_view(), name='vmware-virtualmachine'),
-    path('<int:assetId>/virtualmachine/<str:moId>/customize-guestos/', VMGuestOS.VMwareCustomizeVMGuestOSController.as_view(), name='vmware-customize-guestos'),
+    path('<int:assetId>/virtualmachine/<str:moId>/guestos/', VMGuestOS.VMwareVirtualMachineGuestOSController.as_view(), name='vmware-virtualmachine-guestos'),
 
     path('<int:assetId>/templates/', Templates.VMwareTemplatesController.as_view(), name='vmware-templates'),
     path('<int:assetId>/template/<str:moId>/', Template.VMwareVirtualMachineTemplateController.as_view(), name='vmware-template'),

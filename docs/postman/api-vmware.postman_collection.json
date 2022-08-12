@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "91fa016d-1265-4ec3-a0ce-f902a964cd54",
+		"_postman_id": "e25ec2d9-8ffe-4539-8813-b6276eedbf71",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -3950,7 +3950,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3180/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3369/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3964,7 +3964,7 @@
 						"vmware",
 						"1",
 						"virtualmachine",
-						"vm-3180",
+						"vm-3369",
 						""
 					]
 				}
@@ -4017,7 +4017,56 @@
 			"response": []
 		},
 		{
-			"name": "virtualmachine customize guestos",
+			"name": "virtualmachine guestos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{jwttoken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3369/guestos/",
+					"protocol": "http",
+					"host": [
+						"10",
+						"0",
+						"111",
+						"25"
+					],
+					"path": [
+						"api",
+						"v1",
+						"vmware",
+						"1",
+						"virtualmachine",
+						"vm-3369",
+						"guestos",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "virtualmachine guestos",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -4040,7 +4089,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3180/customize-guestos/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3180/guestos/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4055,7 +4104,7 @@
 						"1",
 						"virtualmachine",
 						"vm-3180",
-						"customize-guestos",
+						"guestos",
 						""
 					]
 				}

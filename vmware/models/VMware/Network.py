@@ -51,9 +51,16 @@ class Network(Backend):
             for v in oVmList:
                 vm = VmwareHelper.getInfo(v)
                 virtualmachine = VirtualMachine(self.assetId, vm["moId"])
-                ipInfo = virtualmachine.guestIpInfo()
-                if self.name in ipInfo and ipInfo[self.name]: # Get only the info about this port group if the vm have more than one network card.
-                    ipList.extend(ipInfo[self.name])
+                vmGuestInfo = virtualmachine.guestInfo()
+                if "network" in vmGuestInfo and self.name in vmGuestInfo["network"] and vmGuestInfo["network"][self.name]: # Get only the info about this port group if the vm have more than one network card.
+                    ipList.append(
+                        {
+                            "moId": vm["moId"],
+                            "name": vm["name"],
+                            "ipList": vmGuestInfo["network"][self.name]
+                        }
+
+                    )
 
             return ipList
         except Exception as e:

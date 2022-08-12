@@ -283,9 +283,9 @@ class VirtualMachine(Backend):
 
 
 
-    def guestIpInfo(self) -> dict:
+    def guestInfo(self) -> dict:
         try:
-            return Backend.guestIpInfo(self)
+            return Backend.guestInfo(self)
         except Exception as e:
             raise e
 
