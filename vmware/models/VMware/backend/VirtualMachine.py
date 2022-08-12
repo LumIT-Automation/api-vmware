@@ -89,7 +89,9 @@ class VirtualMachine(VmwareHandler):
             infoData = self.oVirtualMachine.guest
 
             if hasattr(infoData, "guestFamily"):
-                info["guestOS"] = infoData.guestFamily
+                info["guestOSFamily"] = infoData.guestFamily
+            if hasattr(infoData, "guestFullName"):
+                info["guestOS"] = infoData.guestFullName
             if hasattr(infoData, "hostName"):
                 info["hostname"] = infoData.hostName
 
