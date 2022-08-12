@@ -58,7 +58,12 @@ class HostSystem(Backend):
                         # For a trunk port group the vlanId field is a list of vim.NumericRange data type.
                         try:
                             for idRange in vlan:
-                                vlanId = str(idRange.start) + "-" + str(idRange.end)
+                                if idRange.start < idRange.end:
+                                    vlanId = vlanId + str(idRange.start) + "-" + str(idRange.end) + ", "
+                                elif idRange.start == idRange.end:
+                                    vlanId = vlanId + str(idRange.start) + ", "
+                            vlanId = vlanId[:-2]
+
                         except Exception:
                             pass
                 else:

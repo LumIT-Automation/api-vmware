@@ -68,6 +68,23 @@ class Network(Backend):
 
 
 
+    def getVlanIds(self):
+        vlanId = set()
+        try:
+            self.loadConfiguredHostSystems()
+            for chost in self.configuredHosts:
+                host = chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
+                if "networks" in host:
+                    for net in host["networks"]:
+                        if "vlanId" in net:
+                            vlanId.add(net["vlanId"])
+
+            return vlanId
+        except Exception as e:
+            raise e
+
+
+
     def info(self, related: bool = True) -> dict:
         hosts = list()
         portGroupType = ""
