@@ -41,7 +41,7 @@ class Network(Backend):
 
 
 
-    def listUsedIps(self) -> list:
+    def listVmsIps(self) -> list:
         from vmware.models.VMware.VirtualMachine import VirtualMachine
         ipList = list()
 
@@ -68,7 +68,7 @@ class Network(Backend):
 
 
 
-    def getVlanIds(self):
+    def getVlanIds(self) -> set:
         vlanId = set()
         try:
             self.loadConfiguredHostSystems()
@@ -76,12 +76,61 @@ class Network(Backend):
                 host = chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
                 if "networks" in host:
                     for net in host["networks"]:
-                        if "vlanId" in net:
-                            vlanId.add(net["vlanId"])
+                        if "vlanId" in net: # This value is an integer for standard port groups, a string for distributed port groups.
+                            # The string can contain a single number, a range, a list. Eg: 2, 11, 111-115, 5
+                            for id in str(net["vlanId"]).split(', '):
+                                if "-" in id: # Range of vlan ids (eg: 111-115)
+                                    idRange = id.split('-')
+                                    for i in range(int(idRange[0]), int(idRange[-1])+1, 1):
+                                        vlanId.add(str(i))
+                                else:
+                                    vlanId.add(id) # Single vlan id.
 
             return vlanId
         except Exception as e:
             raise e
+
+
+
+    def getNetWithSameVlanIds(self) -> List[object]:
+        networks = list()
+
+        try:
+            vlanIds = self.getVlanIds() # Vlan ids of this network.
+            for o in Backend.oNetworks(self.assetId):
+                network = Network(self.assetId, VmwareHelper.getInfo(o)["moId"])
+                netVlanIds = network.getVlanIds() # Vlan ids of another network.
+                for netVlanId in netVlanIds:
+                    for vlanId in vlanIds:
+                        if netVlanId == str(vlanId):
+                            networks.append(network)
+
+            return networks
+        except Exception as e:
+            raise e
+
+
+
+    def findVMsWithThisIpAddress(self, ipAddress: str):
+        vms = list()
+
+        try:
+            nets = self.getNetWithSameVlanIds()
+            nets.append(self)
+
+            for net in nets:
+                for vm in net.listVmsIps():
+                    for ip in vm["ipList"]:
+                        if ip == ipAddress:
+                            vms.append({
+                                "moId": vm["moId"],
+                                "name": vm["name"]
+                            })
+
+            return vms
+        except Exception as e:
+            raise e
+
 
 
 
