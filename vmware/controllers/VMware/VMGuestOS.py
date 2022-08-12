@@ -5,7 +5,8 @@ from rest_framework import status
 from vmware.models.VMware.VirtualMachine import VirtualMachine
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.VMware.CustomSpec import VMwareCustomizationSpecApplySerializer as Serializer
+from vmware.serializers.VMware.VMGuestOS import VMwareVMGuestOSSerializer as Serializer
+from vmware.serializers.VMware.VMGuestOS import VMwareVMGuestOSCustomizeSerializer as CustomizeSerializer
 
 from vmware.controllers.CustomController import CustomController
 
@@ -32,11 +33,11 @@ class VMwareVirtualMachineGuestOSController(CustomController):
 
                     virtualmachine = VirtualMachine(assetId, moId)
                     itemData = virtualmachine.guestInfo()
-                    #serializer = Serializer(data=itemData)
-                    #if serializer.is_valid():
-                    #    data["data"] = serializer.validated_data
-                    if True:
-                        data["data"] = itemData
+                    serializer = Serializer(data=itemData)
+                    if serializer.is_valid():
+                        data["data"] = serializer.validated_data
+                    #if True:
+                    #    data["data"] = itemData
                         data["href"] = request.get_full_path()
 
                         # Check the response's ETag validity (against client request).
@@ -84,7 +85,7 @@ class VMwareVirtualMachineGuestOSController(CustomController):
                 Log.actionLog("Virtual machine guest OS customization", user)
                 Log.actionLog("User data: "+str(request.data), user)
 
-                serializer = Serializer(data=request.data["data"], partial=True)
+                serializer = CustomizeSerializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
                     data = serializer.validated_data
 

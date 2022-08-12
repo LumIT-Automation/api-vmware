@@ -25,8 +25,3 @@ class VMwareCustomizationSpecSerializer(serializers.Serializer):
 
 class VMwareCustomizationSpecCloneSerializer(serializers.Serializer):
     destination = serializers.CharField(required=True, max_length=64)
-
-
-
-class VMwareCustomizationSpecApplySerializer(serializers.Serializer):
-    specName = serializers.CharField(required=True, max_length=64)
