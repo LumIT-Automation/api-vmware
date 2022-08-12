@@ -116,7 +116,6 @@ class Network(Backend):
 
         try:
             nets = self.getNetWithSameVlanIds()
-            nets.append(self)
 
             for net in nets:
                 for vm in net.listVmsIps():
