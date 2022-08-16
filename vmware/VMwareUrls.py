@@ -6,7 +6,7 @@ from .controllers.VMware import Clusters, Cluster
 from .controllers.VMware import HostSystems, HostSystem
 from .controllers.VMware import Datastores, Datastore
 from .controllers.VMware import Networks,Network
-from .controllers.VMware import FindUsedIp
+from .controllers.VMware import NetworkVMs, FindUsedIp
 from .controllers.VMware import VMFolders, VMFolder, VMFoldersTree
 from .controllers.VMware import VirtualMachines, VirtualMachine
 from .controllers.VMware import VMGuestOS
@@ -54,6 +54,7 @@ urlpatterns = [
     # Network.
     path('<int:assetId>/networks/', Networks.VMwareNetworksController.as_view(), name='vmware-networks'),
     path('<int:assetId>/network/<str:moId>/', Network.VMwareNetworkController.as_view(), name='vmware-network'),
+    path('<int:assetId>/network/<str:moId>/vms/', NetworkVMs.VMwareNetworkVMsController.as_view(), name='vmware-network'),
     path('<int:assetId>/network/<str:moId>/find-ip/<str:ipAddress>/', FindUsedIp.VMwareNetworkFindIpController.as_view(), name='vmware-network-find-ip'),
 
     # VMFolder.

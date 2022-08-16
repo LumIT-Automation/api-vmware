@@ -15,8 +15,8 @@ class VMwareVMGuestOSSerializer(serializers.Serializer):
         dnsList = serializers.ListField(child=serializers.CharField(max_length=64), required=False)
 
     hostname = serializers.CharField(required=False, allow_blank=True, max_length=255)
-    guestOS = serializers.CharField(required=False, allow_blank=True, max_length=255)
-    guestOSFamily = serializers.CharField(required=False, allow_blank=True, max_length=64)
+    guestOS = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
+    guestOSFamily = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=64)
     vmTools = VMwareVMGuestOSToolsSerializer(required=False)
     dnsConfig = VMwareVMGuestOSDnsSerializer(required=False)
     network = serializers.DictField(child=serializers.ListField(child=serializers.CharField(max_length=64), required=False))

@@ -16,7 +16,7 @@
 							"basic": [
 								{
 									"key": "password",
-									"value": "PASSWORD",
+									"value": "Password01!!",
 									"type": "string"
 								},
 								{
@@ -478,7 +478,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{vc}}/rest/vcenter/vm?filter.datacenters.1=datacenter-2&filter.clusters.1=domain-c122856",
+							"raw": "http://{{vc}}/rest/vcenter/vm?filter.datacenters.1=datacenter-2&filter.clusters.1=domain-c1441",
 							"protocol": "http",
 							"host": [
 								"{{vc}}"
@@ -495,7 +495,7 @@
 								},
 								{
 									"key": "filter.clusters.1",
-									"value": "domain-c122856"
+									"value": "domain-c1441"
 								}
 							]
 						}
@@ -517,7 +517,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{vc}}/rest/vcenter/vm/vm-115227/",
+							"raw": "http://{{vc}}/rest/vcenter/vm/vm-3366/guest/",
 							"protocol": "http",
 							"host": [
 								"{{vc}}"
@@ -526,7 +526,8 @@
 								"rest",
 								"vcenter",
 								"vm",
-								"vm-115227",
+								"vm-3366",
+								"guest",
 								""
 							]
 						}
@@ -3798,7 +3799,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-3223/find-ip/192.168.12.114/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-83/find-ip/192.168.12.64/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3812,9 +3813,46 @@
 						"vmware",
 						"1",
 						"network",
-						"dvportgroup-3223",
+						"dvportgroup-83",
 						"find-ip",
-						"192.168.12.114",
+						"192.168.12.64",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "network - list vms",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{jwttoken}}"
+					}
+				],
+				"url": {
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-83/vms/",
+					"protocol": "http",
+					"host": [
+						"10",
+						"0",
+						"111",
+						"25"
+					],
+					"path": [
+						"api",
+						"v1",
+						"vmware",
+						"1",
+						"network",
+						"dvportgroup-83",
+						"vms",
 						""
 					]
 				}
@@ -4081,7 +4119,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3367/guestos/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3532/guestos/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4095,7 +4133,7 @@
 						"vmware",
 						"1",
 						"virtualmachine",
-						"vm-3367",
+						"vm-3532",
 						"guestos",
 						""
 					]
