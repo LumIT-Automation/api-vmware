@@ -72,7 +72,6 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.Datastore import Datastore
         from vmware.models.VMware.FolderVM import FolderVM
         from vmware.models.VMware.CustomSpec import CustomSpec
-        from vmware.models.VMware.Network import Network
 
         oCustomSpec = None
         host = None
@@ -147,16 +146,7 @@ class VirtualMachine(Backend):
 
             # checkIp True by default.
             if (Input.checkIp or Input.checkIp is None) and "network" in cSpecInfo:
-                n = 0
-                for net in cSpecInfo["network"]:
-                    if net["ip"] and Input.networkMoId[n]:
-                        Log.actionLog("Deploy VM: check if the ip address "+net["ip"]+" is used in network "+Input.networkMoId[n])
-                        networkIp = Network(assetId=self.assetId, moId=Input.networkMoId[n]).findVMsWithThisIpAddress(ipAddress=net["ip"])
-                        if networkIp:
-                            raise CustomException(status=400, payload={"VMware": "The ip address "+net["ip"]+" is already used in this vCenter."})
-                        else:
-                            Log.actionLog("Deploy VM: the ip "+ net["ip"] +" seems unused.")
-                    n += 1
+                self.__checkNewVMIpAddress(networkSpecInfo=cSpecInfo["network"], networkMoIdList=Input.networkMoId)
 
             # Put all together: build the cloneSpec.
             specsBuilder.buildVMCloneSpecs(
@@ -446,6 +436,26 @@ class VirtualMachine(Backend):
                     Command(c["command"])
                 except Exception:
                     raise CustomException(status=400, payload={"VMware": "Invalid post-deploy command identifier."})
+
+
+
+    def __checkNewVMIpAddress(self, networkSpecInfo: object, networkMoIdList: list ) -> None:
+        from vmware.models.VMware.Network import Network
+
+        try:
+            n = 0
+            for net in networkSpecInfo:
+                if net["ip"] and networkMoIdList[n]:
+                    Log.actionLog("Deploy VM: check if the ip address "+net["ip"]+" is used in network "+networkMoIdList[n])
+                    networkIp = Network(assetId=self.assetId, moId=networkMoIdList[n]).findVMsWithThisIpAddress(ipAddress=net["ip"])
+                    if networkIp:
+                        raise CustomException(status=400, payload={"VMware": "The ip address "+net["ip"]+" is already used in this vCenter."})
+                    else:
+                        Log.actionLog("Deploy VM: the ip "+net["ip"]+" seems unused.")
+                n += 1
+
+        except Exception as e:
+            raise e
 
 
 
