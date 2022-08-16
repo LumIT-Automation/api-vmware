@@ -72,6 +72,7 @@ class VirtualMachine(Backend):
         from vmware.models.VMware.Datastore import Datastore
         from vmware.models.VMware.FolderVM import FolderVM
         from vmware.models.VMware.CustomSpec import CustomSpec
+        from vmware.models.VMware.Network import Network
 
         oCustomSpec = None
         host = None
@@ -81,7 +82,7 @@ class VirtualMachine(Backend):
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
-                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "postDeployCommands"):
+                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "postDeployCommands", "checkIp"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -143,6 +144,19 @@ class VirtualMachine(Backend):
             if Input.guestSpec:
                 oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
                 cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
+
+            # checkIp True by default.
+            if (Input.checkIp or Input.checkIp is None) and "network" in cSpecInfo:
+                n = 0
+                for net in cSpecInfo["network"]:
+                    if net["ip"] and Input.networkMoId[n]:
+                        Log.actionLog("Deploy VM: check if the ip address "+net["ip"]+" is used in network "+Input.networkMoId[n])
+                        networkIp = Network(assetId=self.assetId, moId=Input.networkMoId[n]).findVMsWithThisIpAddress(ipAddress=net["ip"])
+                        if networkIp:
+                            raise CustomException(status=400, payload={"VMware": "The ip address "+net["ip"]+" is already used in this vCenter."})
+                        else:
+                            Log.actionLog("Deploy VM: the ip "+ net["ip"] +" seems unused.")
+                    n += 1
 
             # Put all together: build the cloneSpec.
             specsBuilder.buildVMCloneSpecs(
