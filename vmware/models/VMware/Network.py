@@ -43,34 +43,15 @@ class Network(Backend):
 
     def listVmsIps(self, othersVMsIp: bool = False) -> list:
         try:
-            o = Backend(assetId=self.assetId, moId=self.moId).listVmsIps()
-            Log.log(o, 'NNNNNNNNNNNNNN')
-
-            return o
+            return Backend(assetId=self.assetId, moId=self.moId).listVmsIps()
         except Exception as e:
             raise e
 
 
 
     def getVlanIds(self) -> set:
-        vlanId = set()
         try:
-            self.loadConfiguredHostSystems()
-            for chost in self.configuredHosts:
-                host = chost.info(loadDatastores=False, specificNetworkMoId=self.moId)
-                if "networks" in host:
-                    for net in host["networks"]:
-                        if "vlanId" in net: # This value is an integer for standard port groups, a string for distributed port groups.
-                            # The string can contain a single number, a range, a list. Eg: 2, 11, 111-115, 5
-                            for id in str(net["vlanId"]).split(', '):
-                                if "-" in id: # Range of vlan ids (eg: 111-115)
-                                    idRange = id.split('-')
-                                    for i in range(int(idRange[0]), int(idRange[-1])+1, 1):
-                                        vlanId.add(str(i))
-                                else:
-                                    vlanId.add(id) # Single vlan id.
-
-            return vlanId
+            return Backend(assetId=self.assetId, moId=self.moId).getVlanIds()
         except Exception as e:
             raise e
 
@@ -104,11 +85,12 @@ class Network(Backend):
             for net in nets:
                 for vm in net.listVmsIps():
                     for ip in vm["ipList"]:
-                        if ip == ipAddress:
-                            vms.append({
-                                "moId": vm["moId"],
-                                "name": vm["name"]
-                            })
+                        if "ipAddress" in ip:
+                            if ip["ipAddress"] == ipAddress:
+                                vms.append({
+                                    "moId": vm["moId"],
+                                    "name": vm["name"]
+                                })
 
             return vms
         except Exception as e:

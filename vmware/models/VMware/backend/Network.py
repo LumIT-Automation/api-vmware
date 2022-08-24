@@ -75,6 +75,36 @@ class Network(VmwareHandler):
 
 
 
+    def getVlanIds(self) -> set:
+        vlanId = set()
+        try:
+            # Distributed port group, first. The vmware DistributedVirtualPortgroup object type extends the Network type.
+            if hasattr(self.oNetwork, "config"):
+                vlan = self.oNetwork.config.defaultPortConfig.vlan.vlanId
+                if isinstance(vlan, int):
+                    vlanId.add(str(vlan))
+                elif isinstance(vlan, list):
+                    # For a trunk port group the vlanId field is a list of vim.NumericRange data type, with the properties "start and "end" for a vlan ids range.
+                    try:
+                        for idRange in vlan:
+                            for id in range(idRange.start, idRange.end+1):
+                                vlanId.add(str(id))
+                    except Exception:
+                        pass
+
+            # Standard port group vlan id info should be taken from the host instead.
+            else:
+                for host in self.oNetwork.host:
+                    pgList = host.config.network.portgroup # standard port groups, basic info.
+                    for pg in pgList:
+                        if pg.spec.name == self.oNetwork.name:
+                            vlanId.add(str(pg.spec.vlanId))
+
+            return vlanId
+        except Exception as e:
+            raise e
+
+
 
     ####################################################################################################################
     # Public static methods
