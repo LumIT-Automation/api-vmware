@@ -81,17 +81,16 @@ class Network(Backend):
 
         try:
             nets = self.getNetWithSameVlanIds()
-
             for net in nets:
                 for vm in net.listVmsIps():
-                    for ip in vm["ipList"]:
-                        if "ipAddress" in ip:
-                            if ip["ipAddress"] == ipAddress:
-                                vms.append({
-                                    "moId": vm["moId"],
-                                    "name": vm["name"]
-                                })
-
+                    for ipData in vm["ipList"]:
+                        if "ipAddress" in ipData:
+                            for ip in ipData["ipAddress"]:
+                                if ip == ipAddress:
+                                    vms.append({
+                                        "moId": vm["moId"],
+                                        "name": vm["name"]
+                                    })
             return vms
         except Exception as e:
             raise e
