@@ -42,33 +42,11 @@ class Network(Backend):
 
 
     def listVmsIps(self, othersVMsIp: bool = False) -> list:
-        from vmware.models.VMware.VirtualMachine import VirtualMachine
-        ipList = list()
-
         try:
-            oVmList = Backend.listAttachedVMs(self)
-            self.name = self.oNetwork.summary.name
-            for v in oVmList:
-                vm = VmwareHelper.getInfo(v)
-                virtualmachine = VirtualMachine(self.assetId, vm["moId"])
-                vmGuestInfo = virtualmachine.guestInfo()
-                if "network" in vmGuestInfo:
-                    ips = list()
-                    if othersVMsIp:
-                        ips = vmGuestInfo["network"]
-                    else:
-                        if self.name in vmGuestInfo["network"]:
-                            ips = vmGuestInfo["network"][self.name] # Get only the info about this port group if the vm have more than one network card.
+            o = Backend(assetId=self.assetId, moId=self.moId).listVmsIps()
+            Log.log(o, 'NNNNNNNNNNNNNN')
 
-                    ipList.append(
-                        {
-                            "moId": vm["moId"],
-                            "name": vm["name"],
-                            "ipList": ips
-                        }
-                    )
-
-            return ipList
+            return o
         except Exception as e:
             raise e
 

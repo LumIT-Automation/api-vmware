@@ -36,7 +36,7 @@ pycparser==2.21
 PyJWT==2.0.1
 PyNaCl==1.5.0
 pyOpenSSL==22.0.0
-pytz==2022.1
+pytz==2022.2.1
 pyvmomi==7.0.3
 redis==3.5.3
 requests==2.25.1
@@ -44,7 +44,7 @@ setuptools==40.8.0
 six==1.16.0
 sqlparse==0.4.2
 typing_extensions==4.3.0
-urllib3==1.26.11
+urllib3==1.26.12
 vapi-client-bindings==3.8.0
 vapi-common-client==2.34.0
 vapi-runtime==2.34.0
