@@ -1,6 +1,6 @@
 amqp==5.1.1
 asgiref==3.5.2
-bcrypt==3.2.2
+bcrypt==4.0.0
 billiard==3.6.4.0
 cached-property==1.5.2
 cachetools==5.0.0
