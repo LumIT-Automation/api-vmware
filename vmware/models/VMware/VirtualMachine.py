@@ -449,9 +449,9 @@ class VirtualMachine(Backend):
                     Log.actionLog("Deploy VM: check if the ip address "+net["ip"]+" is used in network "+networkMoIdList[n])
                     networkIp = Network(assetId=self.assetId, moId=networkMoIdList[n]).findVMsWithThisIpAddress(ipAddress=net["ip"])
                     if networkIp:
-                        raise CustomException(status=400, payload={"VMware": "The ip address "+net["ip"]+" is already used in this vCenter."})
+                        raise CustomException(status=400, payload={"VMware": "The IP address "+net["ip"]+" is already in use in this vCenter. Details: "+str(networkIp)})
                     else:
-                        Log.actionLog("Deploy VM: the ip "+net["ip"]+" seems unused.")
+                        Log.actionLog("Deploy VM: the IP "+net["ip"]+" seems unused.")
                 n += 1
 
         except Exception as e:
