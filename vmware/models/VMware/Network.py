@@ -97,7 +97,6 @@ class Network(Backend):
 
 
 
-
     def info(self, related: bool = True) -> dict:
         hosts = list()
         portGroupType = ""

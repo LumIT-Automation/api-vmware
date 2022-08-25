@@ -34,7 +34,7 @@ class Network(VmwareHandler):
 
 
 
-    def listVmsIps(self, othersVMsIp: bool = False) -> list:
+    def listVmsIps(self) -> list:
         ipList = list()
 
         try:
