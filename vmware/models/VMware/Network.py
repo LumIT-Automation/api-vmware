@@ -76,12 +76,14 @@ class Network(Backend):
 
 
 
-    def findVMsWithThisIpAddress(self, ipAddress: str):
+    def findVMsWithThisIpAddress(self, ipAddress: str, checkNetworksWithSameVlanIds: bool = False):
         vms = list()
 
         try:
-            nets = [ self ]
-            # nets = self.getNetWithSameVlanIds() TODO: see how to speed this one.
+            if checkNetworksWithSameVlanIds:
+                nets = self.getNetWithSameVlanIds()  # TODO: see how to speed this one.
+            else:
+                nets = [ self ]
             for net in nets:
                 for vm in net.listVmsIps():
                     for ipData in vm["ipList"]:

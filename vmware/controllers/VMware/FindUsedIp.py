@@ -24,13 +24,17 @@ class VMwareNetworkFindIpController(CustomController):
 
         try:
             if Permission.hasUserPermission(groups=user["groups"], action="network_get", assetId=assetId, moId=moId) or user["authDisabled"]:
-                Log.actionLog("Network: find ip: "+ipAddress, user)
+                if "checkNetworksWithSameVlanIds" in request.GET:
+                    checkNetworksWithSameVlanIds = True
+                else:
+                    checkNetworksWithSameVlanIds = False
+                Log.actionLog("Network: find ip: "+ipAddress+", checkNetworksWithSameVlanIds = "+str(checkNetworksWithSameVlanIds), user)
 
                 lock = Lock("network", locals(), moId)
                 if lock.isUnlocked():
                     lock.lock()
 
-                    itemData["items"] = Network(assetId, moId).findVMsWithThisIpAddress(ipAddress)
+                    itemData["items"] = Network(assetId, moId).findVMsWithThisIpAddress(ipAddress=ipAddress, checkNetworksWithSameVlanIds=checkNetworksWithSameVlanIds)
                     serializer = Serializer(data=itemData)
                     if serializer.is_valid():
                         data["data"] = serializer.validated_data
