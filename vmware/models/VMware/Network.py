@@ -80,7 +80,8 @@ class Network(Backend):
         vms = list()
 
         try:
-            nets = self.getNetWithSameVlanIds()
+            nets = [ self ]
+            # nets = self.getNetWithSameVlanIds() TODO: see how to speed this one.
             for net in nets:
                 for vm in net.listVmsIps():
                     for ipData in vm["ipList"]:

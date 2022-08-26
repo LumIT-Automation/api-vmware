@@ -445,7 +445,7 @@ class VirtualMachine(Backend):
         try:
             n = 0
             for net in networkSpecInfo:
-                if net["ip"] and networkMoIdList[n]:
+                if "ip" in net and net["ip"] and networkMoIdList[n]:
                     Log.actionLog("Deploy VM: check if the ip address "+net["ip"]+" is used in network "+networkMoIdList[n])
                     networkIp = Network(assetId=self.assetId, moId=networkMoIdList[n]).findVMsWithThisIpAddress(ipAddress=net["ip"])
                     if networkIp:
