@@ -81,7 +81,7 @@ class Network(Backend):
 
         try:
             if checkNetworksWithSameVlanIds:
-                nets = self.getNetWithSameVlanIds()  # TODO: see how to speed this one.
+                nets = self.getNetWithSameVlanIds()
             else:
                 nets = [ self ]
             for net in nets:

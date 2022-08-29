@@ -94,12 +94,12 @@ class Network(VmwareHandler):
 
             # Standard port group vlan id info should be taken from the host instead.
             else:
-                for host in self.oNetwork.host:
-                    pgList = host.config.network.portgroup # standard port groups, basic info.
-                    for pg in pgList:
+                if self.oNetwork.host:
+                    host = self.oNetwork.host[0] # Get the vlan info from the first host of the list.
+                    for pg in host.config.network.portgroup: # standard port groups, basic info.
                         if pg.spec.name == self.oNetwork.name:
                             vlanId.add(str(pg.spec.vlanId))
-
+                            break
             return vlanId
         except Exception as e:
             raise e
