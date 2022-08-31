@@ -1,6 +1,5 @@
 import re
 from typing import List
-from dataclasses import dataclass
 
 from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
@@ -20,24 +19,23 @@ from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
-@dataclass
-class Input:
-    datacenterMoId = None
-    clusterMoId = None
-    hostMoId = None
-    mainDatastoreMoId = None
-    datastoreMoId = []
-    networkMoId = []
-    vmFolderMoId = None
-    diskDevices = None
-    networkDevices = None
-    guestSpec = None
-    deleteGuestSpecAfterDeploy = False
-    vmName = None
-    bootstrapKeyId = None
-    secondStageIp = None
-    PubKeyIds = []
-    postDeployCommands: List[dict] = None
+class InputData:
+    def __init__(self, *args, **kwargs):
+        self.datacenterMoId = None
+        self.clusterMoId = None
+        self.hostMoId = None
+        self.mainDatastoreMoId = None
+        self.datastoreMoId = []
+        self.networkMoId = []
+        self.vmFolderMoId = None
+        self.diskDevices = None
+        self.networkDevices = None
+        self.guestSpec = None
+        self.deleteGuestSpecAfterDeploy = False
+        self.vmName = None
+        self.bootstrapKeyId = None
+        self.secondStageIp = None
+        self.postDeployCommands: List[dict] = None
 
 
 
@@ -78,8 +76,11 @@ class VirtualMachine(Backend):
         cluster = None
         cSpecInfo = dict()
         out = dict()
+        Input = InputData()
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
+        Input.networkMoId = [] # safe to controller locks.
+        Input.datastoreMoId = []
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
                   "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "postDeployCommands", "checkIp"):
             setattr(Input, v, data.get(v, None))
@@ -122,7 +123,7 @@ class VirtualMachine(Backend):
 
             for net in Input.networkMoId:
                 self.__checkNetwork(computeResource, net)
-
+            raise
             # Check bootstrapKey.
             self.__checkBootstrapKey(Input.bootstrapKeyId)
 
