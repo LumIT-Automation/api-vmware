@@ -67,12 +67,9 @@ class PollWorker:
                 else:
                     # Update db/target.
                     Target(targetId=self.targetId).modify({"second_stage_state": "-"})
-
         except Exception:
             globalExitStatus = 1
-
         finally:
-            self.__deleteGuestSpec()
             if deployStatus and not self.forceDisableSecondStage:
                 if self.commands:
                     # Update db/target.
@@ -137,15 +134,3 @@ class PollWorker:
             })
 
             raise e
-
-    ####################################################################################################################
-    # Private methods
-    ####################################################################################################################
-
-    def __deleteGuestSpec(self):
-        if self.guestSpec:
-            try:
-                Log.actionLog("Deleting guest spec: " + str(self.guestSpec))
-                CustomSpec(self.assetId, self.guestSpec).delete()
-            except Exception:
-                pass

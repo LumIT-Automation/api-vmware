@@ -188,6 +188,8 @@ class VirtualMachine(Backend):
             return out
         except Exception as e:
             raise e
+        finally:
+            VirtualMachine.__deleteGuestSpec(assetId=self.assetId, guestSpec=Input.guestSpec)
 
 
 
@@ -520,3 +522,18 @@ class VirtualMachine(Backend):
             pass
 
         return o
+
+
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __deleteGuestSpec(assetId, guestSpec):
+        if guestSpec:
+            try:
+                Log.actionLog("Deleting guest spec: " + str(guestSpec))
+                CustomSpec(assetId, guestSpec).delete()
+            except Exception:
+                pass
