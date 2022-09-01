@@ -253,3 +253,10 @@ API_SUPPLICANT_NETWORK_TIMEOUT = 30 # seconds.
 LOCK_MAX_VALIDITY = 30 # seconds.
 
 VMWARE_CONTENT_CACHE_TIMEOUT = 1600 # seconds.
+
+# When deploying a new virtualmachine, check if the given ip addresses are already used in the portgroups assigned to the VM.
+NEW_VM_CHECK_IP_IN_PG = True
+
+# This option applies only when NEW_VM_CHECK_IP_IN_PG = True: also it finds all portgroups with the same vlan id of the assigned pg and checks into.
+# Warning: it can be slow (minutes), so the deployment procedure is slowed down as well.
+NEW_VM_CHECK_IP_IN_PGS_SAME_VLANID = False

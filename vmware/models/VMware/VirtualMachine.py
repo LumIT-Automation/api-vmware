@@ -1,6 +1,8 @@
 import re
 from typing import List
 
+from django.conf import settings
+
 from vmware.models.VMware.VmNetworkAdapter import VmNetworkAdapter
 from vmware.models.VMware.VirtualMachineDatastore import VirtualMachineDatastore
 from vmware.models.VMware.Datastore import Datastore
@@ -82,7 +84,7 @@ class VirtualMachine(Backend):
         Input.networkMoId = [] # safe to controller locks.
         Input.datastoreMoId = []
         for v in ("datacenterMoId", "clusterMoId", "hostMoId", "mainDatastoreMoId", "vmFolderMoId", "diskDevices",
-                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "postDeployCommands", "checkIp"):
+                  "networkDevices", "guestSpec", "deleteGuestSpecAfterDeploy", "secondStageIp", "vmName", "bootstrapKeyId", "postDeployCommands"):
             setattr(Input, v, data.get(v, None))
         for v in ("networkDevices", "diskDevices"):
             for e in ("existent", "new"):
@@ -123,7 +125,7 @@ class VirtualMachine(Backend):
 
             for net in Input.networkMoId:
                 self.__checkNetwork(computeResource, net)
-            raise
+
             # Check bootstrapKey.
             self.__checkBootstrapKey(Input.bootstrapKeyId)
 
@@ -145,8 +147,8 @@ class VirtualMachine(Backend):
                 oCustomSpec = CustomSpec(self.assetId).oCustomSpec(Input.guestSpec)
                 cSpecInfo = CustomSpec(self.assetId, Input.guestSpec).info()
 
-            # checkIp True by default.
-            if (Input.checkIp or Input.checkIp is None) and "network" in cSpecInfo:
+            # If settings.NEW_VM_CHECK_IP_IN_PG is true (default), check if the ip addresses of the new VM are already used.
+            if settings.NEW_VM_CHECK_IP_IN_PG and "network" in cSpecInfo:
                 self.__checkNewVMIpAddress(networkSpecInfo=cSpecInfo["network"], networkMoIdList=Input.networkMoId)
 
             # Put all together: build the cloneSpec.
@@ -448,7 +450,7 @@ class VirtualMachine(Backend):
             for net in networkSpecInfo:
                 if "ip" in net and net["ip"] and networkMoIdList[n]:
                     Log.actionLog("Deploy VM: check if the ip address "+net["ip"]+" is used in network "+networkMoIdList[n])
-                    networkIp = Network(assetId=self.assetId, moId=networkMoIdList[n]).findVMsWithThisIpAddress(ipAddress=net["ip"])
+                    networkIp = Network(assetId=self.assetId, moId=networkMoIdList[n]).findVMsWithThisIpAddress(ipAddress=net["ip"], checkNetworksWithSameVlanIds=settings.NEW_VM_CHECK_IP_IN_PGS_SAME_VLANID)
                     if networkIp:
                         raise CustomException(status=400, payload={"VMware": "The IP address "+net["ip"]+" is already in use in this vCenter. Details: "+str(networkIp)})
                     else:
