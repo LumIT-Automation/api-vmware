@@ -21,8 +21,5 @@ if [ "$1" -eq "0" ]; then
     fi
 fi
 
-# De-schedule db backups.
-(crontab -l | sed '/bck-db_api-vmware.sh/d') | crontab -
-
 exit 0
 

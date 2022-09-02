@@ -17,9 +17,6 @@ if [ "$1" == "purge" ]; then
     fi
 fi
 
-# De-schedule db backups.
-(crontab -l | sed '/bck-db_api-vmware.sh/d') | crontab -
-
 # Force debconf cleanup.
 echo PURGE | debconf-communicate automation-interface-api-vmware-container
 
