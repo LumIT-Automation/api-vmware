@@ -130,6 +130,7 @@ function System_systemFilesSetup()
 
     # Cleanup.
     rm -f $workingFolderPath/var/log/automation/${shortName}/placeholder
+    rm -f $workingFolderPath/home/bck/${shortName}/volumes/placeholder
 
     mv $serviceProjectPackage $workingFolderPath/usr/lib/${shortName}
 
@@ -142,6 +143,8 @@ function System_systemFilesSetup()
     chmod +x $workingFolderPath/etc/cron.daily/bck-db_${shortName}
     chmod +x $workingFolderPath/usr/bin/${shortName}-container.sh
     chmod +x $workingFolderPath/usr/lib/${shortName}/bootstrap.sh
+    chmod 700 $workingFolderPath/home/bck/${shortName}/volumes
+    chmod 700 $workingFolderPath/home/bck/${shortName}
 }
 
 

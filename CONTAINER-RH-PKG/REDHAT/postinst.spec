@@ -107,8 +107,6 @@ function containerSetup()
         fi
     fi
 
-    rm -f /home/bck/api-vmware/volumes/placeholder
-
     printf "$wallBanner Installation completed." | wall -n
 }
 
