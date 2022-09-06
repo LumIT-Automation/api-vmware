@@ -5,18 +5,23 @@
 
 PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin
 
+# Grab some settings.
+[ -r /etc/default/api-vmware ] && . /etc/default/api-vmware
 
 now=`date +%Y%m%d-%H.%M`
 api="api-vmware"
 
 # Name of the container volumes that shoul be backed up.
 vols=(api-vmware api-vmware-cacerts)
-
-# Number of days of retention: delete backups older than this number of days.
-retention=120
-
 bckDir="/home/bck/${api}/volumes"
 containerVolDir="/var/lib/containers/storage/volumes"
+
+# Number of days of retention: delete backups older than this number of days.
+if echo $API_VMWARE_VOL_RETENTION | grep -Eq '^[0-9]+$'; then 
+    retention=$API_VMWARE_VOL_RETENTION
+else
+    retention=120
+fi
 
 
 cd $containerVolDir || exit 1
