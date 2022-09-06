@@ -15,7 +15,7 @@ bckDir="/home/bck/${api}"
 containerDir="/var/www/api/api"
 containerDirOnHost="/var/lib/containers/storage/volumes/${api}/_data"
 
-# Name of the databases that shoul be backed up.
+# Name of the databases that should be backed up.
 dbs=(api stage2)
 
 # Number of days of retention: delete backups older than this number of days.

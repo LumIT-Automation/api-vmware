@@ -11,7 +11,7 @@ PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin
 now=`date +%Y%m%d-%H.%M`
 api="api-vmware"
 
-# Name of the container volumes that shoul be backed up.
+# Name of the container volumes that should be backed up.
 vols=(api-vmware api-vmware-cacerts)
 bckDir="/home/bck/${api}/volumes"
 containerVolDir="/var/lib/containers/storage/volumes"
