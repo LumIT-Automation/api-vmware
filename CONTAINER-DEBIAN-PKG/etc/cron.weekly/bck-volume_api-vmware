@@ -6,7 +6,7 @@
 PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin
 
 # Grab some settings.
-[ -r /etc/default/api-vmware ] && . /etc/default/api-vmware
+[ -r /etc/default/api-vmware-container ] && . /etc/default/api-vmware-container
 
 now=`date +%Y%m%d-%H.%M`
 api="api-vmware"
