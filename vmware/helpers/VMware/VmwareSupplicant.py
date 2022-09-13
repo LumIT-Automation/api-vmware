@@ -48,12 +48,7 @@ class VmwareSupplicant:
                 )
                 atexit.register(Disconnect, self.connection)
             except Exception as e:
-                if e.__class__.__name__ == "TimeoutError" or (e.__class__.__name__ == "OSError" and e.strerror == "No route to host"):
-                    raise CustomException(status=504, payload={"VMware": "No route to the vCemter server."})
-                elif e.__class__.__name__ in ("ConnectionResetError", "SSLError", "HTTPError") or (e.__class__.__name__ == "OSError" and e.errno == 0):
-                    raise CustomException(status=502, payload={"VMware": "Cannot connect to the vCemter server."})
-                else:
-                    raise e
+                raise e
 
         return self.connection
 
