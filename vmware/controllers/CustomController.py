@@ -50,24 +50,24 @@ class CustomController(APIView):
         if e.__class__.__name__ == "TimeoutError" or (e.__class__.__name__ == "OSError" and e.strerror == "No route to host"):
             httpStatus = status.HTTP_504_GATEWAY_TIMEOUT
             data["error"] = {
-                "network (vmware supplicant)": "No route to the vCemter server. "+e.__str__()
+                "network error": "No route to the vCenter server. "+e.__str__()
             }
         elif e.__class__.__name__ in ("ConnectionResetError", "ConnectionError", "Timeout", "TooManyRedirects", "SSLError", "HTTPError", "vim.fault.InvalidLogin") or (e.__class__.__name__ == "OSError" and e.errno) == 0:
             httpStatus = status.HTTP_503_SERVICE_UNAVAILABLE
             data["error"] = {
-                "network (vmware supplicant)": e.__str__()
+                "network error": e.__str__()
             }
         elif e.__class__.__name__ in ("NoValidConnectionsError", "ChannelException", "BadHostKeyException", "SSHException", "timeout", "gaierror"):
             httpStatus = status.HTTP_503_SERVICE_UNAVAILABLE
             data["error"] = {
-                "network (ssh supplicant)": e.__str__()
+                "network error": e.__str__()
             }
         elif e.__class__.__name__ == "CustomException":
             httpStatus = e.status
             data["error"] = e.payload
         elif e.__class__.__name__ in ("AuthenticationException", "BadAuthenticationType"):
             data["error"] = {
-                "ssh": "Wrong credentials or authentication type for the target."
+                "network error": "Wrong ssh credentials or authentication type for the target. "+e.__str__()
             }
             httpStatus = status.HTTP_400_BAD_REQUEST # SshSupplicant: paramiko auth failed on target.
         elif e.__class__.__name__ == "ParseError":
