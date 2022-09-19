@@ -32,6 +32,8 @@ class SSHCommandRun:
             if "id_bootstrap_key" in self.connection \
                     and self.connection["id_bootstrap_key"]:
                 self.connection["priv_key"] = BootstrapKey(self.connection["id_bootstrap_key"]).priv_key
+            else:
+                self.connection["password"] = Target(self.targetId).getPassword()
         except Exception as e:
             raise e
 
@@ -134,8 +136,11 @@ class SSHCommandRun:
                     o = SSHCommandRun("echo", self.targetId, {"__echo": "i-am-alive"})()
                     if o:
                         break
-                except Exception:
-                    pass
+                except Exception as e:
+                    if e.__class__.__name__ == "AuthenticationException":
+                        raise e
+                    else:
+                        pass
 
                 time.sleep(10) # every 10s.
 
