@@ -68,6 +68,23 @@ class Target:
 
 
     @staticmethod
+    def getPassword(targetId: int) -> str:
+        c = connections[Target.db].cursor()
+
+        try:
+            c.execute("SELECT password FROM target WHERE target.id = %s ", [
+                targetId
+            ])
+
+            return DBHelper.asDict(c)[0]["password"]
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    @staticmethod
     def modify(targetId: int, data: dict) -> None:
         sql = ""
         values = []
