@@ -140,12 +140,13 @@ class SSHCommandRun:
                     if e.__class__.__name__ == "AuthenticationException":
                         raise e
                     else:
+                        Log.log("Ssh/WaitPowerOn: looping. Received the exception "+str(e.__class__.__name__)+", retrying in a few seconds...")
                         pass
 
                 time.sleep(10) # every 10s.
 
             if not o:
-                raise CustomException(status=400, payload={"SSH": "machine not responding."})
+                raise CustomException(status=400, payload={"SSH": "timeout WaitPowerOn, cannot login."})
 
             return "", "", 0
         except Exception as e:
