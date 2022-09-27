@@ -92,6 +92,7 @@ function containerSetup()
 
     printf "$wallBanner Restarting container's services..." | wall -n
     podman exec api-vmware systemctl restart apache2
+    podman exec api-vmware systemctl restart celery
     podman exec api-vmware systemctl restart mariadb
 
     diffOutput=$(podman exec api-vmware diff /var/www/api_default_settings.py /var/www/api/api/settings.py | grep '^[<>].*' | grep -v SECRET | grep -v PASSWORD | grep -v VENV || true)

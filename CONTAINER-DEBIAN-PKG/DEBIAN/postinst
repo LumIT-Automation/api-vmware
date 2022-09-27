@@ -87,6 +87,7 @@ if [ "$1" == "configure" ]; then
 
     printf "\n* Restarting container's services..."
     podman exec api-vmware systemctl restart apache2
+    podman exec api-vmware systemctl restart celery
     podman exec api-vmware systemctl restart mariadb
 
     printf "\n* Differences from package's stock config file and the installed one (please import NEW directives in your installed config file, if any):\n"
