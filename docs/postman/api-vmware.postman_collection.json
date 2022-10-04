@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "fe9327c3-2567-4ebe-aeec-a1ce1c35d54b",
+		"_postman_id": "9b8cd55a-11cc-42d5-be4a-5c3a42976bd9",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1686,15 +1686,6 @@
 								"value": "Bearer {{jwttoken}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"data\": {\n        \"name\": \"groupLocalNew\",\n        \"identity_group_identifier\": \"cn=groupStaff,cn=users,dc=lab,dc=localNew\",\n        \"roles_vmFolder\": {\n            \"staff\": [\n                {\n                    \"moId\": \"group-v2476\",\n                    \"vmFolder\": \"riurca\",\n                    \"assetId\": 1\n                }\n            ],\n            \"nonExistent\": []\n        }\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "http://10.0.111.25/api/v1/vmware/identity-group/cn=groupStaff2,cn=users,dc=lab,dc=local/",
 							"protocol": "http",
