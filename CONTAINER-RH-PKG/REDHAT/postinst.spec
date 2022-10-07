@@ -22,9 +22,9 @@ function containerSetup()
     # First container run: associate name, bind ports, bind fs volume, define init process, ...
     # api-vmware folder will be bound to /var/lib/containers/storage/volumes/.
     podman run --name api-vmware -v api-vmware:/var/www/api/api -v api-vmware-db:/var/lib/mysql -v api-vmware-cacerts:/usr/local/share/ca-certificates -dt localhost/api-vmware /sbin/init
-    podman exec api-vmware chown www-data:www-data /var/www/api/api # within container.
 
-    podman exec api-vmware chown mysql:mysql /var/lib/mysql # within container.
+    podman exec api-vmware chown -R www-data:www-data /var/www/api/api # within container.
+    podman exec api-vmware chown -R mysql:mysql /var/lib/mysql # within container.
     podman exec api-vmware systemctl restart mysql
 
     printf "$wallBanner Starting Container Service on HOST..." | wall -n
