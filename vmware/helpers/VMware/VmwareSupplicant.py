@@ -19,7 +19,7 @@ class VmwareSupplicant:
             self.username = asset.username
             self.password = asset.password
 
-            self.connection = None # this is a vim.ServiceInstance object.
+            self.vmwareServiceInstance = None # vim.ServiceInstance object, root of the vSphere inventory.
             self.ran = random.random()
         except Exception:
             raise ValueError('Error in connection data.')
@@ -31,14 +31,14 @@ class VmwareSupplicant:
     ####################################################################################################################
 
     def connect(self):
-        if not self.connection:
+        if not self.vmwareServiceInstance:
             context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             context.verify_mode = ssl.CERT_NONE
 
             try:
                 Log.actionLog("["+str(self.ran)+"] Connecting to VMware server: "+str(self.ipAddr))
 
-                self.connection = SmartConnect(
+                self.vmwareServiceInstance = SmartConnect(
                     host=self.ipAddr,
                     user=self.username,
                     pwd=self.password,
@@ -46,11 +46,11 @@ class VmwareSupplicant:
                     connectionPoolTimeout=60,
                     sslContext=context
                 )
-                atexit.register(Disconnect, self.connection)
+                atexit.register(Disconnect, self.vmwareServiceInstance)
             except Exception as e:
                 raise Exception("vmware supplicant", e.args)
 
-        return self.connection
+        return self.vmwareServiceInstance
 
 
 
@@ -59,8 +59,8 @@ class VmwareSupplicant:
     ####################################################################################################################
 
     @staticmethod
-    def disconnect(connection: object) -> None:
+    def disconnect(vmwareServiceInstance: object) -> None:
         try:
-            Disconnect(connection)
+            Disconnect(vmwareServiceInstance)
         except Exception as e:
             raise e
