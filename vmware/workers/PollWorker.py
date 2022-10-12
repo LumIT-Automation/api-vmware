@@ -94,7 +94,6 @@ class PollWorker:
                 # Get VMware task info.
                 tsk = Task(assetId=self.assetId, moId=self.taskMoId)
                 info = tsk.info()
-                tsk.disconnect()
                 del tsk
 
                 # Update db/target during normal operation.

@@ -19,7 +19,7 @@ class VmwareSupplicant:
             self.username = asset.username
             self.password = asset.password
 
-            self.connection = None
+            self.connection = None # this is a vim.ServiceInstance object.
             self.ran = random.random()
         except Exception:
             raise ValueError('Error in connection data.')
@@ -54,8 +54,12 @@ class VmwareSupplicant:
 
 
 
-    def disconnect(self) -> None:
+    ####################################################################################################################
+    # Public static methods
+    ####################################################################################################################
+
+    def disconnect(connection: object) -> None:
         try:
-            Disconnect(self.connection)
+            Disconnect(connection)
         except Exception as e:
             raise e

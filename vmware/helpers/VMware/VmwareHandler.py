@@ -100,7 +100,7 @@ class VmwareHandler:
     def disconnect(self):
         try:
             if self.connection:
-                self.connection.disconnect()
+                VmwareSupplicant.disconnect(self.connection)
         except Exception as e:
             raise e
 
