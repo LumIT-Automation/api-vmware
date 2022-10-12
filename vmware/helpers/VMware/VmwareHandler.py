@@ -97,15 +97,6 @@ class VmwareHandler:
 
 
 
-    def disconnect(self):
-        try:
-            if self.connection:
-                VmwareSupplicant.disconnect(self.connection)
-        except Exception as e:
-            raise e
-
-
-
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
