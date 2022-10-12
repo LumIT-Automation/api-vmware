@@ -86,3 +86,5 @@ class SSHSupplicant:
             return stdOutData, stdErrData, exitStatus
         except Exception as e:
             raise e
+        finally:
+            ssh.close()
