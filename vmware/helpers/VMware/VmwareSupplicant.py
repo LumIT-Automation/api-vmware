@@ -58,6 +58,7 @@ class VmwareSupplicant:
     # Public static methods
     ####################################################################################################################
 
+    @staticmethod
     def disconnect(connection: object) -> None:
         try:
             Disconnect(connection)
