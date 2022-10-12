@@ -1,6 +1,6 @@
 cachetools~=5.0.0
 celery~=5.2.3
-importlib-metadata~=4.*
+importlib-metadata==4.*
 cryptography~=36.0.2
 Django~=3.2
 django-redis==5.0.0

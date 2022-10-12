@@ -20,6 +20,8 @@ class VmwareHandler:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.connection = None
+
 
 
     ####################################################################################################################
@@ -95,16 +97,25 @@ class VmwareHandler:
 
 
 
+    def disconnect(self):
+        try:
+            if self.connection:
+                self.connection.disconnect()
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Private methods
     ####################################################################################################################
 
     def __fetchContent(self, assetId) -> None:
         try:
-            connection = VmwareSupplicant(Asset(assetId)).connect()
+            self.connection = VmwareSupplicant(Asset(assetId)).connect()
 
             Log.actionLog("Fetch VMware content from connection.")
-            VmwareHandler.contents[assetId] = connection.RetrieveContent()
+            VmwareHandler.contents[assetId] = self.connection.RetrieveContent()
 
             if assetId not in VmwareHandler.managedObjectCaches:
                 VmwareHandler.managedObjectCaches[assetId] = TTLCache(maxsize=100, ttl=settings.VMWARE_CONTENT_CACHE_TIMEOUT)
