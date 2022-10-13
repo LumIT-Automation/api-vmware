@@ -20,6 +20,8 @@ class VmwareHandler:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.vmwareServiceInstance = None
+
 
 
     ####################################################################################################################
@@ -101,10 +103,10 @@ class VmwareHandler:
 
     def __fetchContent(self, assetId) -> None:
         try:
-            connection = VmwareSupplicant(Asset(assetId)).connect()
+            self.vmwareServiceInstance = VmwareSupplicant(Asset(assetId)).connect()
 
             Log.actionLog("Fetch VMware content from connection.")
-            VmwareHandler.contents[assetId] = connection.RetrieveContent()
+            VmwareHandler.contents[assetId] = self.vmwareServiceInstance.RetrieveContent()
 
             if assetId not in VmwareHandler.managedObjectCaches:
                 VmwareHandler.managedObjectCaches[assetId] = TTLCache(maxsize=100, ttl=settings.VMWARE_CONTENT_CACHE_TIMEOUT)
