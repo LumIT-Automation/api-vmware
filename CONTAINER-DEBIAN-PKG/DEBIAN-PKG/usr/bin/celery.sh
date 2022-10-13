@@ -4,12 +4,17 @@ app=api
 workdir=/var/www/api
 logLevel=INFO
 
+# Options:
+# --max-tasks-per-child: at the end of the task terminate the worker and replace it with a new one.
+#     This avoids the problem of having an increasing number of open connections toward the vCenter.
+#
+
 function start()
 {
     if [ -x /var/lib/api-venv/bin/celery ]; then
-        /var/lib/api-venv/bin/celery --app $app --workdir $workdir worker -l $logLevel --hostname api@%h --autoscale 2,10
+        /var/lib/api-venv/bin/celery --app $app --workdir $workdir worker -l $logLevel --hostname api@%h --autoscale 2,10 --max-tasks-per-child 1
     else
-        celery --app $app --workdir $workdir worker -l $logLevel --hostname api@%h --autoscale 2,10
+        celery --app $app --workdir $workdir worker -l $logLevel --hostname api@%h --autoscale 2,10 --max-tasks-per-child 1
     fi
 }
 
