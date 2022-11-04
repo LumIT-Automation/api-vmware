@@ -6,6 +6,7 @@ from vmware.models.VMware.FolderVM import FolderVM
 
 from vmware.models.Permission.repository.Permission import Permission as Repository
 
+from vmware.helpers.Exception import CustomException
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 
 
@@ -122,6 +123,88 @@ class Permission:
                 identityGroup.id,
                 role.id,
                 vmwareObject.id
+            )
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    def addFacade(identityGroupId: str, role: str, vmwareObjectInfo: dict) -> None:
+        oAssetId = vmwareObjectInfo.get("assetId", "")
+        oMoId = vmwareObjectInfo.get("moId", "")
+        oName = vmwareObjectInfo.get("name", "")
+
+        try:
+            # Get existent or new object.
+            if role == "admin":
+                # Role admin -> "any" partition, which always exists.
+                vmo = VObject(assetId=oAssetId, moId="any")
+            else:
+                try:
+                    # Try retrieving object.
+                    vmo = VObject(assetId=oAssetId, moId=oMoId)
+                except CustomException as e:
+                    if e.status == 404:
+                        try:
+                            # If object does not exist, create it (permissions database).
+                            vmo = VObject(
+                                id=VObject.add(
+                                    moId=oMoId,
+                                    assetId=oAssetId,
+                                    objectName=oName
+                                )
+                            )
+                        except Exception:
+                            raise e
+                    else:
+                        raise e
+
+            Permission.add(
+                identityGroup=IdentityGroup(identityGroupIdentifier=identityGroupId),
+                role=Role(role=role),
+                vmwareObject=vmo
+            )
+        except Exception as e:
+            raise e
+
+
+
+    @staticmethod
+    def modifyFacade(permissionId: int, identityGroupId: str, role: str, vmwareObjectInfo: dict) -> None:
+        oAssetId = vmwareObjectInfo.get("assetId", "")
+        oMoId = vmwareObjectInfo.get("moId", "")
+        oName = vmwareObjectInfo.get("name", "")
+
+        try:
+            # Get existent or new object.
+            if role == "admin":
+                # Role admin -> "any" partition, which always exists.
+                vmo = VObject(assetId=oAssetId, moId="any")
+            else:
+                try:
+                    # Try retrieving object.
+                    vmo = VObject(assetId=oAssetId, moId=oMoId)
+                except CustomException as e:
+                    if e.status == 404:
+                        try:
+                            # If object does not exist, create it (permissions database).
+                            vmo = VObject(
+                                id=VObject.add(
+                                    moId=oMoId,
+                                    assetId=oAssetId,
+                                    objectName=oName
+                                )
+                            )
+                        except Exception:
+                            raise e
+                    else:
+                        raise e
+
+            Permission(permissionId).modify(
+                identityGroup=IdentityGroup(identityGroupIdentifier=identityGroupId),
+                role=Role(role=role),
+                vmwareObject=vmo
             )
         except Exception as e:
             raise e

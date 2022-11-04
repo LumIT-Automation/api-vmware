@@ -2,16 +2,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.Permission.IdentityGroup import IdentityGroup
-from vmware.models.Permission.Role import Role
 from vmware.models.Permission.Permission import Permission
-from vmware.models.Permission.VObject import VObject
 
 from vmware.serializers.Permission.Permission import PermissionSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 
-from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
@@ -55,37 +51,15 @@ class PermissionController(CustomController):
                 if serializer.is_valid():
                     data = serializer.validated_data
 
-                    group = data["identity_group_identifier"]
-                    role = data["role"]
-
-                    oMoId = data["object"]["moId"]
-                    oName = data["object"]["name"]
-                    oAssetId = data["object"]["id_asset"]
-
-                    # Get existent or new object.
-                    try:
-                        vmo = VObject(assetId=oAssetId, moId=oMoId)
-                    except CustomException as e:
-                        if e.status == 404:
-                            try:
-                                # If object does not exist, create it (on Permissions database).
-                                vmo = VObject(
-                                    id=VObject.add(
-                                        moId=oMoId,
-                                        assetId=oAssetId,
-                                        objectName=oName,
-                                        role=role
-                                    )
-                                )
-                            except Exception:
-                                raise e
-                        else:
-                            raise e
-
-                    Permission(permissionId).modify(
-                        identityGroup=IdentityGroup(identityGroupIdentifier=group),
-                        role=Role(role=role),
-                        vmwareObject=vmo
+                    Permission.modifyFacade(
+                        permissionId=permissionId,
+                        identityGroupId=data["identity_group_identifier"],
+                        role=data["role"],
+                        vmwareObjectInfo={
+                            "assetId": data["object"]["id_asset"],
+                            "moId": data["object"]["moId"],
+                            "name": data["object"]["name"]
+                        }
                     )
 
                     httpStatus = status.HTTP_200_OK

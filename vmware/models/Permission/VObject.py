@@ -51,14 +51,10 @@ class VObject:
 
 
     @staticmethod
-    def add(moId: str, assetId: int, objectName: str, description: str = "", role: str = "") -> int:
+    def add(moId: str, assetId: int, objectName: str, description: str = "") -> int:
         oId = ""
         oName = ""
         objectType = VmwareHelper.getType(moId)
-
-        # If admin: "any" is the only valid choice (on selected assetId).
-        if role == "admin":
-            moId = "any"
 
         # Check if the objectName exists in the vCenter. Skip for "any".
         if moId == "any":

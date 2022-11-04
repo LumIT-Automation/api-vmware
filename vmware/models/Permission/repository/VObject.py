@@ -100,7 +100,7 @@ class VObject:
         except Exception as e:
             if e.__class__.__name__ == "IntegrityError" \
                     and e.args and e.args[0] and e.args[0] == 1062:
-                        raise CustomException(status=400, payload={"database": "duplicated object"})
+                        raise CustomException(status=400, payload={"database": "duplicated partition"})
             else:
                 raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
