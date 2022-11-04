@@ -1,4 +1,4 @@
-from vmware.repository.Permission.Authorization import Authorization as Repository
+from vmware.models.Permission.repository.Authorization import Authorization as Repository
 
 
 class Authorization:

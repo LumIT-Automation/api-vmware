@@ -2,7 +2,7 @@ from typing import List
 
 from vmware.helpers.Utils import GroupConcatToDict
 
-from vmware.repository.Permission.IdentityGroup import IdentityGroup as Repository
+from vmware.models.Permission.repository.IdentityGroup import IdentityGroup as Repository
 
 
 class IdentityGroup:

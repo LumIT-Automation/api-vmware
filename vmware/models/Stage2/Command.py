@@ -1,9 +1,8 @@
 from typing import List
 
-from vmware.repository.Stage2.Command import Command as Repository
+from vmware.models.Stage2.repository.Command import Command as Repository
 
 from vmware.helpers.Exception import CustomException
-from vmware.helpers.Log import Log
 
 
 class Command:

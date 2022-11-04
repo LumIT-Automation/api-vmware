@@ -1,8 +1,6 @@
 from typing import List
 
-from vmware.repository.Stage2.TargetCommandExecution import TargetCommandExecution as Repository
-
-from vmware.helpers.Log import Log
+from vmware.models.Stage2.repository.TargetCommandExecution import TargetCommandExecution as Repository
 
 
 class TargetCommandExecution:

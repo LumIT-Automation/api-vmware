@@ -1,7 +1,6 @@
 from typing import List
 
-from vmware.repository.Stage2.FinalPubKey import FinalPubKey as Repository
-from vmware.helpers.Log import Log
+from vmware.models.Stage2.repository.FinalPubKey import FinalPubKey as Repository
 
 
 class FinalPubKey:

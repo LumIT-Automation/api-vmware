@@ -1,4 +1,4 @@
-from vmware.repository.Permission.History import History as Repository
+from vmware.models.Permission.repository.History import History as Repository
 
 
 class History:

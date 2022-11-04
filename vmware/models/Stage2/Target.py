@@ -5,10 +5,7 @@ from vmware.models.Stage2.Command import Command
 from vmware.models.Stage2.TargetCommand import TargetCommand
 from vmware.models.Stage2.TargetCommandExecution import TargetCommandExecution
 
-from vmware.repository.Stage2.Target import Target as Repository
-
-from vmware.helpers.Log import Log
-
+from vmware.models.Stage2.repository.Target import Target as Repository
 
 DataConnection: Dict[str, Union[str, int]] = {
     "ip":  "",

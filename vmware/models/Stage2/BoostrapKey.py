@@ -1,10 +1,9 @@
 from typing import List
 import os
 
-from vmware.repository.Stage2.BoostrapKey import BootstrapKey as Repository
+from vmware.models.Stage2.repository.BoostrapKey import BootstrapKey as Repository
 
 from vmware.helpers.Process import Process
-from vmware.helpers.Log import Log
 
 
 class BootstrapKey:
