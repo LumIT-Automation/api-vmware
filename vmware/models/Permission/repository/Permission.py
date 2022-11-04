@@ -26,6 +26,23 @@ class Permission:
     ####################################################################################################################
 
     @staticmethod
+    def get(permissionId: int) -> dict:
+        c = connection.cursor()
+
+        try:
+            c.execute("SELECT * FROM group_role_object WHERE id=%s", [permissionId])
+
+            return DBHelper.asDict(c)[0]
+        except IndexError:
+            raise CustomException(status=404, payload={"database": "non existent permission"})
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    @staticmethod
     def modify(permissionId: int, identityGroupId: int, roleId: int, objectId: int) -> None:
         c = connection.cursor()
 

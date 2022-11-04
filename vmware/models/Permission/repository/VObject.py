@@ -83,33 +83,6 @@ class VObject:
 
 
     @staticmethod
-    def modify(id: int, data: dict) -> None:
-        sql = ""
-        values = []
-        c = connection.cursor()
-
-        # %s placeholders and values for SET.
-        for k, v in data.items():
-            sql += k + "=%s,"
-            values.append(strip_tags(v)) # no HTML allowed.
-
-        # Condition for WHERE.
-        values.append(id)
-
-        try:
-            c.execute("UPDATE `vmware_object` SET "+sql[:-1]+" WHERE id = %s", values)
-        except Exception as e:
-            if e.__class__.__name__ == "IntegrityError" \
-                    and e.args and e.args[0] and e.args[0] == 1062:
-                        raise CustomException(status=400, payload={"database": "duplicated object"})
-            else:
-                raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
-    @staticmethod
     def add(assetId: int, moId: str, objectName: str, description: str) -> int:
         c = connection.cursor()
 

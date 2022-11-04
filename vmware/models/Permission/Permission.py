@@ -1,3 +1,4 @@
+from vmware.models.Permission.IdentityGroup import IdentityGroup
 from vmware.models.Permission.Role import Role
 from vmware.models.Permission.VObject import VObject
 from vmware.models.Permission.Privilege import Privilege
@@ -15,11 +16,12 @@ class Permission:
     def __init__(self, id: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id = id
-        self.identity_group_identifier: int
-        self.identity_group_name: str
-        self.role: str
+        self.id: int = int(id)
+        self.identityGroup: IdentityGroup
+        self.role: Role
         self.obj = VObject
+
+        self.__load()
 
 
 
@@ -27,29 +29,13 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroupId: int, role: str, vmwareObject: VObject) -> None:
+    def modify(self, identityGroup: IdentityGroup, role: Role, vmwareObject: VObject) -> None:
         try:
-            if role == "admin":
-                moId = "any" # if admin: override to "any".
-                objectId = VObject(assetId=vmwareObject.id_asset, moId=moId).id # get the id of object "any".
-            else:
-                moId = vmwareObject.moId
-                objectId = vmwareObject.id
-
-            if not objectId:
-                if moId != "any":
-                    # If the VMObject does not exist (in the db), create it.
-                    objectId = VObject.add(
-                        moId=moId,
-                        assetId=vmwareObject.id_asset,
-                        objectName=vmwareObject.name
-                    )
-
             Repository.modify(
                 self.id,
-                identityGroupId,
-                Role(role=role).id,
-                objectId
+                identityGroup.id,
+                role.id,
+                vmwareObject.id
             )
         except Exception as e:
             raise e
@@ -130,28 +116,28 @@ class Permission:
 
 
     @staticmethod
-    def add(identityGroupId: int, role: str, vmwareObject: VObject) -> None:
+    def add(identityGroup: IdentityGroup, role: Role, vmwareObject: VObject) -> None:
         try:
-            if role == "admin":
-                moId = "any" # if admin: override to "any".
-                objectId = VObject(assetId=vmwareObject.id_asset, moId=moId).id # get the id of object "any".
-            else:
-                moId = vmwareObject.moId
-                objectId = vmwareObject.id
-
-            if not objectId:
-                if moId != "any":
-                    # If the VMObject does not exist (in the db), create it.
-                    objectId = VObject.add(
-                        moId=moId,
-                        assetId=vmwareObject.id_asset,
-                        objectName=vmwareObject.name
-                    )
-
             Repository.add(
-                identityGroupId,
-                Role(role=role).id,
-                objectId
+                identityGroup.id,
+                role.id,
+                vmwareObject.id
             )
+        except Exception as e:
+            raise e
+
+
+
+    ####################################################################################################################
+    # Private methods
+    ####################################################################################################################
+
+    def __load(self) -> None:
+        try:
+            info = Repository.get(self.id)
+
+            self.identityGroup = IdentityGroup(id=info["id_group"])
+            self.role = Role(id=info["id_role"])
+            self.obj = VObject(id=info["id_object"])
         except Exception as e:
             raise e

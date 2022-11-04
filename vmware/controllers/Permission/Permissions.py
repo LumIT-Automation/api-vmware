@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from vmware.models.Permission.IdentityGroup import IdentityGroup
+from vmware.models.Permission.Role import Role
 from vmware.models.Permission.Permission import Permission
 from vmware.models.Permission.VObject import VObject
 
@@ -77,19 +78,37 @@ class PermissionsController(CustomController):
                 if serializer.is_valid():
                     data = serializer.validated_data
 
+                    group = data["identity_group_identifier"]
+                    role = data["role"]
+
+                    oMoId = data["object"]["moId"]
+                    oName = data["object"]["name"]
+                    oAssetId = data["object"]["id_asset"]
+
+                    # Get existent or new object.
                     try:
-                        identityGroupId = IdentityGroup(identityGroupIdentifier=data["identity_group_identifier"]).id
-                    except Exception:
-                        raise CustomException(status=status.HTTP_422_UNPROCESSABLE_ENTITY, payload={"database": "Group identifier doesn't exist."})
+                        vmo = VObject(assetId=oAssetId, moId=oMoId)
+                    except CustomException as e:
+                        if e.status == 404:
+                            try:
+                                # If object does not exist, create it (on Permissions database).
+                                vmo = VObject(
+                                    id=VObject.add(
+                                        moId=oMoId,
+                                        assetId=oAssetId,
+                                        objectName=oName,
+                                        role=role
+                                    )
+                                )
+                            except Exception:
+                                raise e
+                        else:
+                            raise e
 
                     Permission.add(
-                        identityGroupId,
-                        data["role"],
-                        VObject(
-                            assetId=data["object"]["id_asset"],
-                            moId=data["object"]["moId"],
-                            name=data["object"]["name"]
-                        )
+                        identityGroup=IdentityGroup(identityGroupIdentifier=group),
+                        role=Role(role=role),
+                        vmwareObject=vmo
                     )
 
                     httpStatus = status.HTTP_201_CREATED

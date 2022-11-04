@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9b8cd55a-11cc-42d5-be4a-5c3a42976bd9",
+		"_postman_id": "a21f8005-cca2-4661-bf4a-8bc41dc37844",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1846,51 +1846,6 @@
 								"permissions",
 								"vmObject",
 								"2",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "vmObject",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{jwttoken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"data\": {\n        \"moId\": \"group-v2478\",\n        \"id_asset\": 1,\n        \"name\": \"rrivarie\",\n        \"description\": \"\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permissions/vmObject/6/",
-							"protocol": "http",
-							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
-							],
-							"path": [
-								"api",
-								"v1",
-								"vmware",
-								"permissions",
-								"vmObject",
-								"6",
 								""
 							]
 						}

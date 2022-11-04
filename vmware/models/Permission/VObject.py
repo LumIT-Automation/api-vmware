@@ -37,20 +37,6 @@ class VObject:
 
 
 
-    def modify(self, data: dict) -> None:
-        modifyData = dict()
-
-        for k, v in data.items():
-            if v:
-                modifyData[k] = v
-
-        try:
-            Repository.modify(self.id, data=modifyData)
-        except Exception as e:
-            raise e
-
-
-
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
@@ -65,10 +51,14 @@ class VObject:
 
 
     @staticmethod
-    def add(moId: str, assetId: int, objectName: str, description: str = "") -> int:
+    def add(moId: str, assetId: int, objectName: str, description: str = "", role: str = "") -> int:
         oId = ""
         oName = ""
         objectType = VmwareHelper.getType(moId)
+
+        # If admin: "any" is the only valid choice (on selected assetId).
+        if role == "admin":
+            moId = "any"
 
         # Check if the objectName exists in the vCenter. Skip for "any".
         if moId == "any":
@@ -115,7 +105,7 @@ class VObject:
 
     def __load(self) -> None:
         try:
-            info = Repository.get(self.id, self.id_asset, self.moId)
+            info = Repository.get(id=self.id, assetId=self.id_asset, moId=self.moId)
 
             # Set attributes.
             for k, v in info.items():
