@@ -2,7 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from vmware.models.History import History
+from vmware.models.History.History import History
 from vmware.models.Permission.Permission import Permission
 
 from vmware.serializers.History import HistorySerializer as Serializer

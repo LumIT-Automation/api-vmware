@@ -51,26 +51,24 @@ class IdentityGroup:
         values = []
         c = connection.cursor()
 
-        if IdentityGroup.__exists(id):
-            # %s placeholders and values for SET.
-            for k, v in data.items():
-                sql += k + "=%s,"
-                values.append(strip_tags(v)) # no HTML allowed.
+        # %s placeholders and values for SET.
+        for k, v in data.items():
+            sql += k + "=%s,"
+            values.append(strip_tags(v)) # no HTML allowed.
 
-            # Condition for WHERE.
-            values.append(id)
+        # Condition for WHERE.
+        values.append(id)
 
-            try:
-                c.execute("UPDATE identity_group SET "+sql[:-1]+" WHERE id = %s",
-                    values
-                )
-            except Exception as e:
+        try:
+            c.execute("UPDATE identity_group SET "+sql[:-1]+" WHERE id = %s", values)
+        except Exception as e:
+            if e.__class__.__name__ == "IntegrityError" \
+                    and e.args and e.args[0] and e.args[0] == 1062:
+                        raise CustomException(status=400, payload={"database": "duplicated identity group"})
+            else:
                 raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
-
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent identity group"})
+        finally:
+            c.close()
 
 
 
@@ -78,20 +76,12 @@ class IdentityGroup:
     def delete(id: int) -> None:
         c = connection.cursor()
 
-        if IdentityGroup.__exists(id):
-            try:
-                c.execute("DELETE FROM identity_group WHERE id = %s", [
-                    id
-                ])
-
-                # Foreign keys' on cascade rules will clean the linked items on db.
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
-
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent identity group"})
+        try:
+            c.execute("DELETE FROM identity_group WHERE id = %s", [id]) # foreign keys' on cascade rules will clean the linked items on db.
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
 
 
 
@@ -190,34 +180,14 @@ class IdentityGroup:
 
         try:
             with transaction.atomic():
-                c.execute("INSERT INTO identity_group "+keys+" VALUES ("+s[:-1]+")",
-                    values
-                )
+                c.execute("INSERT INTO identity_group "+keys+" VALUES ("+s[:-1]+")", values)
 
                 return c.lastrowid
         except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
-    ####################################################################################################################
-    # Private static methods
-    ####################################################################################################################
-
-    @staticmethod
-    def __exists(id: int) -> int:
-        c = connection.cursor()
-
-        try:
-            c.execute("SELECT COUNT(*) AS c FROM identity_group WHERE id = %s", [
-                id
-            ])
-            o = DBHelper.asDict(c)
-
-            return int(o[0]['c'])
-        except Exception:
-            return 0
+            if e.__class__.__name__ == "IntegrityError" \
+                    and e.args and e.args[0] and e.args[0] == 1062:
+                raise CustomException(status=400, payload={"database": "duplicated identity group"})
+            else:
+                raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()

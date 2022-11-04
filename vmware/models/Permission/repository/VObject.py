@@ -99,7 +99,11 @@ class VObject:
         try:
             c.execute("UPDATE `vmware_object` SET "+sql[:-1]+" WHERE id = %s", values)
         except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
+            if e.__class__.__name__ == "IntegrityError" \
+                    and e.args and e.args[0] and e.args[0] == 1062:
+                        raise CustomException(status=400, payload={"database": "duplicated object"})
+            else:
+                raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
@@ -110,15 +114,21 @@ class VObject:
         c = connection.cursor()
 
         try:
-            c.execute("INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) VALUES (NULL, %s, %s, %s, %s)", [
-                moId,
-                assetId,
-                objectName,
-                description
-            ])
+            c.execute(
+                "INSERT INTO `vmware_object` (`id`, `moId`, `id_asset`, `name`, `description`) "
+                "VALUES (NULL, %s, %s, %s, %s)", [
+                    moId,
+                    assetId,
+                    objectName,
+                    description
+                ])
 
             return c.lastrowid
         except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
+            if e.__class__.__name__ == "IntegrityError" \
+                    and e.args and e.args[0] and e.args[0] == 1062:
+                        raise CustomException(status=400, payload={"database": "duplicated object"})
+            else:
+                raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
