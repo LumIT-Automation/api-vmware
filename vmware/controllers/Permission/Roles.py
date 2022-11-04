@@ -17,7 +17,7 @@ class PermissionRolesController(CustomController):
     def get(request: Request) -> Response:
         data = dict()
         itemData = {"data": dict()}
-        showPrivileges = False
+        loadPrivilege = False
         etagCondition = {"responseEtag": ""}
 
         user = CustomController.loggedUser(request)
@@ -30,13 +30,9 @@ class PermissionRolesController(CustomController):
                 if "related" in request.GET:
                     rList = request.GET.getlist('related')
                     if "privileges" in rList:
-                        showPrivileges = True
+                        loadPrivilege = True
 
-                if showPrivileges:
-                    itemData["data"]["items"] = Role.listWithPrivileges()
-                else:
-                    itemData["data"]["items"] = Role.list()
-
+                itemData["data"]["items"] = Role.dataList(loadPrivilege=loadPrivilege)
                 serializer = Serializer(data=itemData["data"])
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data

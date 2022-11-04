@@ -48,7 +48,7 @@ class Permission:
             Repository.modify(
                 self.id,
                 identityGroupId,
-                Role(name=role).id,
+                Role(role=role).id,
                 objectId
             )
         except Exception as e:
@@ -150,7 +150,7 @@ class Permission:
 
             Repository.add(
                 identityGroupId,
-                Role(name=role).id,
+                Role(role=role).id,
                 objectId
             )
         except Exception as e:

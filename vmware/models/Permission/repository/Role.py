@@ -3,7 +3,6 @@ from typing import List
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
-from vmware.helpers.Log import Log
 
 
 class Role:
@@ -21,15 +20,18 @@ class Role:
     ####################################################################################################################
 
     @staticmethod
-    def get(role: str) -> dict:
+    def get(id: int, role: str) -> dict:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT * FROM role WHERE role = %s", [
-                role
-            ])
+            if id:
+                c.execute("SELECT * FROM role WHERE id = %s", [id])
+            if role:
+                c.execute("SELECT * FROM role WHERE role = %s", [role])
 
             return DBHelper.asDict(c)[0]
+        except IndexError:
+            raise CustomException(status=404, payload={"database": "non existent role"})
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -38,35 +40,13 @@ class Role:
 
 
     @staticmethod
-    def list(showPrivileges: bool = False) -> List[dict]:
+    def list() -> List[dict]:
         c = connection.cursor()
 
         try:
-            if showPrivileges:
-                # Grouping roles' and privileges' values into two columns.
-                j = 0
-                c.execute(
-                    "SELECT role.*, IFNULL(group_concat(DISTINCT privilege.privilege), '') AS privileges "
-                    "FROM role "
-                    "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
-                    "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                    "GROUP BY role.role"
-                )
+            c.execute("SELECT * FROM role")
 
-                items = DBHelper.asDict(c)
-                for ln in items:
-                    if "privileges" in items[j]:
-                        if "," in ln["privileges"]:
-                            items[j]["privileges"] = ln["privileges"].split(",")
-                        else:
-                            if ln["privileges"]:
-                                items[j]["privileges"] = [ ln["privileges"] ]
-                    j = j+1
-            else:
-                c.execute("SELECT * FROM role")
-                items = DBHelper.asDict(c)
-
-            return items
+            return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:

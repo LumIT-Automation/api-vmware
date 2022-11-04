@@ -3,7 +3,6 @@ from django.db import connection
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
-from vmware.helpers.Log import Log
 
 
 class Privilege:
@@ -22,6 +21,23 @@ class Privilege:
     ####################################################################################################################
 
     @staticmethod
+    def get(id: int) -> dict:
+        c = connection.cursor()
+
+        try:
+            c.execute("SELECT * FROM privilege WHERE id = %s", [id])
+
+            return DBHelper.asDict(c)[0]
+        except IndexError:
+            raise CustomException(status=404, payload={"database": "non existent privilege"})
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    @staticmethod
     def list() -> List[dict]:
         c = connection.cursor()
 
@@ -36,7 +52,7 @@ class Privilege:
 
 
     @staticmethod
-    def getPrivType(privilege: str) -> str:
+    def getType(privilege: str) -> str:
         c = connection.cursor()
 
         try:

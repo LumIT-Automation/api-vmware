@@ -1,17 +1,22 @@
 from typing import List
 
+from vmware.models.Permission.Privilege import Privilege
+
 from vmware.models.Permission.repository.Role import Role as Repository
+from vmware.models.Permission.repository.RolePrivilege import RolePrivilege as RolePrivilegeRepository
 
 
 class Role:
-    def __init__(self, id: int = 0, name: str = "", *args, **kwargs):
+    def __init__(self, id: int = 0, role: str = "", loadPrivilege: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id: int = id
-        self.role: str = name
-        self.description: str
+        self.id: int = int(id)
+        self.role: str = role
+        self.description: str = ""
 
-        self.__load()
+        self.privileges: List[Privilege] = []
+
+        self.__load(loadPrivilege=loadPrivilege)
 
 
 
@@ -20,18 +25,28 @@ class Role:
     ####################################################################################################################
 
     @staticmethod
-    def list() -> List[dict]:
+    def list(loadPrivilege: bool = False) -> list:
+        roles = []
+
         try:
-            return Repository.list()
+            for role in Repository.list():
+                roles.append(
+                    Role(id=role["id"], loadPrivilege=loadPrivilege)
+                )
+
+            return roles
         except Exception as e:
             raise e
 
 
 
     @staticmethod
-    def listWithPrivileges() -> List[dict]:
+    def dataList(loadPrivilege: bool = False) -> List[dict]:
         try:
-            return Repository.list(True)
+            if loadPrivilege:
+                return RolePrivilegeRepository.list()
+            else:
+                return Repository.list()
         except Exception as e:
             raise e
 
@@ -41,9 +56,15 @@ class Role:
     # Private methods
     ####################################################################################################################
 
-    def __load(self) -> None:
+    def __load(self, loadPrivilege: bool = False) -> None:
         try:
-            info = Repository.get(self.role)
+            info = Repository.get(id=self.id, role=self.role)
+
+            if loadPrivilege:
+                for privilegeId in RolePrivilegeRepository.rolePrivileges(roleId=self.id):
+                    self.privileges.append(
+                        Privilege(privilegeId)
+                    )
 
             # Set attributes.
             for k, v in info.items():
