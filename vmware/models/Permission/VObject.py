@@ -11,11 +11,11 @@ from vmware.models.Permission.repository.VObject import VObject as Repository
 
 
 class VObject:
-    def __init__(self, assetId: int, moId: str, name: str = "", *args, **kwargs):
+    def __init__(self, id: int = 0, assetId: int = 0, moId: str = "", name: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.id: int = 0
-        self.id_asset: int = assetId
+        self.id: int = int(id)
+        self.id_asset: int = int(assetId) # simple property, not composition.
         self.moId: str = moId
         self.name: str = name
         self.object_type: str = ""
@@ -29,33 +29,36 @@ class VObject:
     # Public static methods
     ####################################################################################################################
 
-    @staticmethod
-    def list() -> List[dict]:
+    def delete(self) -> None:
         try:
-            return Repository.list()
+            Repository.delete(self.id)
         except Exception as e:
             raise e
 
 
 
-    @staticmethod
-    def delete(objectId: int) -> None:
-        try:
-            Repository.delete(objectId)
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    def modify(objectId: int, data: dict) -> None:
+    def modify(self, data: dict) -> None:
         modifyData = dict()
+
         for k, v in data.items():
             if v:
                 modifyData[k] = v
 
         try:
-            Repository.modify(objectId, data=modifyData)
+            Repository.modify(self.id, data=modifyData)
+        except Exception as e:
+            raise e
+
+
+
+    ####################################################################################################################
+    # Public static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def dataList() -> List[dict]:
+        try:
+            return Repository.list()
         except Exception as e:
             raise e
 
@@ -112,10 +115,7 @@ class VObject:
 
     def __load(self) -> None:
         try:
-            info = Repository.get(
-                self.id_asset,
-                self.moId
-            )
+            info = Repository.get(self.id, self.id_asset, self.moId)
 
             # Set attributes.
             for k, v in info.items():

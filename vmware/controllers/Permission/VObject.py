@@ -19,7 +19,7 @@ class PermissionVObjectController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_vmobject_delete") or user["authDisabled"]:
                 Log.actionLog("Permission vmware object deletion ", user)
 
-                PermissionVMObject.delete(objectId)
+                PermissionVMObject(id=objectId).delete()
                 httpStatus = status.HTTP_200_OK
             else:
                 httpStatus = status.HTTP_403_FORBIDDEN
@@ -47,10 +47,7 @@ class PermissionVObjectController(CustomController):
                 if serializer.is_valid():
                     data = serializer.validated_data
 
-                    PermissionVMObject.modify(
-                        objectId=objectId,
-                        data=data
-                    )
+                    PermissionVMObject(id=objectId).modify(data=data)
 
                     httpStatus = status.HTTP_200_OK
                 else:

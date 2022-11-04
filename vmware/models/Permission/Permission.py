@@ -31,7 +31,7 @@ class Permission:
         try:
             if role == "admin":
                 moId = "any" # if admin: override to "any".
-                objectId = VObject(vmwareObject.id_asset, moId).id # get the id of object "any".
+                objectId = VObject(assetId=vmwareObject.id_asset, moId=moId).id # get the id of object "any".
             else:
                 moId = vmwareObject.moId
                 objectId = vmwareObject.id
@@ -134,7 +134,7 @@ class Permission:
         try:
             if role == "admin":
                 moId = "any" # if admin: override to "any".
-                objectId = VObject(vmwareObject.id_asset, moId).id # get the id of object "any".
+                objectId = VObject(assetId=vmwareObject.id_asset, moId=moId).id # get the id of object "any".
             else:
                 moId = vmwareObject.moId
                 objectId = vmwareObject.id

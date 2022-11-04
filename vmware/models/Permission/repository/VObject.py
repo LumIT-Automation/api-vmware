@@ -24,35 +24,21 @@ class VObject:
     ####################################################################################################################
 
     @staticmethod
-    def get(assetId: int, moId: str) -> dict:
+    def get(id: int = 0, assetId: int = 0, moId: str = "") -> dict:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT * FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [
-                moId,
-                assetId
-            ])
-            info = DBHelper.asDict(c)[0]
+            if id:
+                c.execute("SELECT * FROM `vmware_object` WHERE `id` = %s", [id])
+            if assetId and moId:
+                c.execute("SELECT * FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [moId, assetId])
 
-            # VMware object type.
+            info = DBHelper.asDict(c)[0]
             info["object_type"] = VmwareHelper.getType(moId)
 
             return info
-        except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
-    @staticmethod
-    def delete(id: int) -> None:
-        c = connection.cursor()
-
-        try:
-            c.execute("DELETE FROM `vmware_object` WHERE id = %s", [
-                id
-            ])
+        except IndexError:
+            raise CustomException(status=404, payload={"database": "non existent object"})
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -65,16 +51,30 @@ class VObject:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT *, "
-                        "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
-                            "WHEN 'group' THEN 'folder' "
-                            "WHEN 'datastore' THEN 'datastore' "
-                            "WHEN 'network' THEN 'network' "
-                            "WHEN 'dvportgroup' THEN 'network' "
-                        "END) AS object_type "
-                      "FROM vmware_object")
+            c.execute(
+                "SELECT *, "
+                "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
+                    "WHEN 'group' THEN 'folder' "
+                    "WHEN 'datastore' THEN 'datastore' "
+                    "WHEN 'network' THEN 'network' "
+                    "WHEN 'dvportgroup' THEN 'network' "
+                "END) AS object_type "
+                "FROM vmware_object")
 
             return DBHelper.asDict(c)
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    @staticmethod
+    def delete(id: int) -> None:
+        c = connection.cursor()
+
+        try:
+            c.execute("DELETE FROM `vmware_object` WHERE id = %s", [id])
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -88,26 +88,20 @@ class VObject:
         values = []
         c = connection.cursor()
 
-        if VObject.__exists(id):
-            # %s placeholders and values for SET.
-            for k, v in data.items():
-                sql += k + "=%s,"
-                values.append(strip_tags(v)) # no HTML allowed.
+        # %s placeholders and values for SET.
+        for k, v in data.items():
+            sql += k + "=%s,"
+            values.append(strip_tags(v)) # no HTML allowed.
 
-            # Condition for WHERE.
-            values.append(id)
+        # Condition for WHERE.
+        values.append(id)
 
-            try:
-                c.execute("UPDATE `vmware_object` SET "+sql[:-1]+" WHERE id = %s",
-                    values
-                )
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
-
-        else:
-            raise CustomException(status=404, payload={"database": "Vmware object not found in db."})
+        try:
+            c.execute("UPDATE `vmware_object` SET "+sql[:-1]+" WHERE id = %s", values)
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
 
 
 
@@ -126,27 +120,5 @@ class VObject:
             return c.lastrowid
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
-        finally:
-            c.close()
-
-
-
-    ####################################################################################################################
-    # Private static methods
-    ####################################################################################################################
-
-    @staticmethod
-    def __exists(id: int) -> int:
-        c = connection.cursor()
-
-        try:
-            c.execute("SELECT COUNT(*) AS c FROM `vmware_object` WHERE id = %s", [
-                id
-            ])
-            o = DBHelper.asDict(c)
-
-            return int(o[0]['c'])
-        except Exception:
-            return 0
         finally:
             c.close()

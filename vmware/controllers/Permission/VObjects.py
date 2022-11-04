@@ -25,7 +25,7 @@ class PermissionVObjectsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_vmobject_get") or user["authDisabled"]:
                 Log.actionLog("Permissions vmware objects list", user)
 
-                itemData["items"] = VObject.list()
+                itemData["items"] = VObject.dataList()
                 serializer = Serializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
