@@ -24,7 +24,7 @@ class VObject:
     ####################################################################################################################
 
     @staticmethod
-    def get(id: int = 0, assetId: int = 0, moId: str = "") -> dict:
+    def get(id: int, assetId: int, moId: str) -> dict:
         c = connection.cursor()
 
         try:

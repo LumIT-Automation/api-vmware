@@ -24,15 +24,20 @@ class IdentityGroup:
     ####################################################################################################################
 
     @staticmethod
-    def get(identityGroupIdentifier: str) -> dict:
+    def get(id: int, identityGroupIdentifier: str) -> dict:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT * FROM identity_group WHERE identity_group_identifier = %s", [
-                identityGroupIdentifier
-            ])
+            if id:
+                c.execute("SELECT * FROM identity_group WHERE id = %s", [id])
+            if identityGroupIdentifier:
+                c.execute("SELECT * FROM identity_group WHERE identity_group_identifier = %s", [
+                    identityGroupIdentifier
+                ])
 
             return DBHelper.asDict(c)[0]
+        except IndexError:
+            raise CustomException(status=404, payload={"database": "non existent identity group"})
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:

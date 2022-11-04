@@ -54,7 +54,7 @@ class PermissionController(CustomController):
 
                     p = Permission(permissionId)
                     p.modify(
-                        IdentityGroup(data["identity_group_identifier"]).id, # identity group id.
+                        IdentityGroup(identityGroupIdentifier=data["identity_group_identifier"]).id, # identity group id.
                         data["role"],
                         VObject(
                             assetId=data["object"]["id_asset"],

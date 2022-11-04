@@ -20,7 +20,7 @@ class PermissionIdentityGroupController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_identityGroup_delete") or user["authDisabled"]:
                 Log.actionLog("Identity group deletion", user)
 
-                ig = IdentityGroup(identityGroupIdentifier)
+                ig = IdentityGroup(identityGroupIdentifier=identityGroupIdentifier)
                 ig.delete()
 
                 httpStatus = status.HTTP_200_OK
@@ -50,7 +50,7 @@ class PermissionIdentityGroupController(CustomController):
                 serializer = GroupSerializer(data=request.data["data"], partial=True)
                 if serializer.is_valid():
                     data = serializer.validated_data
-                    ig = IdentityGroup(identityGroupIdentifier)
+                    ig = IdentityGroup(identityGroupIdentifier=identityGroupIdentifier)
                     ig.modify(data)
 
                     httpStatus = status.HTTP_200_OK
