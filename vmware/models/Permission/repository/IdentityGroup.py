@@ -6,7 +6,6 @@ from django.db import transaction
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
-from vmware.helpers.Log import Log
 
 
 class IdentityGroup:
@@ -94,66 +93,7 @@ class IdentityGroup:
         c = connection.cursor()
 
         try:
-            query = (
-                "SELECT "
-                    "identity_group.*, "
-    
-                    "IFNULL( "
-                        "GROUP_CONCAT( "
-                            "DISTINCT CONCAT( "
-                            "role.role,'::',CONCAT( "
-                                "vmware_object.moId,'::',vmware_object.name,'::',vmware_object.id_asset,'::', "
-                                    "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
-                                    "WHEN 'any' THEN 'any' "
-                                    "WHEN 'group' THEN 'folder' "
-                                    "WHEN 'datastore' THEN 'datastore' "
-                                    "WHEN 'network' THEN 'network' "
-                                    "WHEN 'dvportgroup' THEN 'network' "
-                                    "END) "
-                                    ") "
-                                ") "
-                            "ORDER BY role.id SEPARATOR ',' "
-                        "), '' "
-                    ") AS roles_object, "
-    
-                    "IFNULL( "
-                        "GROUP_CONCAT( "
-                            "DISTINCT( "
-                                "CASE SUBSTRING_INDEX(privilege.privilege_type, '-', 1) "
-                                    "WHEN 'global' THEN CONCAT(privilege.privilege,'::any::any::0::global') "
-                                    "WHEN 'asset' THEN CONCAT(privilege.privilege,'::any::any::',vmware_object.id_asset,'::asset') "
-                                    "WHEN 'object' THEN "
-                                    "IF( "
-                                        "SUBSTRING_INDEX(vmware_object.moId, '-', 1) = SUBSTRING_INDEX(privilege.privilege_type, '-', -1), "
-                                        "CONCAT( "
-                                        "privilege.privilege,'::',vmware_object.moId,'::',vmware_object.name,'::',vmware_object.id_asset,'::', "
-                                            "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
-                                                "WHEN 'group' THEN 'folder' "
-                                                "WHEN 'datastore' THEN 'datastore' "
-                                                "WHEN 'network' THEN 'network' "
-                                                "WHEN 'dvportgroup' THEN 'network' "
-                                            "END) "
-                                        "), "
-                                        "NULL "
-                                    ") "
-                                "END "
-                            ") "
-                            "ORDER BY privilege.id SEPARATOR ',' "
-                        "), "
-                        "'' "
-                    ") AS privileges_object "
-
-                "FROM identity_group "
-                "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
-                "LEFT JOIN role ON role.id = group_role_object.id_role "
-                "LEFT JOIN `vmware_object` ON `vmware_object`.id = group_role_object.id_object "
-                "LEFT JOIN role_privilege ON role_privilege.id_role = role.id "
-                "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
-                "GROUP BY identity_group.id "
-            )
-
-            Log.log(query, '_')
-            c.execute(query)
+            c.execute("SELECT * FROM identity_group")
 
             return DBHelper.asDict(c)
         except Exception as e:
@@ -186,7 +126,7 @@ class IdentityGroup:
         except Exception as e:
             if e.__class__.__name__ == "IntegrityError" \
                     and e.args and e.args[0] and e.args[0] == 1062:
-                raise CustomException(status=400, payload={"database": "duplicated identity group"})
+                        raise CustomException(status=400, payload={"database": "duplicated identity group"})
             else:
                 raise CustomException(status=400, payload={"database": e.__str__()})
         finally:

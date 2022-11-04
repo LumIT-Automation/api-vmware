@@ -33,7 +33,7 @@ class PermissionIdentityGroupsController(CustomController):
                     if "privileges" in rList:
                         showPrivileges = True
 
-                itemData["items"] = IdentityGroup.listWithRelated(showPrivileges)
+                itemData["items"] = IdentityGroup.listWithPermissionsPrivileges(showPrivileges=showPrivileges)
                 serializer = GroupsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
