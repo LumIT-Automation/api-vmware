@@ -30,19 +30,6 @@ class Permission:
     # Public methods
     ####################################################################################################################
 
-    def modify(self, identityGroup: IdentityGroup, role: Role, vmwareObject: VObject) -> None:
-        try:
-            Repository.modify(
-                self.id,
-                identityGroup.id,
-                role.id,
-                vmwareObject.id
-            )
-        except Exception as e:
-            raise e
-
-
-
     def delete(self) -> None:
         try:
             Repository.delete(self.id)
@@ -117,19 +104,6 @@ class Permission:
 
 
     @staticmethod
-    def add(identityGroup: IdentityGroup, role: Role, vmwareObject: VObject) -> None:
-        try:
-            Repository.add(
-                identityGroup.id,
-                role.id,
-                vmwareObject.id
-            )
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
     def addFacade(identityGroupId: str, role: str, vmwareObjectInfo: dict) -> None:
         oAssetId = vmwareObjectInfo.get("assetId", "")
         oMoId = vmwareObjectInfo.get("moId", "")
@@ -160,7 +134,7 @@ class Permission:
                     else:
                         raise e
 
-            Permission.add(
+            Permission.__add(
                 identityGroup=IdentityGroup(identityGroupIdentifier=identityGroupId),
                 role=Role(role=role),
                 vmwareObject=vmo
@@ -201,7 +175,7 @@ class Permission:
                     else:
                         raise e
 
-            Permission(permissionId).modify(
+            Permission(permissionId).__modify(
                 identityGroup=IdentityGroup(identityGroupIdentifier=identityGroupId),
                 role=Role(role=role),
                 vmwareObject=vmo
@@ -222,5 +196,26 @@ class Permission:
             self.identityGroup = IdentityGroup(id=info["id_group"])
             self.role = Role(id=info["id_role"])
             self.obj = VObject(id=info["id_object"])
+        except Exception as e:
+            raise e
+
+
+
+    def __modify(self, identityGroup: IdentityGroup, role: Role, vmwareObject: VObject) -> None:
+        try:
+            Repository.modify(self.id, identityGroup.id, role.id, vmwareObject.id)
+        except Exception as e:
+            raise e
+
+
+
+    ####################################################################################################################
+    # Private static methods
+    ####################################################################################################################
+
+    @staticmethod
+    def __add(identityGroup: IdentityGroup, role: Role, vmwareObject: VObject) -> None:
+        try:
+            Repository.add(identityGroup.id, role.id, vmwareObject.id)
         except Exception as e:
             raise e
