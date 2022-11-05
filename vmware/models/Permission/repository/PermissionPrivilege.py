@@ -2,6 +2,8 @@ from typing import List, Dict
 
 from django.db import connection
 
+from vmware.models.VMware.FolderVM import FolderVM
+
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
 from vmware.helpers.Utils import GroupConcatToDict
@@ -145,3 +147,126 @@ class PermissionPrivilege:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
+
+
+
+    @staticmethod
+    def countUserPermissions(groups: list, action: str, objectType: str, assetId: int = 0, objectMoId: str = "") -> int:
+        if action and groups:
+            args = groups.copy()
+            assetWhere = ""
+            objectWhere = ""
+
+            c = connection.cursor()
+
+            try:
+                # Build the first half of the where condition of the query.
+                # Obtain: WHERE (identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || ....)
+                groupWhere = ''
+                for _ in groups:
+                    groupWhere += 'identity_group.identity_group_identifier = %s || '
+
+                # Put all the args of the query in a list.
+                if assetId:
+                    args.append(assetId)
+                    assetWhere = "AND vmware_object.id_asset = %s "
+
+                if objectMoId:
+                    objectWhere = "AND ( vmware_object.moId = 'any' "  # if "any" appears in the query results so far -> pass.
+                    if objectType == "folder":
+                        f = FolderVM(assetId, objectMoId)
+                        foldersMoIdsList = f.parentList()
+                        foldersMoIdsList.append(objectMoId)
+                        objectWhere += "OR ("
+                        for moId in foldersMoIdsList:
+                            args.append(moId)
+                            objectWhere += "vmware_object.moId = %s OR "
+                        objectWhere = objectWhere[:-3] + ") "
+                    elif objectType == "datastore":
+                        objectWhere += "OR (vmware_object.moId = %s) "
+                        args.append(objectMoId)
+                    elif objectType == "network":
+                        objectWhere += "OR (vmware_object.moId = %s) "
+                        args.append(objectMoId)
+                    else:
+                        raise CustomException(status=400, payload={
+                            "database": "\"object_type\" can have only one of these values: folder,datastore,network"})
+                    objectWhere += ") "
+
+                args.append(action)
+
+                query = (
+                    "SELECT COUNT(*) AS count "
+                    "FROM identity_group "
+                    "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                    "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
+                    "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
+                    "LEFT JOIN vmware_object ON vmware_object.id = group_role_object.id_object "
+
+                    "WHERE (" + groupWhere[:-4] + ") " +
+                    assetWhere +
+                    objectWhere +
+                    "AND privilege.privilege = %s "
+                )
+
+                c.execute(query, args)
+                return DBHelper.asDict(c)[0]["count"]
+            except Exception as e:
+                raise CustomException(status=400, payload={"database": e.__str__()})
+            finally:
+                c.close()
+
+        return False
+
+
+
+    @staticmethod
+    def allowedObjectsByPrivilegeSet(groups: list, action: str, assetId: int = 0) -> set:
+        if action and groups:
+            args = groups.copy()
+            groupWhere = ""
+            assetWhere = ""
+
+            c = connection.cursor()
+
+            try:
+                # Build the first half of the where condition of the query.
+                # Obtain: WHERE (identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || ....)
+
+                for _ in groups:
+                    groupWhere += 'identity_group.identity_group_identifier = %s || '
+
+                # Put all the args of the query in a list.
+                if assetId:
+                    args.append(assetId)
+                    assetWhere = "AND vmware_object.id_asset = %s "
+
+                args.append(action)
+
+                query = (
+                    "SELECT vmware_object.moId "
+                    "FROM identity_group "
+                    "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
+                    "LEFT JOIN role_privilege ON role_privilege.id_role = group_role_object.id_role "
+                    "LEFT JOIN privilege ON privilege.id = role_privilege.id_privilege "
+                    "LEFT JOIN vmware_object ON vmware_object.id = group_role_object.id_object "
+                    
+                    "WHERE (" + groupWhere[:-4] + ") " +
+                    assetWhere +
+                    "AND "
+                    "(vmware_object.moId = 'any' OR "
+                    "CASE SUBSTRING_INDEX(privilege.privilege_type, '-', -1) "
+                    "WHEN 'network' THEN ((SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'network') || (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'dvportgroup')) "
+                    "WHEN 'datastore' THEN (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'datastore') "
+                    "WHEN 'folder' THEN (SUBSTRING_INDEX(vmware_object.moId, '-', 1) = 'group') "
+                    "END "
+                    ") "
+                    "AND privilege.privilege = %s "
+                )
+
+                c.execute(query, args)
+                return DBHelper.columnAsSet(c)
+            except Exception as e:
+                raise CustomException(status=400, payload={"database": e.__str__()})
+            finally:
+                c.close()

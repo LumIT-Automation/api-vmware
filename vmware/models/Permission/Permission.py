@@ -1,3 +1,5 @@
+from typing import List
+
 from vmware.models.Permission.IdentityGroup import IdentityGroup
 from vmware.models.Permission.Role import Role
 from vmware.models.Permission.VObject import VObject
@@ -5,6 +7,7 @@ from vmware.models.Permission.Privilege import Privilege
 from vmware.models.VMware.FolderVM import FolderVM
 
 from vmware.models.Permission.repository.Permission import Permission as Repository
+from vmware.models.Permission.repository.PermissionPrivilege import PermissionPrivilege as PermissionPrivilegeRepository
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
@@ -51,10 +54,10 @@ class Permission:
 
         try:
             return bool(
-                Repository.countUserPermissions(
+                PermissionPrivilegeRepository.countUserPermissions(
                     groups,
                     action,
-                    VmwareHelper.getType(moId), # vmware object type from the moId.
+                    VmwareHelper.getType(moId), # vmware object type.
                     assetId,
                     moId
                 )
@@ -64,7 +67,7 @@ class Permission:
 
 
 
-    # Get all the moId of the objects on which the user has a privilege. Use sets to deduplicate.
+    # Get all the moIds of the objects on which the user has a privilege. Use sets to deduplicate.
     # Use this with actions of privilege_type = 'object-%'
     # (for privilege_type = 'global' or 'asset' hasUserPermission is the right choice).
     @staticmethod
@@ -75,10 +78,10 @@ class Permission:
                 return {"any"}
 
         try:
-            objectMoIdSet = Repository.allowedObjectsByPrivilegeSet(groups=groups, action=action, assetId=assetId)
+            objectMoIdSet = PermissionPrivilegeRepository.allowedObjectsByPrivilegeSet(groups=groups, action=action, assetId=assetId)
             privilegeType = Privilege.getType(action)
 
-            if privilegeType == "object-folder": # for folder permissions allow the access for the subFolders also.
+            if privilegeType == "object-folder": # for folder permissions allow the access for the subFolders too.
                 subItems = set()
                 for objMoId in objectMoIdSet:
                     try:
@@ -86,6 +89,7 @@ class Permission:
                         subItems.update(FolderVM.treeToSet(subTree, moIdSet=None))
                     except Exception:
                         pass
+
                 objectMoIdSet.update(subItems)
 
             return objectMoIdSet
@@ -95,7 +99,7 @@ class Permission:
 
 
     @staticmethod
-    def rawList() -> list:
+    def dataList() -> List[dict]:
         try:
             return Repository.list()
         except Exception as e:

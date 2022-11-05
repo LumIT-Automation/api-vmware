@@ -3,6 +3,8 @@ from vmware.models.Permission.repository.Authorization import Authorization as R
 
 class Authorization:
 
+    # A permission "view".
+
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################

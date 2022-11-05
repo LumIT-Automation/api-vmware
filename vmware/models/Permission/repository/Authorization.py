@@ -22,7 +22,7 @@ class Authorization:
                 # Build the where condition of the query.
                 # Obtain: WHERE (identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || identity_group.identity_group_identifier = %s || ....)
                 groupWhere = ''
-                for g in groups:
+                for _ in groups:
                     groupWhere += 'identity_group.identity_group_identifier = %s || '
 
                 # Simple example start query:

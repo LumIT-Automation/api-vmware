@@ -26,7 +26,7 @@ class PermissionsController(CustomController):
             if Permission.hasUserPermission(groups=user["groups"], action="permission_identityGroups_get") or user["authDisabled"]:
                 Log.actionLog("Permissions list", user)
 
-                itemData["items"] = Permission.rawList()
+                itemData["items"] = Permission.dataList()
                 serializer = PermissionsSerializer(data=itemData)
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data
