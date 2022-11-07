@@ -116,7 +116,7 @@ class Permission:
         try:
             # Get existent or new object.
             if role == "admin":
-                # Role admin -> "any" partition, which always exists.
+                # Role admin -> "any" object, which always exists.
                 vmo = VObject(assetId=oAssetId, moId="any")
             else:
                 try:
@@ -157,7 +157,7 @@ class Permission:
         try:
             # Get existent or new object.
             if role == "admin":
-                # Role admin -> "any" partition, which always exists.
+                # Role admin -> "any" object, which always exists.
                 vmo = VObject(assetId=oAssetId, moId="any")
             else:
                 try:
