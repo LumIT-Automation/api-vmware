@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a21f8005-cca2-4661-bf4a-8bc41dc37844",
+		"_postman_id": "c8b40888-133b-4bd0-a9d3-2772180e04c0",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2246,7 +2246,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/ls/",
+							"raw": "http://10.0.111.25/api/v1/stage2/command/echo/",
 							"protocol": "http",
 							"host": [
 								"10",
@@ -2259,7 +2259,7 @@
 								"v1",
 								"stage2",
 								"command",
-								"ls",
+								"echo",
 								""
 							]
 						}
@@ -3525,7 +3525,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/hostsystem/host-56/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/hostsystem/host-2601/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3539,7 +3539,7 @@
 						"vmware",
 						"1",
 						"hostsystem",
-						"host-56",
+						"host-2601",
 						""
 					]
 				}
@@ -3709,7 +3709,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-3223/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-2702/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3723,7 +3723,7 @@
 						"vmware",
 						"1",
 						"network",
-						"dvportgroup-3223",
+						"dvportgroup-2702",
 						""
 					]
 				}
@@ -3745,7 +3745,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-83/find-ip/192.168.12.64/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-2605/find-ip/192.168.22.190/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3759,9 +3759,9 @@
 						"vmware",
 						"1",
 						"network",
-						"dvportgroup-83",
+						"network-2605",
 						"find-ip",
-						"192.168.12.64",
+						"192.168.22.190",
 						""
 					]
 				}
@@ -3783,7 +3783,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-83/vms/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-2605/vms/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3797,7 +3797,7 @@
 						"vmware",
 						"1",
 						"network",
-						"dvportgroup-83",
+						"network-2605",
 						"vms",
 						""
 					]
@@ -3972,7 +3972,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3532/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-2630/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3986,7 +3986,7 @@
 						"vmware",
 						"1",
 						"virtualmachine",
-						"vm-3532",
+						"vm-2630",
 						""
 					]
 				}
@@ -4009,7 +4009,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 3072,\n        \"notes\": \"123 prova\",\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 2048,\n                    \"deviceType\": \"thin\"\n                },\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 2\",\n                    \"sizeMB\": 1024,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 1024,\n                    \"deviceType\": \"thin\"\n                },\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 1024,\n                    \"deviceType\": \"thin\"\n                },\n                                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 1024,\n                    \"deviceType\": \"thin\"\n                }\n\n            ]\n        },\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"dvportgroup-135\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet\"\n                },\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"\",\n                    \"deviceType\": \"pcnet32\"\n                }\n            ],\n            \"new\": []\n        }\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"numCpu\": 2,\n        \"numCoresPerSocket\": 1,\n        \"memoryMB\": 3072,\n        \"notes\": \"123 prova\",\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 25600,\n                    \"deviceType\": \"thin\"\n                },\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 2\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-2602\",\n                    \"label\": \"\",\n                    \"sizeMB\": 1024,\n                    \"deviceType\": \"thin\"\n                },\n                {\n                    \"datastoreMoId\": \"datastore-2602\",\n                    \"label\": \"\",\n                    \"sizeMB\": 1024,\n                    \"deviceType\": \"thick eager zeroed\"\n                }\n\n            ]\n        },\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"dvportgroup-2702\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet\"\n                },\n                {\n                    \"networkMoId\": \"network-2605\",\n                    \"label\": \"\",\n                    \"deviceType\": \"pcnet32\"\n                }\n            ],\n            \"new\": []\n        }\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4017,7 +4017,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-2736/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-2709/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4031,7 +4031,7 @@
 						"vmware",
 						"1",
 						"virtualmachine",
-						"vm-2736",
+						"vm-2709",
 						""
 					]
 				}
@@ -4065,7 +4065,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3532/guestos/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-2630/guestos/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4079,7 +4079,7 @@
 						"vmware",
 						"1",
 						"virtualmachine",
-						"vm-3532",
+						"vm-2630",
 						"guestos",
 						""
 					]
@@ -4351,7 +4351,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTSTD\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-1363\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"dvportgroup-3223\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 25600,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test177\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_swap\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 4096\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_root\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": true,\n                    \"__totSize\": 0\n                }\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n            {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTSTD\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-2601\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"dvportgroup-2702\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 25600,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-2603\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test-18\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_swap\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 4096\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_root\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": true,\n                    \"__totSize\": 0\n                }\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n            {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4396,7 +4396,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTSTD\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-1363\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 6144,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"dvportgroup-3223\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ]\n\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 40960,\n                    \"deviceType\": \"thin\"\n                }\n            ]\n        },\n        \"guestSpec\": \"finestropode\",\n        \"deleteGuestSpecAfterDeploy\": false\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTSTD\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-2601\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 6144,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"dvportgroup-2702\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ]\n\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 40960,\n                    \"deviceType\": \"thin\"\n                }\n            ]\n        },\n        \"guestSpec\": \"finestropode\",\n        \"deleteGuestSpecAfterDeploy\": false\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4404,7 +4404,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-3532/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-2705/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4418,7 +4418,7 @@
 						"vmware",
 						"1",
 						"template",
-						"vm-3532",
+						"vm-2705",
 						""
 					]
 				}
@@ -4441,7 +4441,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTCUSTOM\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-1363\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"dvportgroup-3223\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 204800,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test177\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"secondStageIp\": \"192.168.12.176\",\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_swap\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 4096\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_root\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 51200\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_home\",\n                    \"__lvSize\": 40960,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/home\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_var\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_varlog\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var/log\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_varlogaudit\",\n                    \"__lvSize\": 5120,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var/log/audit\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_tmp\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/tmp\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u01\",\n                    \"__lvSize\": 1024,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u01\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u02\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u02\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u03\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u03\"\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u01\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": true,\n                    \"__totSize\": 0\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n            {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"vmName\": \"TESTCUSTOM\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-2601\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"dvportgroup-2702\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 204800,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-2603\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test-18\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"secondStageIp\": \"192.168.18.221\",\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_swap\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 4096\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_root\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": false,\n                    \"__totSize\": 51200\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_home\",\n                    \"__lvSize\": 40960,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/home\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_var\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_varlog\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var/log\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_varlogaudit\",\n                    \"__lvSize\": 5120,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var/log/audit\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_tmp\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/tmp\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u01\",\n                    \"__lvSize\": 1024,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u01\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u02\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u02\"\n                }\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u03\",\n                    \"__lvSize\": 10240,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/u03\"\n                }\n            },\n            {\n                \"command\": \"lvGrow\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_u01\",\n                    \"__growSize\": 0,\n                    \"__grow_100\": true,\n                    \"__totSize\": 0\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n            {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4903,7 +4903,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test18/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4917,7 +4917,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"centos-test",
+						"centos-test18",
 						""
 					]
 				}
@@ -4948,7 +4948,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test2/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4962,7 +4962,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"centos-test",
+						"centos-test2",
 						""
 					]
 				}
@@ -4985,7 +4985,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"destination\": \"centos-test3\"\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"destination\": \"centos-test\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4993,7 +4993,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/try/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -5007,7 +5007,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"centos-test",
+						"try",
 						""
 					]
 				}
@@ -5030,7 +5030,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"network\": [\n            {\n                \"ip\": \"192.168.18.206\",\n                \"netMask\": \"255.255.255.0\",\n                \"gw\": [\n                    \"192.168.18.1\"\n                ]\n            },\n            {\n                \"ip\": \"192.168.18.207\",\n                \"netMask\": \"255.255.255.0\"\n\n            }\n\n        ],\n        \"dns1\": \"192.168.18.20\",\n        \"dns2\": \"8.8.8.8\",\n        \"hostName\": \"robo\",\n        \"domainName\": \"robevarie.vlab.local\",\n        \"timeZone\": \"Antarctica/Troll\"\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"network\": [\n            {\n                \"ip\": \"192.168.18.206\",\n                \"netMask\": \"255.255.255.0\",\n                \"gw\": [\n                    \"192.168.18.1\"\n                ]\n            },\n            {\n                \"dhcp\": true\n\n            }\n\n        ],\n        \"dns1\": \"192.168.18.20\",\n        \"dns2\": \"8.8.8.8\",\n        \"hostName\": \"robo\",\n        \"domainName\": \"robevarie.vlab.local\",\n        \"timeZone\": \"Antarctica/Troll\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -5038,7 +5038,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/try4/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test-tmp-wVJBJD/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -5052,7 +5052,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"try4",
+						"centos-test-tmp-wVJBJD",
 						""
 					]
 				}

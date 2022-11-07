@@ -48,7 +48,8 @@ class VmwareSupplicant:
                 )
                 atexit.register(Disconnect, self.vmwareServiceInstance)
             except Exception as e:
-                raise Exception("vmware supplicant", e.args)
+                raise e
+                #raise Exception("vmware supplicant", e.args)
 
         return self.vmwareServiceInstance
 
