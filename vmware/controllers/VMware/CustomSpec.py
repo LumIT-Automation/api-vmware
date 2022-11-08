@@ -151,9 +151,7 @@ class VMwareCustomSpecController(CustomController):
 
     @staticmethod
     def post(request: Request, assetId: int, specName: str) -> Response:
-        response = {
-            "data": dict()
-        }
+        response = dict()
         user = CustomController.loggedUser(request)
 
         try:
@@ -166,7 +164,11 @@ class VMwareCustomSpecController(CustomController):
                     lock = Lock("custom_spec", locals(), specName)
                     if lock.isUnlocked():
                         lock.lock()
-                        response["data"]["newSpecName"] = CustomSpec(assetId, specName).cloneAndModify(serializer.validated_data)
+                        response = {
+                            "data": {
+                                "newSpecName": CustomSpec(assetId, specName).cloneAndModify(serializer.validated_data)
+                            }
+                        }
 
                         httpStatus = status.HTTP_201_CREATED
                         lock.release()
@@ -181,6 +183,7 @@ class VMwareCustomSpecController(CustomController):
                     }
                     Log.actionLog("User data incorrect:"+str(response), user)
             else:
+                response = None
                 httpStatus = status.HTTP_403_FORBIDDEN
 
         except Exception as e:
