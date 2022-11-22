@@ -24,7 +24,7 @@ function containerSetup()
     podman run --name api-vmware -v api-vmware:/var/www/api/api -v api-vmware-db:/var/lib/mysql -v api-vmware-cacerts:/usr/local/share/ca-certificates -dt localhost/api-vmware /lib/systemd/systemd
 
     podman exec api-vmware chown -R www-data:www-data /var/www/api/api # within container.
-    podman exec api-vmware chown -R mysql:mysql /var/lib/mysql # within container.
+    podman exec api-vmware chown -R mysql:mysql /var/lib/mysql
     podman exec api-vmware systemctl restart mysql
 
     printf "$wallBanner Starting Container Service on HOST..." | wall -n
