@@ -88,7 +88,8 @@ INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VAL
 (59, 'target_get', 'global', NULL),
 (60, 'target_delete', 'global', NULL),
 (61, 'target_patch', 'global', NULL),
-(62, 'target_post', 'global', NULL);
+(62, 'target_post', 'global', NULL),
+(63, 'full_visibility', 'global', NULL);
 
 
 --
@@ -166,6 +167,7 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (1, 60),
 (1, 61),
 (1, 62),
+(1, 63),
 (2, 3),
 (2, 12),
 (2, 13),
