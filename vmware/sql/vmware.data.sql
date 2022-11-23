@@ -98,7 +98,8 @@ INSERT INTO `privilege` (`id`, `privilege`, `privilege_type`, `description`) VAL
 INSERT INTO `role` (`id`, `role`, `description`) VALUES
 (1, 'admin', 'admin'),
 (2, 'staff', 'read / write, excluding assets'),
-(3, 'readonly', 'readonly');
+(3, 'readonly', 'readonly'),
+(4, 'workflow', 'workflow system user');
 
 
 --
@@ -205,7 +206,14 @@ INSERT INTO `role_privilege` (`id_role`, `id_privilege`) VALUES
 (3, 52),
 (3, 54),
 (3, 58),
-(3, 59);
+(3, 59),
+(4, 3);
+
+-- Dump dei dati per la tabella `identity_group`
+-- (Workflow system group)
+
+INSERT INTO `identity_group` (`id`, `name`, `identity_group_identifier`) VALUES
+(1, 'workflow.local', 'workflow.local');
 
 
 COMMIT;
