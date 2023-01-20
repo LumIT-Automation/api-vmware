@@ -63,7 +63,7 @@ class TargetCommandExecution:
         keys = keys[:-1]+")"
 
         try:
-            c.execute("INSERT INTO target_command_exec "+keys+" VALUES ("+s[:-1]+")",
+            c.execute("INSERT INTO target_command_exec "+keys+" VALUES ("+s[:-1]+")", # no user data.
                 values
             )
 

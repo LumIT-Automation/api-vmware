@@ -87,7 +87,7 @@ class TargetCommand:
         keys = keys[:-1]+")"
 
         try:
-            c.execute("INSERT INTO target_command "+keys+" VALUES ("+s[:-1]+")",
+            c.execute("INSERT INTO target_command "+keys+" VALUES ("+s[:-1]+")", # user data are filtered by the serializer.
                 values
             )
 

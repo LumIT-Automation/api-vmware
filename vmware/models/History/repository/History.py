@@ -68,7 +68,7 @@ class History:
         keys = keys[:-1]+")"
 
         try:
-            c.execute("INSERT INTO log "+keys+" VALUES ("+s[:-1]+")",
+            c.execute("INSERT INTO log "+keys+" VALUES ("+s[:-1]+")", # no user data.
                 values
             )
         except Exception as e:

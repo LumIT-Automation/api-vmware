@@ -57,7 +57,7 @@ class FinalPubKey:
                     values.append(strip_tags(v)) # no HTML allowed.
 
             try:
-                c.execute("UPDATE final_pubkey SET "+sql[:-1]+" WHERE id = "+str(int(keyId)),
+                c.execute("UPDATE final_pubkey SET "+sql[:-1]+" WHERE id = "+str(int(keyId)), # user data are filtered by the serializer.
                     values
                 )
 
@@ -120,7 +120,7 @@ class FinalPubKey:
 
         try:
             with transaction.atomic():
-                c.execute("INSERT INTO final_pubkey "+keys+" VALUES ("+s[:-1]+")",
+                c.execute("INSERT INTO final_pubkey "+keys+" VALUES ("+s[:-1]+")", # user data are filtered by the serializer.
                     values
                 )
                 return c.lastrowid

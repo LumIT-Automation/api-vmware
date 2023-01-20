@@ -63,7 +63,7 @@ class BootstrapKey:
                         values.append(strip_tags(v)) # no HTML allowed.
 
                 logging.disable(logging.WARNING) # do not ever log private key.
-                c.execute("UPDATE bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(int(keyId)),
+                c.execute("UPDATE bootstrap_key SET "+sql[:-1]+" WHERE id = "+str(int(keyId)), # user data are filtered by the serializer.
                     values
                 )
             except Exception as e:
@@ -129,7 +129,7 @@ class BootstrapKey:
 
             logging.disable(logging.WARNING) # do not ever log private key.
             with transaction.atomic():
-                c.execute("INSERT INTO bootstrap_key "+keys+" VALUES ("+s[:-1]+")",
+                c.execute("INSERT INTO bootstrap_key "+keys+" VALUES ("+s[:-1]+")", # user data are filtered by the serializer.
                     values
                 )
                 return c.lastrowid

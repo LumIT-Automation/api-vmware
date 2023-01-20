@@ -68,7 +68,7 @@ class Command:
         values.append(uid)
 
         try:
-            c.execute("UPDATE `command` SET "+sql[:-1]+" WHERE uid = %s",
+            c.execute("UPDATE `command` SET "+sql[:-1]+" WHERE uid = %s", # user data are filtered by the serializer.
                 values
             )
         except Exception as e:
@@ -137,7 +137,7 @@ class Command:
         keys = keys[:-1]+")"
 
         try:
-            c.execute("INSERT INTO command "+keys+" VALUES ("+s[:-1]+")",
+            c.execute("INSERT INTO command "+keys+" VALUES ("+s[:-1]+")", # user data are filtered by the serializer.
                 values
             )
         except Exception as e:

@@ -86,6 +86,7 @@ class Target:
 
     @staticmethod
     def modify(targetId: int, data: dict) -> None:
+        targetId = int(targetId)
         sql = ""
         values = []
         c = connections[Target.db].cursor()
@@ -107,7 +108,7 @@ class Target:
 
             try:
                 c.execute(
-                    "UPDATE target SET "+sql[:-1]+" WHERE id = "+str(targetId),
+                    "UPDATE target SET "+sql[:-1]+" WHERE id = "+str(targetId), # user data are filtered by the serializer.
                     values
                 )
             except Exception as e:
@@ -198,7 +199,7 @@ class Target:
         keys = keys[:-1]+")"
 
         try:
-            c.execute("INSERT INTO target "+keys+" VALUES ("+s[:-1]+")",
+            c.execute("INSERT INTO target "+keys+" VALUES ("+s[:-1]+")", # user data are filtered by the serializer.
                 values
             )
             targetId = c.lastrowid
