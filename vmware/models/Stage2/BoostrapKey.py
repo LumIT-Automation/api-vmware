@@ -1,5 +1,4 @@
 from typing import List
-import os
 
 from vmware.models.Stage2.repository.BoostrapKey import BootstrapKey as Repository
 
@@ -46,16 +45,8 @@ class BootstrapKey:
         pub_key = ""
 
         try:
-            # Use shell command to get the public key from the private one.
-            # Using paramiko instead works only if all the keys are of the same type,
-            # because paramiko.from_private_key is a class method, which hardly works well in a for loop.
-
-            subEnv = os.environ.copy()
-            subEnv["PRIV_KEY"] = self.priv_key
-            command = 'ssh-keygen -yf /dev/stdin <<< $(echo -n "$PRIV_KEY")'
-
             try:
-                out = Process.execCommandString(invocation=command, procEnv=subEnv)
+                out = Process.execSSHKeygen(privateKey=self.priv_key)
                 if out["success"]:
                     pub_key = out["stdout"].decode('utf-8').replace('\n', '')
             except ValueError:
