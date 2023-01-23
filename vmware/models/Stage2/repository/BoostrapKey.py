@@ -2,13 +2,15 @@ import base64
 import logging
 from typing import List
 
+from sshkey_tools.keys import PrivateKey
+
 from django.utils.html import strip_tags
 from django.db import connections
 from django.db import transaction
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
-from vmware.helpers.Log import Log
+
 
 
 class BootstrapKey:
@@ -36,6 +38,26 @@ class BootstrapKey:
                     ])
 
             return DBHelper.asDict(c)[0]
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
+
+
+
+    def getPublic(keyId: int) -> str:
+        c = connections[BootstrapKey.db].cursor()
+
+        try:
+            c.execute("SELECT * FROM bootstrap_key "
+                      "WHERE id = %s ", [
+                        keyId
+                    ])
+            privKeyString = DBHelper.asDict(c)[0]["priv_key"]
+            pubKey =  PrivateKey.from_string(privKeyString).public_key
+            pubKey.comment = "" # to_string() breaks without this one.
+
+            return pubKey.to_string()
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:

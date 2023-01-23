@@ -2,7 +2,6 @@ from typing import List
 
 from vmware.models.Stage2.repository.BoostrapKey import BootstrapKey as Repository
 
-from vmware.helpers.Process import Process
 
 
 class BootstrapKey:
@@ -42,17 +41,8 @@ class BootstrapKey:
 
 
     def getPublic(self) -> str:
-        pub_key = ""
-
         try:
-            try:
-                out = Process.execSSHKeygen(privateKey=self.priv_key)
-                if out["success"]:
-                    pub_key = out["stdout"].decode('utf-8').replace('\n', '')
-            except ValueError:
-                pub_key = "<error>"
-
-            return pub_key
+            return Repository.getPublic(self.id)
         except Exception as e:
             raise e
 
