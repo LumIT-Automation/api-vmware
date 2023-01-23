@@ -2,6 +2,9 @@ import base64
 import logging
 from typing import List
 
+# Use sshkey_tools instead of paramiko because with the second one there is a problem when retrieving some public keys from their private keys.
+# With two keys of different kind (e.g.: RSA and ECDSA), the classmethod PKey.from_private_key() in the parent class creates always an object of the first child type.
+# So at the second key our getPublic() method breaks because PKey.from_private_key try to create an RSA object using an ECDSA key string.
 from sshkey_tools.keys import PrivateKey
 
 from django.utils.html import strip_tags
