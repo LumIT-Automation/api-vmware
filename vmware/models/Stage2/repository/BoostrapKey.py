@@ -35,10 +35,9 @@ class BootstrapKey:
         c = connections[BootstrapKey.db].cursor()
 
         try:
-            c.execute("SELECT * FROM bootstrap_key "
-                      "WHERE id = %s ", [
-                        keyId
-                    ])
+            c.execute("SELECT * FROM bootstrap_key WHERE id = %s ", [
+                keyId
+            ])
 
             return DBHelper.asDict(c)[0]
         except Exception as e:
@@ -48,16 +47,17 @@ class BootstrapKey:
 
 
 
+    @staticmethod
     def getPublic(keyId: int) -> str:
         c = connections[BootstrapKey.db].cursor()
 
         try:
-            c.execute("SELECT * FROM bootstrap_key "
-                      "WHERE id = %s ", [
-                        keyId
-                    ])
+            c.execute("SELECT * FROM bootstrap_key WHERE id = %s ", [
+                keyId
+            ])
+
             privKeyString = DBHelper.asDict(c)[0]["priv_key"]
-            pubKey =  PrivateKey.from_string(privKeyString).public_key
+            pubKey = PrivateKey.from_string(privKeyString).public_key
             pubKey.comment = "" # to_string() breaks without this one.
 
             return pubKey.to_string()
