@@ -61,7 +61,7 @@ class SSHSupplicant:
             else:
                 raise CustomException(status=503, payload={"SSH": "failed to execute the SSH command."})
 
-            stdIn, stdOut, stdErr = ssh.exec_command(cmd)
+            stdIn, stdOut, stdErr = ssh.exec_command(cmd) # pre-cleaned command.
 
             # Exit status.
             exitStatus = stdOut.channel.recv_exit_status()
