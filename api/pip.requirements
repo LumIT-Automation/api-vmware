@@ -15,4 +15,5 @@ importlib-metadata==5.*
 djangorestframework-recursive~=0.1.2
 paramiko~=2.12.0
 sshkey-tools~=0.9.0
-git+https://github.com/vmware/vsphere-automation-sdk-python.git@a5ef74d9d91d0bc292a07ae1bb8460361b2d67e0
+#git+https://github.com/vmware/vsphere-automation-sdk-python.git@a5ef74d9d91d0bc292a07ae1bb8460361b2d67e0
+pyvmomi~=8.0
