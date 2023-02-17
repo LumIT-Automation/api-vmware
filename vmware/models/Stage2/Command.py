@@ -2,6 +2,7 @@ from typing import List
 
 from vmware.models.Stage2.repository.Command import Command as Repository
 
+from vmware.helpers.Misc import Misc
 from vmware.helpers.Exception import CustomException
 
 
@@ -34,6 +35,9 @@ class Command:
         try:
             if not self.reserved:
                 Repository.modify(self.uid, data)
+
+                for k, v in Misc.toDict(data).items():
+                    setattr(self, k, v)
             else:
                 raise CustomException(status=400, payload={"database": "reserved command not modifiable."})
         except Exception as e:
@@ -45,6 +49,7 @@ class Command:
         try:
             if not self.reserved:
                 Repository.delete(self.uid)
+                del self
             else:
                 raise CustomException(status=400, payload={"database": "reserved command not modifiable."})
         except Exception as e:

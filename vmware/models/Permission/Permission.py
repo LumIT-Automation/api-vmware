@@ -36,6 +36,7 @@ class Permission:
     def delete(self) -> None:
         try:
             Repository.delete(self.id)
+            del self
         except Exception as e:
             raise e
 
@@ -208,6 +209,8 @@ class Permission:
     def __modify(self, identityGroup: IdentityGroup, role: Role, vmwareObject: VObject) -> None:
         try:
             Repository.modify(self.id, identityGroup.id, role.id, vmwareObject.id)
+
+            self.__load()
         except Exception as e:
             raise e
 

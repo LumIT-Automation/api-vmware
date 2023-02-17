@@ -1,3 +1,5 @@
+from typing import Union
+
 import hashlib
 import json
 
@@ -14,7 +16,7 @@ class Conditional:
     # Public methods
     ####################################################################################################################
 
-    def responseEtagFreshnessAgainstRequest(self, result: dict) -> dict:
+    def responseEtagFreshnessAgainstRequest(self, result: Union[dict, str]) -> dict:
         # Compares the resource's hash against the passed If-None-Match HTTP header
         # in order to state if the resource corresponding to the header is fresh or not.
         ifNoneMatchRequest = ""

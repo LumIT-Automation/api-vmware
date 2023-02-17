@@ -2,6 +2,7 @@ from typing import List
 
 from vmware.models.Stage2.repository.BoostrapKey import BootstrapKey as Repository
 
+from vmware.helpers.Misc import Misc
 
 
 class BootstrapKey:
@@ -27,6 +28,9 @@ class BootstrapKey:
     def modify(self, data: dict) -> None:
         try:
             Repository.modify(self.id, data)
+
+            for k, v in Misc.toDict(data).items():
+                setattr(self, k, v)
         except Exception as e:
             raise e
 
@@ -35,6 +39,7 @@ class BootstrapKey:
     def delete(self) -> None:
         try:
             Repository.delete(self.id)
+            del self
         except Exception as e:
             raise e
 

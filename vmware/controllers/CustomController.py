@@ -52,7 +52,7 @@ class CustomController(APIView):
             data["error"] = {
                 "network error": "No route to the vCenter server. "+e.__str__()
             }
-        elif e.__class__.__name__ in ("ConnectionResetError", "ConnectionError", "Timeout", "TooManyRedirects", "SSLError", "HTTPError", "vim.fault.InvalidLogin") or (e.__class__.__name__ == "OSError" and e.errno == 0):
+        elif e.__class__.__name__ in ("ConnectionResetError", "ConnectionError", "ConnectTimeout", "Timeout", "TooManyRedirects", "SSLError", "HTTPError", "vim.fault.InvalidLogin") or (e.__class__.__name__ == "OSError" and e.errno == 0):
             httpStatus = status.HTTP_503_SERVICE_UNAVAILABLE
             data["error"] = {
                 "network error": e.__str__()

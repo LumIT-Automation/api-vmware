@@ -4,8 +4,10 @@ from vmware.models.Stage2.BoostrapKey import BootstrapKey
 from vmware.models.Stage2.Command import Command
 from vmware.models.Stage2.TargetCommand import TargetCommand
 from vmware.models.Stage2.TargetCommandExecution import TargetCommandExecution
-
 from vmware.models.Stage2.repository.Target import Target as Repository
+
+from vmware.helpers.Misc import Misc
+
 
 DataConnection: Dict[str, Union[str, int]] = {
     "ip":  "",
@@ -54,6 +56,9 @@ class Target:
     def modify(self, data: dict) -> None:
         try:
             Repository.modify(self.id, data)
+
+            for k, v in Misc.toDict(data).items():
+                setattr(self, k, v)
         except Exception as e:
             raise e
 
@@ -62,6 +67,7 @@ class Target:
     def delete(self) -> None:
         try:
             Repository.delete(self.id)
+            del self
         except Exception as e:
             raise e
 
