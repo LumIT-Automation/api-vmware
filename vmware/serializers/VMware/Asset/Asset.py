@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 class VMwareAssetSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False)
-    address = serializers.IPAddressField(max_length=64, required=True)
+    address = serializers.CharField(max_length=64, required=True, allow_blank=True)
     fqdn = serializers.CharField(max_length=255, required=True, allow_blank=True)
     baseurl = serializers.CharField(max_length=255, required=True)
     tlsverify = serializers.IntegerField(required=True)
