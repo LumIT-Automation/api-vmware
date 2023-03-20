@@ -1356,6 +1356,45 @@
 					"response": []
 				},
 				{
+					"name": "permissionHasUser",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{jwttoken}}"
+							}
+						],
+						"url": {
+							"raw": "http://10.0.111.25/api/v1/vmware/permissions/permissionHasUser/cn=groupstaff,cn=users,dc=lab,dc=local/folder_get/1/group-v2477/",
+							"protocol": "http",
+							"host": [
+								"10",
+								"0",
+								"111",
+								"25"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vmware",
+								"permissions",
+								"permissionHasUser",
+								"cn=groupstaff,cn=users,dc=lab,dc=local",
+								"folder_get",
+								"1",
+								"group-v2477",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "permissions",
 					"request": {
 						"auth": {
@@ -4985,7 +5024,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"destination\": \"centos-test\"\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"destination\": \"centos-test-18\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -4993,7 +5032,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/try/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test-18.ok/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -5007,7 +5046,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"try",
+						"centos-test-18.ok",
 						""
 					]
 				}
