@@ -1,0 +1,51 @@
+{
+  "name": "Testone",
+  "notes": "Eccomi qua",
+  "datacenterName": "Datacenter",
+  "clusterName": "LumIT_LAB",
+  "hostName": "",
+  "main_datastoreName": "NFS_Datastore",
+  "folderName": "Varie",
+  "templateName": "centos-test",
+  "network_devices": [
+    {
+      "portgroupName": "LumitLab_18",
+      "device_type": "vmxnet3"
+    },
+    {
+      "portgroupName": "LumitLab_18",
+      "device_type": "vmxnet3"
+    }
+  ],
+  "disk_devices": [
+    {
+      "datastoreName": "MainDatastore",
+      "device_type": "thin",
+      "size_gib": "22"
+    }
+  ],
+  "ram_mb": "2048",
+  "cpu": "2",
+  "sockets": "1",
+  "guestspec": "centos-test-18",
+  "hostname": "testone",
+  "domainName": "lab18.local",
+  "network": [
+    {
+      "dhcp": false,
+      "ip": "192.168.18.206",
+      "netMask": "255.255.255.0",
+      "gw": "192.168.18.1"
+    },
+    {
+      "dhcp": true,
+      "ip": "",
+      "netMask": "",
+      "gw": ""
+    }
+  ],
+  "dns1": "192.168.18.20",
+  "dns2": "",
+  "bootstrapkeyId": "1",
+  "finalpubkeyId": "1"
+}
