@@ -5,7 +5,7 @@ from rest_framework import status
 from vmware.models.Permission.Role import Role
 from vmware.models.Permission.Permission import Permission
 
-from vmware.serializers.Permission.Roles import IdentityRolesSerializer as Serializer
+from vmware.serializers.Permission.Roles import RolesSerializer as Serializer
 
 from vmware.controllers.CustomController import CustomController
 from vmware.helpers.Conditional import Conditional
@@ -32,7 +32,7 @@ class PermissionRolesController(CustomController):
                     if "privileges" in rList:
                         loadPrivilege = True
 
-                itemData["data"]["items"] = Role.dataList(loadPrivilege=loadPrivilege)
+                itemData["data"]["items"] = [r.repr() for r in Role.list(loadPrivilege=loadPrivilege)]
                 serializer = Serializer(data=itemData["data"])
                 if serializer.is_valid():
                     data["data"] = serializer.validated_data

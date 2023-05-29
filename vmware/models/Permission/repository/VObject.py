@@ -1,6 +1,5 @@
 from django.db import connection
 from typing import List
-from django.utils.html import strip_tags
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
@@ -10,12 +9,6 @@ from vmware.helpers.VMware.VmwareHelper import VmwareHelper
 class VObject:
 
     # Table: vmware_object`
-
-    #   `id` int(11) NOT NULL,
-    #   `id_asset` int(11) NOT NULL,
-    #   `moId` varchar(64) NOT NULL,
-    #   `name` varchar(255) NOT NULL,
-    #   `description` varchar(255) DEFAULT NULL
 
 
 
@@ -29,9 +22,9 @@ class VObject:
 
         try:
             if id:
-                c.execute("SELECT * FROM `vmware_object` WHERE `id` = %s", [id])
+                c.execute("SELECT id, id_asset, moId, name, IFNULL (description, '') AS description FROM `vmware_object` WHERE `id` = %s", [id])
             if assetId and moId:
-                c.execute("SELECT * FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [moId, assetId])
+                c.execute("SELECT id, id_asset, moId, name, IFNULL (description, '') AS description FROM `vmware_object` WHERE `moId` = %s AND id_asset = %s", [moId, assetId])
 
             info = DBHelper.asDict(c)[0]
             info["object_type"] = VmwareHelper.getType(moId)
@@ -52,13 +45,13 @@ class VObject:
 
         try:
             c.execute(
-                "SELECT *, "
-                "(CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
+                "SELECT id, id_asset, moId, name, IFNULL (description, '') AS description, "
+                "IFNULL ((CASE SUBSTRING_INDEX(vmware_object.moId, '-', 1) "
                     "WHEN 'group' THEN 'folder' "
                     "WHEN 'datastore' THEN 'datastore' "
                     "WHEN 'network' THEN 'network' "
                     "WHEN 'dvportgroup' THEN 'network' "
-                "END) AS object_type "
+                "END), '') AS object_type "
                 "FROM vmware_object")
 
             return DBHelper.asDict(c)

@@ -12,10 +12,6 @@ class IdentityGroup:
 
     # Table: identity_group`
 
-    #   `id` int(11) NOT NULL,
-    #   `name` varchar(64) NOT NULL,
-    #   `identity_group_identifier` varchar(255) DEFAULT NULL
-
 
 
     ####################################################################################################################

@@ -9,10 +9,6 @@ class Role:
 
     # Table: role
 
-    #   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    #   `role` varchar(64) NOT NULL UNIQUE KEY,
-    #   `description` varchar(255) DEFAULT NULL
-
 
 
     ####################################################################################################################
@@ -25,9 +21,9 @@ class Role:
 
         try:
             if id:
-                c.execute("SELECT * FROM role WHERE id = %s", [id])
+                c.execute("SELECT id, role, IFNULL(description, '') AS description FROM role WHERE id = %s", [id])
             if role:
-                c.execute("SELECT * FROM role WHERE role = %s", [role])
+                c.execute("SELECT id, role, IFNULL(description, '') AS description FROM role WHERE role = %s", [role])
 
             return DBHelper.asDict(c)[0]
         except IndexError:
@@ -44,7 +40,7 @@ class Role:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT * FROM role")
+            c.execute("SELECT id, role, IFNULL(description, '') AS description FROM role")
 
             return DBHelper.asDict(c)
         except Exception as e:

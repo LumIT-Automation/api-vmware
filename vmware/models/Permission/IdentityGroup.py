@@ -1,7 +1,7 @@
+from __future__ import annotations
 from typing import List
 
 from vmware.models.Permission.repository.IdentityGroup import IdentityGroup as Repository
-from vmware.models.Permission.repository.PermissionPrivilege import PermissionPrivilege as PermissionPrivilegeRepository
 
 from vmware.helpers.Misc import Misc
 
@@ -21,6 +21,11 @@ class IdentityGroup:
     ####################################################################################################################
     # Public methods
     ####################################################################################################################
+
+    def repr(self):
+        return vars(self)
+
+
 
     def modify(self, data: dict) -> None:
         try:
@@ -47,20 +52,16 @@ class IdentityGroup:
     ####################################################################################################################
 
     @staticmethod
-    def dataList() -> List[dict]:
+    def list() -> List[IdentityGroup]:
+        identityGroups = []
+
         try:
-            return Repository.list()
-        except Exception as e:
-            raise e
+            for ig in Repository.list():
+                identityGroups.append(
+                    IdentityGroup(id=ig["id"])
+                )
 
-
-
-    @staticmethod
-    def listWithPermissionsPrivileges(showPrivileges: bool = False) -> list:
-        # List identity groups with related information regarding the associated roles on objects,
-        # and optionally detailed privileges' descriptions.
-        try:
-            return PermissionPrivilegeRepository.list(showPrivileges=showPrivileges)
+            return identityGroups
         except Exception as e:
             raise e
 

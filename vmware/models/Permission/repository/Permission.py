@@ -9,12 +9,7 @@ class Permission:
 
     # IdentityGroupRoleObject
 
-    # Table: group_role_object
-
-    #   `id` int(255) NOT NULL,
-    #   `id_group` int(11) NOT NULL,
-    #   `id_role` int(11) NOT NULL,
-    #   `id_object` int(11) NOT NULL
+    # Tables: group_role_object, identity_group, role, vmware_object
 
 
 

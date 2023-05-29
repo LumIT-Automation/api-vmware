@@ -9,11 +9,6 @@ class Privilege:
 
     # Table: privilege
 
-    #   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    #   `privilege` varchar(64) NOT NULL UNIQUE KEY,
-    #   `privilege_type` enum('object-folder','object-network','object-datastore','asset','global') NOT NULL DEFAULT 'asset',
-    #   `description` varchar(255) DEFAULT NULL
-
 
 
     ####################################################################################################################
@@ -25,7 +20,7 @@ class Privilege:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT * FROM privilege WHERE id = %s", [id])
+            c.execute("SELECT id, privilege, privilege_type, IFNULL(description, '') AS description FROM privilege WHERE id = %s", [id])
 
             return DBHelper.asDict(c)[0]
         except IndexError:
@@ -42,7 +37,7 @@ class Privilege:
         c = connection.cursor()
 
         try:
-            c.execute("SELECT * FROM privilege")
+            c.execute("SELECT id, privilege, privilege_type, IFNULL(description, '') AS description FROM privilege")
             return DBHelper.asDict(c)
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})

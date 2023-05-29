@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "70099086-d44e-44df-839d-348cf7abb4c9",
+		"_postman_id": "13942ce6-6108-4476-9f60-395847f289ec",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1585,46 +1585,6 @@
 					"response": []
 				},
 				{
-					"name": "identity-groups (privileges)",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{jwttoken}}"
-							}
-						],
-						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/identity-groups/?related=privileges",
-							"protocol": "http",
-							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
-							],
-							"path": [
-								"api",
-								"v1",
-								"vmware",
-								"identity-groups",
-								""
-							],
-							"query": [
-								{
-									"key": "related",
-									"value": "privileges"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "identity-groups",
 					"request": {
 						"auth": {
@@ -1683,7 +1643,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"data\": {\n        \"name\": \"groupStaff\",\n        \"identity_group_identifier\": \"cn=groupStaff,cn=users,dc=lab,dc=localNew\"\n    }\n}",
+							"raw": "{\n    \"data\": {\n        \"name\": \"groupStaff\",\n        \"identity_group_identifier\": \"cn=groupStaff,cn=users,dc=lab,dc=localNewModified\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1726,7 +1686,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/identity-group/cn=groupStaff2,cn=users,dc=lab,dc=local/",
+							"raw": "http://10.0.111.25/api/v1/vmware/identity-group/cn=groupStaff,cn=users,dc=lab,dc=localNewModified/",
 							"protocol": "http",
 							"host": [
 								"10",
@@ -1739,7 +1699,7 @@
 								"v1",
 								"vmware",
 								"identity-group",
-								"cn=groupStaff2,cn=users,dc=lab,dc=local",
+								"cn=groupStaff,cn=users,dc=lab,dc=localNewModified",
 								""
 							]
 						}

@@ -1,12 +1,7 @@
 from rest_framework import serializers
 
+from vmware.serializers.Permission.Role import RoleSerializer
 
-class IdentityRolesSerializer(serializers.Serializer):
-    class IdentityRolesItemsSerializer(serializers.Serializer):
-        role = serializers.CharField(max_length=63, required=True)
-        description = serializers.CharField(max_length=255, required=True)
-        privileges = serializers.ListField(
-            child=serializers.CharField(max_length=63), required=False
-        )
 
-    items = IdentityRolesItemsSerializer(many=True)
+class RolesSerializer(serializers.Serializer):
+    items = RoleSerializer(many=True)

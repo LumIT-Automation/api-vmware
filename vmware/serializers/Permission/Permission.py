@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 
 class PermissionSerializer(serializers.Serializer):
+    # Not using composition here, for simpler data structure exposed to consumer.
+
     class PermissionObjectSerializer(serializers.Serializer):
         id_asset = serializers.IntegerField(required=True)
         moId = serializers.CharField(required=True, max_length=63)

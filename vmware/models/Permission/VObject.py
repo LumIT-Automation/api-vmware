@@ -1,13 +1,15 @@
+from __future__ import annotations
 from typing import List
 
 from vmware.models.VMware.FolderVM import FolderVM as vCenterVMFolder
 from vmware.models.VMware.Network import Network as vCenterNetwork
 from vmware.models.VMware.Datastore import Datastore as vCenterDatastore
 
+from vmware.models.Permission.repository.VObject import VObject as Repository
+
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.VMware.VmwareHelper import VmwareHelper
-
-from vmware.models.Permission.repository.VObject import VObject as Repository
+from vmware.helpers.Misc import Misc
 
 
 class VObject:
@@ -19,7 +21,7 @@ class VObject:
         self.moId: str = moId
         self.name: str = name
         self.object_type: str = ""
-        self.description: str
+        self.description: str = ""
 
         self.__load()
 
@@ -28,6 +30,11 @@ class VObject:
     ####################################################################################################################
     # Public static methods
     ####################################################################################################################
+
+    def repr(self):
+        return Misc.deepRepr(self)
+
+
 
     def delete(self) -> None:
         try:
@@ -43,9 +50,16 @@ class VObject:
     ####################################################################################################################
 
     @staticmethod
-    def dataList() -> List[dict]:
+    def list() -> List[VObject]:
+        vObjects = []
+
         try:
-            return Repository.list()
+            for vo in Repository.list():
+                vObjects.append(
+                    VObject(vo["id"])
+                )
+
+            return vObjects
         except Exception as e:
             raise e
 

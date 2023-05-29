@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List
 
 from vmware.models.Permission.repository.Privilege import Privilege as Repository
@@ -17,6 +18,15 @@ class Privilege:
 
 
     ####################################################################################################################
+    # Public methods
+    ####################################################################################################################
+
+    def repr(self):
+        return repr(self)
+
+
+
+    ####################################################################################################################
     # Public static methods
     ####################################################################################################################
 
@@ -30,7 +40,7 @@ class Privilege:
 
 
     @staticmethod
-    def list() -> list:
+    def list() -> List[Privilege]:
         privileges = []
 
         try:
@@ -40,15 +50,6 @@ class Privilege:
                 )
 
             return privileges
-        except Exception as e:
-            raise e
-
-
-
-    @staticmethod
-    def dataList() -> List[dict]:
-        try:
-            return Repository.list()
         except Exception as e:
             raise e
 
