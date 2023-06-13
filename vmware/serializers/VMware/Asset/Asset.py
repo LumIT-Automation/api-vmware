@@ -2,7 +2,11 @@ from rest_framework import serializers
 
 
 class VMwareAssetSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=False)
+    def __init__(self, idField: bool = False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if idField:
+            self.fields["id"] = serializers.IntegerField(required=False)
     address = serializers.CharField(max_length=64, required=False, allow_blank=True)
     fqdn = serializers.CharField(max_length=255, required=True, allow_blank=True)
     baseurl = serializers.CharField(max_length=255, required=True)
