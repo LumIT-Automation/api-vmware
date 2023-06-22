@@ -20,9 +20,6 @@ class BootstrapKey:
     db = 'stage2'
 
     # Table: stage2_target
-    #   `id` int(11) NOT NULL,
-    #   `priv_key` varchar(8192) NOT NULL DEFAULT '',
-    #   `comment` varchar(1024) NOT NULL DEFAULT ''
 
 
 

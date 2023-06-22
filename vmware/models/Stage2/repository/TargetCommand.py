@@ -13,10 +13,6 @@ class TargetCommand:
     db = 'stage2'
 
     # Table: target_command
-    #   `id` int(11) NOT NULL AUTO_INCREMENT,
-    #   `id_target` int(11) NOT NULL,
-    #   `command` varchar(64) NOT NULL DEFAULT '',
-    #   `user_args` varchar(8192) NOT NULL DEFAULT '{}'
 
 
 

@@ -13,21 +13,6 @@ class Target:
     db = 'stage2'
 
     # Table: stage2_target
-    #   `id` int(11) NOT NULL,
-    #   `ip` varchar(64) DEFAULT NULL,
-    #   `port` int(11) DEFAULT NULL,
-    #   `api_type` varchar(64) NOT NULL DEFAULT '',
-    #   `id_bootstrap_key` int(11) DEFAULT NULL,
-    #   `username` varchar(64) NOT NULL DEFAULT '',
-    #   `password` varchar(64) NOT NULL DEFAULT '',
-    #   `id_asset` int(11) DEFAULT NULL,
-    #   `task_moid` varchar(64) DEFAULT NULL,
-    #   `task_state` varchar(64) NOT NULL DEFAULT 'undefined',
-    #   `task_progress` int(11) DEFAULT NULL,
-    #   `task_startTime` varchar(64) NOT NULL DEFAULT '',
-    #   `task_queueTime` varchar(64) NOT NULL DEFAULT '',
-    #   `task_message` varchar(512) NOT NULL DEFAULT '',
-    #   `vm_name` varchar(128) NOT NULL DEFAULT ''
 
 
 

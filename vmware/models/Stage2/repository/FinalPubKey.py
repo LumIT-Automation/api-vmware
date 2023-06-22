@@ -13,9 +13,6 @@ class FinalPubKey:
     db = 'stage2'
 
     # Table: final_pubkey
-    #   `id` int(11) NOT NULL,
-    #   `comment` varchar(1024) NOT NULL DEFAULT '',
-    #   `pub_key` varchar(2048) NOT NULL DEFAULT '';
 
 
 

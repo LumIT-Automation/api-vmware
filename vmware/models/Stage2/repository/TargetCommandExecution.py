@@ -13,12 +13,6 @@ class TargetCommandExecution:
     db = 'stage2'
 
     # Table: target_command_exec
-    #   `id` int(11) NOT NULL,
-    #   `id_target_command` int(11) NOT NULL,
-    #   `timestamp` datetime(4) NOT NULL DEFAULT current_timestamp(4),
-    #   `exit_status` int(11) NOT NULL,
-    #   `stdout` mediumtext NOT NULL DEFAULT '',
-    #   `stderr` mediumtext NOT NULL DEFAULT ''
 
 
 

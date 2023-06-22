@@ -14,9 +14,6 @@ class Command:
     db = 'stage2'
 
     # Table: command
-    #   `uid` varchar(64) NOT NULL,
-    #   `command` text NOT NULL,
-    #   `template_args` varchar(8192) NOT NULL DEFAULT '{}'
 
 
 

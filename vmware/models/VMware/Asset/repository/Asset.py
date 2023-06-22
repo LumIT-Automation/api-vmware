@@ -13,20 +13,6 @@ class Asset:
 
     # Table: asset
 
-    #   `id` int(11) NOT NULL,
-    #   `address` varchar(64) NOT NULL,
-    #   `port` int(11) DEFAULT NULL,
-    #   `fqdn` varchar(255) DEFAULT NULL,
-    #   `baseurl` varchar(255) NOT NULL,
-    #   `tlsverify` tinyint(4) NOT NULL DEFAULT 1,
-    #   `datacenter` varchar(255) DEFAULT NULL,
-    #   `environment` varchar(255) NOT NULL,
-    #   `position` varchar(255) DEFAULT NULL,
-    #   `api_type` varchar(64) NOT NULL DEFAULT '',
-    #   `api_additional_data` varchar(255) NOT NULL DEFAULT '',
-    #   `username` varchar(64) NOT NULL DEFAULT '',
-    #   `password` varchar(64) NOT NULL DEFAULT ''
-
 
 
     ####################################################################################################################
