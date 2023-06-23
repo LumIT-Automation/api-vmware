@@ -4987,7 +4987,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test2/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test18/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -5001,7 +5001,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"centos-test2",
+						"centos-test18",
 						""
 					]
 				}
