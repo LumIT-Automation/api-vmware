@@ -10,18 +10,17 @@ class Asset:
         super().__init__(*args, **kwargs)
 
         self.id = int(assetId)
-        self.address: str = ""
-        self.port: int = 443
         self.fqdn: str = ""
+        self.protocol: str = "https"
+        self.port: int = 443
+        self.path: str = "/"
+        self.tlsverify: bool = True
         self.baseurl: str = ""
-        self.tlsverify: int = 1
-        self.api_type: str = ""
-        self.api_additional_data: int = 1
+        self.datacenter: str = ""
+        self.environment: str = ""
+        self.position: str = ""
         self.username: str = ""
         self.password: str = ""
-        self.datacenter: str
-        self.environment: str
-        self.position: str
 
         self.__load()
 
@@ -83,7 +82,7 @@ class Asset:
 
     def __load(self) -> None:
         try:
-            info = Repository.get(self.id)
+            info = Repository.get(self.id, showPassword=True)
 
             # Set attributes.
             for k, v in info.items():

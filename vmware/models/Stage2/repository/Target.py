@@ -1,4 +1,3 @@
-import json
 from typing import List
 
 from django.utils.html import strip_tags
@@ -6,7 +5,6 @@ from django.db import connections
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
-from vmware.helpers.Log import Log
 
 
 class Target:

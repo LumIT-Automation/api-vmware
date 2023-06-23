@@ -5,7 +5,6 @@ import random
 from pyVim.connect import SmartConnect, Disconnect
 
 from vmware.models.VMware.Asset import Asset
-from vmware.helpers.Exception import CustomException
 from vmware.helpers.Log import Log
 
 
@@ -14,7 +13,7 @@ class VmwareSupplicant:
         super().__init__(*args, **kwargs)
 
         try:
-            self.ipAddr = asset.address
+            self.fqdn = asset.fqdn
             self.port = asset.port if asset.port else 443
             self.username = asset.username
             self.password = asset.password
@@ -36,10 +35,10 @@ class VmwareSupplicant:
             context.verify_mode = ssl.CERT_NONE
 
             try:
-                Log.actionLog("["+str(self.ran)+"] Connecting to VMware server: "+str(self.ipAddr))
+                Log.actionLog("["+str(self.ran)+"] Connecting to VMware server: "+str(self.fqdn))
 
                 self.vmwareServiceInstance = SmartConnect(
-                    host=self.ipAddr,
+                    host=self.fqdn,
                     user=self.username,
                     pwd=self.password,
                     port=self.port,
@@ -49,7 +48,6 @@ class VmwareSupplicant:
                 atexit.register(Disconnect, self.vmwareServiceInstance)
             except Exception as e:
                 raise e
-                #raise Exception("vmware supplicant", e.args)
 
         return self.vmwareServiceInstance
 

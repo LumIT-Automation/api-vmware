@@ -29,16 +29,15 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `asset` (
   `id` int(11) NOT NULL,
-  `address` varchar(64) NOT NULL DEFAULT '',
-  `port` int(11) DEFAULT NULL,
-  `fqdn` varchar(255) DEFAULT NULL,
-  `baseurl` varchar(255) NOT NULL,
+  `fqdn` varchar(255) NOT NULL,
+  `protocol` varchar(16) NOT NULL DEFAULT 'https',
+  `port` int(11) NOT NULL DEFAULT 443,
+  `path` varchar(255) NOT NULL DEFAULT '/',
   `tlsverify` tinyint(4) NOT NULL DEFAULT 1,
-  `datacenter` varchar(255) NOT NULL DEFAULT '',
-  `environment` varchar(255) NOT NULL DEFAULT '',
-  `position` varchar(255) NOT NULL DEFAULT '',
-  `api_type` varchar(64) NOT NULL DEFAULT 'vmware',
-  `api_additional_data` varchar(255) NOT NULL DEFAULT '',
+  `baseurl` varchar(255) NOT NULL DEFAULT '',
+  `datacenter` varchar(255) NULL,
+  `environment` varchar(255) NULL,
+  `position` varchar(255) NULL,
   `username` varchar(64) NOT NULL DEFAULT '',
   `password` varchar(64) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -158,7 +157,7 @@ CREATE TABLE `role_privilege` (
 --
 ALTER TABLE `asset`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `fqdn` (`fqdn`);
+  ADD UNIQUE KEY `fqdn` (`fqdn`,`protocol`,`port`);
 
 --
 -- Indici per le tabelle `group_role_object`

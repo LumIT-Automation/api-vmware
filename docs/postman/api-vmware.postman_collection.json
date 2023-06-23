@@ -1210,7 +1210,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"data\": \n    {\n        \"address\": \"192.168.12.174\",\n        \"port\": null,\n        \"fqdn\": \"192.168.12.174\",\n        \"baseurl\": \"https://192.168.12.174/\",\n        \"tlsverify\": 0,\n        \"datacenter\": \"Milano\",\n        \"environment\": \"Developement\",\n        \"position\": \"RACK 1\",\n        \"api_type\": \"vmware\",\n        \"api_additional_data\": \"\",\n        \"username\": \"administrator@vsphere.local\",\n        \"password\": \"PASSWORD\"\n    }\n}",
+							"raw": "{\n    \"data\": {\n        \"fqdn\": \"192.168.12.175\",\n        \"protocol\": \"https\",\n        \"port\": 443,\n        \"path\": \"/web_api/\",\n        \"tlsverify\": false,\n        \"datacenter\": \"Milano\",\n        \"environment\": \"\",\n        \"position\": \"Virtual\",\n        \"username\": \"administrator@vsphere.local\",\n        \"password\": \"password\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1253,7 +1253,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"data\": \n    {\n        \"address\": \"192.168.18.18\",\n        \"fqdn\": \"infocoso.lumitlab.internal\",\n        \"baseurl\": \"https://192.168.18.10/\",\n        \"datacenter\": \"Verona\",\n        \"environment\": \"Produzione\"\n    }\n}",
+							"raw": "{\n    \"data\": {\n        \"path\": \"/web_api/v1/\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
