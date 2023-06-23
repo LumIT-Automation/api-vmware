@@ -35,7 +35,7 @@ class VirtualMachine(VmwareHandler):
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualDisk) and dev.deviceInfo.label == diskLabel:
                     return dev
-            raise CustomException(status=400, payload={"VMware": "can't find the disk "+str(diskLabel)+"."})
+            raise CustomException(status=400, payload={"VMware": "Can't find the disk "+str(diskLabel)+"."})
         except Exception as e:
             raise e
 
@@ -72,7 +72,7 @@ class VirtualMachine(VmwareHandler):
             for dev in self.oDevices():
                 if isinstance(dev, vim.vm.device.VirtualEthernetCard) and dev.deviceInfo.label == nicLabel:
                     return dev
-            raise CustomException(status=400, payload={"VMware": "can't find the network card: "+str(nicLabel)+"."})
+            raise CustomException(status=400, payload={"VMware": "Can't find the network card: "+str(nicLabel)+"."})
         except Exception as e:
             raise e
 
@@ -166,7 +166,7 @@ class VirtualMachine(VmwareHandler):
                     controller = dev
                     break
             if not controller:
-                raise CustomException(status=400, payload={"VMware": "controller not found!"})
+                raise CustomException(status=400, payload={"VMware": "Controller not found!"})
 
             return controller
         except Exception as e:
@@ -259,4 +259,4 @@ class VirtualMachine(VmwareHandler):
         try:
             return self.getObjects(assetId=self.assetId, vimType=vim.VirtualMachine, moId=self.moId)[0]
         except Exception:
-            raise CustomException(status=404, payload={"VMware": "cannot load resource."})
+            raise CustomException(status=404, payload={"VMware": "Cannot load resource."})

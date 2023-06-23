@@ -104,7 +104,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 self.relocateSpec.pool = host.oHostSystem.parent.resourcePool # Standalone host resource pool.
                 self.relocateSpec.host = host.oHostSystem
             else:
-                raise CustomException(status=400, payload={"VMware": "missing cluster or host params."})
+                raise CustomException(status=400, payload={"VMware": "Missing cluster or host params."})
 
             self.relocateSpec.disk = self.diskLocators
             self.cloneSpec.location = self.relocateSpec
@@ -193,7 +193,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 diskSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
                 diskSpec.device = data["device"]
             else:
-                raise CustomException(status=400, payload={"VMware": "invalid operation."})
+                raise CustomException(status=400, payload={"VMware": "Invalid operation."})
 
             return diskSpec
         except Exception as e:
@@ -241,7 +241,7 @@ class VirtualMachineSpecsBuilder(Backend):
                 nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
                 nicSpec.device = data["device"]
             else:
-                raise CustomException(status=400, payload={"VMware": "invalid operation."})
+                raise CustomException(status=400, payload={"VMware": "Invalid operation."})
 
             return nicSpec
         except Exception as e:

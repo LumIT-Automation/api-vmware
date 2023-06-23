@@ -101,7 +101,7 @@ class VObject:
                         break
 
         if not oId:
-            raise CustomException(status=400, payload={"VMware": "object with given moId and name not found in vCenter"})
+            raise CustomException(status=400, payload={"VMware": "Object with given moId and name not found in vCenter"})
 
         try:
             return Repository.add(assetId, oId, oName, description)

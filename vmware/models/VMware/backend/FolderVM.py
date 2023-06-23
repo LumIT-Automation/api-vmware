@@ -54,4 +54,4 @@ class FolderVM(VmwareHandler):
         try:
             return self.getObjects(assetId=self.assetId, vimType=vim.Folder, moId=self.moId)[0]
         except Exception:
-            raise CustomException(status=404, payload={"VMware": "cannot load resource."})
+            raise CustomException(status=404, payload={"VMware": "Cannot load resource."})

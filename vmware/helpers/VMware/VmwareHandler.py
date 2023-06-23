@@ -62,7 +62,7 @@ class VmwareHandler:
                     for managedObject_ref in c.view:
                         obj.append(managedObject_ref)
             else:
-                raise CustomException(status=400, payload={"VMware": "cannot fetch VMware objects."})
+                raise CustomException(status=400, payload={"VMware": "Cannot fetch VMware objects."})
         except vim.fault.NotAuthenticated: # when token expires.
             self.__fetchContent(assetId)
             obj = self.getObjects(assetId, vimType, moId)

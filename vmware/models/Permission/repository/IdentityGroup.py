@@ -32,7 +32,7 @@ class IdentityGroup:
 
             return DBHelper.asDict(c)[0]
         except IndexError:
-            raise CustomException(status=404, payload={"database": "non existent identity group"})
+            raise CustomException(status=404, payload={"database": "Non existent identity group"})
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -59,7 +59,7 @@ class IdentityGroup:
         except Exception as e:
             if e.__class__.__name__ == "IntegrityError" \
                     and e.args and e.args[0] and e.args[0] == 1062:
-                        raise CustomException(status=400, payload={"database": "duplicated identity group"})
+                        raise CustomException(status=400, payload={"database": "Duplicated identity group"})
             else:
                 raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -122,7 +122,7 @@ class IdentityGroup:
         except Exception as e:
             if e.__class__.__name__ == "IntegrityError" \
                     and e.args and e.args[0] and e.args[0] == 1062:
-                        raise CustomException(status=400, payload={"database": "duplicated identity group"})
+                        raise CustomException(status=400, payload={"database": "Duplicated identity group"})
             else:
                 raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
