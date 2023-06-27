@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d4646eeb-2a42-4107-aaee-dde6ce53acd4",
+		"_postman_id": "c295581b-1aa8-4412-83a4-0cb3b5efca1c",
 		"name": "api-vmware",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1210,7 +1210,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"data\": \n    {\n        \"address\": \"192.168.12.174\",\n        \"port\": null,\n        \"fqdn\": \"192.168.12.174\",\n        \"baseurl\": \"https://192.168.12.174/\",\n        \"tlsverify\": 0,\n        \"datacenter\": \"Milano\",\n        \"environment\": \"Developement\",\n        \"position\": \"RACK 1\",\n        \"api_type\": \"vmware\",\n        \"api_additional_data\": \"\",\n        \"username\": \"administrator@vsphere.local\",\n        \"password\": \"PASSWORD\"\n    }\n}",
+							"raw": "{\n    \"data\": {\n        \"fqdn\": \"192.168.12.174\",\n        \"tlsverify\": false,\n        \"datacenter\": \"Milano\",\n        \"environment\": \"Developement\",\n        \"position\": \"Virtual\",\n        \"username\": \"administrator@vsphere.local\",\n        \"password\": \"password\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1253,7 +1253,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"data\": \n    {\n        \"address\": \"192.168.18.18\",\n        \"fqdn\": \"infocoso.lumitlab.internal\",\n        \"baseurl\": \"https://192.168.18.10/\",\n        \"datacenter\": \"Verona\",\n        \"environment\": \"Produzione\"\n    }\n}",
+							"raw": "{\n    \"data\": {\n        \"datacenter\": \"Verona\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
