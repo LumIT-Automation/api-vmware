@@ -39,7 +39,7 @@ class Command:
                 for k, v in Misc.toDict(data).items():
                     setattr(self, k, v)
             else:
-                raise CustomException(status=400, payload={"database": "reserved command not modifiable."})
+                raise CustomException(status=400, payload={"database": "Reserved command not modifiable."})
         except Exception as e:
             raise e
 
@@ -51,7 +51,7 @@ class Command:
                 Repository.delete(self.uid)
                 del self
             else:
-                raise CustomException(status=400, payload={"database": "reserved command not modifiable."})
+                raise CustomException(status=400, payload={"database": "Reserved command not modifiable."})
         except Exception as e:
             raise e
 
@@ -91,4 +91,4 @@ class Command:
             for k, v in info.items():
                 setattr(self, k, v)
         except Exception:
-            raise CustomException(status=400, payload={"SSH": "non existent command."})
+            raise CustomException(status=400, payload={"SSH": "Non existent command."})

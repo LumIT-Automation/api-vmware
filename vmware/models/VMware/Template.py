@@ -19,7 +19,7 @@ class VirtualMachineTemplate(VirtualMachine):
 
     def info(self, related: bool = True) -> dict:
         if not self.__isVmTemplate():
-            raise CustomException(status=400, payload={"VMware": "this object is not a virtual machine template."})
+            raise CustomException(status=400, payload={"VMware": "This object is not a virtual machine template."})
 
         info = super().info()
         return info

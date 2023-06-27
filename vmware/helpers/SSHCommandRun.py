@@ -146,7 +146,7 @@ class SSHCommandRun:
                 time.sleep(10) # every 10s.
 
             if not o:
-                raise CustomException(status=400, payload={"SSH": "timeout WaitPowerOn, cannot login."})
+                raise CustomException(status=400, payload={"SSH": "Timeout WaitPowerOn, cannot login."})
 
             return "", "", 0
         except Exception as e:
@@ -164,14 +164,14 @@ class SSHCommandRun:
                 if isinstance(vu, eval(templateArgs[ku])):
                     del(templateArgs[ku]) # delete to keep track of available args.
                 else:
-                    raise CustomException(status=400, payload={"SSH": "forbidden data type in args."})
+                    raise CustomException(status=400, payload={"SSH": "Forbidden data type in args."})
 
             # All template args passed?
             if templateArgs:
-                raise CustomException(status=400, payload={"SSH": "some args missing."})
+                raise CustomException(status=400, payload={"SSH": "Some args missing."})
         except KeyError:
             # Something not needed passed (causing a KeyError).
-            raise CustomException(status=400, payload={"SSH": "some args not required."})
+            raise CustomException(status=400, payload={"SSH": "Some args not required."})
 
 
 

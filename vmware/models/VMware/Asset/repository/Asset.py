@@ -6,7 +6,6 @@ from django.db import transaction
 
 from vmware.helpers.Exception import CustomException
 from vmware.helpers.Database import Database as DBHelper
-from vmware.helpers.Log import Log
 
 
 class Asset:
@@ -16,19 +15,26 @@ class Asset:
 
 
     ####################################################################################################################
-    # Public methods
+    # Public static methods
     ####################################################################################################################
 
     @staticmethod
-    def get(assetId: int) -> dict:
+    def get(assetId: int, showPassword: bool = False) -> dict:
         c = connection.cursor()
 
-        try:
-            c.execute("SELECT * FROM asset WHERE id = %s", [
-                assetId
-            ])
+        fields = "id, fqdn, protocol, port, path, tlsverify, baseurl, IFNULL (datacenter, '') AS datacenter, IFNULL (environment, '') AS environment, IFNULL (position, '') AS position"
+        if showPassword:
+            fields += ", IFNULL (username, '') AS username, IFNULL (password, '') AS password"
 
-            return DBHelper.asDict(c)[0]
+        try:
+            c.execute("SELECT " + fields + " FROM asset WHERE id = %s", [assetId])
+
+            info = DBHelper.asDict(c)[0]
+            info["tlsverify"] = bool(info["tlsverify"])
+
+            return info
+        except IndexError:
+            raise CustomException(status=404, payload={"database": "Non existent asset"})
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -43,23 +49,28 @@ class Asset:
         values = []
         c = connection.cursor()
 
-        if Asset.__exists(assetId):
-            # Build SQL query according to dict fields.
-            for k, v in data.items():
-                sql += k+"=%s,"
-                values.append(strip_tags(v)) # no HTML allowed.
+        # Build SQL query according to dict fields.
+        for k, v in data.items():
+            sql += k + "=%s,"
 
-            try:
-                c.execute("UPDATE asset SET "+sql[:-1]+" WHERE id = "+str(assetId), # user data are filtered by the serializer.
-                    values
-                )
+            if k == "tlsverify":
+                v = int(v)
+            values.append(strip_tags(v)) # no HTML allowed.
 
-            except Exception as e:
+        try:
+            with transaction.atomic():
+                c.execute("UPDATE asset SET " + sql[:-1] + " WHERE id = " + str(assetId), values) # user data are filtered by the serializer.
+                c.execute("UPDATE asset SET baseurl=%s WHERE id = " + str(assetId), [
+                    Asset.__getBaseurl(assetId)
+                ])
+        except Exception as e:
+            if e.__class__.__name__ == "IntegrityError" \
+                    and e.args and e.args[0] and e.args[0] == 1062:
+                        raise CustomException(status=400, payload={"database": "Duplicated values"})
+            else:
                 raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent VMware endpoint"})
+        finally:
+            c.close()
 
 
 
@@ -67,32 +78,31 @@ class Asset:
     def delete(assetId: int) -> None:
         c = connection.cursor()
 
-        if Asset.__exists(assetId):
-            try:
-                c.execute("DELETE FROM asset WHERE id = %s", [
-                    assetId
-                ])
-
-            except Exception as e:
-                raise CustomException(status=400, payload={"database": e.__str__()})
-            finally:
-                c.close()
-        else:
-            raise CustomException(status=404, payload={"database": "Non existent VMware endpoint"})
+        try:
+            c.execute("DELETE FROM asset WHERE id = %s", [assetId])
+        except Exception as e:
+            raise CustomException(status=400, payload={"database": e.__str__()})
+        finally:
+            c.close()
 
 
-
-    ####################################################################################################################
-    # Public static methods
-    ####################################################################################################################
 
     @staticmethod
-    def list() -> List[dict]:
+    def list(showPassword: bool = False) -> List[dict]:
         c = connection.cursor()
 
+        fields = "id, fqdn, protocol, port, path, tlsverify, baseurl, IFNULL (datacenter, '') AS datacenter, IFNULL (environment, '') AS environment, IFNULL (position, '') AS position"
+        if showPassword:
+            fields += ", IFNULL (username, '') AS username, IFNULL (password, '') AS password"
+
         try:
-            c.execute("SELECT id, address, fqdn, baseurl, tlsverify, api_type, datacenter, environment, position FROM asset")
-            return DBHelper.asDict(c)
+            c.execute("SELECT " + fields + " FROM asset")
+
+            l = DBHelper.asDict(c)
+            for el in l:
+                el["tlsverify"] = bool(el["tlsverify"])
+
+            return l
         except Exception as e:
             raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
@@ -110,40 +120,41 @@ class Asset:
         # Build SQL query according to dict fields.
         for k, v in data.items():
             s += "%s,"
-            keys += k+","
+            keys += k + ","
+
+            if k == "tlsverify":
+                v = int(v)
             values.append(strip_tags(v)) # no HTML allowed.
 
-        keys = keys[:-1]+")"
+        keys = keys[:-1] + ")"
 
         try:
             with transaction.atomic():
-                c.execute("INSERT INTO asset "+keys+" VALUES ("+s[:-1]+")", # user data are filtered by the serializer.
-                    values
-                )
+                c.execute("INSERT INTO asset " + keys + " VALUES (" + s[:-1] + ")", values) # user data are filtered by the serializer.
+                lwId = c.lastrowid
 
-                return c.lastrowid
+                c.execute("UPDATE asset SET baseurl=%s WHERE id = " + str(lwId), [
+                    Asset.__getBaseurl(lwId)
+                ])
+
+                return lwId
         except Exception as e:
-            raise CustomException(status=400, payload={"database": e.__str__()})
+            if e.__class__.__name__ == "IntegrityError" \
+                    and e.args and e.args[0] and e.args[0] == 1062:
+                        raise CustomException(status=400, payload={"database": "Duplicated values"})
+            else:
+                raise CustomException(status=400, payload={"database": e.__str__()})
         finally:
             c.close()
 
 
 
     ####################################################################################################################
-    # Private methods
+    # Private static methods
     ####################################################################################################################
 
     @staticmethod
-    def __exists(assetId: int) -> int:
-        c = connection.cursor()
-        try:
-            c.execute("SELECT COUNT(*) AS c FROM asset WHERE id = %s", [
-                assetId
-            ])
-            o = DBHelper.asDict(c)
+    def __getBaseurl(assetId: int) -> str:
+        ai = Asset.get(assetId)
 
-            return int(o[0]['c'])
-        except Exception:
-            return 0
-        finally:
-            c.close()
+        return str(ai["protocol"]) + "://" + str(ai["fqdn"]) + ":" + str(ai["port"]) + str(ai["path"])

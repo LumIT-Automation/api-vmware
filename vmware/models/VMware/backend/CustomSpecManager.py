@@ -27,7 +27,7 @@ class CustomSpecManager(VmwareHandler):
             if self.oCustomSpecManager.DoesCustomizationSpecExist(name):
                 return self.oCustomSpecManager.GetCustomizationSpec(name=name)
             else:
-                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
+                raise CustomException(status=404, payload={"VMware": "Cannot load specified customization specification."})
         except Exception as e:
             raise e
 
@@ -46,7 +46,7 @@ class CustomSpecManager(VmwareHandler):
             if self.oCustomSpecManager.DoesCustomizationSpecExist(srcSpecName):
                 self.oCustomSpecManager.DuplicateCustomizationSpec(name=srcSpecName, newName=newSpecName)
             else:
-                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
+                raise CustomException(status=404, payload={"VMware": "Cannot load specified customization specification."})
         except Exception as e:
             raise e
 
@@ -57,7 +57,7 @@ class CustomSpecManager(VmwareHandler):
             if self.oCustomSpecManager.DoesCustomizationSpecExist(name):
                 self.oCustomSpecManager.DeleteCustomizationSpec(name)
             else:
-                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
+                raise CustomException(status=404, payload={"VMware": "Cannot load specified customization specification."})
         except Exception as e:
             raise e
 
@@ -82,7 +82,7 @@ class CustomSpecManager(VmwareHandler):
                 task = oVirtualMachine.CustomizeVM_Task(spec.spec)
                 return task._GetMoId()
             else:
-                raise CustomException(status=404, payload={"VMware": "cannot load specified customization specification."})
+                raise CustomException(status=404, payload={"VMware": "Cannot load specified customization specification."})
         except Exception as e:
             raise e
 
@@ -96,7 +96,7 @@ class CustomSpecManager(VmwareHandler):
         try:
             return self.getCustomizationSpecManager(assetId=self.assetId)
         except Exception:
-            raise CustomException(status=404, payload={"VMware": "cannot load resource."})
+            raise CustomException(status=404, payload={"VMware": "Cannot load resource."})
 
 
 

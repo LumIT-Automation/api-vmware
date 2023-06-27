@@ -117,7 +117,7 @@ class VirtualMachine(Backend):
                 computeResource = host = HostSystem(self.assetId, Input.hostMoId)
 
             else:
-                raise CustomException(status=400, payload={"VMware": "missing cluster and/or host parameters."})
+                raise CustomException(status=400, payload={"VMware": "Missing cluster and/or host parameters."})
 
             # Check target datastore/network validity for computeResource (cluster or single host).
             for ds in (Input.datastoreMoId + [Input.mainDatastoreMoId]):
@@ -364,11 +364,11 @@ class VirtualMachine(Backend):
             try:
                 datacenter = Datacenter(self.assetId, datacenterMoId)
             except Exception:
-                raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+                raise CustomException(status=400, payload={"VMware": "Invalid datacenter."})
 
             try:
                 if clusterMoId not in datacenter:
-                    raise CustomException(status=400, payload={"VMware": "cluster not found in this datacenter."})
+                    raise CustomException(status=400, payload={"VMware": "Cluster not found in this datacenter."})
             except Exception as e:
                 raise e
 
@@ -381,7 +381,7 @@ class VirtualMachine(Backend):
             try:
                 cluster = Cluster(self.assetId, clusterMoId)
                 if hostMoId not in cluster:
-                    raise CustomException(status=400, payload={"VMware": "host not found in this cluster."})
+                    raise CustomException(status=400, payload={"VMware": "Host not found in this cluster."})
             except Exception as e:
                 raise e
 
@@ -394,11 +394,11 @@ class VirtualMachine(Backend):
             try:
                 datacenter = Datacenter(self.assetId, datacenterMoId)
             except Exception:
-                raise CustomException(status=400, payload={"VMware": "invalid datacenter."})
+                raise CustomException(status=400, payload={"VMware": "Invalid datacenter."})
 
             try:
                 if hostMoId not in datacenter:
-                    raise CustomException(status=400, payload={"VMware": "host not found in this datacenter."})
+                    raise CustomException(status=400, payload={"VMware": "Host not found in this datacenter."})
             except Exception as e:
                 raise e
 
@@ -408,7 +408,7 @@ class VirtualMachine(Backend):
         if datastoreMoId:
             try:
                 if datastoreMoId not in computeResource: # host or cluster.
-                    raise CustomException(status=400, payload={"VMware": "datastore not found in this cluster."})
+                    raise CustomException(status=400, payload={"VMware": "Datastore not found in this cluster."})
             except Exception as e:
                 raise e
 
@@ -418,7 +418,7 @@ class VirtualMachine(Backend):
         if networkMoId:
             try:
                 if networkMoId not in computeResource: # host or cluster.
-                    raise CustomException(status=400, payload={"VMware": "network not attached to this cluster."})
+                    raise CustomException(status=400, payload={"VMware": "Network not attached to this cluster."})
             except Exception as e:
                 raise e
 

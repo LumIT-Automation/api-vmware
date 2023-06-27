@@ -4,4 +4,4 @@ from vmware.serializers.VMware.Asset.Asset import VMwareAssetSerializer
 
 
 class VMwareAssetsSerializer(serializers.Serializer):
-    items = VMwareAssetSerializer(idField=True, many=True)
+    items = VMwareAssetSerializer(many=True)
