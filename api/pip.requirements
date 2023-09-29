@@ -11,7 +11,7 @@ requests~=2.31.0
 func-timeout~=4.3.5
 cachetools~=5.2.0
 celery~=5.3.4
-importlib-metadata==5.*
+importlib-metadata~=6.8.0
 djangorestframework-recursive~=0.1.2
 paramiko~=3.3.1
 sshkey-tools~=0.10.1
