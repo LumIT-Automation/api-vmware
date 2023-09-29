@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "c295581b-1aa8-4412-83a4-0cb3b5efca1c",
+		"_postman_id": "317cac83-ef9a-4627-8486-d8497d1f38ec",
 		"name": "api-vmware",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30146130"
 	},
 	"item": [
 		{
@@ -3452,7 +3453,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/cluster/domain-c1441/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/cluster/domain-c64/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3466,7 +3467,7 @@
 						"vmware",
 						"1",
 						"cluster",
-						"domain-c1441",
+						"domain-c64",
 						""
 					]
 				}
@@ -3564,7 +3565,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/hostsystem/host-2601/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/hostsystem/host-84/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3578,7 +3579,7 @@
 						"vmware",
 						"1",
 						"hostsystem",
-						"host-2601",
+						"host-84",
 						""
 					]
 				}
@@ -3600,7 +3601,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/datastore/datastore-2341/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/datastore/datastore-85/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3614,7 +3615,7 @@
 						"vmware",
 						"1",
 						"datastore",
-						"datastore-2341",
+						"datastore-85",
 						""
 					]
 				}
@@ -3712,7 +3713,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-131/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-93/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3726,7 +3727,7 @@
 						"vmware",
 						"1",
 						"network",
-						"network-131",
+						"network-93",
 						""
 					]
 				}
@@ -3748,7 +3749,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-2702/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-366/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3762,7 +3763,7 @@
 						"vmware",
 						"1",
 						"network",
-						"dvportgroup-2702",
+						"dvportgroup-366",
 						""
 					]
 				}
@@ -3784,7 +3785,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-2605/find-ip/192.168.22.190/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-93/find-ip/192.168.22.190/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3798,7 +3799,7 @@
 						"vmware",
 						"1",
 						"network",
-						"network-2605",
+						"network-93",
 						"find-ip",
 						"192.168.22.190",
 						""
@@ -3822,7 +3823,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-2605/vms/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-93/vms/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -3836,7 +3837,7 @@
 						"vmware",
 						"1",
 						"network",
-						"network-2605",
+						"network-93",
 						"vms",
 						""
 					]
@@ -4011,7 +4012,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-2630/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-171/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4025,7 +4026,7 @@
 						"vmware",
 						"1",
 						"virtualmachine",
-						"vm-2630",
+						"vm-171",
 						""
 					]
 				}
@@ -4104,7 +4105,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-2630/guestos/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-171/guestos/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4118,7 +4119,7 @@
 						"vmware",
 						"1",
 						"virtualmachine",
-						"vm-2630",
+						"vm-171",
 						"guestos",
 						""
 					]
@@ -4263,7 +4264,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-2441/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-171/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4277,7 +4278,7 @@
 						"vmware",
 						"1",
 						"template",
-						"vm-2441",
+						"vm-171",
 						""
 					]
 				}
@@ -4524,7 +4525,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/task/task-36327/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/task/task-4317/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4538,7 +4539,7 @@
 						"vmware",
 						"1",
 						"task",
-						"task-36327",
+						"task-4317",
 						""
 					]
 				}
@@ -4747,7 +4748,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolders/tree/?folder=group-v1082&folder=group-v1726",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolders/tree/?folder=group-v58&folder=group-v53",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4767,11 +4768,11 @@
 					"query": [
 						{
 							"key": "folder",
-							"value": "group-v1082"
+							"value": "group-v58"
 						},
 						{
 							"key": "folder",
-							"value": "group-v1726"
+							"value": "group-v53"
 						}
 					]
 				}
@@ -4829,7 +4830,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolder/group-v2478/parentList/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolder/group-v72/parentList/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4843,7 +4844,7 @@
 						"vmware",
 						"1",
 						"vmFolder",
-						"group-v2478",
+						"group-v72",
 						"parentList",
 						""
 					]
@@ -4942,7 +4943,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test18/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test-18/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -4956,7 +4957,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"centos-test18",
+						"centos-test-18",
 						""
 					]
 				}
@@ -5024,7 +5025,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"destination\": \"centos-test\"\n    }\n}",
+					"raw": "{\n    \"data\": {\n        \"destination\": \"centos-test-18\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -5032,7 +5033,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/try/",
+					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test-18.ok/",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -5046,7 +5047,7 @@
 						"vmware",
 						"1",
 						"customSpec",
-						"try",
+						"centos-test-18.ok",
 						""
 					]
 				}
