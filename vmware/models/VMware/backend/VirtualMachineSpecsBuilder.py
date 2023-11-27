@@ -92,7 +92,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
 
 
-    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None):
+    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None) -> bool:
         try:
             self.cloneSpec = vim.vm.CloneSpec()
             self.relocateSpec.datastore = oDatastore
@@ -118,6 +118,8 @@ class VirtualMachineSpecsBuilder(Backend):
             # Apply the guest OS customization specifications.
             if oCustomSpec:
                 self.cloneSpec.customization = oCustomSpec.spec
+
+            return True
         except Exception as e:
             raise e
 
@@ -130,6 +132,8 @@ class VirtualMachineSpecsBuilder(Backend):
             if "numCoresPerSocket" in data and data["numCoresPerSocket"]:
                 self.configSpec.numCoresPerSocket = data["numCoresPerSocket"]
             if "memoryMB" in data and data["memoryMB"]:
+                if data["memoryMB"] % 4 != 0:
+                    raise CustomException(status=400, payload={"VMware": "memoryMB: invalid value (must be a multiple of 4)."})
                 self.configSpec.memoryMB = data["memoryMB"]
             if "notes" in data and data["notes"]:
                 self.configSpec.annotation = data["notes"]

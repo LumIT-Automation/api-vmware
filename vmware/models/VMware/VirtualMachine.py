@@ -79,6 +79,7 @@ class VirtualMachine(Backend):
         cSpecInfo = dict()
         out = dict()
         Input = InputData()
+        specsBuilt = False
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         Input.networkMoId = [] # safe to controller locks.
@@ -152,7 +153,7 @@ class VirtualMachine(Backend):
                 self.__checkNewVMIpAddress(networkSpecInfo=cSpecInfo["network"], networkMoIdList=Input.networkMoId)
 
             # Put all together: build the cloneSpec.
-            specsBuilder.buildVMCloneSpecs(
+            specsBuilt = specsBuilder.buildVMCloneSpecs(
                 oDatastore=Datastore(self.assetId, Input.mainDatastoreMoId).oDatastore,
                 devsSpecs=devSpecs,
                 cluster=cluster,
@@ -171,9 +172,6 @@ class VirtualMachine(Backend):
             )
 
             # A worker will poll the vCenter and update the target table on stage2 database in order to track progress.
-            if not Input.deleteGuestSpecAfterDeploy:
-                Input.guestSpec = ""
-
             out["targetId"] = self.pollVmwareDeployVMTask(
                 bootStrapKeyId=Input.bootstrapKeyId,
                 userName="root",
@@ -189,7 +187,8 @@ class VirtualMachine(Backend):
         except Exception as e:
             raise e
         finally:
-            VirtualMachine.__deleteGuestSpec(assetId=self.assetId, guestSpec=Input.guestSpec)
+            if Input.deleteGuestSpecAfterDeploy and specsBuilt:
+                VirtualMachine.__deleteGuestSpec(assetId=self.assetId, guestSpec=Input.guestSpec)
 
 
 
