@@ -1,7 +1,7 @@
 amqp==5.2.0
 asgiref==3.7.2
 async-timeout==4.0.3
-bcrypt==4.1.0
+bcrypt==4.0.1
 billiard==3.6.4.0
 cachetools==5.2.1
 celery==5.2.7
