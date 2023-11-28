@@ -79,7 +79,6 @@ class VirtualMachine(Backend):
         cSpecInfo = dict()
         out = dict()
         Input = InputData()
-        specsBuilt = False
 
         # Put user input, data[*], into proper Input.* properties - this will simplify the rest of the code.
         Input.networkMoId = [] # safe to controller locks.
@@ -153,7 +152,7 @@ class VirtualMachine(Backend):
                 self.__checkNewVMIpAddress(networkSpecInfo=cSpecInfo["network"], networkMoIdList=Input.networkMoId)
 
             # Put all together: build the cloneSpec.
-            specsBuilt = specsBuilder.buildVMCloneSpecs(
+            specsBuilder.buildVMCloneSpecs(
                 oDatastore=Datastore(self.assetId, Input.mainDatastoreMoId).oDatastore,
                 devsSpecs=devSpecs,
                 cluster=cluster,
@@ -187,7 +186,7 @@ class VirtualMachine(Backend):
         except Exception as e:
             raise e
         finally:
-            if Input.deleteGuestSpecAfterDeploy and specsBuilt:
+            if Input.deleteGuestSpecAfterDeploy:
                 VirtualMachine.__deleteGuestSpec(assetId=self.assetId, guestSpec=Input.guestSpec)
 
 
