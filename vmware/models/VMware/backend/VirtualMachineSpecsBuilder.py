@@ -92,7 +92,7 @@ class VirtualMachineSpecsBuilder(Backend):
 
 
 
-    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None) -> bool:
+    def buildVMCloneSpecs(self, oDatastore: object, data: dict, cluster: object = None, host: object = None, devsSpecs: object = None, oCustomSpec: object = None):
         try:
             self.cloneSpec = vim.vm.CloneSpec()
             self.relocateSpec.datastore = oDatastore
@@ -119,7 +119,6 @@ class VirtualMachineSpecsBuilder(Backend):
             if oCustomSpec:
                 self.cloneSpec.customization = oCustomSpec.spec
 
-            return True
         except Exception as e:
             raise e
 
