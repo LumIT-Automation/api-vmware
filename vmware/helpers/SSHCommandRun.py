@@ -118,6 +118,7 @@ class SSHCommandRun:
                     self.command, self.userArgs, self.templateArgs),
                 alwaysSuccess=True # reboot on RH does not return 0.
             )
+            time.sleep(5) # avoid to connect before the reboot.
 
             return self.__waitPowerOn()
         except Exception as e:
