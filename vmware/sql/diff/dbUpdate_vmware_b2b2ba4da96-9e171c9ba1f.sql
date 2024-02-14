@@ -22,12 +22,15 @@ ALTER TABLE asset CHANGE COLUMN fqdn fqdn varchar(255) NOT NULL; # was varchar(2
 ALTER TABLE asset DROP INDEX address; # was UNIQUE (address)
 ALTER TABLE asset DROP COLUMN address; # was varchar(64) NOT NULL
 ALTER TABLE asset ADD COLUMN protocol varchar(16) NOT NULL DEFAULT 'https' AFTER fqdn;
-ALTER TABLE asset ADD COLUMN port int(11) NOT NULL DEFAULT 443 AFTER protocol;
+UPDATE asset SET port = 0 WHERE port IS NULL;
 ALTER TABLE asset CHANGE COLUMN port port int(11) NOT NULL DEFAULT 443 AFTER protocol; # was int(11) DEFAULT NULL
 ALTER TABLE asset DROP COLUMN api_additional_data; # was varchar(255) NOT NULL DEFAULT ''
 ALTER TABLE asset DROP COLUMN api_type; # was varchar(64) NOT NULL DEFAULT ''
 ALTER TABLE asset ADD COLUMN path varchar(255) NOT NULL DEFAULT '/' AFTER port;
 ALTER TABLE asset MODIFY `tlsverify` tinyint(4) NOT NULL DEFAULT 1 AFTER path;
+ALTER TABLE asset MODIFY `datacenter` varchar(255) NOT NULL DEFAULT '';
+ALTER TABLE asset MODIFY `environment` varchar(255) NOT NULL DEFAULT '';
+ALTER TABLE asset MODIFY `position` varchar(255) NOT NULL DEFAULT '';
 
 ALTER TABLE asset ADD UNIQUE fqdn (fqdn,protocol,port);
 
@@ -232,4 +235,5 @@ INSERT INTO `role` (`id`, `role`, `description`) VALUES
 (4, 'workflow', 'workflow system user');
 
 
-set foreign_key_checks = 1;
+#set foreign_key_checks = 1;
+
