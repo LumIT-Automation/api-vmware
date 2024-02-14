@@ -52,7 +52,7 @@ sqlSchemaFile=${api}/sql/${schema}.schema.sql
 # db data file in the git repo.
 sqlDataFile=${api}/sql/${schema}.data.sql
 # Tables that need data update.
-updateTables='privilege role_privilege role'
+updateTables='command'
 
 sqlFileOld=${workDir}/${schema}_old.sql
 sqlFileNew=${workDir}/${schema}_new.sql
