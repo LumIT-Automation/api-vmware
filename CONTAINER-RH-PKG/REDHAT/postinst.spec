@@ -72,10 +72,13 @@ function containerSetup()
         # Database api.
         echo "Creating database api and restoring SQL dump..."
         if [ "$(podman exec api-vmware mysql --vertical -e "SHOW DATABASES LIKE 'api';" | tail -1 | awk -F': ' '{print $2}')" == "" ]; then
-            podman exec api-vmware mysql -e 'CREATE DATABASE api DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;' # create database.
+            pkgVer=`dpkg-query --show --showformat='${Version}' automation-interface-api-vmware-container`
+            commit=$(podman exec api-vmware dpkg-query --show --showformat='${Description}' automation-interface-api | sed -r -e 's/.*commit: (.*)/\1/' -e 's/\)\.//')
+            podman exec api-vmware mysql -e 'CREATE DATABASE `api` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT ='"'"'pkgVersion='${pkgVer}' commit='${commit}"'"';'
             podman exec api-vmware mysql api -e "source /var/www/api/vmware/sql/vmware.schema.sql" # restore database schema.
             podman exec api-vmware mysql api -e "source /var/www/api/vmware/sql/vmware.data.sql" # restore database data.
-            podman exec api-vmware mysql -e 'CREATE DATABASE stage2 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;' # create database.
+
+            podman exec api-vmware mysql -e 'CREATE DATABASE stage2 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT = '"'${pkgVer}';" # create database.
             podman exec api-vmware mysql stage2 -e "source /var/www/api/vmware/sql/stage2.schema.sql" # restore database schema.
         fi
 
