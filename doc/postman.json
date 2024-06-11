@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "317cac83-ef9a-4627-8486-d8497d1f38ec",
+		"_postman_id": "f4a55064-ef40-4c66-b562-cdbe4c729df5",
 		"name": "api-vmware",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30146130"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -1176,18 +1175,12 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/assets/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/infoblox/assets/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
-								"vmware",
+								"infoblox",
 								"assets",
 								""
 							]
@@ -1219,18 +1212,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/assets/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/infoblox/assets/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
-								"vmware",
+								"infoblox",
 								"assets",
 								""
 							]
@@ -1262,18 +1249,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/asset/2/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/infoblox/asset/2/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
-								"vmware",
+								"infoblox",
 								"asset",
 								"2",
 								""
@@ -1297,18 +1278,12 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/asset/2/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/infoblox/asset/2/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
-								"vmware",
+								"infoblox",
 								"asset",
 								"2",
 								""
