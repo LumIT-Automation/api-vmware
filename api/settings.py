@@ -260,3 +260,6 @@ NEW_VM_CHECK_IP_IN_PG = True
 # This option applies only when NEW_VM_CHECK_IP_IN_PG = True: also it finds all portgroups with the same vlan id of the assigned pg and checks into.
 # Warning: it can be slow (minutes), so the deployment procedure is slowed down as well.
 NEW_VM_CHECK_IP_IN_PGS_SAME_VLANID = False
+
+DOC_TXT_DIR = "/var/www/api/doc/"
+

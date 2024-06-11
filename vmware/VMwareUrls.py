@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .controllers import Root
+from .controllers import Root, RawTxtController
 from .controllers.VMware import Datacenters, Datacenter
 from .controllers.VMware import Clusters, Cluster
 from .controllers.VMware import HostSystems, HostSystem
@@ -30,6 +30,8 @@ urlpatterns = [
     path('permissions/vmObject/<int:objectId>/', PermissionVMObject.PermissionVObjectController.as_view(), name='permissions-vmobject'),
 
     path('authorizations/', Authorizations.AuthorizationsController.as_view(), name='authorizations'),
+
+    path('doc/<str:fileName>/', RawTxtController.VMwareRawTxtController.as_view(), name='txt'),
 
     # Asset.
     path('assets/', Assets.VMwareAssetsController.as_view(), name='vmware-assets'),
