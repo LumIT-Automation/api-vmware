@@ -3015,17 +3015,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/datacenters/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/datacenters/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"datacenters",
@@ -3050,17 +3044,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/datacenters/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/datacenters/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"datacenters",
@@ -3091,17 +3079,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/datacenter/datacenter-2/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/datacenter/datacenter-2/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"datacenter",
@@ -3127,17 +3109,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/clusters/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/clusters/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"clusters",
@@ -3162,17 +3138,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/clusters/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/clusters/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"clusters",
@@ -3203,17 +3173,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/cluster/domain-c64/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/cluster/domain-c64/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"cluster",
@@ -3239,17 +3203,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/hostsystems/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/hostsystems/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"hostsystems",
@@ -3274,17 +3232,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/hostsystems/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/hostsystems/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"hostsystems",
@@ -3315,17 +3267,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/hostsystem/host-84/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/hostsystem/host-84/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"hostsystem",
@@ -3351,17 +3297,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/datastore/datastore-85/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/datastore/datastore-85/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"datastore",
@@ -3387,17 +3327,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/datastores/",
-					"protocol": "http",
+					"raw": "h{{vmwareBaseUrl}}/vmware/1/datastores/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"h{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"datastores",
@@ -3422,17 +3356,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/datastores/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/datastores/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"datastores",
@@ -3463,17 +3391,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-93/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/network/network-93/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"network",
@@ -3499,17 +3421,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/dvportgroup-366/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/network/dvportgroup-366/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"network",
@@ -3535,17 +3451,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-93/find-ip/192.168.22.190/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/network/network-93/find-ip/192.168.22.190/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"network",
@@ -3573,17 +3483,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/network/network-93/vms/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/network/network-93/vms/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"network",
@@ -3610,17 +3514,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/networks/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/networks/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"networks",
@@ -3645,17 +3543,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/networks/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/networks/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"networks",
@@ -3686,17 +3578,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachines/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/virtualmachines/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"virtualmachines",
@@ -3721,17 +3607,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachines/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/virtualmachines/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"virtualmachines",
@@ -3762,17 +3642,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-171/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/virtualmachine/vm-171/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"virtualmachine",
@@ -3807,17 +3681,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-2709/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/virtualmachine/vm-2709/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"virtualmachine",
@@ -3855,17 +3723,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-171/guestos/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/virtualmachine/vm-171/guestos/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"virtualmachine",
@@ -3901,17 +3763,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/virtualmachine/vm-3180/guestos/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/virtualmachine/vm-3180/guestos/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"virtualmachine",
@@ -3938,17 +3794,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/templates/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/templates/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"templates",
@@ -3973,17 +3823,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/templates/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/templates/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"templates",
@@ -4014,111 +3858,15 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-171/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/template/vm-171/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"template",
 						"vm-171",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "template",
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "Bearer {{jwttoken}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"vmName\": \"TEST-ONE\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"dvportgroup-83\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 21504,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"label\": \"\",\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"bootstrapKeyId\": 1,\n        \"finalPubKeyIds\": [\n            1\n        ],\n        \"postDeployCommands\": [\n            {\n                \"command\": \"echo\",\n                \"user_args\": {\n                    \"__echo\": \"Hello World!\"\n                }\n            },\n            {\n                \"command\": \"ls\",\n                \"user_args\": {\n                    \"__path\": \"/\"\n                }\n            }\n        ]\n    }\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-2441/",
-					"protocol": "http",
-					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
-					],
-					"path": [
-						"api",
-						"v1",
-						"vmware",
-						"1",
-						"template",
-						"vm-2441",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "template prod example",
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "Bearer {{jwttoken}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"data\": {\n        \"vmName\": \"TEST-TWO\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"hostMoId\": \"host-1363\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000e\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 25600,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"datastoreMoId\": \"datastore-1364\",\n                    \"label\": \"\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test2\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"secondStageIp\": \"192.168.18.217\",\n        \"bootstrapKeyId\": 1,\n        \"postDeployCommands\": [\n            {\n                \"command\": \"waitPowerOn\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"resizeLastPartition\",\n                \"user_args\": {\n                    \"__diskDevice\": \"sda\"\n                }\n            },\n            {\n                \"command\": \"renameVg\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"addMountPoint\",\n                \"user_args\": {\n                    \"__vgName\": \"paperoga\",\n                    \"__lvName\": \"lv_var\",\n                    \"__lvSize\": 2,\n                    \"__filesystem\": \"ext4\",\n                    \"__mountFolder\": \"/var\"\n                }\n            },\n            {\n                \"command\": \"reboot\",\n                \"user_args\": {}\n            },\n            {\n                \"command\": \"addPubKey\",\n                \"user_args\": {\n                    \"__pubKeyId\": 1\n                }\n            },\n            {\n                \"command\": \"removeBootstrapKey\",\n                \"user_args\": {}\n            }\n        ]\n    }\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-2441/",
-					"protocol": "http",
-					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
-					],
-					"path": [
-						"api",
-						"v1",
-						"vmware",
-						"1",
-						"template",
-						"vm-2441",
 						""
 					]
 				}
@@ -4149,21 +3897,54 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-181/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/template/vm-181/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"template",
 						"vm-181",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "template",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{jwttoken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": {\n        \"vmName\": \"TEST-ONE\",\n        \"datacenterMoId\": \"datacenter-2\",\n        \"clusterMoId\": \"domain-c1441\",\n        \"vmFolderMoId\": \"group-v2475\",\n        \"mainDatastoreMoId\": \"datastore-2341\",\n        \"powerOn\": true,\n        \"numCpu\": 4,\n        \"numCoresPerSocket\": 2,\n        \"memoryMB\": 2048,\n        \"notes\": \"TEST ONE\",\n        \"networkDevices\": {\n            \"existent\": [\n                {\n                    \"networkMoId\": \"network-1213\",\n                    \"label\": \"Network adapter 1\",\n                    \"deviceType\": \"vmxnet3\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"networkMoId\": \"dvportgroup-83\",\n                    \"label\": \"\",\n                    \"deviceType\": \"e1000\"\n                }\n            ]\n        },\n        \"diskDevices\": {\n            \"existent\": [\n                {\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"label\": \"Hard disk 1\",\n                    \"sizeMB\": 21504,\n                    \"deviceType\": \"thin\"\n                }\n            ],\n            \"new\": [\n                {\n                    \"label\": \"\",\n                    \"datastoreMoId\": \"datastore-2341\",\n                    \"sizeMB\": 512,\n                    \"deviceType\": \"thick lazy zeroed\"\n                }\n            ]\n        },\n        \"guestSpec\": \"centos-test\",\n        \"deleteGuestSpecAfterDeploy\": false,\n        \"bootstrapKeyId\": 1,\n        \"finalPubKeyIds\": [\n            1\n        ],\n        \"postDeployCommands\": [\n            {\n                \"command\": \"echo\",\n                \"user_args\": {\n                    \"__echo\": \"Hello World!\"\n                }\n            },\n            {\n                \"command\": \"ls\",\n                \"user_args\": {\n                    \"__path\": \"/\"\n                }\n            }\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{vmwareBaseUrl}}/vmware/1/template/vm-2441/",
+					"host": [
+						"{{vmwareBaseUrl}}"
+					],
+					"path": [
+						"vmware",
+						"1",
+						"template",
+						"vm-2441",
 						""
 					]
 				}
@@ -4194,17 +3975,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-186/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/template/vm-186/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"template",
@@ -4239,17 +4014,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/template/vm-181/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/template/vm-181/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"template",
@@ -4275,17 +4044,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/task/task-4317/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/task/task-4317/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"task",
@@ -4311,17 +4074,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/tasks/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/tasks/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"tasks",
@@ -4355,17 +4112,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/task/task-34003/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/task/task-34003/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"task",
@@ -4391,17 +4142,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/task/task-34003/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/task/task-34003/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"task",
@@ -4427,17 +4172,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolders/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/vmFolders/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"vmFolders",
@@ -4462,17 +4201,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolders/tree/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/vmFolders/tree/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"vmFolders",
@@ -4498,17 +4231,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolders/tree/?folder=group-v58&folder=group-v53",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/vmFolders/tree/?folder=group-v58&folder=group-v53",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"vmFolders",
@@ -4544,17 +4271,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolder/group-v1082/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/vmFolder/group-v1082/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"vmFolder",
@@ -4580,17 +4301,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/vmFolder/group-v72/parentList/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/vmFolder/group-v72/parentList/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"vmFolder",
@@ -4617,17 +4332,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpecs/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/customSpecs/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"customSpecs",
@@ -4652,17 +4361,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpecs/?quick",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/customSpecs/?quick",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"customSpecs",
@@ -4693,17 +4396,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test-18/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/customSpec/centos-test-18/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"customSpec",
@@ -4738,17 +4435,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test18/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/customSpec/centos-test18/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"customSpec",
@@ -4783,17 +4474,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test-18.ok/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/customSpec/centos-test-18.ok/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"customSpec",
@@ -4828,17 +4513,11 @@
 					}
 				},
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/centos-test-tmp-wVJBJD/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/customSpec/centos-test-tmp-wVJBJD/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"customSpec",
@@ -4864,17 +4543,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/1/customSpec/try2/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/1/customSpec/try2/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"1",
 						"customSpec",
@@ -4900,17 +4573,11 @@
 					}
 				],
 				"url": {
-					"raw": "http://10.0.111.25/api/v1/vmware/history/",
-					"protocol": "http",
+					"raw": "{{vmwareBaseUrl}}/vmware/history/",
 					"host": [
-						"10",
-						"0",
-						"111",
-						"25"
+						"{{vmwareBaseUrl}}"
 					],
 					"path": [
-						"api",
-						"v1",
 						"vmware",
 						"history",
 						""
