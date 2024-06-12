@@ -1158,6 +1158,63 @@
 			]
 		},
 		{
+			"name": "Api doc",
+			"item": [
+				{
+					"name": "postman",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwttoken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{vmwareBaseUrl}}/vmware/doc/postman.json/",
+							"host": [
+								"{{vmwareBaseUrl}}"
+							],
+							"path": [
+								"vmware",
+								"doc",
+								"postman.json",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "swagger",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwttoken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{vmwareBaseUrl}}/vmware/doc/swagger.yaml/",
+							"host": [
+								"{{vmwareBaseUrl}}"
+							],
+							"path": [
+								"vmware",
+								"doc",
+								"swagger.yaml",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Assets",
 			"item": [
 				{
@@ -1175,12 +1232,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{vmwareBaseUrl}}/infoblox/assets/",
+							"raw": "{{vmwareBaseUrl}}/vmware/assets/",
 							"host": [
 								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"infoblox",
+								"vmware",
 								"assets",
 								""
 							]
@@ -1212,12 +1269,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{vmwareBaseUrl}}/infoblox/assets/",
+							"raw": "{{vmwareBaseUrl}}/vmware/assets/",
 							"host": [
 								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"infoblox",
+								"vmware",
 								"assets",
 								""
 							]
@@ -1249,12 +1306,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{vmwareBaseUrl}}/infoblox/asset/2/",
+							"raw": "{{vmwareBaseUrl}}/vmware/asset/2/",
 							"host": [
 								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"infoblox",
+								"vmware",
 								"asset",
 								"2",
 								""
@@ -1278,12 +1335,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{vmwareBaseUrl}}/infoblox/asset/2/",
+							"raw": "{{vmwareBaseUrl}}/vmware/asset/2/",
 							"host": [
 								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"infoblox",
+								"vmware",
 								"asset",
 								"2",
 								""
@@ -1312,17 +1369,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/authorizations/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/authorizations/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"authorizations",
 								""
@@ -1346,17 +1397,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permissions/permissionHasUser/cn=groupstaff,cn=users,dc=lab,dc=local/folder_get/1/group-v2477/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/permissions/permissionHasUser/cn=groupstaff,cn=users,dc=lab,dc=local/folder_get/1/group-v2477/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"permissions",
 								"permissionHasUser",
@@ -1385,17 +1430,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permissions/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/permissions/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"permissions",
 								""
@@ -1428,17 +1467,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permissions/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/permissions/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"permissions",
 								""
@@ -1471,17 +1504,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permission/3/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/permission/3/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"permission",
 								"3",
@@ -1506,17 +1533,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permission/3/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/permission/3/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"permission",
 								"3",
@@ -1541,17 +1562,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/identity-groups/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/identity-groups/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"identity-groups",
 								""
@@ -1575,17 +1590,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/identity-groups/?related=privileges",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/identity-groups/?related=privileges",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"identity-groups",
 								""
@@ -1624,17 +1633,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/identity-groups/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/identity-groups/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"identity-groups",
 								""
@@ -1667,17 +1670,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/identity-group/cn=groupStaff,cn=users,dc=lab,dc=localNew/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/identity-group/cn=groupStaff,cn=users,dc=lab,dc=localNew/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"identity-group",
 								"cn=groupStaff,cn=users,dc=lab,dc=localNew",
@@ -1702,17 +1699,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/identity-group/cn=groupStaff2,cn=users,dc=lab,dc=local/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/identity-group/cn=groupStaff2,cn=users,dc=lab,dc=local/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"identity-group",
 								"cn=groupStaff2,cn=users,dc=lab,dc=local",
@@ -1737,17 +1728,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/roles/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/roles/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"roles",
 								""
@@ -1771,17 +1756,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/roles/?related=privileges",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/roles/?related=privileges",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"roles",
 								""
@@ -1811,17 +1790,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permissions/vmObjects/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/permissions/vmObjects/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"permissions",
 								"vmObjects",
@@ -1846,17 +1819,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/vmware/permissions/vmObject/2/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/vmware/permissions/vmObject/2/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"vmware",
 								"permissions",
 								"vmObject",
@@ -1890,17 +1857,11 @@
 									}
 								],
 								"url": {
-									"raw": "http://10.0.111.25/api/v1/stage2/target/2/",
-									"protocol": "http",
+									"raw": "{{vmwareBaseUrl}}/stage2/target/2/",
 									"host": [
-										"10",
-										"0",
-										"111",
-										"25"
+										"{{vmwareBaseUrl}}"
 									],
 									"path": [
-										"api",
-										"v1",
 										"stage2",
 										"target",
 										"2",
@@ -1934,17 +1895,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://10.0.111.25/api/v1/stage2/targets/",
-									"protocol": "http",
+									"raw": "{{vmwareBaseUrl}}/stage2/targets/",
 									"host": [
-										"10",
-										"0",
-										"111",
-										"25"
+										"{{vmwareBaseUrl}}"
 									],
 									"path": [
-										"api",
-										"v1",
 										"stage2",
 										"targets",
 										""
@@ -1977,17 +1932,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://10.0.111.25/api/v1/stage2/target/2/",
-									"protocol": "http",
+									"raw": "{{vmwareBaseUrl}}/stage2/target/2/",
 									"host": [
-										"10",
-										"0",
-										"111",
-										"25"
+										"{{vmwareBaseUrl}}"
 									],
 									"path": [
-										"api",
-										"v1",
 										"stage2",
 										"target",
 										"2",
@@ -2021,17 +1970,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://10.0.111.25/api/v1/stage2/target/1/commands/",
-									"protocol": "http",
+									"raw": "{{vmwareBaseUrl}}/stage2/target/1/commands/",
 									"host": [
-										"10",
-										"0",
-										"111",
-										"25"
+										"{{vmwareBaseUrl}}"
 									],
 									"path": [
-										"api",
-										"v1",
 										"stage2",
 										"target",
 										"1",
@@ -2057,17 +2000,11 @@
 									}
 								],
 								"url": {
-									"raw": "http://10.0.111.25/api/v1/stage2/target/1/command/2/",
-									"protocol": "http",
+									"raw": "{{vmwareBaseUrl}}/stage2/target/1/command/2/",
 									"host": [
-										"10",
-										"0",
-										"111",
-										"25"
+										"{{vmwareBaseUrl}}"
 									],
 									"path": [
-										"api",
-										"v1",
 										"stage2",
 										"target",
 										"1",
@@ -2096,17 +2033,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/bootstrapkeys/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/bootstrapkeys/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"bootstrapkeys",
 								""
@@ -2139,17 +2070,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/bootstrapkeys/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/bootstrapkeys/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"bootstrapkeys",
 								""
@@ -2182,17 +2107,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/bootstrapkey/2/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/bootstrapkey/2/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"bootstrapkey",
 								"2",
@@ -2226,17 +2145,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/bootstrapkey/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/bootstrapkey/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"bootstrapkey",
 								"1",
@@ -2261,17 +2174,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/echo/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/echo/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"echo",
@@ -2296,17 +2203,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/commands/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/commands/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"commands",
 								""
@@ -2339,17 +2240,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/commands/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/commands/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"commands",
 								""
@@ -2382,17 +2277,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/commands/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/commands/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"commands",
 								""
@@ -2425,17 +2314,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/Ls/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/Ls/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"Ls",
@@ -2469,17 +2352,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/ciao/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/ciao/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"ciao",
@@ -2513,17 +2390,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/ls/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/ls/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"ls",
@@ -2548,17 +2419,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/target/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/target/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"target",
 								"1",
@@ -2583,17 +2448,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/targets/?results=1",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/targets/?results=1",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"targets",
 								""
@@ -2623,17 +2482,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/target/1/commands/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/target/1/commands/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"target",
 								"1",
@@ -2659,17 +2512,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/finalpubkeys/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/finalpubkeys/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"finalpubkeys",
 								""
@@ -2702,17 +2549,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/finalpubkeys/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/finalpubkeys/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"finalpubkeys",
 								""
@@ -2745,17 +2586,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/finalpubkey/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/finalpubkey/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"finalpubkey",
 								"1",
@@ -2789,17 +2624,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/finalpubkey/2/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/finalpubkey/2/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"finalpubkey",
 								"2",
@@ -2833,17 +2662,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/ls/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/ls/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"ls",
@@ -2879,17 +2702,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/echo/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/echo/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"echo",
@@ -2925,17 +2742,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/resizeLastPartition/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/resizeLastPartition/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"resizeLastPartition",
@@ -2971,17 +2782,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/renameVg/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/renameVg/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"renameVg",
@@ -3017,17 +2822,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/lvGrow/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/lvGrow/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"lvGrow",
@@ -3063,17 +2862,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/addMountPoint/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/addMountPoint/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"addMountPoint",
@@ -3109,17 +2902,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/addPubKey/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/addPubKey/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"addPubKey",
@@ -3155,17 +2942,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/removeBootstrapKey/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/removeBootstrapKey/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"removeBootstrapKey",
@@ -3201,17 +2982,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://10.0.111.25/api/v1/stage2/command/reboot/run/1/",
-							"protocol": "http",
+							"raw": "{{vmwareBaseUrl}}/stage2/command/reboot/run/1/",
 							"host": [
-								"10",
-								"0",
-								"111",
-								"25"
+								"{{vmwareBaseUrl}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"stage2",
 								"command",
 								"reboot",
