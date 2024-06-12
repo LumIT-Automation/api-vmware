@@ -6,7 +6,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-i','--inputFile',help='(openapi yaml file to fix)', required=True)
 parser.add_argument('-o','--outputFile',help='(output file)', required=True)
-parser.add_argument('-u','--urlFile',help='(vmware url file)', required=True)
+parser.add_argument('-u','--urlFile',help='(stage2 url file)', required=True)
 args = parser.parse_args()
 
 
@@ -142,19 +142,19 @@ reId = re.compile('<int:([A-Za-z0-9]*[Ii]d)>/')
 reSegmentId = re.compile('<int:([A-Za-z0-9]*[Ii]d)>')
 for url in urls:
     strMatch = reStr.sub('[A-Za-z0-9,.=_-]+/', url)
-    urlMatch = '/vmware/' + reId.sub('[0-9]+/', strMatch) + '$'
+    urlMatch = '/stage2/' + reId.sub('[0-9]+/', strMatch) + '$'
 
     # Now we have the right regexp built from the urlFile to match an url in the inputFile.
     for idx in range(len(lines)):
-        if re.match('\s+/vmware/.*/:', lines[idx]): # get urls only from the inputFile.
-            if re.match(urlMatch, lines[idx].strip().replace(':','')): # url line example in inputFile: /vmware/<int:assetId>/network/<str:networkAddress>/:.
+        if re.match('\s+/stage2/.*/:', lines[idx]): # get urls only from the inputFile.
+            if re.match(urlMatch, lines[idx].strip().replace(':','')): # url line example in inputFile: /stage2/<int:assetId>/network/<str:networkAddress>/:.
                 urlData = dict()
 
                 adjustedLineUrl = '  /' # 2 leading spaces.
                 segments = url.split('/')
                 if not segments[-1]:  # empty segment.
                     segments.pop(-1)
-                segments.insert(0,'vmware') # urls in the urlFile doesn't have the vmware prefix.
+                segments.insert(0,'stage2') # urls in the urlFile doesn't have the stage2 prefix.
 
                 for segment in segments:
                     if re.match(reSegmentId, segment):
