@@ -142,11 +142,16 @@ reId = re.compile('<int:([A-Za-z0-9]*[Ii]d)>/')
 reSegmentId = re.compile('<int:([A-Za-z0-9]*[Ii]d)>')
 for url in urls:
     strMatch = reStr.sub('[A-Za-z0-9,.=_-]+/', url)
-    urlMatch = '/vmware/' + reId.sub('[0-9]+/', strMatch) + '$'
+    urlMatch = '/(vmware|stage2)/' + reId.sub('[0-9]+/', strMatch) + '$'
 
     # Now we have the right regexp built from the urlFile to match an url in the inputFile.
     for idx in range(len(lines)):
+        prefix = ""
         if re.match('\s+/vmware/.*/:', lines[idx]): # get urls only from the inputFile.
+            prefix = "vmware"
+        if re.match('\s+/stage2/.*/:', lines[idx]):
+            prefix = "stage2"
+        if prefix:
             if re.match(urlMatch, lines[idx].strip().replace(':','')): # url line example in inputFile: /vmware/<int:assetId>/network/<str:networkAddress>/:.
                 urlData = dict()
 
@@ -154,7 +159,7 @@ for url in urls:
                 segments = url.split('/')
                 if not segments[-1]:  # empty segment.
                     segments.pop(-1)
-                segments.insert(0,'vmware') # urls in the urlFile doesn't have the vmware prefix.
+                segments.insert(0, prefix) # urls in the urlFile doesn't have the vmware prefix.
 
                 for segment in segments:
                     if re.match(reSegmentId, segment):

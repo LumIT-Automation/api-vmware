@@ -270,7 +270,7 @@ function System_swaggerFile() {
     cp /var/www/api/doc/postman.json $workingFolderPath/var/www/api/doc/
     postman2openapi -f yaml /var/www/api/doc/postman.json > $workingFolderPath/var/www/api/doc/swagger0.yaml
     python /var/www/api/doc/openapi-fix.py -i $workingFolderPath/var/www/api/doc/swagger0.yaml -o $workingFolderPath/var/www/api/doc/swagger1.yaml -u /var/www/api/vmware/VMwareUrls.py
-    python /var/www/api/doc/openapi-stage2-fix.py -i $workingFolderPath/var/www/api/doc/swagger1.yaml -o $workingFolderPath/var/www/api/doc/swagger.yaml -u /var/www/api/vmware/VMwareUrls.py
+    python /var/www/api/doc/openapi-fix.py -i $workingFolderPath/var/www/api/doc/swagger1.yaml -o $workingFolderPath/var/www/api/doc/swagger.yaml -u /var/www/api/vmware/VMwareUrls.py
     rm -f $workingFolderPath/var/www/api/doc/swagger0.yaml $workingFolderPath/var/www/api/doc/swagger1.yaml
 }
 
