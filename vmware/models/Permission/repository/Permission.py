@@ -88,12 +88,13 @@ class Permission:
                 "role.role AS role, "
                 "vmware_object.id AS object_id, vmware_object.moId, "
                 "vmware_object.id_asset AS object_asset, "
-                "vmware_object.name AS object_name "
-                                
+                "vmware_object.name AS object_name, "
+                "asset.fqdn AS asset_name "                                
                 "FROM identity_group "
                 "LEFT JOIN group_role_object ON group_role_object.id_group = identity_group.id "
                 "LEFT JOIN role ON role.id = group_role_object.id_role "
                 "LEFT JOIN `vmware_object` ON vmware_object.id = group_role_object.id_object "
+                "INNER JOIN asset ON asset.id = `vmware_object`.id_asset "
                 "WHERE role.role IS NOT NULL ")
             l = DBHelper.asDict(c)
 
@@ -101,12 +102,14 @@ class Permission:
                 el["object"] = {
                     "object_id": el["object_id"],
                     "id_asset": el["object_asset"],
+                    "asset_name": el["asset_name"],
                     "moId": el["moId"],
                     "name": el["object_name"]
                 }
 
                 del(el["object_id"])
                 del(el["object_asset"])
+                del(el["asset_name"])
                 del(el["moId"])
                 del(el["object_name"])
 
