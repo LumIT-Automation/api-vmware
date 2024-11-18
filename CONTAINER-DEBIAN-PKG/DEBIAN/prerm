@@ -4,7 +4,7 @@ printf "\n* Container prerm...\n"
 printf "\n* Cleanup...\n"
 
 if podman ps | awk '{print $2}' | grep -Eq '\blocalhost/api-vmware(:|$)'; then
-    podman stop -t 5 api-vmware &
+    podman stop -t 15 api-vmware &
     wait $! # Wait for the shutdown process of the container.
 fi
 

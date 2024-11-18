@@ -5,7 +5,7 @@ function start() {
 }
 
 function stop() {
-    podman stop api-vmware
+    podman stop -t 15 api-vmware
 }
 
 function restart() {
