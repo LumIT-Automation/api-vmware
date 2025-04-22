@@ -518,6 +518,19 @@ class VirtualMachine(Backend):
 
 
 
+    @staticmethod
+    def getVmObjFromName(assetId: int, vmName: str):
+        try:
+            for o in Backend.oVirtualMachines(assetId):
+                vm = VmwareHelper.getInfo(o)
+                if vm["name"] == vmName:
+                    return VirtualMachine(assetId, VmwareHelper.getInfo(o)["moId"])
+            return None
+        except Exception as e:
+            raise e
+
+
+
     ####################################################################################################################
     # Protected static methods
     ####################################################################################################################

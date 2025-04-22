@@ -2,7 +2,6 @@ from typing import List
 import time
 
 from vmware.models.VMware.Task import Task
-from vmware.models.VMware.CustomSpec import CustomSpec
 from vmware.models.Stage2.Target import Target
 from vmware.models.Stage2.TargetCommandExecution import TargetCommandExecution
 
@@ -37,13 +36,18 @@ class PollWorker:
             # Wait for VMware VM cloning completion.
             deployStatus = self.checkDeployStatus()
             if deployStatus and not self.forceDisableSecondStage:
+                # Execute scheduled SSH commands.
+                time.sleep(50)  # wait for guest spec apply (a reboot occurs).
+
+                from vmware.models.VMware.VirtualMachine import VirtualMachine
+                # Force the virtual machine network connection status.
+                virtualMachine = VirtualMachine.getVmObjFromName(assetId=self.assetId, vmName=Target(targetId=self.targetId).vm_name)
+                virtualMachine.nicConnection(connected=True)
+
                 # On successful vm creation.
                 if self.commands:
                     # Update db/target.
                     Target(targetId=self.targetId).modify({"second_stage_state": "running"})
-
-                    # Execute scheduled SSH commands.
-                    time.sleep(50) # wait for guest spec apply (a reboot occurs).
 
                     for command in self.commands:
                         Log.actionLog("Executing command uuid "+command["uid"]+" with user params: "+str(command["user_args"]))
