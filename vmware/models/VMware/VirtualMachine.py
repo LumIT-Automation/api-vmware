@@ -298,6 +298,26 @@ class VirtualMachine(Backend):
 
 
 
+    # Set all the nics of the virtual machine as connected/disconnected to the associate port group.
+    def nicConnection(self, connected: bool):
+        devChange = list()
+
+        try:
+            specsBuilder = SpecsBuilder(self.assetId, self.moId)
+            modifySpec = specsBuilder.configSpec
+
+            for nic in self.oNicList():
+                devChange.append(self.nicConnectSpec(oNic=nic, connected=connected))
+            modifySpec.deviceChange = devChange
+
+            Log.log("Reconfiguring virtual Machine nics as: \"connected\": " + str(connected))
+            Log.log("Reconfigure operation specs: " + str(devChange))
+            self.reconfig(configSpec=modifySpec)
+        except Exception as e:
+            raise e
+
+
+
     def info(self, related: bool = True) -> dict:
         vmDisks = list()
         vmNets = list()
@@ -305,7 +325,6 @@ class VirtualMachine(Backend):
 
         try:
             config = self.oVirtualMachine.config
-
             if related:
                 # Get virtual disks info.
                 self.loadVMDatastores()

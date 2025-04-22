@@ -78,6 +78,42 @@ class VirtualMachine(VmwareHandler):
 
 
 
+    def oNicList(self) -> list:
+        oNicList = list()
+
+        try:
+            for dev in self.oDevices():
+                if isinstance(dev, vim.vm.device.VirtualEthernetCard):
+                    oNicList.append(dev)
+            return oNicList
+        except Exception as e:
+            raise e
+
+
+
+    def nicConnectSpec(self, oNic: vim.vm.device.VirtualEthernetCard, connected: bool):
+        try:
+            nicSpec = vim.vm.device.VirtualDeviceSpec()
+            nicSpec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
+
+            nicSpec.device = oNic
+            nicSpec.device.key = oNic.key
+            nicSpec.device.macAddress = oNic.macAddress
+            nicSpec.device.backing = oNic.backing
+            nicSpec.device.wakeOnLanEnabled  = oNic.wakeOnLanEnabled
+
+            connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+            connectable.connected = connected
+            connectable.startConnected = connected
+
+            nicSpec.device.connectable = connectable
+
+            return nicSpec
+        except Exception as e:
+            raise e
+
+
+
     def guestInfo(self) -> dict:
         info = {
             "network": {},
