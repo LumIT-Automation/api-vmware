@@ -10,7 +10,7 @@ from vmware.helpers.Log import Log
 
 
 class PollWorker:
-    def __init__(self, assetId: int, taskMoId: str, targetId: int, guestSpec: str, forceDisableSecondStage: bool = False, *args, **kwargs):
+    def __init__(self, assetId: int, taskMoId: str, targetId: int, guestSpec: str, forceDisableSecondStage: bool = False, forceConnectNics: bool = True, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.assetId: int = int(assetId)
@@ -18,6 +18,7 @@ class PollWorker:
         self.targetId: int = int(targetId)
         self.guestSpec: str = guestSpec
         self.forceDisableSecondStage: bool = forceDisableSecondStage
+        self.forceConnectNics: bool = forceConnectNics
 
         self.commands: List[dict] = Target(self.targetId, loadCommands=True).commands
 
@@ -35,42 +36,44 @@ class PollWorker:
         try:
             # Wait for VMware VM cloning completion.
             deployStatus = self.checkDeployStatus()
-            if deployStatus and not self.forceDisableSecondStage:
-                # Execute scheduled SSH commands.
-                time.sleep(50)  # wait for guest spec apply (a reboot occurs).
+            if deployStatus:
+                if self.forceConnectNics:
+                    from vmware.models.VMware.VirtualMachine import VirtualMachine
+                    # Force the virtual machine network connection status.
+                    virtualMachine = VirtualMachine.getVmObjFromName(assetId=self.assetId, vmName=Target(targetId=self.targetId).vm_name)
+                    virtualMachine.nicConnection(connected=True)
 
-                from vmware.models.VMware.VirtualMachine import VirtualMachine
-                # Force the virtual machine network connection status.
-                virtualMachine = VirtualMachine.getVmObjFromName(assetId=self.assetId, vmName=Target(targetId=self.targetId).vm_name)
-                virtualMachine.nicConnection(connected=True)
+                if not self.forceDisableSecondStage:
+                    # Execute scheduled SSH commands.
+                    time.sleep(50)  # wait for guest spec apply (a reboot occurs).
 
-                # On successful vm creation.
-                if self.commands:
-                    # Update db/target.
-                    Target(targetId=self.targetId).modify({"second_stage_state": "running"})
+                    # On successful vm creation.
+                    if self.commands:
+                        # Update db/target.
+                        Target(targetId=self.targetId).modify({"second_stage_state": "running"})
 
-                    for command in self.commands:
-                        Log.actionLog("Executing command uuid "+command["uid"]+" with user params: "+str(command["user_args"]))
+                        for command in self.commands:
+                            Log.actionLog("Executing command uuid "+command["uid"]+" with user params: "+str(command["user_args"]))
 
-                        o, e, s = SSHCommandRun(
-                            commandUid=command["uid"],
-                            targetId=self.targetId,
-                            userArgs=command["user_args"]
-                        )()
+                            o, e, s = SSHCommandRun(
+                                commandUid=command["uid"],
+                                targetId=self.targetId,
+                                userArgs=command["user_args"]
+                            )()
 
-                        # Save results into db/target_command_exec.
-                        TargetCommandExecution.add({
-                            "id_target_command": command["id_target_command"],
-                            "stdout": o,
-                            "stderr": e,
-                            "exit_status": s # exit ok = 0.
-                        })
+                            # Save results into db/target_command_exec.
+                            TargetCommandExecution.add({
+                                "id_target_command": command["id_target_command"],
+                                "stdout": o,
+                                "stderr": e,
+                                "exit_status": s # exit ok = 0.
+                            })
 
-                        globalExitStatus += s
-                        time.sleep(2)
-                else:
-                    # Update db/target.
-                    Target(targetId=self.targetId).modify({"second_stage_state": "-"})
+                            globalExitStatus += s
+                            time.sleep(2)
+                    else:
+                        # Update db/target.
+                        Target(targetId=self.targetId).modify({"second_stage_state": "-"})
         except Exception:
             globalExitStatus = 1
         finally:
