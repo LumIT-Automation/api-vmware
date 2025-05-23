@@ -17,7 +17,7 @@ if [ "$1" == "configure" ]; then
     # api-vmware folder will be bound to /var/lib/containers/storage/volumes/.
     # Until the package is not uninstalled+purged, fs volumes remain untouched -> newly installed package's configuration files are then rewritten with volume's ones (this is why some services are restarted).
     # Side effect is that new package's configuration directives are ignored, so the user must be informed ("Differences from stock config").
-    podman run --name api-vmware -v api-vmware:/var/www/api/api -v api-vmware-db:/var/lib/mysql -v api-vmware-cacerts:/usr/local/share/ca-certificates -dt localhost/api-vmware /lib/systemd/systemd
+    podman run --name api-vmware --hostname api-vmware -v api-vmware:/var/www/api/api -v api-vmware-db:/var/lib/mysql -v api-vmware-cacerts:/usr/local/share/ca-certificates -dt localhost/api-vmware /lib/systemd/systemd
 
     podman exec api-vmware chown -R www-data:www-data /var/www/api/api # within container.
     podman exec api-vmware chown -R mysql:mysql /var/lib/mysql

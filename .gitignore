@@ -5,3 +5,4 @@
 api/*.db
 vmware/sql/vmware.data-development.sql
 doc/swagger.yaml
+doc/about.json
